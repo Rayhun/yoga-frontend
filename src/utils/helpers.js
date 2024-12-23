@@ -1,5 +1,4 @@
 import axios, { AxiosError } from 'axios';
-import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
 /**

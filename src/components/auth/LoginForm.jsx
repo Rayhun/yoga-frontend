@@ -30,8 +30,8 @@ const LoginForm = () => {
     try {
       const { data: response } = await mutateAsync({ payload: values });
 
-      if (response?.token) {
-        Cookies.set('token', response?.token);
+      if (response?.data?.token) {
+        Cookies.set('token', response?.data?.token);
         router.push('/portal');
       }
 
