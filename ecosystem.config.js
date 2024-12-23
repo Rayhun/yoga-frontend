@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'bali-wellness',
+      name: 'nourish-doc',
       script: 'npm',
       args: 'start',
       instances: 1,
