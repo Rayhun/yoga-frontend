@@ -7,7 +7,7 @@ import ChartNine from '../charts/ChartNine';
 import LeadsReport from '../LeadsReport';
 import ToDoList from '../Todo/ToDoList';
 
-const CRM: React.FC = () => {
+const CRM = () => {
   return (
     <>
       <DataStatsThree />

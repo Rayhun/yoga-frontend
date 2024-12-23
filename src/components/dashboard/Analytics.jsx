@@ -1,48 +1,45 @@
-"use client";
-import React, { useEffect } from "react";
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import ChartFour from "../charts/ChartFour";
-import DataStats from "../DataStats/DataStats";
-import ChartThree from "../charts/ChartThree";
-import TopContent from "../TopContent";
-import TopChannels from "../TopChannels";
-import TableTwo from "../Tables/TableTwo";
+'use client';
+import React, { useEffect } from 'react';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import dynamic from 'next/dynamic';
 
-// without this the component renders on server and throws an error
-import dynamic from "next/dynamic";
+const ChartFour = require('../charts/ChartFour').default;
+const DataStats = require('../DataStats/DataStats').default;
+const ChartThree = require('../charts/ChartThree').default;
+const TopContent = require('../TopContent').default;
+const TopChannels = require('../TopChannels').default;
+const TableTwo = require('../Tables/TableTwo').default;
 
-const MapTwo = dynamic(() => import("../Maps/MapTwo"), {
+const MapTwo = dynamic(() => import('../Maps/MapTwo'), {
   ssr: false,
 });
 
-const Analytics: React.FC = () => {
+const Analytics = () => {
   useEffect(() => {
     // Init flatpickr
-    const fp = flatpickr(".datepicker", {
-      mode: "range",
+    const fp = flatpickr('.datepicker', {
+      mode: 'range',
       static: true,
-      monthSelectorType: "static",
-      dateFormat: "M j, Y",
+      monthSelectorType: 'static',
+      dateFormat: 'M j, Y',
       defaultDate: [new Date().setDate(new Date().getDate() - 6), new Date()],
       prevArrow:
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
       nextArrow:
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
-      onReady: (selectedDates: Date[], dateStr: string, instance: any) => {
-        instance.element.value = dateStr.replace("to", "-");
-        const customClass = instance.element.getAttribute("data-class");
-        instance.calendarContainer.classList.add(customClass!);
-        selectedDates;
+      onReady: (selectedDates, dateStr, instance) => {
+        instance.element.value = dateStr.replace('to', '-');
+        const customClass = instance.element.getAttribute('data-class');
+        instance.calendarContainer.classList.add(customClass);
       },
-      onChange: (selectedDates: Date[], dateStr: string, instance: any) => {
-        instance.element.value = dateStr.replace("to", "-");
-        selectedDates;
+      onChange: (selectedDates, dateStr, instance) => {
+        instance.element.value = dateStr.replace('to', '-');
       },
     });
 
     return () => {
-      (fp as flatpickr.Instance).destroy();
+      if (fp) fp.destroy();
     };
   }, []);
 
@@ -50,7 +47,6 @@ const Analytics: React.FC = () => {
     <>
       <div className="grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
         <div className="col-span-12 flex flex-wrap items-center justify-between gap-3">
-          {/* <!-- Datepicker built with flatpickr --> */}
           <div className="relative">
             <input
               className="datepicker w-[120%] rounded border border-stroke bg-white py-2 pl-10 pr-4 text-sm font-medium shadow-card-2 focus-visible:outline-none dark:border-strokedark dark:bg-boxdark"
@@ -58,13 +54,7 @@ const Analytics: React.FC = () => {
               data-class="flatpickr-right"
             />
             <div className="pointer-events-none absolute inset-0 left-4 right-auto flex items-center">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -93,11 +83,7 @@ const Analytics: React.FC = () => {
             </div>
           </div>
           <div className="relative z-20 inline-block rounded bg-white shadow-card-2 dark:bg-boxdark">
-            <select
-              name=""
-              id=""
-              className="relative z-20 inline-flex appearance-none rounded border border-stroke bg-transparent py-2 pl-4 pr-9 text-sm font-medium outline-none dark:border-strokedark"
-            >
+            <select className="relative z-20 inline-flex appearance-none rounded border border-stroke bg-transparent py-2 pl-4 pr-9 text-sm font-medium outline-none dark:border-strokedark">
               <option value="" className="dark:bg-boxdark">
                 Yearly
               </option>
@@ -106,13 +92,7 @@ const Analytics: React.FC = () => {
               </option>
             </select>
             <span className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -127,21 +107,13 @@ const Analytics: React.FC = () => {
         <DataStats />
         <MapTwo />
         <div className="col-span-12 xl:col-span-6">
-          {/* <!-- ====== Top Content Start --> */}
           <TopContent />
-          {/* <!-- ====== Top Content End --> */}
-
-          {/* <!-- ====== Top Channels Start --> */}
           <TopChannels />
-          {/* <!-- ====== Top Channels End --> */}
         </div>
         <ChartThree />
-
-        {/* <!-- ====== Table Two Start --> */}
         <div className="col-span-12 xl:col-span-7">
           <TableTwo />
         </div>
-        {/* <!-- ====== Table Two End --> */}
       </div>
     </>
   );

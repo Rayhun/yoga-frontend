@@ -8,7 +8,7 @@ import ChartSix from '../charts/ChartSix';
 import FeaturedCampaigns from '../FeaturedCampaigns';
 import Feedback from '../Feedback';
 
-const Marketing: React.FC = () => {
+const Marketing = () => {
   return (
     <>
       <DataStatsTwo />
