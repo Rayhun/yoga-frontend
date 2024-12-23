@@ -1,10 +1,12 @@
 'use client';
-import { createContext, useCallback, useEffect } from 'react';
+import { createContext } from 'react';
+import { redirect } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
 import { authenticateUser } from '@/services/public/auth';
+import FullScreenLoader from '@/components/common/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
-import { redirect } from 'next/navigation';
+import { useUI } from './UIProvider';
 
 const initialState = {
   email: null,
@@ -20,17 +22,25 @@ export const AuthContext = createContext(initialState);
 
 function AuthProvider({ children }) {
   const token = Cookies.get('token');
-  const { data: userAuthenticationResponse } = useQuery({
+  if (!token) redirect('/auth/login');
+
+  const {
+    data: userAuthenticationResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryFn: authenticateUser,
     queryKey: [queryKeys.loggedInUser],
   });
 
-  if (!token) redirect('/auth/login');
+  if (isLoading) return <FullScreenLoader />;
 
-  const logout = useCallback(() => {
+  if (isError) redirect('/auth/login');
+
+  const logout = () => {
     Cookies.remove('token');
     window.location.reload();
-  }, []);
+  };
 
   return (
     <AuthContext.Provider value={{ ...(userAuthenticationResponse?.data || {}), logout }}>

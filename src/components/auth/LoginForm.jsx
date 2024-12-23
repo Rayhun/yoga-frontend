@@ -3,12 +3,12 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
+import Cookies from 'js-cookie';
 import { FiMail, FiLock } from 'react-icons/fi';
 import FormikField from '@/components/common/form/FormikField';
 import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
-import { sleep, toastApiError } from '@/utils/helpers';
-import Cookies from 'js-cookie';
+import { toastApiError } from '@/utils/helpers';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -28,10 +28,13 @@ const LoginForm = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      // await mutateAsync({ payload: values });
-      await sleep(2000);
-      Cookies.set('token', 'test');
-      router.push('/portal');
+      const { data: response } = await mutateAsync({ payload: values });
+
+      if (response?.token) {
+        Cookies.set('token', response?.token);
+        router.push('/portal');
+      }
+
       setSubmitting(false);
     } catch (error) {
       toastApiError(error);

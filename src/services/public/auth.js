@@ -5,7 +5,7 @@ export const authenticateUser = async () => {
 };
 
 export const loginUser = async ({ payload }) => {
-  return axios.post('/auth/login/', payload);
+  return axios.post('/auth/login', payload);
 };
 
 export const registerNewUser = async ({ payload }) => {

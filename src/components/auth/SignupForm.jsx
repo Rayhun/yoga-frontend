@@ -8,7 +8,7 @@ import { FiMail, FiLock, FiUser } from 'react-icons/fi';
 import FormikField from '@/components/common/form/FormikField';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
-import { sleep, toastApiError } from '@/utils/helpers';
+import { toastApiError } from '@/utils/helpers';
 
 const SignupForm = () => {
   const router = useRouter();
@@ -46,9 +46,7 @@ const SignupForm = () => {
         },
       };
 
-      // await mutateAsync({ payload });
-
-      await sleep(2000);
+      await mutateAsync({ payload });
 
       toast.success('Account created successfully');
 

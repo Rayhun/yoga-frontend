@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import resolveConfig from 'tailwindcss/resolveConfig';
-import Spinner from '@/components/common/Spinner';
+import FullScreenLoader from '@/components/common/FullScreenLoader';
 import tailwindConfig from '../../tailwind.config';
 
 const initialState = {
@@ -25,13 +25,7 @@ function UIProvider({ children }) {
 
   return (
     <UIContext.Provider value={{ isLoading, setIsLoading, theme: resolvedTailwindConfig.theme }}>
-      {isLoading ? (
-        <div className="flex h-screen items-center justify-center bg-white dark:bg-black">
-          <Spinner size={60} />
-        </div>
-      ) : (
-        children
-      )}
+      {isLoading ? <FullScreenLoader /> : children}
     </UIContext.Provider>
   );
 }
