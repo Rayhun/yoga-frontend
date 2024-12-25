@@ -1,0 +1,15 @@
+.btn-primary {
+  @apply block rounded border border-primary bg-primary p-3 text-center font-medium text-white transition;
+}
+
+.btn-primary:hover {
+  @apply bg-opacity-90;
+}
+
+.btn-cancel {
+  @apply block rounded border border-stroke bg-gray p-3 text-center font-medium text-black transition dark:border-strokedark dark:bg-meta-4 dark:text-white dark:hover:border-meta-1 dark:hover:bg-meta-1;
+}
+
+.btn-cancel:hover {
+  @apply border-meta-1 bg-meta-1 text-white;
+}

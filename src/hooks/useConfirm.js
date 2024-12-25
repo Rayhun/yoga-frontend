@@ -5,32 +5,73 @@ import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import CloseIcon from '@mui/icons-material/Close';
-import Button from '@/components/common/Button';
-import { CLR_PRIMARY } from '@/constants/branding';
+import { MdErrorOutline, MdClose } from 'react-icons/md';
 
-const StyledButton = styled(Button)`
-  text-transform: none !important;
-  padding: 8px 15px !important;
+const StyledMainWrapper = styled.div`
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 `;
 
-const AcceptButton = styled(StyledButton)`
-  background-color: ${CLR_PRIMARY} !important;
-  color: white !important;
-  &:hover {
-    background-color: white !important;
-    color: black !important;
+const StyledIconButton = styled(IconButton)`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+`;
+
+const StyledWrapper = styled.div`
+  width: 100%;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    padding: 30px;
   }
 `;
 
-const CancelButton = styled(StyledButton)`
-  background-color: white !important;
-  color: black !important;
-  &:hover {
-    background-color: ${CLR_PRIMARY} !important;
-    color: white !important;
+const HeadingWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+`;
+
+const Heading = styled.h3`
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+
+  @media (min-width: 640px) {
+    font-size: 24px;
   }
+`;
+
+const Separator = styled.span`
+  display: block;
+  margin: 0 auto 24px;
+  height: 4px;
+  width: 90px;
+  border-radius: 2px;
+  background-color: #007bff;
+`;
+
+const Message = styled.p`
+  margin-bottom: 40px;
+  color: #333;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+`;
+
+const StyledButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 `;
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -38,10 +79,10 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 function useConfirm() {
-  const defaultArgs = { message: 'Are you sure you want to proceed?' };
+  const defaultArgs = { heading: 'Confirmation!!!', message: 'Are you sure you want to proceed?' };
 
   const confirm = (providedArgs = defaultArgs) => {
-    const { message } = {
+    const { heading, message } = {
       ...defaultArgs,
       ...providedArgs,
     };
@@ -80,23 +121,27 @@ function useConfirm() {
             fullWidth
             open
           >
-            <div className="!relative bg-gray-700 shadow">
-              <IconButton className="!absolute" sx={{ top: '10px', right: '10px' }} onClick={closeModal}>
-                <CloseIcon htmlColor="gray" fontSize="medium" />
-              </IconButton>
-              <div className="p-5 text-center">
-                <ErrorOutlineIcon
-                  htmlColor="#fff"
-                  fontSize="large"
-                  sx={{ width: '1.5em', height: '1.5em' }}
-                />
-                <h3 className="mb-5 text-md font-normal text-gray-400">{message}</h3>
-                <Stack direction="row" justifyContent="center" spacing={1}>
-                  <CancelButton onClick={handleCancel}>No, cancel</CancelButton>
-                  <AcceptButton onClick={handleConfirm}>Yes, I am sure</AcceptButton>
-                </Stack>
-              </div>
-            </div>
+            <StyledMainWrapper>
+              <StyledIconButton onClick={closeModal}>
+                <MdClose color="gray" size={20} />
+              </StyledIconButton>
+              <StyledWrapper>
+                <HeadingWrapper>
+                  <MdErrorOutline color="black" size={40} />
+                  <Heading>{heading}</Heading>
+                </HeadingWrapper>
+                <Separator />
+                <Message>{message}</Message>
+                <ButtonGroup>
+                  <StyledButton className="btn-cancel" fullWidth onClick={handleCancel}>
+                    No, Cancel
+                  </StyledButton>
+                  <StyledButton className="btn-primary" fullWidth onClick={handleConfirm}>
+                    Yes, Proceed
+                  </StyledButton>
+                </ButtonGroup>
+              </StyledWrapper>
+            </StyledMainWrapper>
           </Dialog>
         );
       } catch (error) {

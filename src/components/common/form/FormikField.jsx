@@ -14,7 +14,7 @@ const FormikField = ({
   const isErrorField = meta.touched && meta.error;
 
   return (
-    <div>
+    <div className="flex flex-col gap-1">
       {label ? (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}

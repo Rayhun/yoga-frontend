@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
@@ -34,10 +35,10 @@ const LoginForm = () => {
         Cookies.set('token', response?.data?.token);
         router.push('/portal');
       }
-
-      setSubmitting(false);
     } catch (error) {
       toastApiError(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -46,14 +47,19 @@ const LoginForm = () => {
       {({ isSubmitting }) => (
         <Form className="flex flex-col gap-3">
           <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
-          <FormikField
-            type="password"
-            name="password"
-            label="Password"
-            placeholder="Password"
-            Icon={FiLock}
-            required
-          />
+          <div className="flex flex-col gap-1">
+            <FormikField
+              type="password"
+              name="password"
+              label="Password"
+              placeholder="Password"
+              Icon={FiLock}
+              required
+            />
+            <Link href="/auth/forgot-password" className="text-primary text-right">
+              Forgot Password?
+            </Link>
+          </div>
           <Button type="submit" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Sigining In...' : 'Sign In'}
           </Button>

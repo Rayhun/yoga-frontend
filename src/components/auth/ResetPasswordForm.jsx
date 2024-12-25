@@ -1,18 +1,19 @@
 'use client';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { toast } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { FiLock } from 'react-icons/fi';
 import FormikField from '@/components/common/form/FormikField';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Button from '@/components/common/Button';
-import { forgotPassword } from '@/services/public/auth';
+import { resetPassword } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';
 
 const ResetPasswordForm = () => {
   const searchParams = useSearchParamUtils();
   const { mutateAsync } = useMutation({
-    mutationFn: forgotPassword,
+    mutationFn: resetPassword,
   });
 
   const initialValues = {
@@ -37,10 +38,11 @@ const ResetPasswordForm = () => {
       const payload = { password, uidb64, token };
 
       await mutateAsync({ payload: payload });
-
-      setSubmitting(false);
+      toast.success('Password updated successfully');
     } catch (error) {
       toastApiError(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -65,7 +67,7 @@ const ResetPasswordForm = () => {
             required
           />
           <Button type="submit" className="mt-3" isLoading={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Send Reset Password Link'}
+            {isSubmitting ? 'Submitting...' : 'Reset Password'}
           </Button>
         </Form>
       )}

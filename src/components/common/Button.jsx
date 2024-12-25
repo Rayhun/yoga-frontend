@@ -18,7 +18,7 @@ const Button = ({
   const { theme } = useUI();
 
   const defaultButtonClass =
-    'w-full rounded-lg border flex justify-center items-center gap-2 disabled:opacity-[0.5]';
+    'w-full rounded-lg border flex justify-center items-center gap-2 disabled:opacity-[0.5] disabled:bg-initial disabled:cursor-not-allowed';
 
   const buttonVariantClasses = useMemo(() => {
     if (variant === BUTTON_VARIANT.primary)

@@ -1,5 +1,4 @@
 .required::after {
+  @apply text-red-500 ml-1;
   content: '*';
-  color: #ef4444;
-  margin-left: 2px;
 }

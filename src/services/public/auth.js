@@ -13,5 +13,25 @@ export const registerNewUser = async ({ payload }) => {
 };
 
 export const forgotPassword = async ({ payload }) => {
-  return axios.post('/auth/forgotpassword/', payload);
+  return axios.post('/auth/forgotpassword', payload);
+};
+
+export const resetPassword = async ({ payload }) => {
+  return axios.patch('/auth/pasword', payload);
+};
+
+export const verifyEmail = async ({ payload }) => {
+  return axios.post('/auth/verify-email-otp/', payload);
+};
+
+export const verifyPhone = async ({ payload }) => {
+  return axios.post('/auth/verify-number-otp/', payload);
+};
+
+export const resendEmailOTPCode = async ({ payload }) => {
+  return axios.post('/auth/resend-email-otp/', payload);
+};
+
+export const resendPhoneOTPCode = async ({ payload }) => {
+  return axios.post('/auth/resend-number-otp/', payload);
 };

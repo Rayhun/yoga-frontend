@@ -25,10 +25,11 @@ const ForgotPasswordForm = () => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       await mutateAsync({ payload: values });
-      setSubmitting(false);
       toast.success('Reset password link sent successfully');
     } catch (error) {
       toastApiError(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
