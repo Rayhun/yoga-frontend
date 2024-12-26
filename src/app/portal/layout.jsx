@@ -3,9 +3,9 @@ import DefaultLayout from '@/components/layouts/DefaultLayout';
 
 const Layout = ({ children }) => {
   return (
-    // <AuthProvider>
-    <DefaultLayout>{children}</DefaultLayout>
-    // </AuthProvider>
+    <AuthProvider>
+      <DefaultLayout>{children}</DefaultLayout>
+    </AuthProvider>
   );
 };
 

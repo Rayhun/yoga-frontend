@@ -4,7 +4,7 @@ import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
 
 const DropdownUser = () => {
-  const { logout } = useAuthContext();
+  const { user: loggedInUser, logout } = useAuthContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef();
@@ -40,8 +40,10 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="hidden text-right lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">Lorem Ipsum</span>
-          <span className="block text-xs">Developer</span>
+          <span className="block text-sm font-medium text-black dark:text-white">
+            {loggedInUser?.profile?.first_name} {loggedInUser?.profile?.last_name}
+          </span>
+          <span className="block text-xs">{loggedInUser?.profile?.role}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">

@@ -6,14 +6,16 @@ import { useQuery } from '@tanstack/react-query';
 import { authenticateUser } from '@/services/public/auth';
 import FullScreenLoader from '@/components/common/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
-import { useUI } from './UIProvider';
 
 const initialState = {
-  email: null,
-  profile: {
-    id: null,
-    first_name: null,
-    last_name: null,
+  user: {
+    email: null,
+    profile: {
+      id: null,
+      first_name: null,
+      last_name: null,
+      role: null,
+    },
   },
   logout: () => {},
 };
@@ -43,7 +45,7 @@ function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ ...(userAuthenticationResponse?.data || {}), logout }}>
+    <AuthContext.Provider value={{ user: { ...(userAuthenticationResponse?.data || {}) }, logout }}>
       {children}
     </AuthContext.Provider>
   );
