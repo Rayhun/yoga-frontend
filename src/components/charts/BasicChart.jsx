@@ -1,5 +1,5 @@
 'use client';
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import Breadcrumb from '@/components/breadcrumbs/Breadcrumb';
 import ChartOne from '@/components/charts/ChartOne';
 import ChartTwo from '@/components/charts/ChartTwo';
 import ChartThree from '@/components/charts/ChartThree';
