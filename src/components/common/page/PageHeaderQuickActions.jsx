@@ -3,8 +3,8 @@ const PageHeaderQuickActions = ({ actions = [] }) => {
     <div className="flex gap-2">
       {actions.map(({ id, Icon, label, ...rest }) => (
         <button
-          {...rest}
           key={id}
+          {...rest}
           className="flex items-center justify-center gap-2 cursor-pointer text-sm bg-primary rounded-md py-2 px-3 text-white transition hover:bg-opacity-70"
         >
           {Icon ? <Icon size={18} /> : null}

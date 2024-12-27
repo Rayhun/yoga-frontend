@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
 import { authenticateUser } from '@/services/public/auth';
-import FullScreenLoader from '@/components/common/FullScreenLoader';
+import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
 
 const initialState = {

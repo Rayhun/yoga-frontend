@@ -9,28 +9,21 @@ import {
 } from '@tanstack/react-table';
 import CustomTable from './Table';
 
-const SelectionTable = ({
-  isLoading = false,
-  columns = [],
-  data = [],
-  rowSelection = {},
-  setRowSelection = () => null,
-}) => {
+const BasicTable = ({ isLoading = false, columns = [], data = [] }) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
   });
+
   const table = useReactTable({
     data,
     columns,
     state: {
-      rowSelection,
       pagination,
     },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -38,4 +31,4 @@ const SelectionTable = ({
   return <CustomTable table={table} pagination={pagination} isLoading={isLoading} />;
 };
 
-export default SelectionTable;
+export default BasicTable;

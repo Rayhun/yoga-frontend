@@ -1,9 +1,11 @@
 'use client';
 import { useMemo } from 'react';
-import { IndeterminateCheckbox, TableActions } from '@/components/common/table';
-import { useQuery } from '@tanstack/react-query';
+import { IndeterminateCheckbox } from '@/components/common/table';
+import useTable from './useTable';
 
 function useSelectionTable({ columns = [], queryFn, queryKey, rowActions = [] }) {
+  const { columns: tableColumns, data: tableData } = useTable({ columns, queryFn, queryKey, rowActions });
+
   const modifiedColumns = useMemo(
     () => [
       {
@@ -28,29 +30,12 @@ function useSelectionTable({ columns = [], queryFn, queryKey, rowActions = [] })
           />
         ),
       },
-      ...columns,
-      {
-        id: 'action',
-        header: 'Action',
-        cell: ({ row }) => (
-          <TableActions
-            actions={rowActions.map(action => ({
-              ...action,
-              onClick: () => action.onClick(row),
-            }))}
-          />
-        ),
-      },
+      ...tableColumns,
     ],
-    [columns, rowActions]
+    [tableColumns]
   );
 
-  const { data: response } = useQuery({
-    queryFn,
-    queryKey,
-  });
-
-  return { columns: modifiedColumns, data: response?.data || [] };
+  return { columns: modifiedColumns, data: tableData };
 }
 
 export default useSelectionTable;

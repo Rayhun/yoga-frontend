@@ -47,4 +47,5 @@ export const TableActions = ({ actions = [] }) => {
   );
 };
 
+export { default as BasicTable } from './BasicTable';
 export { default as SelectionTable } from './SelectionTable';

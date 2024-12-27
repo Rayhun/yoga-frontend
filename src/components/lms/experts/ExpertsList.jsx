@@ -1,25 +1,27 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import useSelectionTable from '@/hooks/useSelectionTable';
+import { BiImport } from 'react-icons/bi';
+import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
-import { SelectionTable } from '@/components/common/table';
+import { BasicTable } from '@/components/common/table';
+import { getExpertsList } from '@/services/private/lms/experts';
 import queryKeys from '@/utils/query-keys';
 
 const ExpertsList = () => {
-  const [rowSelection, setRowSelection] = useState({});
-
   const tableColumns = useMemo(
     () => [
       {
-        header: 'First Name',
-        accessorKey: 'firstName',
-        cell: info => info.getValue(),
+        header: 'Name',
+        accessorKey: 'name',
       },
       {
-        header: 'Last Name',
-        accessorKey: 'lastName',
-        cell: info => info.getValue(),
+        header: 'Email',
+        accessorKey: 'email',
+      },
+      {
+        header: 'Title',
+        accessorKey: 'title',
       },
     ],
     []
@@ -49,6 +51,12 @@ const ExpertsList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'import',
+        Icon: BiImport,
+        label: 'Import',
+        onClick: () => null,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Expert',
@@ -58,29 +66,9 @@ const ExpertsList = () => {
     []
   );
 
-  const { columns, data } = useSelectionTable({
+  const { isLoading, columns, data } = useTable({
     columns: tableColumns,
-    queryFn: () =>
-      Promise.resolve({
-        data: [
-          {
-            firstName: 'John',
-            lastName: 'Doe',
-            age: 35,
-            visits: 10,
-            progress: 90,
-            status: 'single',
-          },
-          {
-            firstName: 'Albert',
-            lastName: 'Tim',
-            age: 32,
-            visits: 30,
-            progress: 70,
-            status: 'married',
-          },
-        ],
-      }),
+    queryFn: getExpertsList,
     queryKey: [queryKeys.quizes],
     rowActions,
   });
@@ -91,13 +79,9 @@ const ExpertsList = () => {
         <PageHeaderQuickActions actions={headerQuickActions} />
       </PageHeader>
 
-      <SelectionTable
-        isLoading={false}
-        columns={columns}
-        data={data}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-      />
+      <BasicTable isLoading={isLoading} columns={columns} data={data} />
+
+      <div className="h-[800px]" />
     </div>
   );
 };

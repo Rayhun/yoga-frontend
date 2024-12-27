@@ -1,10 +1,10 @@
 import AuthProvider from '@/context/AuthProvider';
-import DefaultLayout from '@/components/layouts/DefaultLayout';
+import { SidebarLayout } from '@/components/layouts';
 
 const Layout = ({ children }) => {
   return (
     <AuthProvider>
-      <DefaultLayout>{children}</DefaultLayout>
+      <SidebarLayout>{children}</SidebarLayout>
     </AuthProvider>
   );
 };

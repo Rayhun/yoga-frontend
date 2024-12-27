@@ -1,14 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import useSelectionTable from '@/hooks/useSelectionTable';
+import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
-import { SelectionTable } from '@/components/common/table';
+import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 
 const UsersList = () => {
-  const [rowSelection, setRowSelection] = useState({});
-
   const tableColumns = useMemo(
     () => [
       {
@@ -58,7 +56,7 @@ const UsersList = () => {
     []
   );
 
-  const { columns, data } = useSelectionTable({
+  const { columns, data } = useTable({
     columns: tableColumns,
     queryFn: () =>
       Promise.resolve({
@@ -91,13 +89,7 @@ const UsersList = () => {
         <PageHeaderQuickActions actions={headerQuickActions} />
       </PageHeader>
 
-      <SelectionTable
-        isLoading={false}
-        columns={columns}
-        data={data}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-      />
+      <BasicTable isLoading={false} columns={columns} data={data} />
     </div>
   );
 };

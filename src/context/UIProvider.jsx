@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import resolveConfig from 'tailwindcss/resolveConfig';
-import FullScreenLoader from '@/components/common/FullScreenLoader';
+import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import tailwindConfig from '../../tailwind.config';
 
 const initialState = {

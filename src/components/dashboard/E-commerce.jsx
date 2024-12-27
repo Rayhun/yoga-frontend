@@ -2,7 +2,7 @@
 import React from 'react';
 import ChartOne from '../charts/ChartOne';
 import ChartTwo from '../charts/ChartTwo';
-import CardDataStats from '../CardDataStats';
+import CardDataStats from '../stats/CardDataStats';
 
 const ECommerce = () => {
   return (
