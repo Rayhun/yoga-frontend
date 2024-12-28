@@ -33,7 +33,9 @@ const LoginForm = () => {
 
       if (response?.data?.token) {
         Cookies.set('token', response?.data?.token);
-        router.push('/portal');
+
+        if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/portal');
+        else router.replace('/onboarding');
       }
     } catch (error) {
       toastApiError(error);
@@ -60,7 +62,7 @@ const LoginForm = () => {
               Forgot Password?
             </Link>
           </div>
-          <Button type="submit" className="mt-3" isLoading={isSubmitting}>
+          <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Sigining In...' : 'Sign In'}
           </Button>
         </Form>

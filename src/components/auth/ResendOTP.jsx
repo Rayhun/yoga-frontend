@@ -40,8 +40,9 @@ const ResendOTP = ({ duration = 10, onResend }) => {
       <p className="w-[60px] text-center text-primary">{formatTime(timeLeft)}</p>
       <Button
         variant="secondary"
+        size="sm"
         disabled={isTimerRunning}
-        className="!w-fit !py-1 !px-2 !text-xs"
+        className="!w-fit !text-xs"
         onClick={handleResendClick}
       >
         Resend OTP

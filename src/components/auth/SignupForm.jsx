@@ -109,7 +109,7 @@ const SignupForm = () => {
             Icon={FiLock}
             required
           />
-          <Button type="submit" className="mt-3" isLoading={isSubmitting}>
+          <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Creating Account' : 'Sign Up'}
           </Button>
         </Form>

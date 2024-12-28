@@ -1,6 +1,7 @@
 'use client';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { FiLock } from 'react-icons/fi';
@@ -11,6 +12,7 @@ import { resetPassword } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';
 
 const ResetPasswordForm = () => {
+  const router = useRouter();
   const searchParams = useSearchParamUtils();
   const { mutateAsync } = useMutation({
     mutationFn: resetPassword,
@@ -39,6 +41,8 @@ const ResetPasswordForm = () => {
 
       await mutateAsync({ payload: payload });
       toast.success('Password updated successfully');
+
+      router.replace('/auth/login');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -66,7 +70,7 @@ const ResetPasswordForm = () => {
             Icon={FiLock}
             required
           />
-          <Button type="submit" className="mt-3" isLoading={isSubmitting}>
+          <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Reset Password'}
           </Button>
         </Form>

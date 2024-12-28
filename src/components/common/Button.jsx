@@ -8,9 +8,14 @@ const BUTTON_VARIANT = {
 };
 
 const BUTTON_SIZE = {
-  small: 'small',
-  medium: 'medium',
-  large: 'large',
+  xs: 'xs',
+  sm: 'sm',
+  lg: 'lg',
+  xl: 'xl',
+  '2xl': '2xl',
+  '3xl': '3xl',
+  '4xl': '4xl',
+  '5xl': '5xl',
 };
 
 const Button = ({
@@ -38,9 +43,15 @@ const Button = ({
   }, [variant]);
 
   const buttonSizeClasses = useMemo(() => {
-    if (size === BUTTON_SIZE.small) return 'px-2 py-1';
-    if (size === BUTTON_SIZE.medium) return 'px-3 py-1.5';
-    if (size === BUTTON_SIZE.large) return 'px-4 py-2';
+    if (size === BUTTON_SIZE.xs) return 'px-1 py-0.5';
+    if (size === BUTTON_SIZE.sm) return 'px-2 py-1';
+    if (size === BUTTON_SIZE.md) return 'px-3 py-1.5';
+    if (size === BUTTON_SIZE.lg) return 'px-4 py-2';
+    if (size === BUTTON_SIZE.xl) return 'px-5 py-2.5';
+    if (size === BUTTON_SIZE['2xl']) return 'px-6 py-3';
+    if (size === BUTTON_SIZE['3xl']) return 'px-7 py-3.5';
+    if (size === BUTTON_SIZE['4xl']) return 'px-8 py-4';
+    if (size === BUTTON_SIZE['5xl']) return 'px-9 py-4.5';
 
     return '';
   }, [size]);

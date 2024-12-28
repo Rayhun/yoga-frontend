@@ -29,7 +29,7 @@ const AccountVerificationForm = ({
             <FormikOTP name="otp" label={label} numberOfDigits={6} required />
             <ResendOTP duration={otpDuration} onResend={onResendOTP} />
           </div>
-          <Button type="submit" isLoading={isSubmitting} disabled={isVerified}>
+          <Button type="submit" size="5xl" isLoading={isSubmitting} disabled={isVerified}>
             {isSubmitting ? 'Verifying...' : btnText}
           </Button>
         </Form>

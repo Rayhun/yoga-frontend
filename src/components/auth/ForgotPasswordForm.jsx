@@ -38,7 +38,7 @@ const ForgotPasswordForm = () => {
       {({ isSubmitting }) => (
         <Form className="flex flex-col gap-3">
           <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
-          <Button type="submit" className="mt-3" isLoading={isSubmitting}>
+          <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Send Reset Password Link'}
           </Button>
         </Form>

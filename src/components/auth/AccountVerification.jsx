@@ -1,5 +1,7 @@
 'use client';
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import OTPVerificationForm from './OTPVerificationForm';
@@ -7,6 +9,7 @@ import { verifyEmail, verifyPhone, resendEmailOTPCode, resendPhoneOTPCode } from
 import { toastApiError } from '@/utils/helpers';
 
 const AccountVerificationForm = () => {
+  const router = useRouter();
   const searchParams = useSearchParamUtils();
   const email = searchParams.get('email');
   const phone = searchParams.get('phone');
@@ -23,6 +26,12 @@ const AccountVerificationForm = () => {
   const { mutateAsync: resendPhoneOTP } = useMutation({
     mutationFn: resendPhoneOTPCode,
   });
+
+  useEffect(() => {
+    if (isEmailVerified && isPhoneVerified) {
+      router.replace('/auth/login');
+    }
+  }, [isEmailVerified, isPhoneVerified, router]);
 
   const handleResendEmailOTP = async () => {
     try {
