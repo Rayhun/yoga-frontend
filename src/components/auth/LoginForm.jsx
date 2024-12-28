@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { FiMail, FiLock } from 'react-icons/fi';
-import FormikField from '@/components/common/form/FormikField';
+import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';

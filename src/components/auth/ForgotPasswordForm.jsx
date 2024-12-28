@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { FiMail } from 'react-icons/fi';
-import FormikField from '@/components/common/form/FormikField';
+import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { forgotPassword } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';

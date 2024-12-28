@@ -1,6 +1,7 @@
 'use client';
 import { Slide, ToastContainer } from 'react-toastify';
 import ReactQueryProvider from '@/context/ReactQueryProvider';
+import MuiThemeProvider from '@/context/MuiThemeProvider';
 import UIProvider from '@/context/UIProvider';
 import 'jsvectormap/dist/jsvectormap.css';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <ReactQueryProvider>
-          <UIProvider>
-            <div className="dark:bg-boxdark-2 dark:text-bodydark">{children}</div>
-          </UIProvider>
+          <MuiThemeProvider>
+            <UIProvider>
+              <div className="dark:bg-boxdark-2 dark:text-bodydark">{children}</div>
+            </UIProvider>
+          </MuiThemeProvider>
         </ReactQueryProvider>
 
         <ToastContainer

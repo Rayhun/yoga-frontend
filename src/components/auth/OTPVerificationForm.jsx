@@ -1,7 +1,7 @@
 'use client';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import FormikOTP from '@/components/common/form/FormikOTP';
+import FormikOTP from '@/components/common/form/formik/FormikOTP';
 import Button from '@/components/common/Button';
 import ResendOTP from './ResendOTP';
 

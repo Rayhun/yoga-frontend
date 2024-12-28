@@ -1,5 +1,6 @@
 'use client';
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
@@ -9,6 +10,7 @@ import { getExpertsList } from '@/services/private/lms/experts';
 import queryKeys from '@/utils/query-keys';
 
 const ExpertsList = () => {
+  const router = useRouter();
   const tableColumns = useMemo(
     () => [
       {
@@ -60,10 +62,10 @@ const ExpertsList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Expert',
-        onClick: () => null,
+        onClick: () => router.push('/portal/lms/experts/add'),
       },
     ],
-    []
+    [router]
   );
 
   const { isLoading, columns, data } = useTable({

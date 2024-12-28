@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { FiLock } from 'react-icons/fi';
-import FormikField from '@/components/common/form/FormikField';
+import FormikField from '@/components/common/form/formik/FormikField';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Button from '@/components/common/Button';
 import { resetPassword } from '@/services/public/auth';
