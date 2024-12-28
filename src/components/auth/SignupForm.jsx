@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { FiMail, FiLock, FiUser, FiPhone } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
-import FormikField from '@/components/common/form/FormikField';
+import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
 import { extractFormFieldError, toastApiError } from '@/utils/helpers';
@@ -32,8 +32,8 @@ const SignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().email('Invalid Email').required('Required!'),
     mobile_number: Yup.string()
-      .min(12, 'Mobile number must contain at least 12 digits')
-      .max(14, 'Mobile number must not contain more than 14 digits')
+      .min(11, 'Mobile number must contain at least 11 digits')
+      .max(13, 'Mobile number must not contain more than 13 digits')
       .required('Required!'),
     password: Yup.string().min(8, 'Password must be at least 8 characters').required('Required!'),
     confirm_password: Yup.string()
