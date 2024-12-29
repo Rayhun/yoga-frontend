@@ -4,18 +4,20 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { getLMSCategories, getLMSTags } from '@/services/private/lms';
-import { addNewExpert } from '@/services/private/lms/experts';
+import { addNewExpert, updateExistingExpert } from '@/services/private/lms/experts';
 import { toastApiError } from '@/utils/helpers';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import queryKeys from '@/utils/query-keys';
 
-const ExpertForm = () => {
+const ExpertForm = ({ selected }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const isEditMode = Boolean(selected);
   const { data: categoriesResponse } = useQuery({
     queryFn: getLMSCategories,
     queryKey: [queryKeys.lmsCategories],
@@ -27,15 +29,18 @@ const ExpertForm = () => {
   const { mutateAsync: addExpert } = useMutation({
     mutationFn: addNewExpert,
   });
+  const { mutateAsync: updateExpert } = useMutation({
+    mutationFn: updateExistingExpert,
+  });
 
   const initialValues = {
-    name: '',
-    email: '',
-    title: '',
-    description: '',
+    name: isEditMode ? selected.name : '',
+    email: isEditMode ? selected.email : '',
+    title: isEditMode ? selected.title : '',
+    description: isEditMode ? selected.description : '',
     file: null,
-    categories: [],
-    tags: [],
+    categories: isEditMode ? selected.categories.map(i => i.id) : [],
+    tags: isEditMode ? selected.tags.map(i => i.id) : [],
   };
 
   const validationSchema = Yup.object({
@@ -43,7 +48,7 @@ const ExpertForm = () => {
     email: Yup.string().email('Invalid email format').required('Required!'),
     title: Yup.string().required('Required!'),
     description: Yup.string().required('Required!'),
-    file: Yup.mixed().required('Required!'),
+    file: Yup.mixed().nullable(),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
@@ -70,10 +75,17 @@ const ExpertForm = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      console.log(values);
-      // const { data: response } = await addExpert({ payload: values });
-
-      toast.success('Expert added successfully');
+      if (isEditMode) {
+        await updateExpert({ payload: { id: selected.id, ...values } });
+        toast.success('Expert updated successfully');
+      } else {
+        await addExpert({ payload: { ...values } });
+        toast.success('Expert added successfully');
+      }
+      await queryClient.invalidateQueries([
+        { queryKey: isEditMode ? [queryKeys.lmsExperts, selected.id] : [queryKeys.lmsExperts] },
+      ]);
+      router.push('/portal/lms/experts');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -83,8 +95,13 @@ const ExpertForm = () => {
 
   return (
     <FormLayoutWrapper title="Expert Form">
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-        {({ isSubmitting, setFieldValue, values }) => (
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ isSubmitting, setFieldValue }) => (
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-6 xl:flex-row">
               <div className="w-full xl:w-1/2">
@@ -109,10 +126,10 @@ const ExpertForm = () => {
               type="file"
               name="file"
               label="File"
+              accept="image/*"
               value={null}
               className="transition file:mr-4 file:rounded file:border-[0.5px] file:border-stroke file:bg-[#EEEEEE] file:px-2.5 file:py-1 file:text-sm focus:border-primary file:focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-strokedark dark:file:bg-white/30 dark:file:text-white"
               onChange={e => setFieldValue(e.target.name, e.target.files[0])}
-              required
             />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}

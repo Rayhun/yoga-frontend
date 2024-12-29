@@ -8,7 +8,7 @@ export const metadata = {
 
 function Page() {
   return (
-    <div className="w-[calc(100vw-20px)] min-h-[calc(100vh-20px)] m-[10px] md:w-[calc(100vw-100px)] md:min-h-[calc(100vh-100px)] md:m-[50px] rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="w-[calc(100vw-20px)] min-h-[calc(100vh-20px)] md:w-[calc(100vw-100px)] md:min-h-[calc(100vh-100px)] rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex flex-wrap items-center">
         <div className="hidden w-full xl:block xl:w-1/2">
           <div className="px-26 py-17.5 text-center">

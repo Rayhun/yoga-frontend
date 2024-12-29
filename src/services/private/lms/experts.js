@@ -4,6 +4,32 @@ export const getExpertsList = async () => {
   return axios.get('/LMS/experts/');
 };
 
-export const addNewExpert = async () => {
-  return axios.post('/LMS/experts/');
+export const getSingleExpert = async ({ id }) => {
+  return axios.get(`/LMS/experts/${id}/`);
+};
+
+export const addNewExpert = async ({ payload: { categories, tags, ...payload } }) => {
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value) formData.set(key, value);
+  });
+  formData.set('categories', categories.join(','));
+  formData.set('tags', tags.join(','));
+
+  return axios.post('/LMS/experts/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
+export const updateExistingExpert = async ({ payload: { id, categories, tags, ...payload } }) => {
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value) formData.set(key, value);
+  });
+  formData.set('categories', categories.join(','));
+  formData.set('tags', tags.join(','));
+
+  return axios.put(`/LMS/experts/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
+export const deleteSingleExpert = async ({ id }) => {
+  return axios.delete(`/LMS/experts/${id}/`);
 };

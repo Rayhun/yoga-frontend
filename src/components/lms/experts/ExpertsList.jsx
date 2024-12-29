@@ -6,11 +6,19 @@ import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getExpertsList } from '@/services/private/lms/experts';
+import { getExpertsList, deleteSingleExpert } from '@/services/private/lms/experts';
 import queryKeys from '@/utils/query-keys';
+import useDelete from '@/hooks/useDelete';
+import { toast } from 'react-toastify';
 
 const ExpertsList = () => {
   const router = useRouter();
+  const { handleDelete: handleDeleteExpert } = useDelete({
+    mutationFn: deleteSingleExpert,
+    invalidateQueryKey: [queryKeys.lmsExperts],
+    onSuccess: () => toast.success('Expert deleted successfully'),
+  });
+
   const tableColumns = useMemo(
     () => [
       {
@@ -34,20 +42,20 @@ const ExpertsList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: () => null,
+        onClick: row => router.push(`/portal/lms/experts/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: () => null,
+        onClick: row => router.push(`/portal/lms/experts/${row.original.id}/details`),
       },
       {
         id: 'delete',
         Icon: MdDeleteOutline,
-        onClick: () => null,
+        onClick: row => handleDeleteExpert({ id: row.original.id }),
       },
     ],
-    []
+    [handleDeleteExpert, router]
   );
 
   const headerQuickActions = useMemo(
@@ -71,7 +79,7 @@ const ExpertsList = () => {
   const { isLoading, columns, data } = useTable({
     columns: tableColumns,
     queryFn: getExpertsList,
-    queryKey: [queryKeys.quizes],
+    queryKey: [queryKeys.lmsExperts],
     rowActions,
   });
 

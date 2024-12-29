@@ -1,9 +1,9 @@
 const queryKeys = {
   loggedInUser: 'loggedInUser',
-  quizes: 'quizesList',
   onboardingQuiz: 'onboardingQuiz',
   lmsCategories: 'lmsCategories',
   lmsTags: 'lmsTags',
+  lmsExperts: 'lmsExperts',
 };
 
 export default queryKeys;

@@ -7,7 +7,7 @@ const Layout = ({ children }) => {
     Cookies.remove('token');
   }, []);
 
-  return children;
+  return <div className="min-h-screen p-[10px] md:p-[50px]">{children}</div>;
 };
 
 export default Layout;

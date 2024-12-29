@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { toast } from 'react-toastify';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import Spinner from '@/components/common/loader/Spinner';
+import PageLoader from '@/components/common/loader/PageLoader';
 import OnboardingQuizQuestion from './OnboardingQuizQuestion';
 import { getOnboardingQuiz, submitOnboardingQuiz } from '@/services/private/onboarding';
 import queryKeys from '@/utils/query-keys';
@@ -74,12 +74,7 @@ const CustomerOnboarding = () => {
   const hasPreviousQuestion = selectedQuestionIndex > 0;
   const hasNextQuestion = selectedQuestionIndex < quizQuestions.length - 1;
 
-  if (isLoadingOnboardingQuiz)
-    return (
-      <div className="mt-5">
-        <Spinner />
-      </div>
-    );
+  if (isLoadingOnboardingQuiz) return <PageLoader />;
 
   return (
     <Formik
