@@ -4,6 +4,7 @@ const queryKeys = {
   lmsCategories: 'lmsCategories',
   lmsTags: 'lmsTags',
   lmsExperts: 'lmsExperts',
+  lmsQuizes: 'lmsQuizes',
 };
 
 export default queryKeys;

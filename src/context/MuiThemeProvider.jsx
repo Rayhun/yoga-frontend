@@ -16,25 +16,9 @@ function MuiThemeProvider({ children }) {
         secondary: {
           main: resolvedTailwindConfig.theme.colors.secondary,
         },
-        white: {
-          main: '#ffffff',
-          contrastText: '#000000',
-        },
-        dim: {
-          main: '#707070',
-          contrastText: '#ffffff',
-        },
-        gray: {
-          main: colors.grey[600],
-          contrastText: '#ffffff',
-        },
-        dimGray: {
-          main: colors.grey[300],
-          contrastText: '#000000',
-        },
       },
       typography: {
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Satoshi, sans-serif',
       },
       components: {
         MuiStack: {
@@ -51,11 +35,57 @@ function MuiThemeProvider({ children }) {
         MuiTextField: {
           defaultProps: {
             variant: 'outlined',
+            classes: {
+              root: 'dark:text-white',
+            },
+          },
+        },
+        MuiAutocomplete: {
+          defaultProps: {
+            classes: {
+              input: 'font-satoshi font-weight-[400] dark:text-white',
+              root: 'dark:bg-form-input',
+              clearIndicator: 'dark:text-white',
+              popupIndicator: 'dark:text-white',
+            },
+          },
+          styleOverrides: {
+            root: {
+              // Default style
+              '.MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: resolvedTailwindConfig.theme.colors['stroke'],
+                },
+                '&:hover fieldset': {
+                  borderColor: resolvedTailwindConfig.theme.colors['stroke'],
+                },
+              },
+              // For Dark Theme
+              '.dark & .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: resolvedTailwindConfig.theme.colors['form-strokedark'],
+                },
+                '&:hover fieldset': {
+                  borderColor: resolvedTailwindConfig.theme.colors['form-strokedark'],
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: resolvedTailwindConfig.theme.colors.primary,
+                },
+              },
+            },
+            listbox: {
+              '.dark &': {
+                backgroundColor: resolvedTailwindConfig.theme.colors['body'],
+                '& li': {
+                  color: 'white',
+                },
+              },
+            },
           },
         },
       },
     });
-  }, [resolvedTailwindConfig.theme.colors.primary, resolvedTailwindConfig.theme.colors.secondary]);
+  }, [resolvedTailwindConfig.theme.colors]);
 
   return (
     <ThemeProvider theme={theme} key="mui-theme">

@@ -1,26 +1,36 @@
 'use client';
+import { useMemo } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Button from '@/components/common/Button';
-import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
-import { addNewExpert, updateExistingExpert } from '@/services/private/lms/experts';
+import Button from '@/components/common/Button';
+import { getLMSCategories, getLMSTags } from '@/services/private/lms';
+import { addNewQuiz, updateExistingQuiz } from '@/services/private/lms/quiz';
 import { toastApiError } from '@/utils/helpers';
-import { CategoriesField, TagsField } from '@/components/lms/general/fields';
+import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
+import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import queryKeys from '@/utils/query-keys';
 
-const ExpertForm = ({ selected }) => {
+const LMSQuizForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const { data: categoriesResponse } = useQuery({
+    queryFn: getLMSCategories,
+    queryKey: [queryKeys.lmsCategories],
+  });
+  const { data: tagsResponse } = useQuery({
+    queryFn: getLMSTags,
+    queryKey: [queryKeys.lmsTags],
+  });
   const { mutateAsync: addExpert } = useMutation({
-    mutationFn: addNewExpert,
+    mutationFn: addNewQuiz,
   });
   const { mutateAsync: updateExpert } = useMutation({
-    mutationFn: updateExistingExpert,
+    mutationFn: updateExistingQuiz,
   });
 
   const initialValues = {
@@ -44,6 +54,24 @@ const ExpertForm = ({ selected }) => {
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one tag is required'),
   });
+
+  const categoriesOptions = useMemo(
+    () =>
+      categoriesResponse?.data?.data.map(option => ({
+        label: option.name,
+        value: option.id,
+      })),
+    [categoriesResponse?.data?.data]
+  );
+
+  const tagsOptions = useMemo(
+    () =>
+      tagsResponse?.data?.data.map(option => ({
+        label: option.name,
+        value: option.id,
+      })),
+    [tagsResponse?.data?.data]
+  );
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -86,8 +114,14 @@ const ExpertForm = ({ selected }) => {
             </div>
             <FormikField name="title" label="Title" placeholder="Title" required />
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
-            <CategoriesField name="categories" label="Categories" placeholder="Categories" required />
-            <TagsField name="tags" label="Tags" placeholder="Tags" required />
+            <FormikMultiSelect
+              name="categories"
+              label="Categories"
+              options={categoriesOptions}
+              placeholder="Categories"
+              required
+            />
+            <FormikMultiSelect name="tags" label="Tags" options={tagsOptions} placeholder="Tags" required />
             <FormikField
               type="file"
               name="file"
@@ -107,4 +141,4 @@ const ExpertForm = ({ selected }) => {
   );
 };
 
-export default ExpertForm;
+export default LMSQuizForm;

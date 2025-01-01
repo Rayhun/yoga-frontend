@@ -1,6 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
@@ -9,7 +10,6 @@ import { BasicTable } from '@/components/common/table';
 import { getExpertsList, deleteSingleExpert } from '@/services/private/lms/experts';
 import queryKeys from '@/utils/query-keys';
 import useDelete from '@/hooks/useDelete';
-import { toast } from 'react-toastify';
 
 const ExpertsList = () => {
   const router = useRouter();

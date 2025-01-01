@@ -50,14 +50,7 @@ const FormikMultiSelect = ({
           getOptionKey={option => option.value}
           value={selectedOptions || []}
           onChange={handleChange}
-          renderInput={params => (
-            <TextField
-              {...params}
-              placeholder={placeholder}
-              className="dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              error={isErrorField}
-            />
-          )}
+          renderInput={params => <TextField {...params} placeholder={placeholder} error={isErrorField} />}
           renderTags={(value, getTagProps) => (
             <div className="flex flex-wrap gap-1">
               {value.map((option, index) => (
