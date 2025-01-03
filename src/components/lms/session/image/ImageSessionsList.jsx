@@ -8,13 +8,14 @@ import useTable from '@/hooks/useTable';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleImageSession, getImageSessionsList } from '@/services/private/lms/session/image';
+import { deleteSingleSession, getSessionsList } from '@/services/private/lms/session';
+import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const ImageSessionsList = () => {
   const router = useRouter();
   const { handleDelete: handleDeleteImageSession } = useDelete({
-    mutationFn: deleteSingleImageSession,
+    mutationFn: deleteSingleSession,
     invalidateQueryKey: [queryKeys.lmsImageSessions],
     onSuccess: () => toast.success('Image Session deleted successfully'),
   });
@@ -78,7 +79,7 @@ const ImageSessionsList = () => {
 
   const { isLoading, columns, data } = useTable({
     columns: tableColumns,
-    queryFn: getImageSessionsList,
+    queryFn: () => getSessionsList({ type: SESSION_TYPE.image }),
     queryKey: [queryKeys.lmsImageSessions],
     rowActions,
   });

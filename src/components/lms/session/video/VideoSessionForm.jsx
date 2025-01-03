@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaRegFileImage } from 'react-icons/fa6';
+import { FaRegFileVideo } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
@@ -28,14 +28,14 @@ import queryKeys from '@/utils/query-keys';
 import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
 
-const ImageSession = ({ selected }) => {
+const VideoSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
-  const { mutateAsync: addImageSession } = useMutation({
+  const { mutateAsync: addVideoSession } = useMutation({
     mutationFn: addNewSession,
   });
-  const { mutateAsync: updateImageSession } = useMutation({
+  const { mutateAsync: updateVideoSession } = useMutation({
     mutationFn: updateExistingSession,
   });
 
@@ -80,26 +80,26 @@ const ImageSession = ({ selected }) => {
       .required('Required!')
       .test(
         'fileType',
-        'Unsupported file format. Only images are allowed.',
-        value => value && value.type.includes('image')
+        'Unsupported file format. Only videos are allowed.',
+        value => value && value.type.includes('video')
       )
       .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const payload = { ...values, content_type: SESSION_TYPE.image };
+      const payload = { ...values, content_type: SESSION_TYPE.video };
       if (isEditMode) {
-        await updateImageSession({ payload: { id: selected.id, ...payload } });
-        toast.success('Image Session updated successfully');
+        await updateVideoSession({ payload: { id: selected.id, ...payload } });
+        toast.success('Video Session updated successfully');
       } else {
-        await addImageSession({ payload });
-        toast.success('Image Session added successfully');
+        await addVideoSession({ payload });
+        toast.success('Video Session added successfully');
       }
       await queryClient.invalidateQueries([
-        { queryKey: isEditMode ? [queryKeys.lmsImageSessions, selected.id] : [queryKeys.lmsImageSessions] },
+        { queryKey: isEditMode ? [queryKeys.lmsVideoSessions, selected.id] : [queryKeys.lmsVideoSessions] },
       ]);
-      router.push('/portal/lms/session/image');
+      router.push('/portal/lms/session/video');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -108,7 +108,7 @@ const ImageSession = ({ selected }) => {
   };
 
   return (
-    <FormLayoutWrapper title="Image Session Form">
+    <FormLayoutWrapper title="Video Session Form">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -192,7 +192,7 @@ const ImageSession = ({ selected }) => {
                         ]
                       : []
                   }
-                  Icon={FaRegFileImage}
+                  Icon={FaRegFileVideo}
                   required
                 />
               </div>
@@ -208,4 +208,4 @@ const ImageSession = ({ selected }) => {
   );
 };
 
-export default ImageSession;
+export default VideoSession;

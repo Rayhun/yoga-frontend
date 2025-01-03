@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import { TableActions } from '@/components/common/table';
 import { useQuery } from '@tanstack/react-query';
+import useHandleApiResponse from './useHandleApiResponse';
 
 function useTable({ columns = [], queryFn, queryKey, rowActions = [] }) {
   const modifiedColumns = useMemo(
@@ -23,10 +24,16 @@ function useTable({ columns = [], queryFn, queryKey, rowActions = [] }) {
     [columns, rowActions]
   );
 
-  const { isLoading, data: response } = useQuery({
+  const {
+    isLoading,
+    data: response,
+    failureReason,
+  } = useQuery({
     queryFn,
     queryKey,
   });
+
+  useHandleApiResponse(failureReason);
 
   return { isLoading, columns: modifiedColumns, data: response?.data || [] };
 }

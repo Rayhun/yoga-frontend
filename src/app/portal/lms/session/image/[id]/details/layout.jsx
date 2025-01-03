@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Quiz Details',
+  title: 'Image Session Details',
 };
 
 const Layout = ({ children }) => {

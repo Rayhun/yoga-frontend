@@ -59,6 +59,9 @@ function MuiThemeProvider({ children }) {
                 '&:hover fieldset': {
                   borderColor: resolvedTailwindConfig.theme.colors['stroke'],
                 },
+                '&.Mui-error fieldset': {
+                  borderColor: 'red',
+                },
               },
               // For Dark Theme
               '.dark & .MuiOutlinedInput-root': {
@@ -70,6 +73,9 @@ function MuiThemeProvider({ children }) {
                 },
                 '&.Mui-focused fieldset': {
                   borderColor: resolvedTailwindConfig.theme.colors.primary,
+                },
+                '&.Mui-error fieldset': {
+                  borderColor: 'red',
                 },
               },
             },

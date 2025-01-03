@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import LMSQuizForm from '@/components/lms/quiz/LMSQuizForm';
-import { getSingleQuiz } from '@/services/private/lms/quiz';
+import ImageSessionForm from '@/components/lms/session/image/ImageSessionForm';
+import { getSingleSession } from '@/services/private/lms/session';
 import queryKeys from '@/utils/query-keys';
 
 const Page = ({ params }) => {
@@ -13,8 +13,8 @@ const Page = ({ params }) => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleQuiz({ id: params.id }),
-    queryKey: [queryKeys.lmsQuizes, params.id],
+    queryFn: () => getSingleSession({ id: params.id }),
+    queryKey: [queryKeys.lmsImageSessions, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -23,8 +23,8 @@ const Page = ({ params }) => {
 
   return (
     <div>
-      <PageHeader title="Edit Quiz" />
-      <LMSQuizForm selected={response?.data?.data} />
+      <PageHeader title="Edit Image Session" />
+      <ImageSessionForm selected={response?.data?.data} />
     </div>
   );
 };

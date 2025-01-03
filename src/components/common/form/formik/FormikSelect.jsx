@@ -39,7 +39,14 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
           getOptionKey={option => option.value}
           value={selectedOption || null}
           onChange={handleChange}
-          renderInput={params => <TextField {...params} placeholder={placeholder} error={isErrorField} />}
+          renderInput={params => (
+            <TextField
+              {...params}
+              placeholder={placeholder}
+              error={isErrorField}
+              // style={{ border: isErrorField ? '1px solid red' : undefined }}
+            />
+          )}
         />
         {Icon && (
           <span className="absolute right-4 top-4">

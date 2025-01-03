@@ -6,6 +6,8 @@ const queryKeys = {
   lmsExperts: 'lmsExperts',
   lmsQuizes: 'lmsQuizes',
   lmsImageSessions: 'lmsImageSessions',
+  lmsAudioSessions: 'lmsAudioSessions',
+  lmsVideoSessions: 'lmsVideoSessions',
 };
 
 export default queryKeys;

@@ -43,3 +43,9 @@ export const INTENSITY_LEVEL = {
   level_9: 'Level 9',
   level_10: 'Level 10',
 };
+
+export const SESSION_TYPE = {
+  image: 'Image',
+  audio: 'Audio',
+  video: 'Video',
+};

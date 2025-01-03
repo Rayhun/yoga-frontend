@@ -6,7 +6,6 @@ import UIProvider from '@/context/UIProvider';
 import 'jsvectormap/dist/jsvectormap.css';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'nouislider/dist/nouislider.css';
-import 'dropzone/dist/dropzone.css';
 import 'react-toastify/dist/ReactToastify.css';
 import '@/css/satoshi.css';
 import '@/css/simple-datatables.css';

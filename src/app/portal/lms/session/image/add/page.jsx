@@ -2,13 +2,13 @@ import { PageHeader } from '@/components/common/page';
 import ImageSessionForm from '@/components/lms/session/image/ImageSessionForm';
 
 export const metadata = {
-  title: 'Add New Image Session',
+  title: 'Add Image Session',
 };
 
 const Page = () => {
   return (
     <div>
-      <PageHeader title="Add New Image Session" />
+      <PageHeader title="Add Image Session" />
       <ImageSessionForm />
     </div>
   );
