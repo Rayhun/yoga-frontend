@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaRegFileAudio } from 'react-icons/fa6';
+import { FaRegFileImage, FaRegFileAudio } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
@@ -83,6 +83,14 @@ const AudioSession = ({ selected }) => {
         'Unsupported file format. Only audios are allowed.',
         value => value && value.type.includes('audio')
       )
+      .test('fileSize', 'File size must be less than 5 MB', value => value && value.size <= 5 * ONE_MB),
+    thumbnail: Yup.mixed()
+      .required('Required!')
+      .test(
+        'fileType',
+        'Unsupported file format. Only images are allowed.',
+        value => value && value.type.includes('image')
+      )
       .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
   });
 
@@ -122,7 +130,7 @@ const AudioSession = ({ selected }) => {
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField type="number" name="duration" label="Duration" placeholder="Duration" required />
+                <FormikField name="duration" label="Duration" placeholder="Duration" required />
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
@@ -181,18 +189,31 @@ const AudioSession = ({ selected }) => {
               <div className="md:w-1/2">
                 <ExpertField required />
               </div>
+              <div className="md:w-1/2" />
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">
                 <FormikDropzone
                   name="file"
-                  label="File"
-                  fileURLs={
-                    isEditMode
-                      ? [
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLR2RW2xUdx_nprpYOA50xWPcaqjQQG7v7Ug&s',
-                        ]
-                      : []
-                  }
+                  label="Audio File"
+                  fileURLs={selected?.content_file ? [selected?.content_file] : []}
                   Icon={FaRegFileAudio}
+                  accept={{
+                    'audio/wav': [],
+                    'audio/mp3': [],
+                    'audio/mpeg': [],
+                  }}
+                  supportedFilesText="wav, mp3 and mpeg files are supported."
+                  maxSize={5 * ONE_MB}
+                  required
+                />
+              </div>
+              <div className="md:w-1/2">
+                <FormikDropzone
+                  name="thumbnail"
+                  label="Thumbnail"
+                  fileURLs={selected?.thumbnail_image ? [selected?.thumbnail_image] : []}
+                  Icon={FaRegFileImage}
                   required
                 />
               </div>

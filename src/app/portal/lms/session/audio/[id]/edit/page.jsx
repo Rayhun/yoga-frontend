@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import ImageSessionDetails from '@/components/lms/session/image/ImageSessionDetails';
+import AudioSessionForm from '@/components/lms/session/audio/AudioSessionForm';
 import { getSingleSession } from '@/services/private/lms/session';
 import queryKeys from '@/utils/query-keys';
 
@@ -14,7 +14,7 @@ const Page = ({ params }) => {
     failureReason,
   } = useQuery({
     queryFn: () => getSingleSession({ id: params.id }),
-    queryKey: [queryKeys.lmsImageSessions, params.id],
+    queryKey: [queryKeys.lmsAudioSessions, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -23,8 +23,8 @@ const Page = ({ params }) => {
 
   return (
     <div>
-      <PageHeader title="Image Session Details" />
-      <ImageSessionDetails data={response?.data?.data} />
+      <PageHeader title="Edit Audio Session" />
+      <AudioSessionForm selected={response?.data?.data} />
     </div>
   );
 };

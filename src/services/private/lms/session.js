@@ -1,18 +1,23 @@
 import axios from '@/lib/axios';
 
 export const getSessionsList = async ({ type }) => {
-  return axios.get(`/LMS/session/?content_type=${type}`);
+  return axios.get(`/LMS/session/?type=${type}`);
 };
 
 export const getSingleSession = async ({ id }) => {
   return axios.get(`/LMS/session/${id}/`);
 };
 
-export const addNewSession = async ({ payload: { categories, tags, ...payload } }) => {
+export const addNewSession = async ({
+  payload: { focus_areas, equipments, languages, categories, tags, ...payload },
+}) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value) formData.set(key, value);
   });
+  formData.set('focus_areas', focus_areas.join(','));
+  formData.set('equipments', equipments.join(','));
+  formData.set('languages', languages.join(','));
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));
 

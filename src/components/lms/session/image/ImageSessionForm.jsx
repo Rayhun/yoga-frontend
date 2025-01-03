@@ -122,7 +122,7 @@ const ImageSession = ({ selected }) => {
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField type="number" name="duration" label="Duration" placeholder="Duration" required />
+                <FormikField name="duration" label="Duration" placeholder="Duration" required />
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
@@ -185,13 +185,7 @@ const ImageSession = ({ selected }) => {
                 <FormikDropzone
                   name="file"
                   label="File"
-                  fileURLs={
-                    isEditMode
-                      ? [
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLR2RW2xUdx_nprpYOA50xWPcaqjQQG7v7Ug&s',
-                        ]
-                      : []
-                  }
+                  fileURLs={selected?.content_file ? [selected?.content_file] : []}
                   Icon={FaRegFileImage}
                   required
                 />

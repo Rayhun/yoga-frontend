@@ -13,11 +13,11 @@ const ExpertField = ({ name = 'expert', label = 'Expert', placeholder = 'Expert'
 
   const expertOptions = useMemo(
     () =>
-      expertsResponse?.data?.data.map(option => ({
+      expertsResponse?.data.map(option => ({
         label: option.name,
         value: option.id,
       })),
-    [expertsResponse?.data?.data]
+    [expertsResponse?.data]
   );
 
   return (

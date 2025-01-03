@@ -84,7 +84,7 @@ function FormikDropzone({
       ) : null}
 
       {selectedFiles.length ? (
-        <div className="cursor-pointer border-2 border-dashed rounded-md p-5 transition w-full flex items-center justify-center bg-slate-50 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+        <div className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-h-[200px] w-full flex items-center justify-center bg-slate-50 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
           {selectedFiles.map(file => (
             <div
               key={file.name}
@@ -96,7 +96,7 @@ function FormikDropzone({
               {file.type.includes('image') ? (
                 <img src={URL.createObjectURL(file)} className="w-full h-full" alt="img" />
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col items-center gap-2">
                   <MdAttachFile size={24} />
                   <p>{file.name}</p>
                 </div>
@@ -108,7 +108,7 @@ function FormikDropzone({
         <div
           {...getRootProps()}
           role="button"
-          className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-w-[250px] w-full flex items-center justify-center bg-slate-100 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-h-[200px]  w-full flex items-center justify-center bg-slate-100 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           style={{ borderColor: isErrorField ? 'red' : undefined }}
         >
           <input {...getInputProps()} />

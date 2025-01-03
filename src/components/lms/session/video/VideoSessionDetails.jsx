@@ -1,9 +1,9 @@
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 
-const ImageSessionDetails = ({ data = {} }) => {
+const VideoSessionDetails = ({ data = {} }) => {
   return (
-    <DetailsLayoutWrapper title="Image Session">
+    <DetailsLayoutWrapper title="Video Session">
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>
@@ -18,12 +18,18 @@ const ImageSessionDetails = ({ data = {} }) => {
         <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
-        <DetailsRecord label="File">
-          <DetailsFileCard fileURL={data.content_file} isImage />
+        <DetailsRecord label="Video File">
+          <DetailsFileCard fileURL={data.content_file} />
+        </DetailsRecord>
+        <DetailsRecord label="Audio File">
+          <DetailsFileCard fileURL={data.audio_file} />
+        </DetailsRecord>
+        <DetailsRecord label="Thumbnail">
+          <DetailsFileCard fileURL={data.thumbnail_image} isImage />
         </DetailsRecord>
       </div>
     </DetailsLayoutWrapper>
   );
 };
 
-export default ImageSessionDetails;
+export default VideoSessionDetails;

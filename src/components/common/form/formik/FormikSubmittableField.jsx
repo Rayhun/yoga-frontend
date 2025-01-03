@@ -78,7 +78,7 @@ const SubmittableTextfield = ({
             <Chip
               key={index}
               label={label}
-              className="cursor-pointer"
+              className="bg-gray-300 text-black-2 dark:text-white dark:bg-primary"
               color="primary"
               onDelete={() => handleRemove(index)}
             />

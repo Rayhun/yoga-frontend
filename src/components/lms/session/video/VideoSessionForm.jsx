@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaRegFileVideo } from 'react-icons/fa6';
+import { FaRegFileVideo, FaRegFileAudio, FaRegFileImage } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
@@ -83,6 +83,22 @@ const VideoSession = ({ selected }) => {
         'Unsupported file format. Only videos are allowed.',
         value => value && value.type.includes('video')
       )
+      .test('fileSize', 'File size must be less than 10 MB', value => value && value.size <= 10 * ONE_MB),
+    audio_file: Yup.mixed()
+      .required('Required!')
+      .test(
+        'fileType',
+        'Unsupported file format. Only audios are allowed.',
+        value => value && value.type.includes('audio')
+      )
+      .test('fileSize', 'File size must be less than 5 MB', value => value && value.size <= 5 * ONE_MB),
+    thumbnail: Yup.mixed()
+      .required('Required!')
+      .test(
+        'fileType',
+        'Unsupported file format. Only images are allowed.',
+        value => value && value.type.includes('image')
+      )
       .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
   });
 
@@ -122,7 +138,7 @@ const VideoSession = ({ selected }) => {
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField type="number" name="duration" label="Duration" placeholder="Duration" required />
+                <FormikField name="duration" label="Duration" placeholder="Duration" required />
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
@@ -184,15 +200,41 @@ const VideoSession = ({ selected }) => {
               <div className="md:w-1/2">
                 <FormikDropzone
                   name="file"
-                  label="File"
-                  fileURLs={
-                    isEditMode
-                      ? [
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLR2RW2xUdx_nprpYOA50xWPcaqjQQG7v7Ug&s',
-                        ]
-                      : []
-                  }
+                  label="Video File"
+                  fileURLs={selected?.content_file ? [selected?.content_file] : []}
                   Icon={FaRegFileVideo}
+                  accept={{
+                    'video/mp4': [],
+                  }}
+                  supportedFilesText="mp4 files are supported."
+                  maxSize={10 * ONE_MB}
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="md:w-1/2">
+                <FormikDropzone
+                  name="audio_file"
+                  label="Audio File"
+                  fileURLs={selected?.audio_file ? [selected?.audio_file] : []}
+                  Icon={FaRegFileAudio}
+                  accept={{
+                    'audio/wav': [],
+                    'audio/mp3': [],
+                    'audio/mpeg': [],
+                  }}
+                  supportedFilesText="wav, mp3 and mpeg files are supported."
+                  maxSize={5 * ONE_MB}
+                  required
+                />
+              </div>
+              <div className="md:w-1/2">
+                <FormikDropzone
+                  name="thumbnail"
+                  label="Thumbnail"
+                  fileURLs={selected?.thumbnail_image ? [selected?.thumbnail_image] : []}
+                  Icon={FaRegFileImage}
                   required
                 />
               </div>
