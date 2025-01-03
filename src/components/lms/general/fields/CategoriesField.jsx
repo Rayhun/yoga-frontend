@@ -5,7 +5,12 @@ import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect
 import { getLMSCategories } from '@/services/private/lms';
 import queryKeys from '@/utils/query-keys';
 
-const CategoriesField = props => {
+const CategoriesField = ({
+  name = 'categories',
+  label = 'Categories',
+  placeholder = 'Categories',
+  ...props
+}) => {
   const { data: categoriesResponse } = useQuery({
     queryFn: getLMSCategories,
     queryKey: [queryKeys.lmsCategories],
@@ -20,7 +25,15 @@ const CategoriesField = props => {
     [categoriesResponse?.data?.data]
   );
 
-  return <FormikMultiSelect {...props} options={categoriesOptions} />;
+  return (
+    <FormikMultiSelect
+      {...props}
+      name={name}
+      label={label}
+      placeholder={placeholder}
+      options={categoriesOptions}
+    />
+  );
 };
 
 export default CategoriesField;

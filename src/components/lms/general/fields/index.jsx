@@ -1,2 +1,9 @@
+export { default as AccessSettingField } from './AccessSettingField';
 export { default as CategoriesField } from './CategoriesField';
+export { default as DifficultyField } from './DifficultyField';
+export { default as EquipmentsField } from './EquipmentsField';
+export { default as FocusAreasField } from './FocusAreasField';
+export { default as IntensityField } from './IntensityField';
+export { default as LanguagesField } from './LanguagesField';
+export { default as VisibilitySettingField } from './VisibilitySettingField';
 export { default as TagsField } from './TagsField';

@@ -83,6 +83,13 @@ function MuiThemeProvider({ children }) {
             },
           },
         },
+        MuiDialog: {
+          styleOverrides: {
+            root: {
+              zIndex: 9999,
+            },
+          },
+        },
       },
     });
   }, [resolvedTailwindConfig.theme.colors]);

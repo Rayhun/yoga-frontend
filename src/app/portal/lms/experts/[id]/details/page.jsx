@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
+import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
 import { DetailsLayoutWrapper, DetailsRecord } from '@/components/common/details';
@@ -9,14 +10,20 @@ import { getSingleExpert } from '@/services/private/lms/experts';
 import queryKeys from '@/utils/query-keys';
 
 const Page = ({ params }) => {
-  const { data: response, isLoading } = useQuery({
+  const {
+    data: response,
+    isLoading,
+    failureReason,
+  } = useQuery({
     queryFn: () => getSingleExpert({ id: params.id }),
     queryKey: [queryKeys.lmsExperts, params.id],
   });
 
+  useHandleApiResponse(failureReason);
+
   if (isLoading) return <PageLoader />;
 
-  const expertDetails = response.data.data || {};
+  const expertDetails = response?.data?.data || {};
 
   return (
     <div>

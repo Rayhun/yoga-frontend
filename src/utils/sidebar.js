@@ -58,18 +58,18 @@ const SIDEBAR = [
         sub_menu: [
           {
             label: 'Video Sessions',
-            href: '/portal/lms/sessions/video',
-            isActive: pathname => pathname.includes('/portal/lms/sessions/video'),
+            href: '/portal/lms/session/video',
+            isActive: pathname => pathname.includes('/portal/lms/session/video'),
           },
           {
             label: 'Image Sessions',
-            href: '/portal/lms/sessions/image',
-            isActive: pathname => pathname.includes('/portal/lms/sessions/image'),
+            href: '/portal/lms/session/image',
+            isActive: pathname => pathname.includes('/portal/lms/session/image'),
           },
           {
             label: 'Audio Sessions',
-            href: '/portal/lms/sessions/audio',
-            isActive: pathname => pathname.includes('/portal/lms/sessions/audio'),
+            href: '/portal/lms/session/audio',
+            isActive: pathname => pathname.includes('/portal/lms/session/audio'),
           },
         ],
       },

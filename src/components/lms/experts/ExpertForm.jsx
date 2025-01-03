@@ -24,13 +24,13 @@ const ExpertForm = ({ selected }) => {
   });
 
   const initialValues = {
-    name: isEditMode ? selected.name : '',
-    email: isEditMode ? selected.email : '',
-    title: isEditMode ? selected.title : '',
-    description: isEditMode ? selected.description : '',
+    name: selected?.name || '',
+    email: selected?.email || '',
+    title: selected?.title || '',
+    description: selected?.description || '',
     file: null,
-    categories: isEditMode ? selected.categories.map(i => i.id) : [],
-    tags: isEditMode ? selected.tags.map(i => i.id) : [],
+    categories: selected?.categories.map(i => i.id) || [],
+    tags: selected?.tags.map(i => i.id) || [],
   };
 
   const validationSchema = Yup.object({
@@ -75,7 +75,7 @@ const ExpertForm = ({ selected }) => {
       >
         {({ isSubmitting, setFieldValue }) => (
           <Form className="flex flex-col gap-3">
-            <div className="flex flex-col gap-6 xl:flex-row">
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full xl:w-1/2">
                 <FormikField name="name" label="Name" placeholder="Name" required />
               </div>

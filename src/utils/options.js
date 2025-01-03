@@ -1,0 +1,138 @@
+import {
+  ACCESS_SETTING,
+  CONTENT_TYPE,
+  DIFFICULTY,
+  INTENSITY_LEVEL,
+  QUIZ_STATUS,
+  VISIBILITY_SETTING,
+} from './enums';
+
+export const CONTENT_TYPE_OPTIONS = [
+  {
+    label: 'Program',
+    value: CONTENT_TYPE.program,
+  },
+  {
+    label: 'Module',
+    value: CONTENT_TYPE.module,
+  },
+  {
+    label: 'Video',
+    value: CONTENT_TYPE.video,
+  },
+  {
+    label: 'Audio',
+    value: CONTENT_TYPE.audio,
+  },
+  {
+    label: 'Image',
+    value: CONTENT_TYPE.image,
+  },
+  {
+    label: 'Quiz',
+    value: CONTENT_TYPE.quiz,
+  },
+];
+
+export const ACCESS_SETTING_OPTIONS = [
+  {
+    label: 'Open',
+    value: ACCESS_SETTING.open,
+  },
+  {
+    label: 'Free',
+    value: ACCESS_SETTING.free,
+  },
+  {
+    label: 'Buy Now',
+    value: ACCESS_SETTING.buy_now,
+  },
+  {
+    label: 'Recurring',
+    value: ACCESS_SETTING.recurring,
+  },
+  {
+    label: 'Closed',
+    value: ACCESS_SETTING.closed,
+  },
+];
+
+export const VISIBILITY_SETTING_OPTIONS = [
+  {
+    label: 'Logged-In',
+    value: VISIBILITY_SETTING.logged_in,
+  },
+];
+
+export const QUIZ_STATUS_OPTIONS = [
+  {
+    label: 'Published',
+    value: QUIZ_STATUS.published,
+  },
+  {
+    label: 'Draft',
+    value: QUIZ_STATUS.draft,
+  },
+  {
+    label: 'InActive',
+    value: QUIZ_STATUS.inactive,
+  },
+];
+
+export const DIFFICULTY_OPTIONS = [
+  {
+    label: 'Introductory',
+    value: DIFFICULTY.introductory,
+  },
+  {
+    label: 'Intermediate',
+    value: DIFFICULTY.intermediate,
+  },
+  {
+    label: 'Expert',
+    value: DIFFICULTY.expert,
+  },
+];
+
+export const INTENSITY_LEVEL_OPTIONS = [
+  {
+    label: 'Level 1',
+    value: INTENSITY_LEVEL.level_1,
+  },
+  {
+    label: 'Level 2',
+    value: INTENSITY_LEVEL.level_2,
+  },
+  {
+    label: 'Level 3',
+    value: INTENSITY_LEVEL.level_3,
+  },
+  {
+    label: 'Level 4',
+    value: INTENSITY_LEVEL.level_4,
+  },
+  {
+    label: 'Level 5',
+    value: INTENSITY_LEVEL.level_5,
+  },
+  {
+    label: 'Level 6',
+    value: INTENSITY_LEVEL.level_6,
+  },
+  {
+    label: 'Level 7',
+    value: INTENSITY_LEVEL.level_7,
+  },
+  {
+    label: 'Level 8',
+    value: INTENSITY_LEVEL.level_8,
+  },
+  {
+    label: 'Level 9',
+    value: INTENSITY_LEVEL.level_9,
+  },
+  {
+    label: 'Level 10',
+    value: INTENSITY_LEVEL.level_10,
+  },
+];

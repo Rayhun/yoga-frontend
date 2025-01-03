@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import styled from '@emotion/styled';
 import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
-import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import { MdErrorOutline, MdClose } from 'react-icons/md';
 
@@ -114,6 +113,7 @@ function useConfirm() {
             onClose={closeModal}
             TransitionComponent={Transition}
             sx={{
+              zIndex: 9999,
               '& .MuiDialog-container': {
                 alignItems: 'flex-start',
               },

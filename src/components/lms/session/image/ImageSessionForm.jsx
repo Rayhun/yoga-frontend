@@ -1,5 +1,5 @@
 'use client';
-import { Formik, Form, FieldArray } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -17,29 +17,29 @@ import {
   TagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
-import LMSQuizFormOptions from './LMSQuizFormOptions';
-import { addNewQuiz, updateExistingQuiz } from '@/services/private/lms/quiz';
+import { addNewImageSession, updateExistingImageSession } from '@/services/private/lms/session/image';
 import { toastApiError } from '@/utils/helpers';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { QUIZ_STATUS_OPTIONS } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 
-const LMSQuizForm = ({ selected }) => {
+const ImageSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
-  const { mutateAsync: addQuiz } = useMutation({
-    mutationFn: addNewQuiz,
+  const { mutateAsync: addImageSession } = useMutation({
+    mutationFn: addNewImageSession,
   });
-  const { mutateAsync: updateQuiz } = useMutation({
-    mutationFn: updateExistingQuiz,
+  const { mutateAsync: updateImageSession } = useMutation({
+    mutationFn: updateExistingImageSession,
   });
 
   const initialValues = {
     title: selected?.title || '',
-    explanation: selected?.explanation || '',
-    quiz_number: selected?.quiz_number || '',
+    description: selected?.description || '',
+    duration: selected?.duration || '',
     status: selected?.status || '',
+    expert: selected?.expert || '',
     difficulty: selected?.difficulty || '',
     intensity: selected?.intensity || '',
     access_setting: selected?.access_setting || '',
@@ -49,17 +49,15 @@ const LMSQuizForm = ({ selected }) => {
     languages: selected?.languages || [],
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    options: (selected?.options || [{ text: '', is_correct: false }]).map(({ text, is_correct }) => ({
-      text,
-      is_correct,
-    })),
+    file: null,
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
     explanation: Yup.string().required('Required!'),
-    quiz_number: Yup.string().required('Required!'),
+    duration: Yup.string().required('Required!'),
     status: Yup.string().required('Required!'),
+    expert: Yup.string().required('Required!'),
     difficulty: Yup.string().required('Required!'),
     intensity: Yup.string().required('Required!'),
     access_setting: Yup.string().required('Required!'),
@@ -73,34 +71,22 @@ const LMSQuizForm = ({ selected }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
-    options: Yup.array()
-      .of(
-        Yup.object({
-          text: Yup.string().trim().required('Required!'),
-          is_correct: Yup.boolean(),
-        })
-      )
-      .min(2, 'At least 2 options are required.')
-      .test(
-        'one-correct',
-        'Only one option can be marked as correct.',
-        options => options.filter(option => option.is_correct).length === 1
-      ),
+    file: Yup.mixed().nullable(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (isEditMode) {
-        await updateQuiz({ payload: { id: selected.id, ...values } });
-        toast.success('Quiz updated successfully');
+        await updateImageSession({ payload: { id: selected.id, ...values } });
+        toast.success('Image Session updated successfully');
       } else {
-        await addQuiz({ payload: { ...values } });
-        toast.success('Quiz added successfully');
+        await addImageSession({ payload: { ...values } });
+        toast.success('Image Session added successfully');
       }
       await queryClient.invalidateQueries([
-        { queryKey: isEditMode ? [queryKeys.lmsExperts, selected.id] : [queryKeys.lmsExperts] },
+        { queryKey: isEditMode ? [queryKeys.lmsImageSessions, selected.id] : [queryKeys.lmsImageSessions] },
       ]);
-      router.push('/portal/lms/quiz');
+      router.push('/portal/lms/session/image');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -109,7 +95,7 @@ const LMSQuizForm = ({ selected }) => {
   };
 
   return (
-    <FormLayoutWrapper title="Quiz Form">
+    <FormLayoutWrapper title="Image Session Form">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -179,11 +165,6 @@ const LMSQuizForm = ({ selected }) => {
               </div>
             </div>
 
-            <div className="my-5 flex flex-col gap-3">
-              <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
-              <FieldArray name="options" render={helpers => <LMSQuizFormOptions {...helpers} />} />
-            </div>
-
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
@@ -194,4 +175,4 @@ const LMSQuizForm = ({ selected }) => {
   );
 };
 
-export default LMSQuizForm;
+export default ImageSession;

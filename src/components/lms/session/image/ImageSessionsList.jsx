@@ -8,15 +8,15 @@ import useTable from '@/hooks/useTable';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleQuiz, getQuizesList } from '@/services/private/lms/quiz';
+import { deleteSingleImageSession, getImageSessionsList } from '@/services/private/lms/session/image';
 import queryKeys from '@/utils/query-keys';
 
-const LMSQuizList = () => {
+const ImageSessionsList = () => {
   const router = useRouter();
-  const { handleDelete: handleDeleteLMSQuiz } = useDelete({
-    mutationFn: deleteSingleQuiz,
-    invalidateQueryKey: [queryKeys.lmsQuizes],
-    onSuccess: () => toast.success('Quiz deleted successfully'),
+  const { handleDelete: handleDeleteImageSession } = useDelete({
+    mutationFn: deleteSingleImageSession,
+    invalidateQueryKey: [queryKeys.lmsImageSessions],
+    onSuccess: () => toast.success('Image Session deleted successfully'),
   });
 
   const tableColumns = useMemo(
@@ -26,8 +26,8 @@ const LMSQuizList = () => {
         accessorKey: 'title',
       },
       {
-        header: 'Quiz Number',
-        accessorKey: 'quiz_number',
+        header: 'Duration',
+        accessorKey: 'duration',
       },
       {
         header: 'Status',
@@ -42,20 +42,20 @@ const LMSQuizList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/quiz/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/lms/session/image/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/quiz/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/lms/session/image/${row.original.id}/details`),
       },
       {
         id: 'delete',
         Icon: MdDeleteOutline,
-        onClick: row => handleDeleteLMSQuiz({ id: row.original.id }),
+        onClick: row => handleDeleteImageSession({ id: row.original.id }),
       },
     ],
-    [handleDeleteLMSQuiz, router]
+    [handleDeleteImageSession, router]
   );
 
   const headerQuickActions = useMemo(
@@ -69,8 +69,8 @@ const LMSQuizList = () => {
       {
         id: 'add',
         Icon: MdOutlineAdd,
-        label: 'Add New Quiz',
-        onClick: () => router.push('/portal/lms/quiz/add'),
+        label: 'Add New Image Session',
+        onClick: () => router.push('/portal/lms/session/image/add'),
       },
     ],
     [router]
@@ -78,14 +78,14 @@ const LMSQuizList = () => {
 
   const { isLoading, columns, data } = useTable({
     columns: tableColumns,
-    queryFn: getQuizesList,
-    queryKey: [queryKeys.lmsQuizes],
+    queryFn: getImageSessionsList,
+    queryKey: [queryKeys.lmsImageSessions],
     rowActions,
   });
 
   return (
     <div>
-      <PageHeader title="LMS Quiz">
+      <PageHeader title="Image Sessions">
         <PageHeaderQuickActions actions={headerQuickActions} />
       </PageHeader>
 
@@ -94,4 +94,4 @@ const LMSQuizList = () => {
   );
 };
 
-export default LMSQuizList;
+export default ImageSessionsList;
