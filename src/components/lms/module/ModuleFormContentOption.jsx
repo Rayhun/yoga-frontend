@@ -1,0 +1,71 @@
+'use client';
+import { useCallback, useState } from 'react';
+import { toast } from 'react-toastify';
+import { useMutation } from '@tanstack/react-query';
+import { useFormikContext } from 'formik';
+import IconButton from '@mui/material/IconButton';
+import { RiCloseCircleLine } from 'react-icons/ri';
+import Button from '@/components/common/Button';
+import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import { getModuleContentOptions } from '@/services/private/lms/module';
+import { MODULE_TYPE_OPTIONS } from '@/utils/options';
+
+const ModuleFormContentOption = ({ name, onRemove }) => {
+  const { setFieldValue } = useFormikContext();
+  const [contentOptions, setContentOptions] = useState([]);
+
+  const { mutateAsync: getContentOptions } = useMutation({
+    mutationFn: getModuleContentOptions,
+  });
+
+  const handleContentTypeChange = useCallback(async selectedType => {
+    try {
+      if (!selectedType) return;
+
+      setContentOptions([]);
+      setFieldValue(`${name}.content_id`, '');
+
+      const contentOptionsResponse = await getContentOptions({ type: selectedType });
+      const modifiedOptionsData = contentOptionsResponse?.data?.map(i => ({
+        label: i.title,
+        value: i.id,
+      }));
+
+      setContentOptions(modifiedOptionsData);
+    } catch (error) {
+      toast.error('Something went wrong in fetching content options');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-x-6 gap-y-1 md:flex-row md:items-center">
+      <div className="md:w-2/5">
+        <FormikSelect
+          name={`${name}.content_type`}
+          label="Type"
+          placeholder="Type"
+          options={MODULE_TYPE_OPTIONS}
+          onChange={value => handleContentTypeChange(value)}
+          required
+        />
+      </div>
+      <div className="md:w-2/5">
+        <FormikSelect
+          name={`${name}.content_id`}
+          label="Content"
+          placeholder="Content"
+          options={contentOptions}
+          required
+        />
+      </div>
+      <div className="md:w-1/5 flex items-center justify-end">
+        <IconButton onClick={onRemove}>
+          <RiCloseCircleLine size={30} className="text-red-500" />
+        </IconButton>
+      </div>
+    </div>
+  );
+};
+
+export default ModuleFormContentOption;

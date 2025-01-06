@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import { getExpertsList } from '@/services/private/lms/experts';
+import { getExpertsList } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
 
 const ExpertField = ({ name = 'expert', label = 'Expert', placeholder = 'Expert', ...props }) => {

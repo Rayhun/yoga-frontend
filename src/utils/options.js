@@ -3,7 +3,8 @@ import {
   CONTENT_TYPE,
   DIFFICULTY,
   INTENSITY_LEVEL,
-  QUIZ_STATUS,
+  MODULE_TYPE,
+  LMS_DOC_STATUS,
   VISIBILITY_SETTING,
 } from './enums';
 
@@ -64,18 +65,18 @@ export const VISIBILITY_SETTING_OPTIONS = [
   },
 ];
 
-export const QUIZ_STATUS_OPTIONS = [
+export const LMS_DOC_STATUS_OPTIONS = [
   {
     label: 'Published',
-    value: QUIZ_STATUS.published,
+    value: LMS_DOC_STATUS.published,
   },
   {
     label: 'Draft',
-    value: QUIZ_STATUS.draft,
+    value: LMS_DOC_STATUS.draft,
   },
   {
     label: 'InActive',
-    value: QUIZ_STATUS.inactive,
+    value: LMS_DOC_STATUS.inactive,
   },
 ];
 
@@ -134,5 +135,24 @@ export const INTENSITY_LEVEL_OPTIONS = [
   {
     label: 'Level 10',
     value: INTENSITY_LEVEL.level_10,
+  },
+];
+
+export const MODULE_TYPE_OPTIONS = [
+  {
+    label: 'Image',
+    value: MODULE_TYPE.image,
+  },
+  {
+    label: 'Audio',
+    value: MODULE_TYPE.audio,
+  },
+  {
+    label: 'Video',
+    value: MODULE_TYPE.video,
+  },
+  {
+    label: 'Quiz',
+    value: MODULE_TYPE.quiz,
   },
 ];

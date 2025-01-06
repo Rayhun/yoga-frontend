@@ -3,104 +3,102 @@ import { Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { FaRegFileImage } from 'react-icons/fa6';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
+import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import {
   AccessSettingField,
-  DifficultyField,
-  IntensityField,
   VisibilitySettingField,
-  FocusAreasField,
   CategoriesField,
   TagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
-import LMSQuizFormOptions from './LMSQuizFormOptions';
-import { addNewQuiz, updateExistingQuiz } from '@/services/private/lms/quiz';
+import ModuleFormContentOptions from './ModuleFormContentOptions';
+import { addNewModule, updateExistingModule } from '@/services/private/lms/module';
+import { uploadLMSFile } from '@/services/private/lms';
 import { toastApiError } from '@/utils/helpers';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
+import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
 
-const LMSQuizForm = ({ selected }) => {
+const ModuleForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
-  const { mutateAsync: addQuiz } = useMutation({
-    mutationFn: addNewQuiz,
+  const { mutateAsync: addModule } = useMutation({
+    mutationFn: addNewModule,
   });
-  const { mutateAsync: updateQuiz } = useMutation({
-    mutationFn: updateExistingQuiz,
+  const { mutateAsync: updateModule } = useMutation({
+    mutationFn: updateExistingModule,
   });
 
   const initialValues = {
     title: selected?.title || '',
     explanation: selected?.explanation || '',
-    quiz_number: selected?.quiz_number || '',
+    benefits: selected?.benefits || '',
+    file: null,
     status: selected?.status || '',
-    difficulty: selected?.difficulty || '',
-    intensity: selected?.intensity || '',
     access_setting: selected?.access_setting || '',
     visibility_setting: selected?.visibility_setting || '',
-    focus_areas: selected?.focus_areas || [],
-    equipments: selected?.equipments || [],
-    languages: selected?.languages || [],
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    options: (selected?.options || [{ text: '', is_correct: false }]).map(({ text, is_correct }) => ({
-      text,
-      is_correct,
-    })),
+    module_content: (selected?.module_content || [{ content_id: '', content_type: '' }]).map(
+      ({ content_id, content_type }) => ({
+        content_id,
+        content_type,
+      })
+    ),
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
     explanation: Yup.string().required('Required!'),
-    quiz_number: Yup.string().required('Required!'),
+    benefits: Yup.string().required('Required!'),
+    file: Yup.mixed()
+      .required('Required!')
+      .test(
+        'fileType',
+        'Unsupported file format. Only images are allowed.',
+        value => value && value.type.includes('image')
+      )
+      .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
     status: Yup.string().required('Required!'),
-    difficulty: Yup.string().required('Required!'),
-    intensity: Yup.string().required('Required!'),
     access_setting: Yup.string().required('Required!'),
     visibility_setting: Yup.string().required('Required!'),
-    focus_areas: Yup.array()
-      .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 focus area is required'),
-    equipments: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 equipment is required'),
-    languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
-    options: Yup.array()
+    module_content: Yup.array()
       .of(
         Yup.object({
-          text: Yup.string().trim().required('Required!'),
-          is_correct: Yup.boolean(),
+          content_id: Yup.string().trim().required('Required!'),
+          content_type: Yup.string().trim().required('Required!'),
         })
       )
-      .min(2, 'At least 2 options are required.')
-      .test(
-        'one-correct',
-        'Only one option can be marked as correct.',
-        options => options.filter(option => option.is_correct).length === 1
-      ),
+      .min(1, 'At least 1 options is required.'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const { file, ...payload } = values;
+
+      const { data: uploadedFile } = await uploadLMSFile({ file });
+
       if (isEditMode) {
-        await updateQuiz({ payload: { id: selected.id, ...values } });
-        toast.success('Quiz updated successfully');
+        await updateModule({ payload: { id: selected.id, ...payload, file: uploadedFile?.file_link } });
+        toast.success('Module updated successfully');
       } else {
-        await addQuiz({ payload: { ...values } });
-        toast.success('Quiz added successfully');
+        await addModule({ payload: { ...payload, file: uploadedFile?.file_link } });
+        toast.success('Module added successfully');
       }
       await queryClient.invalidateQueries([
-        { queryKey: isEditMode ? [queryKeys.lmsQuizes, selected.id] : [queryKeys.lmsQuizes] },
+        { queryKey: isEditMode ? [queryKeys.lmsModules, selected.id] : [queryKeys.lmsModules] },
       ]);
-      router.push('/portal/lms/quiz');
+      router.push('/portal/lms/module');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -109,7 +107,7 @@ const LMSQuizForm = ({ selected }) => {
   };
 
   return (
-    <FormLayoutWrapper title="Quiz Form">
+    <FormLayoutWrapper title="Module Form">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -123,12 +121,6 @@ const LMSQuizForm = ({ selected }) => {
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField name="quiz_number" label="Quiz Number" placeholder="Quiz Number" required />
-              </div>
-            </div>
-            <FormikField name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full md:w-1/2">
                 <FormikSelect
                   name="status"
                   label="Status"
@@ -137,37 +129,26 @@ const LMSQuizForm = ({ selected }) => {
                   required
                 />
               </div>
-              <div className="w-full md:w-1/2">
-                <DifficultyField required />
-              </div>
             </div>
+            <FormikField name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
+            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
-                <IntensityField required />
-              </div>
-              <div className="w-full md:w-1/2">
-                <AccessSettingField required />
-              </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full md:w-1/2">
-                <VisibilitySettingField required />
-              </div>
-              <div className="w-full md:w-1/2">
-                <FocusAreasField required />
-              </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <FormikSubmittableField
-                  name="equipments"
-                  label="Equipments"
-                  placeholder="Equipments"
+                <FormikDropzone
+                  name="file"
+                  label="File"
+                  fileURLs={selected?.file ? [selected.file] : []}
+                  Icon={FaRegFileImage}
                   required
                 />
               </div>
-              <div className="md:w-1/2">
-                <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full md:w-1/2">
+                <AccessSettingField required />
+              </div>
+              <div className="w-full md:w-1/2">
+                <VisibilitySettingField required />
               </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -180,8 +161,11 @@ const LMSQuizForm = ({ selected }) => {
             </div>
 
             <div className="my-5 flex flex-col gap-3">
-              <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
-              <FieldArray name="options" render={helpers => <LMSQuizFormOptions {...helpers} />} />
+              <h3 className="font-bold text-2xl text-black dark:text-white">Module Content</h3>
+              <FieldArray
+                name="module_content"
+                render={helpers => <ModuleFormContentOptions {...helpers} />}
+              />
             </div>
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
@@ -194,4 +178,4 @@ const LMSQuizForm = ({ selected }) => {
   );
 };
 
-export default LMSQuizForm;
+export default ModuleForm;

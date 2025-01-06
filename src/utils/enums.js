@@ -19,7 +19,7 @@ export const VISIBILITY_SETTING = {
   logged_in: 'Logged-In',
 };
 
-export const QUIZ_STATUS = {
+export const LMS_DOC_STATUS = {
   published: 'Published',
   draft: 'Draft',
   inactive: 'InActive',
@@ -48,4 +48,11 @@ export const SESSION_TYPE = {
   image: 'Image',
   audio: 'Audio',
   video: 'Video',
+};
+
+export const MODULE_TYPE = {
+  image: 'Image',
+  audio: 'Audio',
+  video: 'Video',
+  quiz: 'Quiz',
 };

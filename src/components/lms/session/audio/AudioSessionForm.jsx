@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FaRegFileImage, FaRegFileAudio } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
+import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import {
   AccessSettingField,
@@ -23,7 +23,7 @@ import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { addNewSession, updateExistingSession } from '@/services/private/lms/session';
 import { toastApiError } from '@/utils/helpers';
-import { QUIZ_STATUS_OPTIONS } from '@/utils/options';
+import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
@@ -140,7 +140,7 @@ const AudioSession = ({ selected }) => {
                   name="status"
                   label="Status"
                   placeholder="Status"
-                  options={QUIZ_STATUS_OPTIONS}
+                  options={LMS_DOC_STATUS_OPTIONS}
                   required
                 />
               </div>

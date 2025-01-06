@@ -43,14 +43,14 @@ const SIDEBAR = [
       {
         Icon: FaNewspaper,
         label: 'Programs',
-        href: '/portal/lms/programs',
-        isActive: pathname => pathname.includes('/portal/lms/programs'),
+        href: '/portal/lms/program',
+        isActive: pathname => pathname.includes('/portal/lms/program'),
       },
       {
         Icon: MdViewModule,
         label: 'Modules',
-        href: '/portal/lms/modules',
-        isActive: pathname => pathname.includes('/portal/lms/modules'),
+        href: '/portal/lms/module',
+        isActive: pathname => pathname.includes('/portal/lms/module'),
       },
       {
         Icon: FaTv,
@@ -82,8 +82,8 @@ const SIDEBAR = [
       {
         Icon: GrUserExpert,
         label: 'Experts',
-        href: '/portal/lms/experts',
-        isActive: pathname => pathname.includes('/portal/lms/experts'),
+        href: '/portal/lms/expert',
+        isActive: pathname => pathname.includes('/portal/lms/expert'),
       },
     ],
   },

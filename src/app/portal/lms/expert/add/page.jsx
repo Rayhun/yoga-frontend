@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import ExpertForm from '@/components/lms/experts/ExpertForm';
+import ExpertForm from '@/components/lms/expert/ExpertForm';
 
 export const metadata = {
   title: 'Add New Expert',

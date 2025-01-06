@@ -1,13 +1,13 @@
-import ExpertsList from '@/components/lms/experts/ExpertsList';
+import ModulesList from '@/components/lms/module/ModulesList';
 
 export const metadata = {
-  title: 'Experts',
+  title: 'Modules',
 };
 
 const Page = () => {
   return (
     <div>
-      <ExpertsList />
+      <ModulesList />
     </div>
   );
 };

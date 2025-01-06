@@ -1,5 +1,5 @@
 'use client';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
+import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 
 const FocusAreasField = ({
   name = 'focus_areas',

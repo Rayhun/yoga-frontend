@@ -1,5 +1,5 @@
 'use client';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittableField';
+import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import { ACCESS_SETTING_OPTIONS } from '@/utils/options';
 
 const LanguagesField = ({ name = 'languages', label = 'Languages', placeholder = 'Languages' }) => {

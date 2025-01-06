@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Edit Expert',
+  title: 'Module Details',
 };
 
 const Layout = ({ children }) => {

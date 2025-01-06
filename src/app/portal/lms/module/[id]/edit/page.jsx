@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import ExpertForm from '@/components/lms/experts/ExpertForm';
-import { getSingleExpert } from '@/services/private/lms/experts';
+import ModuleForm from '@/components/lms/module/ModuleForm';
+import { getSingleModule } from '@/services/private/lms/module';
 import queryKeys from '@/utils/query-keys';
 
 const Page = ({ params }) => {
@@ -13,8 +13,8 @@ const Page = ({ params }) => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleExpert({ id: params.id }),
-    queryKey: [queryKeys.lmsExperts, params.id],
+    queryFn: () => getSingleModule({ id: params.id }),
+    queryKey: [queryKeys.lmsModules, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -23,8 +23,8 @@ const Page = ({ params }) => {
 
   return (
     <div>
-      <PageHeader title="Edit Expert" />
-      <ExpertForm selected={response?.data?.data} />
+      <PageHeader title="Edit Module" />
+      <ModuleForm selected={response?.data?.data} />
     </div>
   );
 };

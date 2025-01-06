@@ -7,7 +7,7 @@ import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getExpertsList, deleteSingleExpert } from '@/services/private/lms/experts';
+import { getExpertsList, deleteSingleExpert } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
 import useDelete from '@/hooks/useDelete';
 
@@ -42,12 +42,12 @@ const ExpertsList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/experts/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/lms/expert/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/experts/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/lms/expert/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -70,7 +70,7 @@ const ExpertsList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Expert',
-        onClick: () => router.push('/portal/lms/experts/add'),
+        onClick: () => router.push('/portal/lms/expert/add'),
       },
     ],
     [router]

@@ -1,0 +1,28 @@
+'use client';
+import Button from '@/components/common/Button';
+import ModuleFormContentOption from './ModuleFormContentOption';
+
+const ModuleFormContentOptions = ({ form, name, push, remove }) => {
+  const error = form.errors?.[name];
+
+  return (
+    <div className="flex flex-col gap-3">
+      {form.values?.[name]?.map((_, i) => (
+        <ModuleFormContentOption key={i} name={`${name}[${i}]`} onRemove={() => remove(i)} />
+      ))}
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="self-start"
+        onClick={() => push({ text: '', is_correct: false })}
+      >
+        Add Option
+      </Button>
+
+      {typeof error === 'string' ? <small className="text-xs text-red-500">{error}</small> : null}
+    </div>
+  );
+};
+
+export default ModuleFormContentOptions;

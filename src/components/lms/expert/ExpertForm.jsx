@@ -9,7 +9,7 @@ import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import { addNewExpert, updateExistingExpert } from '@/services/private/lms/experts';
+import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import { ONE_MB } from '@/utils/general';
@@ -67,7 +67,7 @@ const ExpertForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsExperts, selected.id] : [queryKeys.lmsExperts] },
       ]);
-      router.push('/portal/lms/experts');
+      router.push('/portal/lms/expert');
     } catch (error) {
       toastApiError(error);
     } finally {

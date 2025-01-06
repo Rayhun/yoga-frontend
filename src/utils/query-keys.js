@@ -8,6 +8,7 @@ const queryKeys = {
   lmsImageSessions: 'lmsImageSessions',
   lmsAudioSessions: 'lmsAudioSessions',
   lmsVideoSessions: 'lmsVideoSessions',
+  lmsModules: 'lmsModules',
 };
 
 export default queryKeys;

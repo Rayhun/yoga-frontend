@@ -1,15 +1,15 @@
 import { PageHeader } from '@/components/common/page';
-import ExpertForm from '@/components/lms/experts/ExpertForm';
+import ModuleForm from '@/components/lms/module/ModuleForm';
 
 export const metadata = {
-  title: 'Add New Expert',
+  title: 'Add New Module',
 };
 
 const Page = () => {
   return (
     <div>
-      <PageHeader title="Add New Expert" />
-      <ExpertForm />
+      <PageHeader title="Add New Module" />
+      <ModuleForm />
     </div>
   );
 };

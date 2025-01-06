@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import Chip from '@mui/material/Chip';
 
-const SubmittableTextfield = ({
+const FormikSubmittable = ({
   name = '',
   label,
   className,
@@ -72,7 +72,7 @@ const SubmittableTextfield = ({
 
       {isErrorField ? <small className="text-xs text-red-500">{meta.error}</small> : null}
 
-      {field.value.length > 0 ? (
+      {field.value?.length > 0 ? (
         <div className="flex flex-wrap gap-2 mt-2">
           {field.value.map((label, index) => (
             <Chip
@@ -89,4 +89,4 @@ const SubmittableTextfield = ({
   );
 };
 
-export default SubmittableTextfield;
+export default FormikSubmittable;
