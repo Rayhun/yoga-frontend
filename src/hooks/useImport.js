@@ -23,7 +23,7 @@ const useImport = ({ mutationFn, invalidateQueryKey = [], onSuccess = () => null
                 accept={{
                   'text/csv': ['.csv'],
                 }}
-                validationError="Only excel files are accepted"
+                validationError="Only csv files are accepted"
                 validate={value => value && value.type.includes('csv')}
                 onSubmit={resolve}
               />
