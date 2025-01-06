@@ -14,8 +14,8 @@ export const UIContext = createContext(initialState);
 
 export const useUI = () => useContext(UIContext);
 
-function UIProvider({ children }) {
-  const [isLoading, setIsLoading] = useState(initialState.isLoading);
+function UIProvider({ initialLoading = initialState.isLoading, children }) {
+  const [isLoading, setIsLoading] = useState(initialLoading);
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 1000);

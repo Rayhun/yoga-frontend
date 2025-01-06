@@ -33,3 +33,12 @@ export const updateExistingExpert = async ({ payload: { id, categories, tags, ..
 export const deleteSingleExpert = async ({ id }) => {
   return axios.delete(`/LMS/experts/${id}/`);
 };
+
+export const importExperts = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/experts/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

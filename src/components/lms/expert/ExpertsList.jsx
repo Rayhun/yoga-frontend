@@ -4,15 +4,21 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
+import useDelete from '@/hooks/useDelete';
+import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getExpertsList, deleteSingleExpert } from '@/services/private/lms/expert';
+import { getExpertsList, deleteSingleExpert, importExperts } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
-import useDelete from '@/hooks/useDelete';
 
 const ExpertsList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportExperts } = useImport({
+    mutationFn: importExperts,
+    invalidateQueryKey: [queryKeys.lmsExperts],
+    onSuccess: () => toast.success('Experts imported successfully'),
+  });
   const { handleDelete: handleDeleteExpert } = useDelete({
     mutationFn: deleteSingleExpert,
     invalidateQueryKey: [queryKeys.lmsExperts],
@@ -64,7 +70,8 @@ const ExpertsList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: handleImportExperts,
       },
       {
         id: 'add',
@@ -73,7 +80,7 @@ const ExpertsList = () => {
         onClick: () => router.push('/portal/lms/expert/add'),
       },
     ],
-    [router]
+    [handleImportExperts, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({
