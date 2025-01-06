@@ -5,22 +5,22 @@ import { FaRegFileAudio, FaRegFileImage, FaRegFileVideo, FaRegNewspaper } from '
 import { IoMdPaper } from 'react-icons/io';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
-import { MODULE_TYPE } from '@/utils/enums';
+import { PROGRAM_TYPE } from '@/utils/enums';
 
-const ContentCard = ({ content_id, content_type }) => {
+const ContentCard = ({ content_id, content_type, drip }) => {
   const Icon = useMemo(() => {
-    if (content_type === MODULE_TYPE.audio) return FaRegFileAudio;
-    if (content_type === MODULE_TYPE.image) return FaRegFileImage;
-    if (content_type === MODULE_TYPE.video) return FaRegFileVideo;
-    if (content_type === MODULE_TYPE.quiz) return FaRegNewspaper;
+    if (content_type === PROGRAM_TYPE.audio) return FaRegFileAudio;
+    if (content_type === PROGRAM_TYPE.image) return FaRegFileImage;
+    if (content_type === PROGRAM_TYPE.video) return FaRegFileVideo;
+    if (content_type === PROGRAM_TYPE.quiz) return FaRegNewspaper;
     return IoMdPaper;
   }, [content_type]);
 
   const docLink = useMemo(() => {
-    if (content_type === MODULE_TYPE.audio) return '/portal/lms/session/audio';
-    if (content_type === MODULE_TYPE.image) return '/portal/lms/session/image';
-    if (content_type === MODULE_TYPE.video) return '/portal/lms/session/video';
-    if (content_type === MODULE_TYPE.quiz) return '/portal/lms/quiz';
+    if (content_type === PROGRAM_TYPE.audio) return '/portal/lms/session/audio';
+    if (content_type === PROGRAM_TYPE.image) return '/portal/lms/session/image';
+    if (content_type === PROGRAM_TYPE.video) return '/portal/lms/session/video';
+    if (content_type === PROGRAM_TYPE.quiz) return '/portal/lms/quiz';
     return '/';
   }, [content_type]);
 
@@ -28,19 +28,20 @@ const ContentCard = ({ content_id, content_type }) => {
     <Link href={`${docLink}/${content_id}/details`}>
       <div className="w-[100px] h-[100px] bg-gray-300 rounded-lg shadow-lg relative group flex flex-col gap-2 justify-center items-center">
         <Icon size={30} />
-        <p className="max-w-[80%] break-words dark:text-white">{content_type}</p>
+        <p className="max-w-[80%] break-words dark:text-white">
+          {content_type} ({drip})
+        </p>
       </div>
     </Link>
   );
 };
 
-const ModuleDetails = ({ data = {} }) => {
+const ProgramDetails = ({ data = {} }) => {
   return (
-    <DetailsLayoutWrapper title="Module">
+    <DetailsLayoutWrapper title="Program">
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
-        <DetailsRecord label="Explanation">{data.explanation}</DetailsRecord>
-        <DetailsRecord label="Benefits">{data.benefits}</DetailsRecord>
+        <DetailsRecord label="Description">{data.description}</DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>
         <DetailsRecord label="File">
           <DetailsFileCard fileURL={data.image} isImage />
@@ -51,7 +52,7 @@ const ModuleDetails = ({ data = {} }) => {
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
         <DetailsRecord label="Content">
           <div className="flex flex-wrap gap-3">
-            {data.module?.map(item => (
+            {data.program?.map(item => (
               <ContentCard key={item.id} {...item} />
             ))}
           </div>
@@ -61,4 +62,4 @@ const ModuleDetails = ({ data = {} }) => {
   );
 };
 
-export default ModuleDetails;
+export default ProgramDetails;

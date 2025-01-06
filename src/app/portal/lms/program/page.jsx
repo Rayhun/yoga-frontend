@@ -1,4 +1,4 @@
-import ProgramsList from '@/components/lms/programs/ProgramsList';
+import ProgramsList from '@/components/lms/program/ProgramsList';
 
 export const metadata = {
   title: 'Programs',

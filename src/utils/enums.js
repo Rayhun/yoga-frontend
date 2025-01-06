@@ -56,3 +56,11 @@ export const MODULE_TYPE = {
   video: 'Video',
   quiz: 'Quiz',
 };
+
+export const PROGRAM_TYPE = {
+  image: 'Image',
+  audio: 'Audio',
+  video: 'Video',
+  quiz: 'Quiz',
+  module: 'Module',
+};

@@ -1,4 +1,3 @@
-import Chip from '@mui/material/Chip';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 
 const LMSQuizDetails = ({ data = {} }) => {

@@ -6,6 +6,9 @@ import { MdDownload, MdAttachFile } from 'react-icons/md';
 
 const DetailsFileCard = ({ fileURL = '', isImage }) => {
   const fileName = useMemo(() => fileURL.substring(fileURL.lastIndexOf('/') + 1), [fileURL]);
+
+  if (!fileURL) return null;
+
   return (
     <div className="w-[200px] h-[200px] bg-gray-300 rounded-lg shadow-lg relative group flex justify-center items-center">
       <MdAttachFile size={50} />
@@ -14,7 +17,7 @@ const DetailsFileCard = ({ fileURL = '', isImage }) => {
       ) : null}
       <div className="absolute hidden group-hover:flex top-0 left-0 w-full h-full rounded-lg bg-black/80 flex-col gap-1 justify-center items-center">
         <IconButton onClick={() => window.open(fileURL, '_blank')}>
-          <MdDownload size={20} className="text-slate-200" />
+          <MdDownload size={40} className="text-slate-200" />
         </IconButton>
         <p className="max-w-[80%] break-words text-white">{fileName}</p>
       </div>

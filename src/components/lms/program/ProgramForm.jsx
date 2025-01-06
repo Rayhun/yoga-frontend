@@ -15,8 +15,8 @@ import {
   TagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
-import ModuleFormContentOptions from './ModuleFormContentOptions';
-import { addNewModule, updateExistingModule } from '@/services/private/lms/module';
+import ProgramFormContentOptions from './ProgramFormContentOptions';
+import { addNewProgram, updateExistingProgram } from '@/services/private/lms/program';
 import { uploadLMSFile } from '@/services/private/lms';
 import { toastApiError } from '@/utils/helpers';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
@@ -24,39 +24,38 @@ import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
 
-const ModuleForm = ({ selected }) => {
+const ProgramForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
-  const { mutateAsync: addModule } = useMutation({
-    mutationFn: addNewModule,
+  const { mutateAsync: addProgram } = useMutation({
+    mutationFn: addNewProgram,
   });
-  const { mutateAsync: updateModule } = useMutation({
-    mutationFn: updateExistingModule,
+  const { mutateAsync: updateProgram } = useMutation({
+    mutationFn: updateExistingProgram,
   });
 
   const initialValues = {
     title: selected?.title || '',
-    explanation: selected?.explanation || '',
-    benefits: selected?.benefits || '',
+    description: selected?.description || '',
     file: null,
     status: selected?.status || '',
     access_setting: selected?.access_setting || '',
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    module_content: (selected?.module_content || [{ content_id: '', content_type: '' }]).map(
-      ({ content_id, content_type }) => ({
+    program_content: (selected?.program_content || [{ content_id: '', content_type: '', drip: '' }]).map(
+      ({ content_id, content_type, drip }) => ({
         content_id,
         content_type,
+        drip,
       })
     ),
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
-    explanation: Yup.string().required('Required!'),
-    benefits: Yup.string().required('Required!'),
+    description: Yup.string().required('Required!'),
     file: Yup.mixed()
       .required('Required!')
       .test(
@@ -72,11 +71,12 @@ const ModuleForm = ({ selected }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
-    module_content: Yup.array()
+    program_content: Yup.array()
       .of(
         Yup.object({
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
+          drip: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
       .min(1, 'At least 1 option is required.'),
@@ -89,16 +89,16 @@ const ModuleForm = ({ selected }) => {
       const { data: uploadedFile } = await uploadLMSFile({ file });
 
       if (isEditMode) {
-        await updateModule({ payload: { id: selected.id, ...payload, file: uploadedFile?.file_link } });
-        toast.success('Module updated successfully');
+        await updateProgram({ payload: { id: selected.id, ...payload, file: uploadedFile?.file_link } });
+        toast.success('Program updated successfully');
       } else {
-        await addModule({ payload: { ...payload, file: uploadedFile?.file_link } });
-        toast.success('Module added successfully');
+        await addProgram({ payload: { ...payload, file: uploadedFile?.file_link } });
+        toast.success('Program added successfully');
       }
       await queryClient.invalidateQueries([
-        { queryKey: isEditMode ? [queryKeys.lmsModules, selected.id] : [queryKeys.lmsModules] },
+        { queryKey: isEditMode ? [queryKeys.lmsPrograms, selected.id] : [queryKeys.lmsPrograms] },
       ]);
-      router.push('/portal/lms/module');
+      router.push('/portal/lms/program');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -107,7 +107,7 @@ const ModuleForm = ({ selected }) => {
   };
 
   return (
-    <FormLayoutWrapper title="Module Form">
+    <FormLayoutWrapper title="Program Form">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -130,8 +130,7 @@ const ModuleForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <FormikField name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
-            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
+            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <FormikDropzone
@@ -161,10 +160,10 @@ const ModuleForm = ({ selected }) => {
             </div>
 
             <div className="my-5 flex flex-col gap-3">
-              <h3 className="font-bold text-2xl text-black dark:text-white">Module Content</h3>
+              <h3 className="font-bold text-2xl text-black dark:text-white">Program Content</h3>
               <FieldArray
-                name="module_content"
-                render={helpers => <ModuleFormContentOptions {...helpers} />}
+                name="program_content"
+                render={helpers => <ProgramFormContentOptions {...helpers} />}
               />
             </div>
 
@@ -178,4 +177,4 @@ const ModuleForm = ({ selected }) => {
   );
 };
 
-export default ModuleForm;
+export default ProgramForm;

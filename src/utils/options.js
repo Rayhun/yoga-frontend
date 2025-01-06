@@ -6,6 +6,7 @@ import {
   MODULE_TYPE,
   LMS_DOC_STATUS,
   VISIBILITY_SETTING,
+  PROGRAM_TYPE,
 } from './enums';
 
 export const CONTENT_TYPE_OPTIONS = [
@@ -154,5 +155,24 @@ export const MODULE_TYPE_OPTIONS = [
   {
     label: 'Quiz',
     value: MODULE_TYPE.quiz,
+  },
+];
+
+export const PROGRAM_TYPE_OPTIONS = [
+  {
+    label: 'Image',
+    value: PROGRAM_TYPE.image,
+  },
+  {
+    label: 'Audio',
+    value: PROGRAM_TYPE.audio,
+  },
+  {
+    label: 'Video',
+    value: PROGRAM_TYPE.video,
+  },
+  {
+    label: 'Quiz',
+    value: PROGRAM_TYPE.quiz,
   },
 ];

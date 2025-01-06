@@ -1,4 +1,3 @@
-import Avatar from '@mui/material/Avatar';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 
@@ -12,12 +11,9 @@ const ExpertDetails = ({ data = {} }) => {
         <DetailsRecord label="Description">{data.description}</DetailsRecord>
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
-        {data.file_link ? (
-          <DetailsRecord label="Avatar">
-            {/* <Avatar alt={data.name} src={data.file_link} /> */}
-            <DetailsFileCard fileURL={data.file_link} />
-          </DetailsRecord>
-        ) : null}
+        <DetailsRecord label="Avatar">
+          <DetailsFileCard fileURL={data.file_link} />
+        </DetailsRecord>
       </div>
     </DetailsLayoutWrapper>
   );
