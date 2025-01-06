@@ -4,16 +4,22 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
+import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleSession, getSessionsList } from '@/services/private/lms/session';
+import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const AudioSessionsList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportAudioSessions } = useImport({
+    mutationFn: importSessions,
+    invalidateQueryKey: [queryKeys.lmsAudioSessions],
+    onSuccess: () => toast.success('Audio Session imported successfully'),
+  });
   const { handleDelete: handleDeleteAudioSession } = useDelete({
     mutationFn: deleteSingleSession,
     invalidateQueryKey: [queryKeys.lmsAudioSessions],
@@ -65,7 +71,8 @@ const AudioSessionsList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: () => handleImportAudioSessions({ type: SESSION_TYPE.audio }),
       },
       {
         id: 'add',
@@ -74,7 +81,7 @@ const AudioSessionsList = () => {
         onClick: () => router.push('/portal/lms/session/audio/add'),
       },
     ],
-    [router]
+    [handleImportAudioSessions, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

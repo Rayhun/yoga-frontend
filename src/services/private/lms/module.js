@@ -27,3 +27,12 @@ export const getModuleContentOptions = async ({ type }) => {
   if (type === MODULE_TYPE.quiz) return getQuizesList();
   return getSessionsList({ type });
 };
+
+export const importModules = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/module/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

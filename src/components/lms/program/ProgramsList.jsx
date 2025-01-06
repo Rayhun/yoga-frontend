@@ -5,14 +5,20 @@ import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleProgram, getProgramsList } from '@/services/private/lms/program';
+import { deleteSingleProgram, getProgramsList, importPrograms } from '@/services/private/lms/program';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportPrograms } = useImport({
+    mutationFn: importPrograms,
+    invalidateQueryKey: [queryKeys.lmsPrograms],
+    onSuccess: () => toast.success('Program imported successfully'),
+  });
   const { handleDelete: handleDeleteProgram } = useDelete({
     mutationFn: deleteSingleProgram,
     invalidateQueryKey: [queryKeys.lmsPrograms],
@@ -64,7 +70,8 @@ const ProgramList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: handleImportPrograms,
       },
       {
         id: 'add',
@@ -73,7 +80,7 @@ const ProgramList = () => {
         onClick: () => router.push('/portal/lms/program/add'),
       },
     ],
-    [router]
+    [handleImportPrograms, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

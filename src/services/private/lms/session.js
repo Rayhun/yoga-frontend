@@ -38,3 +38,12 @@ export const updateExistingSession = async ({ payload: { id, categories, tags, .
 export const deleteSingleSession = async ({ id }) => {
   return axios.delete(`/LMS/session/${id}/`);
 };
+
+export const importSessions = async ({ file, type }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post(`/LMS/session/${type.toLowerCase()}/import/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

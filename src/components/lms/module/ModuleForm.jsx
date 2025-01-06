@@ -37,7 +37,7 @@ const ModuleForm = ({ selected }) => {
 
   const initialValues = {
     title: selected?.title || '',
-    explanation: selected?.explanation || '',
+    description: selected?.description || '',
     benefits: selected?.benefits || '',
     file: null,
     status: selected?.status || '',
@@ -55,7 +55,7 @@ const ModuleForm = ({ selected }) => {
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
-    explanation: Yup.string().required('Required!'),
+    description: Yup.string().required('Required!'),
     benefits: Yup.string().required('Required!'),
     file: Yup.mixed()
       .required('Required!')
@@ -130,7 +130,7 @@ const ModuleForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <FormikField name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
+            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
             <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">

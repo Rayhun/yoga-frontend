@@ -29,3 +29,12 @@ export const getProgramContentOptions = async ({ type }) => {
   if (type === PROGRAM_TYPE.quiz) return getQuizesList();
   return getSessionsList({ type });
 };
+
+export const importPrograms = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/program/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

@@ -5,15 +5,21 @@ import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleSession, getSessionsList } from '@/services/private/lms/session';
+import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const ImageSessionsList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportImageSessions } = useImport({
+    mutationFn: importSessions,
+    invalidateQueryKey: [queryKeys.lmsImageSessions],
+    onSuccess: () => toast.success('Image Session imported successfully'),
+  });
   const { handleDelete: handleDeleteImageSession } = useDelete({
     mutationFn: deleteSingleSession,
     invalidateQueryKey: [queryKeys.lmsImageSessions],
@@ -65,7 +71,8 @@ const ImageSessionsList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: () => handleImportImageSessions({ type: SESSION_TYPE.image }),
       },
       {
         id: 'add',
@@ -74,7 +81,7 @@ const ImageSessionsList = () => {
         onClick: () => router.push('/portal/lms/session/image/add'),
       },
     ],
-    [router]
+    [handleImportImageSessions, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

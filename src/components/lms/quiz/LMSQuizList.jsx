@@ -5,14 +5,20 @@ import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleQuiz, getQuizesList } from '@/services/private/lms/quiz';
+import { deleteSingleQuiz, getQuizesList, importQuizes } from '@/services/private/lms/quiz';
 import queryKeys from '@/utils/query-keys';
 
 const LMSQuizList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportQuizes } = useImport({
+    mutationFn: importQuizes,
+    invalidateQueryKey: [queryKeys.lmsQuizes],
+    onSuccess: () => toast.success('Quiz imported successfully'),
+  });
   const { handleDelete: handleDeleteLMSQuiz } = useDelete({
     mutationFn: deleteSingleQuiz,
     invalidateQueryKey: [queryKeys.lmsQuizes],
@@ -64,7 +70,8 @@ const LMSQuizList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: handleImportQuizes,
       },
       {
         id: 'add',
@@ -73,7 +80,7 @@ const LMSQuizList = () => {
         onClick: () => router.push('/portal/lms/quiz/add'),
       },
     ],
-    [router]
+    [handleImportQuizes, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

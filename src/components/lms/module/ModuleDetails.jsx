@@ -39,7 +39,7 @@ const ModuleDetails = ({ data = {} }) => {
     <DetailsLayoutWrapper title="Module">
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
-        <DetailsRecord label="Explanation">{data.explanation}</DetailsRecord>
+        <DetailsRecord label="Description">{data.description}</DetailsRecord>
         <DetailsRecord label="Benefits">{data.benefits}</DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>
         <DetailsRecord label="File">

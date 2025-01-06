@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
@@ -14,6 +15,11 @@ import queryKeys from '@/utils/query-keys';
 
 const VideoSessionsList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportVideoSessions } = useImport({
+    mutationFn: importSessions,
+    invalidateQueryKey: [queryKeys.lmsVideoSessions],
+    onSuccess: () => toast.success('Video Session imported successfully'),
+  });
   const { handleDelete: handleDeleteVideoSession } = useDelete({
     mutationFn: deleteSingleSession,
     invalidateQueryKey: [queryKeys.lmsVideoSessions],
@@ -65,7 +71,8 @@ const VideoSessionsList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: () => handleImportVideoSessions({ type: SESSION_TYPE.video }),
       },
       {
         id: 'add',
@@ -74,7 +81,7 @@ const VideoSessionsList = () => {
         onClick: () => router.push('/portal/lms/session/video/add'),
       },
     ],
-    [router]
+    [handleImportVideoSessions, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

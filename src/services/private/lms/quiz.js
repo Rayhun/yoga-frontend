@@ -19,3 +19,12 @@ export const updateExistingQuiz = async ({ payload: { id, ...payload } }) => {
 export const deleteSingleQuiz = async ({ id }) => {
   return axios.delete(`/LMS/quiz/${id}/`);
 };
+
+export const importQuizes = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/quiz/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

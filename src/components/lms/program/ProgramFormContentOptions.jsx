@@ -15,7 +15,7 @@ const ProgramFormContentOptions = ({ form, name, push, remove }) => {
         size="sm"
         variant="secondary"
         className="self-start"
-        onClick={() => push({ text: '', is_correct: false })}
+        onClick={() => push({ content_id: '', content_type: '' })}
       >
         Add Option
       </Button>

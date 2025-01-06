@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
@@ -37,7 +38,10 @@ const FileSelectorForm = ({
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
       {({ isSubmitting }) => (
-        <Form className="flex flex-col gap-2">
+        <Form className="flex flex-col gap-3">
+          <Link href="#" target="_blank" className="text-md text-blue-400">
+            Download Sample File
+          </Link>
           <FormikDropzone
             name="file"
             supportedFilesText={validationError}

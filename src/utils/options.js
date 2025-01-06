@@ -175,4 +175,8 @@ export const PROGRAM_TYPE_OPTIONS = [
     label: 'Quiz',
     value: PROGRAM_TYPE.quiz,
   },
+  {
+    label: 'Module',
+    value: PROGRAM_TYPE.module,
+  },
 ];

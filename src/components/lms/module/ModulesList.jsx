@@ -5,14 +5,20 @@ import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleModule, getModulesList } from '@/services/private/lms/module';
+import { deleteSingleModule, getModulesList, importModules } from '@/services/private/lms/module';
 import queryKeys from '@/utils/query-keys';
 
 const ModuleList = () => {
   const router = useRouter();
+  const { isImporting, handleImport: handleImportModules } = useImport({
+    mutationFn: importModules,
+    invalidateQueryKey: [queryKeys.lmsModules],
+    onSuccess: () => toast.success('Modules imported successfully'),
+  });
   const { handleDelete: handleDeleteModule } = useDelete({
     mutationFn: deleteSingleModule,
     invalidateQueryKey: [queryKeys.lmsModules],
@@ -64,7 +70,8 @@ const ModuleList = () => {
         id: 'import',
         Icon: BiImport,
         label: 'Import',
-        onClick: () => null,
+        isLoading: isImporting,
+        onClick: handleImportModules,
       },
       {
         id: 'add',
@@ -73,7 +80,7 @@ const ModuleList = () => {
         onClick: () => router.push('/portal/lms/module/add'),
       },
     ],
-    [router]
+    [handleImportModules, isImporting, router]
   );
 
   const { isLoading, columns, data } = useTable({
