@@ -1,7 +1,7 @@
 import Chip from '@mui/material/Chip';
 import DetailsRecord from './DetailsRecord';
 
-const MultiValueDetailsRecord = ({ label, data, getChipLabel = () => null }) => (
+const MultiValueDetailsRecord = ({ label, data = [], getChipLabel = () => null }) => (
   <DetailsRecord label={label}>
     <div className="flex gap-2">
       {data.map((item, i) => (

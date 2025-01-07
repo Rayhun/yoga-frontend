@@ -29,7 +29,7 @@ const FormikMultiSelect = ({
   );
 
   const selectedOptions = useMemo(
-    () => options.filter(option => field.value.includes(option.value)),
+    () => options.filter(option => field.value?.includes(option.value)),
     [field.value, options]
   );
 

@@ -1,5 +1,5 @@
-import { MdOutlineSpaceDashboard, MdViewModule } from 'react-icons/md';
-import { FaUsers, FaFileInvoice, FaNewspaper, FaTv } from 'react-icons/fa';
+import { MdOutlineSpaceDashboard, MdViewModule, MdCategory } from 'react-icons/md';
+import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 
@@ -84,6 +84,18 @@ const SIDEBAR = [
         label: 'Experts',
         href: '/portal/lms/expert',
         isActive: pathname => pathname.includes('/portal/lms/expert'),
+      },
+      {
+        Icon: MdCategory,
+        label: 'Categories',
+        href: '/portal/lms/category',
+        isActive: pathname => pathname.includes('/portal/lms/category'),
+      },
+      {
+        Icon: FaTags,
+        label: 'Tags',
+        href: '/portal/lms/tag',
+        isActive: pathname => pathname.includes('/portal/lms/tag'),
       },
     ],
   },
