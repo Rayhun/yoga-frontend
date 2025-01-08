@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { useField, useFormikContext } from 'formik';
 import Button from '@/components/common/Button';
+import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
 
 const OnboardingQuizQuestion = ({
   question = {},
@@ -55,7 +56,7 @@ const OnboardingQuizQuestion = ({
             }`}
             onClick={() => handleSelectOption(option.text)}
           >
-            {question.screen_type === 'Single Select with Image' ? (
+            {question.screen_type === ONBOARDING_QUIZ_CONTENT_TYPE.image ? (
               <Image width={50} height={50} src={option.image_url} alt="image" priority />
             ) : null}
             <span className="text-gray-700 dark:text-gray-400">{option.text}</span>

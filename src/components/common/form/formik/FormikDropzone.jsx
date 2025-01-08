@@ -93,12 +93,12 @@ function FormikDropzone({
               <IconButton className="absolute top-1 right-1 p-1" onClick={() => handleRemoveFile(file)}>
                 <MdClose size={20} color="red" />
               </IconButton>
-              {file.type.includes('image') ? (
+              {file?.type?.includes('image') ? (
                 <img src={URL.createObjectURL(file)} className="w-full h-full" alt="img" />
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <MdAttachFile size={24} />
-                  <p>{file.name}</p>
+                  <p>{file?.name}</p>
                 </div>
               )}
             </div>

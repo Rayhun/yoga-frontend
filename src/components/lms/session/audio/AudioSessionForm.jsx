@@ -55,6 +55,7 @@ const AudioSession = ({ selected }) => {
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
     file: null,
+    thumbnail: null,
   };
 
   const validationSchema = Yup.object({

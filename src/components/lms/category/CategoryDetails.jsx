@@ -5,7 +5,7 @@ const CategoryDetails = ({ data = {} }) => {
     <DetailsLayoutWrapper title="Category">
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Name">{data.name}</DetailsRecord>
-        <DetailsRecord label="Parent">{data.parent}</DetailsRecord>
+        <DetailsRecord label="Parent">{data.parent?.name}</DetailsRecord>
       </div>
     </DetailsLayoutWrapper>
   );

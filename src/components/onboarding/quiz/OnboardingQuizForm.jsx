@@ -32,9 +32,10 @@ const OnboardingQuizForm = ({ selected }) => {
     title: selected?.title || '',
     screen_type: selected?.screen_type || ONBOARDING_QUIZ_CONTENT_TYPE.text,
     description: selected?.description || '',
-    is_required: selected?.is_required || false,
-    options: (selected?.options || [{ content: '' }]).map(i => ({
-      content: selected?.screen_type === ONBOARDING_QUIZ_CONTENT_TYPE.text ? i.text : null,
+    is_required: selected?.required || false,
+    options: (selected?.options || [{ text: '', image: null }]).map(i => ({
+      text: i.text || '',
+      image: i.image || null,
     })),
   };
 
@@ -45,7 +46,8 @@ const OnboardingQuizForm = ({ selected }) => {
     options: Yup.array()
       .of(
         Yup.object({
-          content: Yup.mixed(),
+          text: Yup.string().required('Required!'),
+          image: Yup.mixed().nullable(),
         })
       )
       .min(2, 'At least 2 options are required.'),
@@ -54,14 +56,11 @@ const OnboardingQuizForm = ({ selected }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const isImageTypeQuiz = values.screen_type === ONBOARDING_QUIZ_CONTENT_TYPE.image;
-      let payload = {
-        ...values,
-        options: values.options.map(option => ({ text: isImageTypeQuiz ? undefined : option.content })),
-      };
+      let payload = { ...values };
 
       if (isImageTypeQuiz) {
         const uploadedImagesResponse = await Promise.all(
-          values.options.map(option => uploadLMSFile({ file: option.content }))
+          payload.options.map(option => uploadLMSFile({ file: option.image }))
         );
         uploadedImagesResponse?.forEach((imgResponse, i) => {
           payload.options[i].image = imgResponse?.data?.file_link || null;
@@ -117,7 +116,10 @@ const OnboardingQuizForm = ({ selected }) => {
 
             <div className="my-5 flex flex-col gap-3">
               <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
-              <FieldArray name="options" render={helpers => <OnboardingQuizFormOptions {...helpers} />} />
+              <FieldArray
+                name="options"
+                render={helpers => <OnboardingQuizFormOptions {...helpers} optionsData={selected?.options} />}
+              />
             </div>
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>

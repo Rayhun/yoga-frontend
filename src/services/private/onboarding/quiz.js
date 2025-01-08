@@ -1,23 +1,23 @@
 import axios from '@/lib/axios';
 
 export const getQuizesList = async () => {
-  return axios.get('/onboarding/quiz/');
+  return axios.get('/onboarding/');
 };
 
 export const getSingleQuiz = async ({ id }) => {
-  return axios.get(`/onboarding/quiz/${id}/`);
+  return axios.get(`/onboarding/${id}/`);
 };
 
 export const addNewQuiz = async ({ payload }) => {
-  return axios.post('/onboarding/quiz/', payload);
+  return axios.post('/onboarding/', payload);
 };
 
 export const updateExistingQuiz = async ({ payload: { id, ...payload } }) => {
-  return axios.put(`/onboarding/quiz/${id}/`, payload);
+  return axios.put(`/onboarding/${id}/`, payload);
 };
 
 export const deleteSingleQuiz = async ({ id }) => {
-  return axios.delete(`/onboarding/quiz/${id}/`);
+  return axios.delete(`/onboarding/${id}/`);
 };
 
 export const submitQuiz = async ({ payload }) => {

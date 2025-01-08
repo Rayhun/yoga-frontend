@@ -3,22 +3,15 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
-import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleQuiz, getQuizesList, importQuizes } from '@/services/private/onboarding/quiz';
+import { deleteSingleQuiz, getQuizesList } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 
 const OnboardingQuizList = () => {
   const router = useRouter();
-  const { isImporting, handleImport: handleImportQuizes } = useImport({
-    mutationFn: importQuizes,
-    invalidateQueryKey: [queryKeys.onboardingQuiz],
-    onSuccess: () => toast.success('Quiz imported successfully'),
-  });
   const { handleDelete: handleDeleteOnboardingQuiz } = useDelete({
     mutationFn: deleteSingleQuiz,
     invalidateQueryKey: [queryKeys.onboardingQuiz],
@@ -33,7 +26,7 @@ const OnboardingQuizList = () => {
       },
       {
         header: 'Is Required?',
-        accessorKey: 'is_required',
+        cell: ({ row }) => (row.original.required ? 'Yes' : 'No'),
       },
     ],
     []
@@ -63,20 +56,13 @@ const OnboardingQuizList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
-        id: 'import',
-        Icon: BiImport,
-        label: 'Import',
-        isLoading: isImporting,
-        onClick: handleImportQuizes,
-      },
-      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Quiz',
         onClick: () => router.push('/portal/onboarding/quiz/add'),
       },
     ],
-    [handleImportQuizes, isImporting, router]
+    [router]
   );
 
   const { isLoading, columns, data } = useTable({
