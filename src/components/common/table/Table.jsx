@@ -18,6 +18,8 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
     getCanNextPage,
   } = table;
 
+  const headerGroups = getHeaderGroups();
+  const { rows } = getRowModel();
   const globalFilter = getState().globalFilter;
   const pageIndex = pagination.pageIndex;
   const pageSize = pagination.pageSize;
@@ -53,7 +55,7 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
 
       <table className="datatable-table w-full table-auto !border-collapse overflow-hidden break-words px-4 md:table-fixed md:overflow-auto md:px-8">
         <thead>
-          {getHeaderGroups().map(headerGroup => (
+          {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id} className="bg-[#F9FAFB] dark:bg-meta-4">
               {headerGroup.headers.map(header => (
                 <th key={header.id}>
@@ -100,7 +102,7 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
 
         <tbody>
           {isLoading ? (
-            <tr style={{ height: pageSize * 40 }}>
+            <tr style={{ height: pageSize * 50 }}>
               <td colSpan={table.getAllColumns().length}>
                 <div className="flex justify-center">
                   <Spinner size={40} />
@@ -108,13 +110,23 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
               </td>
             </tr>
           ) : (
-            getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                ))}
-              </tr>
-            ))
+            <>
+              {rows.length > 0 ? (
+                rows.map(row => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr style={{ height: pageSize * 50 }}>
+                  <td colSpan={table.getAllColumns().length}>
+                    <div className="flex justify-center">No Records Found</div>
+                  </td>
+                </tr>
+              )}
+            </>
           )}
         </tbody>
       </table>

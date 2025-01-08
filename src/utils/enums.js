@@ -64,3 +64,8 @@ export const PROGRAM_TYPE = {
   quiz: 'Quiz',
   module: 'Module',
 };
+
+export const ONBOARDING_QUIZ_CONTENT_TYPE = {
+  text: 'Single Select without Image',
+  image: 'Single Select with Image',
+};

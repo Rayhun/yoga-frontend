@@ -7,6 +7,7 @@ import {
   LMS_DOC_STATUS,
   VISIBILITY_SETTING,
   PROGRAM_TYPE,
+  ONBOARDING_QUIZ_CONTENT_TYPE,
 } from './enums';
 
 export const CONTENT_TYPE_OPTIONS = [
@@ -178,5 +179,16 @@ export const PROGRAM_TYPE_OPTIONS = [
   {
     label: 'Module',
     value: PROGRAM_TYPE.module,
+  },
+];
+
+export const ONBOARDING_QUIZ_CONTENT_TYPE_OPTIONS = [
+  {
+    label: 'Text',
+    value: ONBOARDING_QUIZ_CONTENT_TYPE.text,
+  },
+  {
+    label: 'Image',
+    value: ONBOARDING_QUIZ_CONTENT_TYPE.image,
   },
 ];

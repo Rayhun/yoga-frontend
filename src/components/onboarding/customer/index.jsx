@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
 import OnboardingQuizQuestion from './OnboardingQuizQuestion';
-import { getOnboardingQuiz, submitOnboardingQuiz } from '@/services/private/onboarding';
+import { getQuizesList, submitQuiz } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 import { toastApiError } from '@/utils/helpers';
 
@@ -21,11 +21,11 @@ const CustomerOnboarding = () => {
     failureReason: onboardingQuizFailureReason,
     isSuccess: isOnboardingQuizSuccess,
   } = useQuery({
-    queryFn: getOnboardingQuiz,
+    queryFn: getQuizesList,
     queryKey: [queryKeys.onboardingQuiz],
   });
-  const { mutateAsync: submitQuiz } = useMutation({
-    mutationFn: submitOnboardingQuiz,
+  const { mutateAsync: submitOnboardingQuiz } = useMutation({
+    mutationFn: submitQuiz,
   });
 
   useHandleApiResponse(onboardingQuizFailureReason, isOnboardingQuizSuccess);
@@ -62,7 +62,7 @@ const CustomerOnboarding = () => {
         option: value,
       }));
 
-      await submitQuiz({ payload: { answers } });
+      await submitOnboardingQuiz({ payload: { answers } });
 
       toast.success('Onboarding quiz submitted successfully');
       router.push('/portal');

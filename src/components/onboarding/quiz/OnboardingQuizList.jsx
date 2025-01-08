@@ -1,25 +1,39 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import useSelectionTable from '@/hooks/useSelectionTable';
+import { BiImport } from 'react-icons/bi';
+import useTable from '@/hooks/useTable';
+import useImport from '@/hooks/useImport';
+import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
-import { SelectionTable } from '@/components/common/table';
+import { BasicTable } from '@/components/common/table';
+import { deleteSingleQuiz, getQuizesList, importQuizes } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 
-const OnbaordingQuizList = () => {
-  const [rowSelection, setRowSelection] = useState({});
+const OnboardingQuizList = () => {
+  const router = useRouter();
+  const { isImporting, handleImport: handleImportQuizes } = useImport({
+    mutationFn: importQuizes,
+    invalidateQueryKey: [queryKeys.onboardingQuiz],
+    onSuccess: () => toast.success('Quiz imported successfully'),
+  });
+  const { handleDelete: handleDeleteOnboardingQuiz } = useDelete({
+    mutationFn: deleteSingleQuiz,
+    invalidateQueryKey: [queryKeys.onboardingQuiz],
+    onSuccess: () => toast.success('Quiz deleted successfully'),
+  });
 
   const tableColumns = useMemo(
     () => [
       {
-        header: 'First Name',
-        accessorKey: 'firstName',
-        cell: info => info.getValue(),
+        header: 'Title',
+        accessorKey: 'title',
       },
       {
-        header: 'Last Name',
-        accessorKey: 'lastName',
-        cell: info => info.getValue(),
+        header: 'Is Required?',
+        accessorKey: 'is_required',
       },
     ],
     []
@@ -30,76 +44,57 @@ const OnbaordingQuizList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: () => null,
+        onClick: row => router.push(`/portal/onboarding/quiz/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: () => null,
+        onClick: row => router.push(`/portal/onboarding/quiz/${row.original.id}/details`),
       },
       {
         id: 'delete',
         Icon: MdDeleteOutline,
-        onClick: () => null,
+        onClick: row => handleDeleteOnboardingQuiz({ id: row.original.id }),
       },
     ],
-    []
+    [handleDeleteOnboardingQuiz, router]
   );
 
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'import',
+        Icon: BiImport,
+        label: 'Import',
+        isLoading: isImporting,
+        onClick: handleImportQuizes,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
-        label: 'Add New Onboarding Quiz',
-        onClick: () => null,
+        label: 'Add New Quiz',
+        onClick: () => router.push('/portal/onboarding/quiz/add'),
       },
     ],
-    []
+    [handleImportQuizes, isImporting, router]
   );
 
-  const { columns, data } = useSelectionTable({
+  const { isLoading, columns, data } = useTable({
     columns: tableColumns,
-    queryFn: () =>
-      Promise.resolve({
-        data: [
-          {
-            firstName: 'John',
-            lastName: 'Doe',
-            age: 35,
-            visits: 10,
-            progress: 90,
-            status: 'single',
-          },
-          {
-            firstName: 'Albert',
-            lastName: 'Tim',
-            age: 32,
-            visits: 30,
-            progress: 70,
-            status: 'married',
-          },
-        ],
-      }),
-    queryKey: [queryKeys.quizes],
+    queryFn: getQuizesList,
+    queryKey: [queryKeys.onboardingQuiz],
     rowActions,
   });
 
   return (
     <div>
-      <PageHeader title="Onboarding Quizes">
+      <PageHeader title="Onboarding Quiz">
         <PageHeaderQuickActions actions={headerQuickActions} />
       </PageHeader>
 
-      <SelectionTable
-        isLoading={false}
-        columns={columns}
-        data={data}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-      />
+      <BasicTable isLoading={isLoading} columns={columns} data={data} />
     </div>
   );
 };
 
-export default OnbaordingQuizList;
+export default OnboardingQuizList;
