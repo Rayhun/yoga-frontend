@@ -34,8 +34,8 @@ const LoginForm = () => {
       if (response?.data?.token) {
         Cookies.set('token', response?.data?.token);
 
-        if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/portal');
-        else router.replace('/onboarding');
+        if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/');
+        else router.replace('/app/onboarding');
       }
     } catch (error) {
       toastApiError(error);

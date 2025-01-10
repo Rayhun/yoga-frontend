@@ -33,7 +33,7 @@ const CategoriesList = () => {
       },
       {
         header: 'Parent',
-        cell: ({ row }) => row.original.parent?.name,
+        accessorKey: 'parent.name',
       },
     ],
     []
