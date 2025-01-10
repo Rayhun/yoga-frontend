@@ -97,8 +97,6 @@ const ExpertsList = () => {
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />
-
-      <div className="h-[800px]" />
     </div>
   );
 };
