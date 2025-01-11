@@ -9,15 +9,25 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleProgram, getProgramsList, importPrograms } from '@/services/private/lms/program';
+import {
+  deleteSingleProgram,
+  getProgramsList,
+  importProgramContents,
+  importPrograms,
+} from '@/services/private/lms/program';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramList = () => {
   const router = useRouter();
-  const { isImporting, handleImport: handleImportPrograms } = useImport({
+  const { isImporting: isImportingPrograms, handleImport: handleImportPrograms } = useImport({
     mutationFn: importPrograms,
     invalidateQueryKey: [queryKeys.lmsPrograms],
     onSuccess: () => toast.success('Program imported successfully'),
+  });
+  const { isImporting: isImportingProgramContents, handleImport: handleImportProgramContents } = useImport({
+    mutationFn: importProgramContents,
+    invalidateQueryKey: [queryKeys.lmsPrograms],
+    onSuccess: () => toast.success('Program Content imported successfully'),
   });
   const { handleDelete: handleDeleteProgram } = useDelete({
     mutationFn: deleteSingleProgram,
@@ -67,11 +77,18 @@ const ProgramList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
-        id: 'import',
+        id: 'import-program',
         Icon: BiImport,
-        label: 'Import',
-        isLoading: isImporting,
+        label: 'Import Program',
+        isLoading: isImportingPrograms,
         onClick: handleImportPrograms,
+      },
+      {
+        id: 'import-program-content',
+        Icon: BiImport,
+        label: 'Import Program Content',
+        isLoading: isImportingProgramContents,
+        onClick: handleImportProgramContents,
       },
       {
         id: 'add',
@@ -80,7 +97,13 @@ const ProgramList = () => {
         onClick: () => router.push('/portal/lms/program/add'),
       },
     ],
-    [handleImportPrograms, isImporting, router]
+    [
+      handleImportProgramContents,
+      handleImportPrograms,
+      isImportingProgramContents,
+      isImportingPrograms,
+      router,
+    ]
   );
 
   const { isLoading, columns, data } = useTable({

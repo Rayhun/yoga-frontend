@@ -36,3 +36,12 @@ export const importModules = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const importModuleContents = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/module/content/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

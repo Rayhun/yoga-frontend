@@ -38,3 +38,12 @@ export const importPrograms = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const importProgramContents = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios.post('/LMS/program/content/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

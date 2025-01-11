@@ -9,15 +9,25 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleModule, getModulesList, importModules } from '@/services/private/lms/module';
+import {
+  deleteSingleModule,
+  getModulesList,
+  importModules,
+  importModuleContents,
+} from '@/services/private/lms/module';
 import queryKeys from '@/utils/query-keys';
 
 const ModuleList = () => {
   const router = useRouter();
-  const { isImporting, handleImport: handleImportModules } = useImport({
+  const { isImporting: isImportingModules, handleImport: handleImportModules } = useImport({
     mutationFn: importModules,
     invalidateQueryKey: [queryKeys.lmsModules],
-    onSuccess: () => toast.success('Modules imported successfully'),
+    onSuccess: () => toast.success('Module imported successfully'),
+  });
+  const { isImporting: isImportingModuleContents, handleImport: handleImportModuleContents } = useImport({
+    mutationFn: importModuleContents,
+    invalidateQueryKey: [queryKeys.lmsModules],
+    onSuccess: () => toast.success('Module Content imported successfully'),
   });
   const { handleDelete: handleDeleteModule } = useDelete({
     mutationFn: deleteSingleModule,
@@ -67,11 +77,18 @@ const ModuleList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
-        id: 'import',
+        id: 'import-module',
         Icon: BiImport,
-        label: 'Import',
-        isLoading: isImporting,
+        label: 'Import Module',
+        isLoading: isImportingModules,
         onClick: handleImportModules,
+      },
+      {
+        id: 'import-module-content',
+        Icon: BiImport,
+        label: 'Import Module Content',
+        isLoading: isImportingModuleContents,
+        onClick: handleImportModuleContents,
       },
       {
         id: 'add',
@@ -80,7 +97,7 @@ const ModuleList = () => {
         onClick: () => router.push('/portal/lms/module/add'),
       },
     ],
-    [handleImportModules, isImporting, router]
+    [handleImportModuleContents, handleImportModules, isImportingModuleContents, isImportingModules, router]
   );
 
   const { isLoading, columns, data } = useTable({
