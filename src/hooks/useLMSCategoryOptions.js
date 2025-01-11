@@ -5,7 +5,7 @@ import { getCategoriesList } from '@/services/private/lms/category';
 import queryKeys from '@/utils/query-keys';
 
 function useLMSCategoryOptions() {
-  const { data: categoriesResponse } = useQuery({
+  const { isLoading, data: categoriesResponse } = useQuery({
     queryFn: getCategoriesList,
     queryKey: [queryKeys.lmsCategories],
   });
@@ -20,6 +20,7 @@ function useLMSCategoryOptions() {
   );
 
   return {
+    isLoading,
     options: categoriesOptions,
   };
 }

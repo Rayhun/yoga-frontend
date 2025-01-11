@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: 'http',
         hostname: '13.52.109.62',
       },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
+      },
     ],
   },
 };

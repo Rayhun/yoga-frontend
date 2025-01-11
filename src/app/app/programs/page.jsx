@@ -1,11 +1,5 @@
-import React from 'react';
+import { redirect } from 'next/navigation';
 
-export const metadata = {
-  title: 'Programs',
-};
-
-const Page = () => {
-  return <div>Programs</div>;
-};
-
-export default Page;
+export default function Programs() {
+  return redirect('/app/programs/library');
+}

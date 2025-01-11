@@ -1,7 +1,7 @@
 import { useUI } from '@/context/UIProvider';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const Loader = ({ size = 30, color, thickness = 4 }) => {
+const Spinner = ({ size = 30, color, thickness = 4 }) => {
   const { theme } = useUI();
 
   const spinnerColor = color || theme.colors.primary;
@@ -9,4 +9,4 @@ const Loader = ({ size = 30, color, thickness = 4 }) => {
   return <CircularProgress size={size} thickness={thickness} sx={{ color: spinnerColor }} />;
 };
 
-export default Loader;
+export default Spinner;

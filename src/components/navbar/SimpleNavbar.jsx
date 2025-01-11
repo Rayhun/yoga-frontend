@@ -47,7 +47,7 @@ const SimpleNavbar = () => {
                   item.isActive(pathname) ? 'before:w-full' : ''
                 }`}
               >
-                <p className="text-bodydark dark:text-white">{item.label}</p>
+                <p className="text-gray-500 dark:text-white">{item.label}</p>
               </Link>
             ))}
           </div>
