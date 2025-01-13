@@ -108,7 +108,7 @@ const AudioSession = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsAudioSessions, selected.id] : [queryKeys.lmsAudioSessions] },
       ]);
-      router.push('/portal/lms/session/audio');
+      router.push('/portal/admin/lms/session/audio');
     } catch (error) {
       toastApiError(error);
     } finally {

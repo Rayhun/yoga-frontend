@@ -49,12 +49,12 @@ const AudioSessionsList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/session/audio/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/session/audio/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/session/audio/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/session/audio/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -78,7 +78,7 @@ const AudioSessionsList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Audio Session',
-        onClick: () => router.push('/portal/lms/session/audio/add'),
+        onClick: () => router.push('/portal/admin/lms/session/audio/add'),
       },
     ],
     [handleImportAudioSessions, isImporting, router]

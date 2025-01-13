@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { authenticateUser } from '@/services/public/auth';
 import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
+import { USER_ROLE, USER_SUB_ROLE } from '@/utils/authorization';
 
 const initialState = {
   user: {
@@ -15,7 +16,11 @@ const initialState = {
       first_name: null,
       last_name: null,
       role: null,
+      sub_role: null,
     },
+    isAdmin: false,
+    isIndividualCustomer: false,
+    isBusinessCustomer: false,
   },
   logout: () => {},
 };
@@ -44,8 +49,18 @@ function AuthProvider({ children }) {
     window.location.reload();
   };
 
+  const userDetails = userAuthenticationResponse?.data || {};
+
+  const isAdmin = userDetails?.role === USER_ROLE.ADMIN;
+  const isIndividualCustomer =
+    userDetails?.role === USER_ROLE.CUSTOMER && userDetails?.sub_role === USER_SUB_ROLE.INDIVIDUAL;
+  const isBusinessCustomer =
+    userDetails?.role === USER_ROLE.CUSTOMER && userDetails?.sub_role === USER_SUB_ROLE.BUSINESS;
+
   return (
-    <AuthContext.Provider value={{ user: { ...(userAuthenticationResponse?.data || {}) }, logout }}>
+    <AuthContext.Provider
+      value={{ user: { ...userDetails, isAdmin, isIndividualCustomer, isBusinessCustomer }, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

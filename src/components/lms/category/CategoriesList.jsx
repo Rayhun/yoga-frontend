@@ -44,12 +44,12 @@ const CategoriesList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/category/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/category/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/category/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/category/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -73,7 +73,7 @@ const CategoriesList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Category',
-        onClick: () => router.push('/portal/lms/category/add'),
+        onClick: () => router.push('/portal/admin/lms/category/add'),
       },
     ],
     [handleImportCategories, isImporting, router]

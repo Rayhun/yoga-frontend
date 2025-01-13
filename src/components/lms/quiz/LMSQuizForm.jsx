@@ -100,7 +100,7 @@ const LMSQuizForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsQuizes, selected.id] : [queryKeys.lmsQuizes] },
       ]);
-      router.push('/portal/lms/quiz');
+      router.push('/portal/admin/lms/quiz');
     } catch (error) {
       toastApiError(error);
     } finally {

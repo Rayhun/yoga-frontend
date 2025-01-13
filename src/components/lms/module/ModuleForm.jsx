@@ -98,7 +98,7 @@ const ModuleForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsModules, selected.id] : [queryKeys.lmsModules] },
       ]);
-      router.push('/portal/lms/module');
+      router.push('/portal/admin/lms/module');
     } catch (error) {
       toastApiError(error);
     } finally {

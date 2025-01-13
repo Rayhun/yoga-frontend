@@ -48,12 +48,12 @@ const LMSQuizList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/quiz/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/quiz/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/quiz/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/quiz/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -77,7 +77,7 @@ const LMSQuizList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Quiz',
-        onClick: () => router.push('/portal/lms/quiz/add'),
+        onClick: () => router.push('/portal/admin/lms/quiz/add'),
       },
     ],
     [handleImportQuizes, isImporting, router]

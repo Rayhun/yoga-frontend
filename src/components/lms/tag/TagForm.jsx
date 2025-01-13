@@ -48,7 +48,7 @@ const TagForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsTags, selected.id] : [queryKeys.lmsTags] },
       ]);
-      router.push('/portal/lms/tag');
+      router.push('/portal/admin/lms/tag');
     } catch (error) {
       toastApiError(error);
     } finally {

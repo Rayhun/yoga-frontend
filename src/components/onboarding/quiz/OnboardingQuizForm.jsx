@@ -77,7 +77,7 @@ const OnboardingQuizForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.onboardingQuiz, selected.id] : [queryKeys.onboardingQuiz] },
       ]);
-      router.push('/portal/onboarding/quiz');
+      router.push('/portal/admin/onboarding/quiz');
     } catch (error) {
       toastApiError(error);
     } finally {

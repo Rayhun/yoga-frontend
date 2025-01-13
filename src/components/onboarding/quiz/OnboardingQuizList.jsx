@@ -37,12 +37,12 @@ const OnboardingQuizList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/onboarding/quiz/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/onboarding/quiz/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/onboarding/quiz/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/onboarding/quiz/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -59,7 +59,7 @@ const OnboardingQuizList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Quiz',
-        onClick: () => router.push('/portal/onboarding/quiz/add'),
+        onClick: () => router.push('/portal/admin/onboarding/quiz/add'),
       },
     ],
     [router]

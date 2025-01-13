@@ -115,7 +115,7 @@ const VideoSession = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsVideoSessions, selected.id] : [queryKeys.lmsVideoSessions] },
       ]);
-      router.push('/portal/lms/session/video');
+      router.push('/portal/admin/lms/session/video');
     } catch (error) {
       toastApiError(error);
     } finally {

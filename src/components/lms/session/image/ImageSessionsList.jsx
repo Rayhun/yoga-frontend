@@ -49,12 +49,12 @@ const ImageSessionsList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/session/image/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/session/image/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/session/image/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/session/image/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -78,7 +78,7 @@ const ImageSessionsList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Image Session',
-        onClick: () => router.push('/portal/lms/session/image/add'),
+        onClick: () => router.push('/portal/admin/lms/session/image/add'),
       },
     ],
     [handleImportImageSessions, isImporting, router]

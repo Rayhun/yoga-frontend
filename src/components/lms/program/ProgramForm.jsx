@@ -98,7 +98,7 @@ const ProgramForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsPrograms, selected.id] : [queryKeys.lmsPrograms] },
       ]);
-      router.push('/portal/lms/program');
+      router.push('/portal/admin/lms/program');
     } catch (error) {
       toastApiError(error);
     } finally {

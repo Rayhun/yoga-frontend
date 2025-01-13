@@ -17,10 +17,10 @@ const ContentCard = ({ content_id, content_type, drip }) => {
   }, [content_type]);
 
   const docLink = useMemo(() => {
-    if (content_type === PROGRAM_TYPE.audio) return '/portal/lms/session/audio';
-    if (content_type === PROGRAM_TYPE.image) return '/portal/lms/session/image';
-    if (content_type === PROGRAM_TYPE.video) return '/portal/lms/session/video';
-    if (content_type === PROGRAM_TYPE.quiz) return '/portal/lms/quiz';
+    if (content_type === PROGRAM_TYPE.audio) return '/portal/admin/lms/session/audio';
+    if (content_type === PROGRAM_TYPE.image) return '/portal/admin/lms/session/image';
+    if (content_type === PROGRAM_TYPE.video) return '/portal/admin/lms/session/video';
+    if (content_type === PROGRAM_TYPE.quiz) return '/portal/admin/lms/quiz';
     return '/';
   }, [content_type]);
 

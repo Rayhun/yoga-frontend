@@ -1,4 +1,9 @@
 export const USER_ROLE = {
-  ADMIN: 'admin',
-  CLIENT: 'client',
+  ADMIN: 'Admin',
+  CUSTOMER: 'Customer',
+};
+
+export const USER_SUB_ROLE = {
+  INDIVIDUAL: 'Individual',
+  BUSINESS: 'Business',
 };

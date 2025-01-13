@@ -48,12 +48,12 @@ const ExpertsList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/expert/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/expert/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/expert/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/expert/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -77,7 +77,7 @@ const ExpertsList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Expert',
-        onClick: () => router.push('/portal/lms/expert/add'),
+        onClick: () => router.push('/portal/admin/lms/expert/add'),
       },
     ],
     [handleImportExperts, isImporting, router]

@@ -48,7 +48,7 @@ const CategoryForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsCategories, selected.id] : [queryKeys.lmsCategories] },
       ]);
-      router.push('/portal/lms/category');
+      router.push('/portal/admin/lms/category');
     } catch (error) {
       toastApiError(error);
     } finally {

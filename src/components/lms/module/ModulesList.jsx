@@ -58,12 +58,12 @@ const ModuleList = () => {
       {
         id: 'edit',
         Icon: MdOutlineEdit,
-        onClick: row => router.push(`/portal/lms/module/${row.original.id}/edit`),
+        onClick: row => router.push(`/portal/admin/lms/module/${row.original.id}/edit`),
       },
       {
         id: 'view',
         Icon: MdOutlineRemoveRedEye,
-        onClick: row => router.push(`/portal/lms/module/${row.original.id}/details`),
+        onClick: row => router.push(`/portal/admin/lms/module/${row.original.id}/details`),
       },
       {
         id: 'delete',
@@ -94,7 +94,7 @@ const ModuleList = () => {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Module',
-        onClick: () => router.push('/portal/lms/module/add'),
+        onClick: () => router.push('/portal/admin/lms/module/add'),
       },
     ],
     [handleImportModuleContents, handleImportModules, isImportingModuleContents, isImportingModules, router]

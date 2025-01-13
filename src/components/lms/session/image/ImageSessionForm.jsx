@@ -99,7 +99,7 @@ const ImageSession = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsImageSessions, selected.id] : [queryKeys.lmsImageSessions] },
       ]);
-      router.push('/portal/lms/session/image');
+      router.push('/portal/admin/admin/admin/lms/session/image');
     } catch (error) {
       toastApiError(error);
     } finally {

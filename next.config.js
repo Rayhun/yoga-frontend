@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'fastly.picsum.photos',
       },
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+      },
     ],
   },
 };

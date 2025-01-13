@@ -67,7 +67,7 @@ const ExpertForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsExperts, selected.id] : [queryKeys.lmsExperts] },
       ]);
-      router.push('/portal/lms/expert');
+      router.push('/portal/admin/lms/expert');
     } catch (error) {
       toastApiError(error);
     } finally {
