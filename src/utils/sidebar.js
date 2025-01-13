@@ -2,6 +2,7 @@ import { MdOutlineSpaceDashboard, MdViewModule, MdCategory } from 'react-icons/m
 import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
+import { USER_SUB_ROLE } from './authorization';
 
 const ADMIN = [
   {
@@ -123,6 +124,7 @@ const CUSTOMER = [
         isActive: pathname => pathname.includes('/portal/customer/entities/users'),
       },
     ],
+    permitted_sub_roles: [USER_SUB_ROLE.BUSINESS],
   },
   {
     label: 'LMS',

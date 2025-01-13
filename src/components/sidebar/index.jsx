@@ -12,7 +12,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const {
     user: {
-      profile: { role: userRole },
+      profile: { role: userRole, sub_role: userSubRole },
     },
   } = useAuthContext();
 
@@ -55,10 +55,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     }
   }, [sidebarExpanded]);
 
-  const roleBasedSidebar = useMemo(() => {
+  const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     return SIDEBAR.CUSTOMER;
   }, [userRole]);
+
+  const subRoleBasedSidebarMenuItems = useMemo(
+    () =>
+      roleBasedSidebarMenuItems
+        .filter(item => {
+          if (!item.permitted_sub_roles) return true;
+          return item.permitted_sub_roles.includes(userSubRole);
+        })
+        .map(item => ({
+          ...item,
+          sub_menu: item.sub_menu?.filter(subMenuItem => {
+            if (!subMenuItem.permitted_sub_roles) return true;
+            return subMenuItem.permitted_sub_roles.includes(userSubRole);
+          }),
+        })),
+    [roleBasedSidebarMenuItems, userSubRole]
+  );
 
   return (
     <aside
@@ -101,7 +118,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {/* <!-- Sidebar Menu --> */}
         <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
-          {roleBasedSidebar.map(menu => (
+          {subRoleBasedSidebarMenuItems.map(menu => (
             <div className="mt-5" key={menu.label}>
               <h3 className="mb-2 ml-4 text-sm font-semibold text-bodydark2">{menu.label}</h3>
 
