@@ -4,6 +4,10 @@ export const getCategoriesList = async () => {
   return axios.get('/LMS/category/');
 };
 
+export const getFeaturedCategoriesList = async () => {
+  return axios.get('/LMS/feature/category/list/');
+};
+
 export const getSingleCategory = async ({ id }) => {
   return axios.get(`/LMS/category/${id}/`);
 };

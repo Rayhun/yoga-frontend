@@ -19,6 +19,7 @@ const initialState = {
       sub_role: null,
     },
     isAdmin: false,
+    isCustomer: false,
     isIndividualCustomer: false,
     isBusinessCustomer: false,
   },
@@ -50,16 +51,20 @@ function AuthProvider({ children }) {
   };
 
   const userDetails = userAuthenticationResponse?.data || {};
+  const userProfile = userDetails?.profile || {};
 
-  const isAdmin = userDetails?.role === USER_ROLE.ADMIN;
-  const isIndividualCustomer =
-    userDetails?.role === USER_ROLE.CUSTOMER && userDetails?.sub_role === USER_SUB_ROLE.INDIVIDUAL;
-  const isBusinessCustomer =
-    userDetails?.role === USER_ROLE.CUSTOMER && userDetails?.sub_role === USER_SUB_ROLE.BUSINESS;
+  // User Role Checks
+  const isAdmin = userProfile?.role === USER_ROLE.ADMIN;
+  const isCustomer = userProfile?.role === USER_ROLE.CUSTOMER;
+  const isIndividualCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.INDIVIDUAL;
+  const isBusinessCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.BUSINESS;
 
   return (
     <AuthContext.Provider
-      value={{ user: { ...userDetails, isAdmin, isIndividualCustomer, isBusinessCustomer }, logout }}
+      value={{
+        user: { ...userDetails, isAdmin, isCustomer, isIndividualCustomer, isBusinessCustomer },
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

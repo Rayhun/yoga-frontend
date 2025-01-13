@@ -3,7 +3,7 @@ import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags } from 'react-icons/f
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 
-const SIDEBAR = [
+const ADMIN = [
   {
     label: 'General',
     sub_menu: [
@@ -100,5 +100,43 @@ const SIDEBAR = [
     ],
   },
 ];
+
+const CUSTOMER = [
+  {
+    label: 'General',
+    sub_menu: [
+      {
+        Icon: MdOutlineSpaceDashboard,
+        label: 'Dashboard',
+        href: '/portal',
+        isActive: pathname => pathname === '/portal',
+      },
+    ],
+  },
+  {
+    label: 'Entities',
+    sub_menu: [
+      {
+        Icon: FaUsers,
+        label: 'Users',
+        href: '/portal/customer/entities/users',
+        isActive: pathname => pathname.includes('/portal/customer/entities/users'),
+      },
+    ],
+  },
+  {
+    label: 'LMS',
+    sub_menu: [
+      {
+        Icon: FaNewspaper,
+        label: 'Programs',
+        href: '/portal/customer/lms/program',
+        isActive: pathname => pathname.includes('/portal/customer/lms/program'),
+      },
+    ],
+  },
+];
+
+const SIDEBAR = { ADMIN, CUSTOMER };
 
 export default SIDEBAR;

@@ -1,14 +1,20 @@
 'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import useAuthContext from '@/hooks/useAuthContext';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
+import { USER_ROLE } from '@/utils/authorization';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
+  const {
+    user: {
+      profile: { role: userRole },
+    },
+  } = useAuthContext();
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -48,6 +54,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       document.querySelector('body')?.classList.remove('sidebar-expanded');
     }
   }, [sidebarExpanded]);
+
+  const roleBasedSidebar = useMemo(() => {
+    if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
+    return SIDEBAR.CUSTOMER;
+  }, [userRole]);
 
   return (
     <aside
@@ -90,7 +101,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {/* <!-- Sidebar Menu --> */}
         <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
-          {SIDEBAR.map(menu => (
+          {roleBasedSidebar.map(menu => (
             <div className="mt-5" key={menu.label}>
               <h3 className="mb-2 ml-4 text-sm font-semibold text-bodydark2">{menu.label}</h3>
 

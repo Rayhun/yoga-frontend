@@ -1,12 +1,17 @@
 'use client';
-import useLMSCategoryOptions from '@/hooks/useLMSCategoryOptions';
+import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
+import { getFeaturedCategoriesList } from '@/services/private/lms/category';
+import queryKeys from '@/utils/query-keys';
 
-const SelectableCategories = () => {
+const FeaturedCategories = () => {
   const searchParams = useSearchParamUtils();
   const selectedCategory = searchParams.get('category');
-  const { isLoading: isLoadingOptions, options: categoryOptions } = useLMSCategoryOptions();
+  const { isLoading: isLoadingCategories, data: categoriesResponse } = useQuery({
+    queryFn: getFeaturedCategoriesList,
+    queryKey: [queryKeys.lmsFeaturedCategories],
+  });
 
   const handleCategorySelect = selected => {
     if (selected.value) searchParams.set('category', selected.value);
@@ -14,12 +19,12 @@ const SelectableCategories = () => {
 
   return (
     <div className="w-full flex gap-3 overflow-auto no-scrollbar">
-      {isLoadingOptions ? (
+      {isLoadingCategories ? (
         <div className="w-full flex justify-center">
           <Spinner />
         </div>
       ) : (
-        categoryOptions?.map(category => (
+        categoriesResponse?.data?.map?.map(category => (
           <div
             key={category.value}
             className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
@@ -37,4 +42,4 @@ const SelectableCategories = () => {
   );
 };
 
-export default SelectableCategories;
+export default FeaturedCategories;
