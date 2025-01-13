@@ -14,7 +14,7 @@ const FeaturedCategories = () => {
   });
 
   const handleCategorySelect = selected => {
-    if (selected.value) searchParams.set('category', selected.value);
+    if (selected.id) searchParams.set('category', selected.id);
   };
 
   return (
@@ -24,17 +24,17 @@ const FeaturedCategories = () => {
           <Spinner />
         </div>
       ) : (
-        categoriesResponse?.data?.map?.map(category => (
+        categoriesResponse?.data.data?.map(category => (
           <div
-            key={category.value}
+            key={category.id}
             className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
-              selectedCategory === category.value.toString()
+              selectedCategory === category.id.toString()
                 ? 'bg-primary border-primary text-white'
                 : 'text-gray-400 border-gray-400'
             }`}
             onClick={() => handleCategorySelect(category)}
           >
-            {category.label}
+            {category.name}
           </div>
         ))
       )}
