@@ -61,10 +61,10 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 function useModal() {
-  const defaultArgs = { heading: 'Confirmation!!!', content: '' };
+  const defaultArgs = { heading: 'Confirmation!!!', content: '', size: 'xs' };
 
   const render = (providedArgs = defaultArgs) => {
-    const { heading, content } = {
+    const { heading, content, size } = {
       ...defaultArgs,
       ...providedArgs,
     };
@@ -89,7 +89,7 @@ function useModal() {
           <MuiThemeProvider>
             <UIProvider initialLoading={false}>
               <Dialog
-                maxWidth="xs"
+                maxWidth={size}
                 className="custom-modal"
                 onClose={closeModal}
                 TransitionComponent={Transition}

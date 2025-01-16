@@ -96,6 +96,34 @@ function MuiThemeProvider({ children }) {
             },
           },
         },
+        MuiTabs: {
+          styleOverrides: {
+            root: {
+              borderBottom: `1px solid ${resolvedTailwindConfig.theme.colors.bodydark1}`,
+              '.dark &': {
+                borderBottom: `1px solid ${resolvedTailwindConfig.theme.colors.meta['4']}`,
+              },
+            },
+            indicator: {
+              height: '3px',
+            },
+          },
+        },
+        MuiTab: {
+          styleOverrides: {
+            root: {
+              '.dark &': {
+                color: 'white',
+              },
+              '&.Mui-selected': {
+                backgroundColor: resolvedTailwindConfig.theme.colors.meta['2'],
+              },
+              '.dark &.Mui-selected': {
+                backgroundColor: resolvedTailwindConfig.theme.colors.meta['4'],
+              },
+            },
+          },
+        },
       },
     });
   }, [resolvedTailwindConfig.theme.colors]);

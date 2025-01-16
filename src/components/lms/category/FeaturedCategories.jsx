@@ -7,15 +7,18 @@ import queryKeys from '@/utils/query-keys';
 
 const FeaturedCategories = () => {
   const searchParams = useSearchParamUtils();
-  const selectedCategory = searchParams.get('category');
+  const selectedCategory = searchParams.get('category') || 'all';
   const { isLoading: isLoadingCategories, data: categoriesResponse } = useQuery({
     queryFn: getFeaturedCategoriesList,
     queryKey: [queryKeys.lmsFeaturedCategories],
   });
 
   const handleCategorySelect = selected => {
-    if (selected.id) searchParams.set('category', selected.id);
+    if (selected.id === 'all') searchParams.remove('category');
+    else searchParams.set('category', selected?.id);
   };
+
+  const featuredCatgories = [{ id: 'all', name: 'All' }, ...(categoriesResponse?.data?.data || [])];
 
   return (
     <div className="w-full flex gap-3 overflow-auto no-scrollbar">
@@ -24,11 +27,11 @@ const FeaturedCategories = () => {
           <Spinner />
         </div>
       ) : (
-        categoriesResponse?.data.data?.map(category => (
+        featuredCatgories.map(category => (
           <div
-            key={category.id}
+            key={category.name}
             className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
-              selectedCategory === category.id.toString()
+              selectedCategory === category.id?.toString()
                 ? 'bg-primary border-primary text-white'
                 : 'text-gray-400 border-gray-400'
             }`}

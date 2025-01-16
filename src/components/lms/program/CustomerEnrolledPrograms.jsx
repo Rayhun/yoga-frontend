@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Spinner from '@/components/common/loader/Spinner';
@@ -8,7 +7,7 @@ import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/lms/program';
 import queryKeys from '@/utils/query-keys';
 
-const ProgramsLibrary = () => {
+const CustomerEnrolledPrograms = () => {
   const router = useRouter();
   const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: getProgramsList,
@@ -17,26 +16,6 @@ const ProgramsLibrary = () => {
 
   return (
     <div className="flex flex-col gap-4 md:gap-7">
-      {/* Hero Section */}
-      <div className="bg-bodydark1 rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">Your Journey Starts Here</h1>
-          <p className="break-words line-clamp-2 dark:text-gray-300">
-            Achieve your personal goals with curated wellness plans developed by our expert
-          </p>
-        </div>
-        <div className="md:w-1/2 mt-6 md:mt-0">
-          <Image
-            src="/images/program/program-01.jpg"
-            alt="Hero Image"
-            width={0}
-            height={0}
-            sizes="100vw"
-            className="w-full rounded-lg shadow-lg"
-          />
-        </div>
-      </div>
-
       {/* Categories */}
       <FeaturedCategories />
 
@@ -62,4 +41,4 @@ const ProgramsLibrary = () => {
   );
 };
 
-export default ProgramsLibrary;
+export default CustomerEnrolledPrograms;
