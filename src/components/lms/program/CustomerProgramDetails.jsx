@@ -11,7 +11,7 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import ProgramExpertsList from './ProgramExpertsList';
-import { getSingleProgram } from '@/services/private/lms/program';
+import { getSingleProgram } from '@/services/private/portal/program';
 import queryKeys from '@/utils/query-keys';
 
 const CustomerProgramDetails = () => {
@@ -23,7 +23,7 @@ const CustomerProgramDetails = () => {
     failureReason,
   } = useQuery({
     queryFn: () => getSingleProgram({ id: params.id }),
-    queryKey: [queryKeys.lmsPrograms, params.id],
+    queryKey: [queryKeys.portalPrograms, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -117,12 +117,13 @@ const CustomerProgramDetails = () => {
             width={0}
             height={0}
             sizes="100vw"
-            className="w-full rounded-lg shadow-lg"
+            className="w-full max-h-[400px] rounded-lg shadow-lg"
           />
         </div>
 
         {/* Right Section - Details */}
         <div className="w-full md:w-1/2 flex flex-col gap-5">
+          <h3 className="text-2xl font-bold dark:text-white">{programDetails.title}</h3>
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
             <div className="flex items-center gap-3">
@@ -135,11 +136,12 @@ const CustomerProgramDetails = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Ratings */}
+          {/* <div className="flex items-center gap-2">
             <p className="text-xl">4.7</p>
             <FaStar size={24} className="text-yellow-500" />
             <p>(27 ratings)</p>
-          </div>
+          </div> */}
 
           <div className="flex">
             <AvatarGroup spacing="small" total={10} classes="cursor-pointer" onClick={handleViewExperts}>
@@ -150,11 +152,8 @@ const CustomerProgramDetails = () => {
             </AvatarGroup>
           </div>
 
-          {/* Buttons */}
+          {/* Start Program Button */}
           <div className="flex flex-col gap-3">
-            <button className="flex items-center justify-center gap-2 w-full md:w-auto bg-gray-100 text-gray-800 p-4 rounded-md shadow hover:bg-gray-200">
-              <FaPlay /> Intro
-            </button>
             <button className="w-full md:w-auto bg-primary text-white p-4 rounded-md shadow hover:bg-primary/80">
               Begin Course
             </button>

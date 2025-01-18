@@ -21,11 +21,9 @@ const FeaturedCategories = () => {
   const featuredCatgories = [{ id: 'all', name: 'All' }, ...(categoriesResponse?.data?.data || [])];
 
   return (
-    <div className="w-full flex gap-3 overflow-auto no-scrollbar">
+    <div className="w-full flex gap-3 justify-center overflow-auto no-scrollbar">
       {isLoadingCategories ? (
-        <div className="w-full flex justify-center">
-          <Spinner />
-        </div>
+        <Spinner />
       ) : (
         featuredCatgories.map(category => (
           <div

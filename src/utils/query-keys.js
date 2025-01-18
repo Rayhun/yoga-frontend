@@ -11,6 +11,7 @@ const queryKeys = {
   lmsVideoSessions: 'lmsVideoSessions',
   lmsModules: 'lmsModules',
   lmsPrograms: 'lmsPrograms',
+  portalPrograms: 'portalPrograms',
 };
 
 export default queryKeys;
