@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import ProgramCard from './CustomerProgramCard';
-import { getProgramsList } from '@/services/private/portal/program';
+import { getProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const STATUS_FILTERS = [

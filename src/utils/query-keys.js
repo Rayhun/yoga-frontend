@@ -12,6 +12,7 @@ const queryKeys = {
   lmsModules: 'lmsModules',
   lmsPrograms: 'lmsPrograms',
   portalPrograms: 'portalPrograms',
+  portalModules: 'portalModules',
 };
 
 export default queryKeys;

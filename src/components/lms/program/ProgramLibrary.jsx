@@ -10,7 +10,7 @@ import Popup from '@/components/common/popup';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import ProgramLibraryFilter from './ProgramLibraryFilter';
 import CustomerProgramCard from './CustomerProgramCard';
-import { getProgramsList } from '@/services/private/portal/program';
+import { getProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {

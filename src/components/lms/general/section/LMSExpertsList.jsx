@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid2';
 import Avatar from '@mui/material/Avatar';
 
-const ProgramExpertsList = ({ experts = [] }) => {
+const LMSExpertsList = ({ experts = [] }) => {
   return (
     <Grid container spacing={2} justifyContent="center">
       {experts.map(expert => (
@@ -19,4 +19,4 @@ const ProgramExpertsList = ({ experts = [] }) => {
   );
 };
 
-export default ProgramExpertsList;
+export default LMSExpertsList;
