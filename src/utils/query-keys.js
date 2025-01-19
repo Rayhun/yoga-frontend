@@ -13,6 +13,8 @@ const queryKeys = {
   lmsPrograms: 'lmsPrograms',
   customerPrograms: 'customerPrograms',
   customerModules: 'customerModules',
+  customerImageSessions: 'customerImageSessions',
+  customerAudioSessions: 'customerAudioSessions',
   customerVideoSessions: 'customerVideoSessions',
 };
 
