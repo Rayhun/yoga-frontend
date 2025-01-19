@@ -51,7 +51,7 @@ const Analytics = () => {
             <input
               className="datepicker w-[120%] rounded border border-stroke bg-white py-2 pl-10 pr-4 text-sm font-medium shadow-card-2 focus-visible:outline-none dark:border-strokedark dark:bg-boxdark"
               placeholder="Select dates"
-              data-class="flatpickr-right"
+              data-className="flatpickr-right"
             />
             <div className="pointer-events-none absolute inset-0 left-4 right-auto flex items-center">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
