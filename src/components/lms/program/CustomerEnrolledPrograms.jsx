@@ -28,7 +28,7 @@ const CustomerEnrolledPrograms = () => {
   const selectedStatus = searchParams.get('status') || 'all';
   const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: getProgramsList,
-    queryKey: [queryKeys.portalPrograms],
+    queryKey: [queryKeys.customerPrograms],
   });
 
   const handleStatusSelect = selected => {

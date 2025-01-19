@@ -10,7 +10,6 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import LinearProgress from '@mui/material/LinearProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { MdViewModule } from 'react-icons/md';
 import { FaTv } from 'react-icons/fa';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
@@ -57,7 +56,7 @@ const CustomerModuleDetails = () => {
     failureReason,
   } = useQuery({
     queryFn: () => getSingleModule({ id: params.id }),
-    queryKey: [queryKeys.portalModules, params.id],
+    queryKey: [queryKeys.customerModules, params.id],
   });
 
   useHandleApiResponse(failureReason);

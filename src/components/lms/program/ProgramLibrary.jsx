@@ -19,7 +19,7 @@ const ProgramsLibrary = () => {
   const [searchText, setSearchText] = useState('');
   const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: getProgramsList,
-    queryKey: [queryKeys.portalPrograms],
+    queryKey: [queryKeys.customerPrograms],
   });
 
   const filteredPrograms = useMemo(

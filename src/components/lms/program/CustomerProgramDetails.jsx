@@ -60,7 +60,7 @@ const CustomerProgramDetails = () => {
     failureReason,
   } = useQuery({
     queryFn: () => getSingleProgram({ id: params.id }),
-    queryKey: [queryKeys.portalPrograms, params.id],
+    queryKey: [queryKeys.customerPrograms, params.id],
   });
 
   useHandleApiResponse(failureReason);
