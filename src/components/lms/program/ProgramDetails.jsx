@@ -42,6 +42,13 @@ const ProgramDetails = ({ data = {} }) => {
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>
+        <DetailsRecord label="Benefits">
+          <ol className="list-disc list-inside dark:text-white">
+            {data?.benefits?.map(benefit => (
+              <li key={benefit}>{benefit}</li>
+            ))}
+          </ol>
+        </DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>
         <DetailsRecord label="File">
           <DetailsFileCard fileURL={data.image} isImage />

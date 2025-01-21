@@ -38,6 +38,7 @@ const ProgramForm = ({ selected }) => {
   const initialValues = {
     title: selected?.title || '',
     description: selected?.description || '',
+    benefits: selected?.benefits || '',
     file: null,
     status: selected?.status || '',
     access_setting: selected?.access_setting || '',
@@ -131,6 +132,7 @@ const ProgramForm = ({ selected }) => {
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <FormikDropzone
