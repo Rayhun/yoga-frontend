@@ -2,9 +2,9 @@
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
-import Vimeo from '@u-wave/react-vimeo';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
+import VideoPlayer from '@/components/common/player/VideoPlayer';
 import { getSingleSession } from '@/services/private/customer/session';
 import queryKeys from '@/utils/query-keys';
 
@@ -55,10 +55,10 @@ const CustomerVideoSessionDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Video */}
         <div className="w-full md:w-1/2">
-          <Vimeo video="115783408" width={550} height={400} className="w-full rounded-lg shadow-lg" />
+          <VideoPlayer video="115783408" />
         </div>
 
         {/* Right Section - Details */}

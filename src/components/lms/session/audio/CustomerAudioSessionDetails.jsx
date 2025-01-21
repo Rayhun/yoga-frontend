@@ -1,10 +1,10 @@
 'use client';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
+import AudioPlayer from '@/components/common/player/AudioPlayer';
 import { getSingleSession } from '@/services/private/customer/session';
 import queryKeys from '@/utils/query-keys';
 
@@ -30,15 +30,8 @@ const CustomerAudioSessionDetails = () => {
       {/* Details Card */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
-        <div className="w-full md:w-1/2">
-          <Image
-            src={sessionDetails?.image}
-            alt="Image"
-            width={0}
-            height={0}
-            sizes="100vw"
-            className="w-full max-h-[400px] rounded-lg shadow-lg"
-          />
+        <div className="w-full md:w-1/2 flex justify-center">
+          <AudioPlayer src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" size={200} />
         </div>
 
         {/* Right Section - Details */}
