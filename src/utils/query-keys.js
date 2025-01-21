@@ -11,6 +11,7 @@ const queryKeys = {
   lmsVideoSessions: 'lmsVideoSessions',
   lmsModules: 'lmsModules',
   lmsPrograms: 'lmsPrograms',
+  customerQuizes: 'customerQuizes',
   customerPrograms: 'customerPrograms',
   customerModules: 'customerModules',
   customerImageSessions: 'customerImageSessions',
