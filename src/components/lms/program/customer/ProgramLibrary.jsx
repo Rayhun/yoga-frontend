@@ -46,7 +46,7 @@ const ProgramsLibrary = () => {
         </div>
         <div className="md:w-1/2 mt-6 md:mt-0">
           <Image
-            src="/images/program/program-01.jpg"
+            src="/images/content/default.png"
             alt="Hero Image"
             width={0}
             height={0}

@@ -74,7 +74,7 @@ const ContentCard = ({ item }) => {
         <Image
           width={0}
           height={0}
-          src={item?.image || '/images/logo/logo.png'}
+          src={item?.image || '/images/content/default.png'}
           alt="image"
           sizes="100vw"
           className="w-full h-40 object-cover rounded-t-lg"

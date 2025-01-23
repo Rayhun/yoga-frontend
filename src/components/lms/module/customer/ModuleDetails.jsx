@@ -164,7 +164,7 @@ const ModuleDetails = () => {
           <div className="flex flex-col gap-2">
             <h3 className="text-lg text-primary font-bold">Module Progress</h3>
             <div className="flex flex-col gap-2">
-              <LinearProgress className="rounded-full h-2" value={moduleProgress} />
+              <LinearProgress className="rounded-full !h-2" value={moduleProgress} />
               <span className="text-sm text-right dark:text-white">{moduleProgress}% Complete</span>
             </div>
           </div>

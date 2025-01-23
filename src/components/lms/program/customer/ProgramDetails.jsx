@@ -67,7 +67,7 @@ const ProgramDetails = () => {
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
-            src={programDetails?.image || '/images/program/program-01.jpg'}
+            src={programDetails?.image || '/images/content/default.png'}
             alt="Program Image"
             width={0}
             height={0}
@@ -168,7 +168,7 @@ const ProgramDetails = () => {
           <div className="flex flex-col gap-2">
             <h3 className="text-lg text-primary font-bold">Program Progress</h3>
             <div className="flex flex-col gap-2">
-              <LinearProgress className="rounded-full h-2" value={programProgress} />
+              <LinearProgress className="rounded-full !h-2" value={programProgress} />
               <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
             </div>
           </div>
