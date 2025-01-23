@@ -29,10 +29,10 @@ const CustomerLMSQuizDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="min-h-[70vh] flex flex-col justify-center items-center gap-6 p-4 bg-bodydark1 rounded-lg shadow-md dark:bg-boxdark">
+      <div className="min-h-[70vh] flex flex-col justify-center items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
         <h2 className="text-3xl text-center font-bold text-gray-800 dark:text-white">{quizDetails.title}</h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2 text-center">{quizDetails.description}</p>
-        <div className="w-full md:w-3/4 grid grid-cols-3 gap-3">
+        <div className="w-full md:w-1/2 lg:1/3 flex flex-col gap-3">
           {quizDetails.options?.map(option => (
             <button
               key={option.text}

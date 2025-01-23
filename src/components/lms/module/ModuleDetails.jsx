@@ -41,7 +41,7 @@ const ModuleDetails = ({ data = {} }) => {
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>
         <DetailsRecord label="Benefits">
-          <ol className="list-disc list-inside dark:text-white">
+          <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
             {data?.benefits?.map(benefit => (
               <li key={benefit}>{benefit}</li>
             ))}

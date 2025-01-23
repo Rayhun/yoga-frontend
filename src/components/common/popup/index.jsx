@@ -50,7 +50,7 @@ export const Separator = styled.span`
   height: 4px;
   width: 90px;
   border-radius: 2px;
-  background-color: #007bff;
+  background-color: ;
 `;
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -81,7 +81,7 @@ const Popup = ({ size, heading = 'Popup', onClose = () => null, children, ...res
           <HeadingWrapper>
             <Heading className="heading">{heading}</Heading>
           </HeadingWrapper>
-          <Separator />
+          <Separator className="bg-primary" />
           <div>{children}</div>
         </StyledWrapper>
       </StyledMainWrapper>

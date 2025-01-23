@@ -277,6 +277,9 @@ const config = {
         4: '0px 0px 2px rgba(0, 0, 0, 0.2)',
         5: '0px 1px 5px rgba(0, 0, 0, 0.2)',
       },
+      listStyleType: {
+        tick: "'✓ '",
+      },
       keyframes: {
         linspin: {
           '100%': { transform: 'rotate(360deg)' },

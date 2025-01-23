@@ -28,14 +28,14 @@ const CustomerAudioSessionDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
-        <div className="w-full md:w-1/2 flex justify-center">
-          <AudioPlayer src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" size={200} />
+        <div className="w-full flex justify-center">
+          <AudioPlayer src={sessionDetails.content_link} size={200} />
         </div>
 
         {/* Right Section - Details */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5">
           <h3 className="text-2xl font-bold dark:text-white">{sessionDetails.title}</h3>
 
           <div className="flex items-center gap-2">

@@ -22,7 +22,7 @@ const VideoPlayer = props => {
 
   return (
     <div ref={wrapperRef} className="w-full flex justify-center">
-      <Vimeo {...props} width={wrapperWidth} />
+      {wrapperWidth ? <Vimeo {...props} width={wrapperWidth} /> : null}
     </div>
   );
 };

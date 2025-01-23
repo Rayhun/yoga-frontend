@@ -225,7 +225,8 @@ const CustomerProgramDetails = () => {
 
             {/* Benefits Tab */}
             <div hidden={selectedTab !== TABS.BENEFITS}>
-              <ol className="list-disc list-inside dark:text-white">
+              <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
+              <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
                 {programDetails?.benefits?.map(benefit => (
                   <li key={benefit}>{benefit}</li>
                 ))}
@@ -242,7 +243,7 @@ const CustomerProgramDetails = () => {
               <LinearProgress
                 variant="determinate"
                 color="warning"
-                className="rounded-full h-3"
+                className="rounded-full h-2"
                 value={programProgress}
                 classes={{
                   bar: 'bg-secondary',
@@ -264,9 +265,6 @@ const CustomerProgramDetails = () => {
                     />
                   </div>
                   <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>
-                  <p className="w-full mb-2 text-sm font-normal leading-none line-clamp-2 text-gray-400 dark:text-gray-500">
-                    {item.description}
-                  </p>
                 </li>
               ))}
             </ol>

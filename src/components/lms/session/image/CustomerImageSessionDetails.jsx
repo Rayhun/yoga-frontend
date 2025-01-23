@@ -54,21 +54,21 @@ const CustomerImageSessionDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full">
           <Image
             src={sessionDetails?.content_link}
             alt="Image"
             width={0}
             height={0}
             sizes="100vw"
-            className="w-full max-h-[400px] rounded-lg shadow-lg"
+            className="w-full max-h-[800px] rounded-lg shadow-lg"
           />
         </div>
 
         {/* Right Section - Details */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5">
           <h3 className="text-2xl font-bold dark:text-white">{sessionDetails.title}</h3>
           <p className="line-clamp-6 dark:text-white">{sessionDetails?.description}</p>
         </div>

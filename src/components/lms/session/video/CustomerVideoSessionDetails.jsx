@@ -55,14 +55,14 @@ const CustomerVideoSessionDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Video */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full">
           <VideoPlayer video="115783408" />
         </div>
 
         {/* Right Section - Details */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5">
           <h3 className="text-2xl font-bold dark:text-white">{sessionDetails.title}</h3>
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-gray-600 dark:text-white">

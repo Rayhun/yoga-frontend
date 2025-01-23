@@ -177,7 +177,7 @@ const CustomerModuleDetails = () => {
                         {/* Completion Icon */}
                         {item.completed ? (
                           <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-                            <BiCheck size={24} className="bg-green-500 rounded-full text-white" />
+                            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
                           </div>
                         ) : null}
                       </div>
@@ -217,7 +217,8 @@ const CustomerModuleDetails = () => {
 
             {/* Benefits Tab */}
             <div hidden={selectedTab !== TABS.BENEFITS}>
-              <ol className="list-disc list-inside dark:text-white">
+              <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
+              <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
                 {moduleDetails?.benefits?.map(benefit => (
                   <li key={benefit}>{benefit}</li>
                 ))}
@@ -233,11 +234,11 @@ const CustomerModuleDetails = () => {
             <div className="flex flex-col gap-2">
               <LinearProgress
                 variant="determinate"
-                color="success"
+                color="warning"
                 className="rounded-full h-2"
                 value={moduleProgress}
                 classes={{
-                  bar: 'bg-green-500',
+                  bar: 'bg-secondary',
                 }}
               />
               <span className="text-sm text-right dark:text-white">{moduleProgress}% Complete</span>
@@ -252,13 +253,10 @@ const CustomerModuleDetails = () => {
                   <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
                     <BiCheck
                       size={20}
-                      className={`rounded-full text-white ${item.completed ? 'bg-green-500' : 'bg-white'}`}
+                      className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white'}`}
                     />
                   </div>
                   <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>
-                  <p className="w-full mb-2 text-sm font-normal leading-none line-clamp-2 text-gray-400 dark:text-gray-500">
-                    {item.description}
-                  </p>
                 </li>
               ))}
             </ol>
