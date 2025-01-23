@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +15,7 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
+import ContentCard from './ContentCard';
 import { getSingleProgram } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
@@ -23,31 +23,6 @@ const TABS = {
   JOURNEY: 'journey',
   DESCRIPTION: 'description',
   BENEFITS: 'benefits',
-};
-
-const getContentRef = item => {
-  let label = 'Item';
-  let href = '#';
-
-  if (item.content_type === 'module') {
-    label = 'Module';
-    href = `/portal/customer/lms/module/${item.id}/details`;
-  } else if (item.content_type === 'session') {
-    if (item.session_type === 'Image') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/image/${item.id}/details`;
-    } else if (item.session_type === 'Audio') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/audio/${item.id}/details`;
-    } else if (item.session_type === 'Video') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/video/${item.id}/details`;
-    }
-  } else if (item.content_type === 'quiz') {
-    label = 'Quiz';
-    href = `/portal/customer/lms/quiz/${item.id}/details`;
-  }
-  return { label, href };
 };
 
 const ProgramDetails = () => {
@@ -165,56 +140,9 @@ const ProgramDetails = () => {
             {/* Journey Tab */}
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {programDetails?.content.map(item => {
-                  const itemRef = getContentRef(item);
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition"
-                    >
-                      {/* Course Image */}
-                      <div className="relative">
-                        <Image
-                          width={0}
-                          height={0}
-                          src={programDetails?.image}
-                          alt="image"
-                          sizes="100vw"
-                          className="w-full h-40 object-cover rounded-t-lg"
-                        />
-                        {/* Completion Icon */}
-                        {item.completed ? (
-                          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-                            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
-                          </div>
-                        ) : null}
-                      </div>
-
-                      {/* Course Info */}
-                      <div className="p-4">
-                        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">
-                          {item.title}
-                        </h2>
-                        <p className="text-sm text-gray-600 line-clamp-1 dark:text-gray-400 mt-2">
-                          {item.description}
-                        </p>
-
-                        {/* Details */}
-                        <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                          <FaTv />
-                          <span>{item.total_item || 0}</span>
-                        </div>
-
-                        {/* Action Button */}
-                        <Link href={itemRef.href}>
-                          <button className="mt-4 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/80 transition">
-                            {item.completed ? 'View' : 'Start'} {itemRef.label}
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
+                {programDetails?.content.map(item => (
+                  <ContentCard key={item.id} item={item} />
+                ))}
               </div>
             </div>
 
@@ -240,15 +168,7 @@ const ProgramDetails = () => {
           <div className="flex flex-col gap-2">
             <h3 className="text-lg text-primary font-bold">Program Progress</h3>
             <div className="flex flex-col gap-2">
-              <LinearProgress
-                variant="determinate"
-                color="warning"
-                className="rounded-full h-2"
-                value={programProgress}
-                classes={{
-                  bar: 'bg-secondary',
-                }}
-              />
+              <LinearProgress className="rounded-full h-2" value={programProgress} />
               <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
             </div>
           </div>

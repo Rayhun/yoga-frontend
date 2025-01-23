@@ -15,6 +15,7 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
+import ContentCard from './ContentCard';
 import { getSingleModule } from '@/services/private/customer/module';
 import queryKeys from '@/utils/query-keys';
 
@@ -22,28 +23,6 @@ const TABS = {
   JOURNEY: 'journey',
   DESCRIPTION: 'description',
   BENEFITS: 'benefits',
-};
-
-const getContentRef = item => {
-  let label = 'Item';
-  let href = '#';
-
-  if (item.content_type === 'session') {
-    if (item.session_type === 'Image') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/image/${item.id}/details`;
-    } else if (item.session_type === 'Audio') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/audio/${item.id}/details`;
-    } else if (item.session_type === 'Video') {
-      label = 'Session';
-      href = `/portal/customer/lms/session/video/${item.id}/details`;
-    }
-  } else if (item.content_type === 'quiz') {
-    label = 'Quiz';
-    href = `/portal/customer/lms/quiz/${item.id}/details`;
-  }
-  return { label, href };
 };
 
 const ModuleDetails = () => {
@@ -157,56 +136,9 @@ const ModuleDetails = () => {
             {/* Journey Tab */}
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {moduleDetails?.content?.map(item => {
-                  const itemRef = getContentRef(item);
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition"
-                    >
-                      {/* Course Image */}
-                      <div className="relative">
-                        <Image
-                          width={0}
-                          height={0}
-                          src={moduleDetails?.image}
-                          alt="image"
-                          sizes="100vw"
-                          className="w-full h-40 object-cover rounded-t-lg"
-                        />
-                        {/* Completion Icon */}
-                        {item.completed ? (
-                          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-                            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
-                          </div>
-                        ) : null}
-                      </div>
-
-                      {/* Course Info */}
-                      <div className="p-4">
-                        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">
-                          {item.title}
-                        </h2>
-                        <p className="text-sm text-gray-600 line-clamp-1 dark:text-gray-400 mt-2">
-                          {item.description}
-                        </p>
-
-                        {/* Details */}
-                        <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                          <FaTv />
-                          <span>{item.total_item || 0}</span>
-                        </div>
-
-                        {/* Action Button */}
-                        <Link href={itemRef.href}>
-                          <button className="mt-4 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/80 transition">
-                            {item.completed ? 'View' : 'Start'} {itemRef.label}
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
+                {moduleDetails?.content?.map(item => (
+                  <ContentCard key={item.id} item={item} />
+                ))}
               </div>
             </div>
 
@@ -232,15 +164,7 @@ const ModuleDetails = () => {
           <div className="flex flex-col gap-2">
             <h3 className="text-lg text-primary font-bold">Module Progress</h3>
             <div className="flex flex-col gap-2">
-              <LinearProgress
-                variant="determinate"
-                color="warning"
-                className="rounded-full h-2"
-                value={moduleProgress}
-                classes={{
-                  bar: 'bg-secondary',
-                }}
-              />
+              <LinearProgress className="rounded-full h-2" value={moduleProgress} />
               <span className="text-sm text-right dark:text-white">{moduleProgress}% Complete</span>
             </div>
           </div>

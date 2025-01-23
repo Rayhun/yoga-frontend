@@ -124,6 +124,15 @@ function MuiThemeProvider({ children }) {
             },
           },
         },
+        MuiLinearProgress: {
+          defaultProps: {
+            variant: 'determinate',
+            color: 'warning',
+            classes: {
+              bar: 'bg-secondary',
+            },
+          },
+        },
       },
     });
   }, [resolvedTailwindConfig.theme.colors]);
