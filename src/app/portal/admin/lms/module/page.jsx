@@ -1,4 +1,4 @@
-import ModulesList from '@/components/lms/module/ModulesList';
+import ModulesList from '@/components/lms/module/admin/ModulesList';
 
 export const metadata = {
   title: 'Modules',

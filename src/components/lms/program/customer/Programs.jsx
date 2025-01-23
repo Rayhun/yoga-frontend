@@ -3,14 +3,14 @@ import { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ProgramsLibrary from './ProgramLibrary';
-import CustomerEnrolledPrograms from './CustomerEnrolledPrograms';
+import EnrolledPrograms from './EnrolledPrograms';
 
 const TABS = {
   LIBRARY: 'library',
   MY_PROGRAMS: 'my-programs',
 };
 
-const CustomerPrograms = () => {
+const Programs = () => {
   const [selectedTab, setSelectedTab] = useState(TABS.LIBRARY);
 
   const handleTabChange = (_, newValue) => {
@@ -30,11 +30,11 @@ const CustomerPrograms = () => {
           <ProgramsLibrary />
         </div>
         <div hidden={selectedTab !== TABS.MY_PROGRAMS}>
-          <CustomerEnrolledPrograms />
+          <EnrolledPrograms />
         </div>
       </div>
     </div>
   );
 };
 
-export default CustomerPrograms;
+export default Programs;

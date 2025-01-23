@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import LMSQuizForm from '@/components/lms/quiz/LMSQuizForm';
+import LMSQuizForm from '@/components/lms/quiz/admin/LMSQuizForm';
 import { getSingleQuiz } from '@/services/private/lms/quiz';
 import queryKeys from '@/utils/query-keys';
 

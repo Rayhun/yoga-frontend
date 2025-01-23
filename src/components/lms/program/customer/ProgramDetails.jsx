@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
@@ -10,12 +10,13 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import LinearProgress from '@mui/material/LinearProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { MdViewModule } from 'react-icons/md';
 import { FaTv } from 'react-icons/fa';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
-import { getSingleModule } from '@/services/private/customer/module';
+import { getSingleProgram } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const TABS = {
@@ -28,7 +29,10 @@ const getContentRef = item => {
   let label = 'Item';
   let href = '#';
 
-  if (item.content_type === 'session') {
+  if (item.content_type === 'module') {
+    label = 'Module';
+    href = `/portal/customer/lms/module/${item.id}/details`;
+  } else if (item.content_type === 'session') {
     if (item.session_type === 'Image') {
       label = 'Session';
       href = `/portal/customer/lms/session/image/${item.id}/details`;
@@ -46,7 +50,7 @@ const getContentRef = item => {
   return { label, href };
 };
 
-const CustomerModuleDetails = () => {
+const ProgramDetails = () => {
   const params = useParams();
   const renderModal = useModal();
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
@@ -55,8 +59,8 @@ const CustomerModuleDetails = () => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleModule({ id: params.id }),
-    queryKey: [queryKeys.customerModules, params.id],
+    queryFn: () => getSingleProgram({ id: params.id }),
+    queryKey: [queryKeys.customerPrograms, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -75,10 +79,10 @@ const CustomerModuleDetails = () => {
     setSelectedTab(newValue);
   };
 
-  const moduleDetails = response?.data?.data || {};
+  const programDetails = response?.data?.data || {};
 
-  const moduleProgress = Math.round(
-    (moduleDetails.content?.filter(i => i.completed).length / moduleDetails.content?.length) * 100
+  const programProgress = Math.round(
+    (programDetails.content?.filter(i => i.completed).length / programDetails.content?.length) * 100
   );
 
   return (
@@ -88,8 +92,8 @@ const CustomerModuleDetails = () => {
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
-            src={moduleDetails?.image || '/images/module/module-01.jpg'}
-            alt="Module Image"
+            src={programDetails?.image || '/images/program/program-01.jpg'}
+            alt="Program Image"
             width={0}
             height={0}
             sizes="100vw"
@@ -99,12 +103,16 @@ const CustomerModuleDetails = () => {
 
         {/* Right Section - Details */}
         <div className="w-full md:w-1/2 flex flex-col gap-5">
-          <h3 className="text-2xl font-bold dark:text-white">{moduleDetails.title}</h3>
+          <h3 className="text-2xl font-bold dark:text-white">{programDetails.title}</h3>
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
             <div className="flex items-center gap-3">
               <FaTv size={24} className="text-primary" />
-              <span>{moduleDetails?.session_count} Sessions</span>
+              <span>{programDetails?.session_count} Sessions</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MdViewModule size={24} className="text-primary" />
+              <span>{programDetails?.modules_count} Modules</span>
             </div>
           </div>
 
@@ -115,36 +123,36 @@ const CustomerModuleDetails = () => {
             <p>(27 ratings)</p>
           </div> */}
 
-          {moduleDetails?.experts.length > 0 ? (
+          {programDetails?.experts.length > 0 ? (
             <div
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => handleViewExperts(moduleDetails?.experts)}
+              onClick={() => handleViewExperts(programDetails?.experts)}
             >
-              <AvatarGroup spacing="small" total={moduleDetails?.experts.length}>
-                {moduleDetails?.experts?.map(expert => (
+              <AvatarGroup spacing="small" total={programDetails?.experts.length}>
+                {programDetails?.experts?.map(expert => (
                   <Avatar key={expert.email} src={expert.image} />
                 ))}
               </AvatarGroup>
               <p className="font-bold">Instructors:</p>
               <p className="flex gap-1 underline-offset-2 hover:underline">
-                <span>{moduleDetails?.experts[0]?.name}</span>
-                {moduleDetails?.experts.length > 1 ? (
-                  <span>+ {moduleDetails?.experts.length - 1} more</span>
+                <span>{programDetails?.experts[0]?.name}</span>
+                {programDetails?.experts.length > 1 ? (
+                  <span>+ {programDetails?.experts.length - 1} more</span>
                 ) : null}
               </p>
             </div>
           ) : null}
 
-          {/* Begin Module Button */}
+          {/* Begin Program Button */}
           <div className="flex flex-col gap-3">
             <button className="w-full md:w-auto bg-primary text-white p-4 rounded-md shadow hover:bg-primary/80">
-              Begin Module
+              Begin Program
             </button>
           </div>
         </div>
       </div>
 
-      {/* Module Content */}
+      {/* Program Content */}
       <div className="py-6 my-5 text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
         <div className="w-full md:w-3/4">
           {/* Tabs */}
@@ -157,7 +165,7 @@ const CustomerModuleDetails = () => {
             {/* Journey Tab */}
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {moduleDetails?.content?.map(item => {
+                {programDetails?.content.map(item => {
                   const itemRef = getContentRef(item);
                   return (
                     <div
@@ -169,7 +177,7 @@ const CustomerModuleDetails = () => {
                         <Image
                           width={0}
                           height={0}
-                          src={moduleDetails?.image}
+                          src={programDetails?.image}
                           alt="image"
                           sizes="100vw"
                           className="w-full h-40 object-cover rounded-t-lg"
@@ -212,14 +220,14 @@ const CustomerModuleDetails = () => {
 
             {/* Description Tab */}
             <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <p className="dark:text-white">{moduleDetails?.description}</p>
+              <p className="dark:text-white">{programDetails?.description}</p>
             </div>
 
             {/* Benefits Tab */}
             <div hidden={selectedTab !== TABS.BENEFITS}>
               <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
               <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
-                {moduleDetails?.benefits?.map(benefit => (
+                {programDetails?.benefits?.map(benefit => (
                   <li key={benefit}>{benefit}</li>
                 ))}
               </ol>
@@ -227,28 +235,28 @@ const CustomerModuleDetails = () => {
           </div>
         </div>
 
-        {/* Module Details Sidebar */}
+        {/* Program Details Sidebar */}
         <div className="w-full md:w-1/4 flex flex-col gap-7">
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Module Progress</h3>
+            <h3 className="text-lg text-primary font-bold">Program Progress</h3>
             <div className="flex flex-col gap-2">
               <LinearProgress
                 variant="determinate"
                 color="warning"
                 className="rounded-full h-2"
-                value={moduleProgress}
+                value={programProgress}
                 classes={{
                   bar: 'bg-secondary',
                 }}
               />
-              <span className="text-sm text-right dark:text-white">{moduleProgress}% Complete</span>
+              <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Module Navigation</h3>
+            <h3 className="text-lg text-primary font-bold">Program Navigation</h3>
             <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
-              {moduleDetails?.content?.map(item => (
+              {programDetails?.content.map(item => (
                 <li key={item.id} className="ms-6 mb-6">
                   <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
                     <BiCheck
@@ -267,4 +275,4 @@ const CustomerModuleDetails = () => {
   );
 };
 
-export default CustomerModuleDetails;
+export default ProgramDetails;

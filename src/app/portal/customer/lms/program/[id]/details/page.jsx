@@ -1,12 +1,12 @@
 'use client';
 import { PageHeader } from '@/components/common/page';
-import CustomerProgramDetails from '@/components/lms/program/CustomerProgramDetails';
+import ProgramDetails from '@/components/lms/program/customer/ProgramDetails';
 
 const Page = () => {
   return (
     <div>
       <PageHeader title="Program Details" />
-      <CustomerProgramDetails />
+      <ProgramDetails />
     </div>
   );
 };

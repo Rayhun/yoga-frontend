@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { GoDotFill } from 'react-icons/go';
 
-const CustomerProgramCard = ({ program, onClick }) => {
+const ProgramCard = ({ program, onClick }) => {
   return (
     <div
       className="rounded-lg border border-stroke bg-white shadow-default cursor-pointer overflow-hidden dark:bg-boxdark"
@@ -30,4 +30,4 @@ const CustomerProgramCard = ({ program, onClick }) => {
   );
 };
 
-export default CustomerProgramCard;
+export default ProgramCard;

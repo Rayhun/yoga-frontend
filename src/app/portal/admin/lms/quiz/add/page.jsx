@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import LMSQuizForm from '@/components/lms/quiz/LMSQuizForm';
+import LMSQuizForm from '@/components/lms/quiz/admin/LMSQuizForm';
 
 export const metadata = {
   title: 'Add New Quiz',

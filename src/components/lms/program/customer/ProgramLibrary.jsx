@@ -8,8 +8,8 @@ import useToggle from '@/hooks/useToggle';
 import Spinner from '@/components/common/loader/Spinner';
 import Popup from '@/components/common/popup';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
-import ProgramLibraryFilter from './ProgramLibraryFilter';
-import CustomerProgramCard from './CustomerProgramCard';
+import ProgramLibraryFilter from '../admin/ProgramLibraryFilter';
+import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
@@ -77,7 +77,7 @@ const ProgramsLibrary = () => {
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {filteredPrograms?.map(program => (
-              <CustomerProgramCard
+              <ProgramCard
                 key={program.id}
                 program={program}
                 onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}

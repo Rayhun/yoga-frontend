@@ -1,4 +1,4 @@
-import ImageSessionsList from '@/components/lms/session/image/ImageSessionsList';
+import ImageSessionsList from '@/components/lms/session/image/admin/ImageSessionsList';
 
 export const metadata = {
   title: 'Image Sessions',

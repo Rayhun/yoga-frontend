@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import ProgramForm from '@/components/lms/program/ProgramForm';
+import ProgramForm from '@/components/lms/program/admin/ProgramForm';
 
 export const metadata = {
   title: 'Add New Program',

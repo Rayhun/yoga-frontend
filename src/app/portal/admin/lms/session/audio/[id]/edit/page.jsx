@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import AudioSessionForm from '@/components/lms/session/audio/AudioSessionForm';
+import AudioSessionForm from '@/components/lms/session/audio/admin/AudioSessionForm';
 import { getSingleSession } from '@/services/private/lms/session';
 import queryKeys from '@/utils/query-keys';
 

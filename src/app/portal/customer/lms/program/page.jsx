@@ -1,4 +1,4 @@
-import CustomerPrograms from '@/components/lms/program/CustomerPrograms';
+import Programs from '@/components/lms/program/customer/Programs';
 
 export const metadata = {
   title: 'LMS Programs',
@@ -7,7 +7,7 @@ export const metadata = {
 const Page = () => {
   return (
     <div>
-      <CustomerPrograms />
+      <Programs />
     </div>
   );
 };

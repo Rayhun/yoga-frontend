@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import ProgramDetails from '@/components/lms/program/ProgramDetails';
+import ProgramDetails from '@/components/lms/program/admin/ProgramDetails';
 import { getSingleProgram } from '@/services/private/lms/program';
 import queryKeys from '@/utils/query-keys';
 

@@ -1,4 +1,4 @@
-import AudioSessionsList from '@/components/lms/session/audio/AudioSessionsList';
+import AudioSessionsList from '@/components/lms/session/audio/admin/AudioSessionsList';
 
 export const metadata = {
   title: 'Audio Sessions',

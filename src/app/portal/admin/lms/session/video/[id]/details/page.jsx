@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import VideoSessionDetails from '@/components/lms/session/video/VideoSessionDetails';
+import VideoSessionDetails from '@/components/lms/session/video/admin/VideoSessionDetails';
 import { getSingleSession } from '@/services/private/lms/session';
 import queryKeys from '@/utils/query-keys';
 

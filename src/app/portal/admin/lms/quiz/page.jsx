@@ -1,4 +1,4 @@
-import LMSQuizList from '@/components/lms/quiz/LMSQuizList';
+import LMSQuizList from '@/components/lms/quiz/admin/LMSQuizList';
 
 export const metadata = {
   title: 'LMS Quizes',

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
-import ProgramCard from './CustomerProgramCard';
+import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
@@ -22,7 +22,7 @@ const STATUS_FILTERS = [
   },
 ];
 
-const CustomerEnrolledPrograms = () => {
+const EnrolledPrograms = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
   const selectedStatus = searchParams.get('status') || 'all';
@@ -77,4 +77,4 @@ const CustomerEnrolledPrograms = () => {
   );
 };
 
-export default CustomerEnrolledPrograms;
+export default EnrolledPrograms;

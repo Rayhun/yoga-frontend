@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import VideoSessionForm from '@/components/lms/session/video/VideoSessionForm';
+import VideoSessionForm from '@/components/lms/session/video/admin/VideoSessionForm';
 
 export const metadata = {
   title: 'Add Video Session',

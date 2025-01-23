@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import AudioSessionForm from '@/components/lms/session/audio/AudioSessionForm';
+import AudioSessionForm from '@/components/lms/session/audio/admin/AudioSessionForm';
 
 export const metadata = {
   title: 'Add Audio Session',

@@ -1,12 +1,12 @@
 'use client';
 import { PageHeader } from '@/components/common/page';
-import CustomerImageSessionDetails from '@/components/lms/session/image/CustomerImageSessionDetails';
+import ImageSessionDetails from '@/components/lms/session/image/customer/ImageSessionDetails';
 
 const Page = () => {
   return (
     <div>
       <PageHeader title="Image Session Details" />
-      <CustomerImageSessionDetails />
+      <ImageSessionDetails />
     </div>
   );
 };

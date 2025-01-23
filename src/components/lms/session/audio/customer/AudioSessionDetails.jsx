@@ -8,7 +8,7 @@ import AudioPlayer from '@/components/common/player/AudioPlayer';
 import { getSingleSession } from '@/services/private/customer/session';
 import queryKeys from '@/utils/query-keys';
 
-const CustomerAudioSessionDetails = () => {
+const AudioSessionDetails = () => {
   const params = useParams();
   const {
     data: response,
@@ -53,4 +53,4 @@ const CustomerAudioSessionDetails = () => {
   );
 };
 
-export default CustomerAudioSessionDetails;
+export default AudioSessionDetails;

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
@@ -10,13 +10,12 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import LinearProgress from '@mui/material/LinearProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { MdViewModule } from 'react-icons/md';
 import { FaTv } from 'react-icons/fa';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
-import { getSingleProgram } from '@/services/private/customer/program';
+import { getSingleModule } from '@/services/private/customer/module';
 import queryKeys from '@/utils/query-keys';
 
 const TABS = {
@@ -29,10 +28,7 @@ const getContentRef = item => {
   let label = 'Item';
   let href = '#';
 
-  if (item.content_type === 'module') {
-    label = 'Module';
-    href = `/portal/customer/lms/module/${item.id}/details`;
-  } else if (item.content_type === 'session') {
+  if (item.content_type === 'session') {
     if (item.session_type === 'Image') {
       label = 'Session';
       href = `/portal/customer/lms/session/image/${item.id}/details`;
@@ -50,7 +46,7 @@ const getContentRef = item => {
   return { label, href };
 };
 
-const CustomerProgramDetails = () => {
+const ModuleDetails = () => {
   const params = useParams();
   const renderModal = useModal();
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
@@ -59,8 +55,8 @@ const CustomerProgramDetails = () => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleProgram({ id: params.id }),
-    queryKey: [queryKeys.customerPrograms, params.id],
+    queryFn: () => getSingleModule({ id: params.id }),
+    queryKey: [queryKeys.customerModules, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -79,10 +75,10 @@ const CustomerProgramDetails = () => {
     setSelectedTab(newValue);
   };
 
-  const programDetails = response?.data?.data || {};
+  const moduleDetails = response?.data?.data || {};
 
-  const programProgress = Math.round(
-    (programDetails.content?.filter(i => i.completed).length / programDetails.content?.length) * 100
+  const moduleProgress = Math.round(
+    (moduleDetails.content?.filter(i => i.completed).length / moduleDetails.content?.length) * 100
   );
 
   return (
@@ -92,8 +88,8 @@ const CustomerProgramDetails = () => {
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
-            src={programDetails?.image || '/images/program/program-01.jpg'}
-            alt="Program Image"
+            src={moduleDetails?.image || '/images/module/module-01.jpg'}
+            alt="Module Image"
             width={0}
             height={0}
             sizes="100vw"
@@ -103,16 +99,12 @@ const CustomerProgramDetails = () => {
 
         {/* Right Section - Details */}
         <div className="w-full md:w-1/2 flex flex-col gap-5">
-          <h3 className="text-2xl font-bold dark:text-white">{programDetails.title}</h3>
+          <h3 className="text-2xl font-bold dark:text-white">{moduleDetails.title}</h3>
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
             <div className="flex items-center gap-3">
               <FaTv size={24} className="text-primary" />
-              <span>{programDetails?.session_count} Sessions</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <MdViewModule size={24} className="text-primary" />
-              <span>{programDetails?.modules_count} Modules</span>
+              <span>{moduleDetails?.session_count} Sessions</span>
             </div>
           </div>
 
@@ -123,36 +115,36 @@ const CustomerProgramDetails = () => {
             <p>(27 ratings)</p>
           </div> */}
 
-          {programDetails?.experts.length > 0 ? (
+          {moduleDetails?.experts.length > 0 ? (
             <div
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => handleViewExperts(programDetails?.experts)}
+              onClick={() => handleViewExperts(moduleDetails?.experts)}
             >
-              <AvatarGroup spacing="small" total={programDetails?.experts.length}>
-                {programDetails?.experts?.map(expert => (
+              <AvatarGroup spacing="small" total={moduleDetails?.experts.length}>
+                {moduleDetails?.experts?.map(expert => (
                   <Avatar key={expert.email} src={expert.image} />
                 ))}
               </AvatarGroup>
               <p className="font-bold">Instructors:</p>
               <p className="flex gap-1 underline-offset-2 hover:underline">
-                <span>{programDetails?.experts[0]?.name}</span>
-                {programDetails?.experts.length > 1 ? (
-                  <span>+ {programDetails?.experts.length - 1} more</span>
+                <span>{moduleDetails?.experts[0]?.name}</span>
+                {moduleDetails?.experts.length > 1 ? (
+                  <span>+ {moduleDetails?.experts.length - 1} more</span>
                 ) : null}
               </p>
             </div>
           ) : null}
 
-          {/* Begin Program Button */}
+          {/* Begin Module Button */}
           <div className="flex flex-col gap-3">
             <button className="w-full md:w-auto bg-primary text-white p-4 rounded-md shadow hover:bg-primary/80">
-              Begin Program
+              Begin Module
             </button>
           </div>
         </div>
       </div>
 
-      {/* Program Content */}
+      {/* Module Content */}
       <div className="py-6 my-5 text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
         <div className="w-full md:w-3/4">
           {/* Tabs */}
@@ -165,7 +157,7 @@ const CustomerProgramDetails = () => {
             {/* Journey Tab */}
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {programDetails?.content.map(item => {
+                {moduleDetails?.content?.map(item => {
                   const itemRef = getContentRef(item);
                   return (
                     <div
@@ -177,7 +169,7 @@ const CustomerProgramDetails = () => {
                         <Image
                           width={0}
                           height={0}
-                          src={programDetails?.image}
+                          src={moduleDetails?.image}
                           alt="image"
                           sizes="100vw"
                           className="w-full h-40 object-cover rounded-t-lg"
@@ -220,14 +212,14 @@ const CustomerProgramDetails = () => {
 
             {/* Description Tab */}
             <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <p className="dark:text-white">{programDetails?.description}</p>
+              <p className="dark:text-white">{moduleDetails?.description}</p>
             </div>
 
             {/* Benefits Tab */}
             <div hidden={selectedTab !== TABS.BENEFITS}>
               <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
               <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
-                {programDetails?.benefits?.map(benefit => (
+                {moduleDetails?.benefits?.map(benefit => (
                   <li key={benefit}>{benefit}</li>
                 ))}
               </ol>
@@ -235,28 +227,28 @@ const CustomerProgramDetails = () => {
           </div>
         </div>
 
-        {/* Program Details Sidebar */}
+        {/* Module Details Sidebar */}
         <div className="w-full md:w-1/4 flex flex-col gap-7">
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Program Progress</h3>
+            <h3 className="text-lg text-primary font-bold">Module Progress</h3>
             <div className="flex flex-col gap-2">
               <LinearProgress
                 variant="determinate"
                 color="warning"
                 className="rounded-full h-2"
-                value={programProgress}
+                value={moduleProgress}
                 classes={{
                   bar: 'bg-secondary',
                 }}
               />
-              <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
+              <span className="text-sm text-right dark:text-white">{moduleProgress}% Complete</span>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Program Navigation</h3>
+            <h3 className="text-lg text-primary font-bold">Module Navigation</h3>
             <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
-              {programDetails?.content.map(item => (
+              {moduleDetails?.content?.map(item => (
                 <li key={item.id} className="ms-6 mb-6">
                   <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
                     <BiCheck
@@ -275,4 +267,4 @@ const CustomerProgramDetails = () => {
   );
 };
 
-export default CustomerProgramDetails;
+export default ModuleDetails;

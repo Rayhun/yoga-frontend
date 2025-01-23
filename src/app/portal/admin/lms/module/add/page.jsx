@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import ModuleForm from '@/components/lms/module/ModuleForm';
+import ModuleForm from '@/components/lms/module/admin/ModuleForm';
 
 export const metadata = {
   title: 'Add New Module',

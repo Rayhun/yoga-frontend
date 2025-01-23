@@ -1,4 +1,4 @@
-import VideoSessionsList from '@/components/lms/session/video/VideoSessionsList';
+import VideoSessionsList from '@/components/lms/session/video/admin/VideoSessionsList';
 
 export const metadata = {
   title: 'Video Sessions',

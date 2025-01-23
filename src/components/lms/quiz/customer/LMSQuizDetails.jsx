@@ -9,7 +9,7 @@ import { getSingleQuiz } from '@/services/private/customer/quiz';
 import queryKeys from '@/utils/query-keys';
 import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
 
-const CustomerLMSQuizDetails = () => {
+const LMSQuizDetails = () => {
   const params = useParams();
   const {
     data: response,
@@ -51,4 +51,4 @@ const CustomerLMSQuizDetails = () => {
   );
 };
 
-export default CustomerLMSQuizDetails;
+export default LMSQuizDetails;
