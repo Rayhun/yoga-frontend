@@ -1,8 +1,9 @@
+'use client';
 import React, { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { useUI } from '@/context/UIProvider';
 
 const options = {
-  colors: ['#3C50E0', '#80CAEE'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     type: 'bar',
@@ -58,6 +59,7 @@ const options = {
 };
 
 const ChartTwo = () => {
+  const { theme } = useUI();
   const [state, setState] = useState({
     series: [
       {
@@ -118,7 +120,12 @@ const ChartTwo = () => {
 
       <div>
         <div id="chartTwo" className="-mb-9 -ml-5">
-          <ReactApexChart options={options} series={state.series} type="bar" height={350} />
+          <ReactApexChart
+            options={{ ...options, colors: [theme.colors.primary, theme.colors.secondary] }}
+            series={state.series}
+            type="bar"
+            height={350}
+          />
         </div>
       </div>
     </div>

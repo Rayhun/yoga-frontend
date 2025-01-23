@@ -185,7 +185,7 @@ const CustomerProgramDetails = () => {
                         {/* Completion Icon */}
                         {item.completed ? (
                           <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-                            <BiCheck size={24} className="bg-green-500 rounded-full text-white" />
+                            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
                           </div>
                         ) : null}
                       </div>
@@ -241,11 +241,11 @@ const CustomerProgramDetails = () => {
             <div className="flex flex-col gap-2">
               <LinearProgress
                 variant="determinate"
-                color="success"
-                className="rounded-full h-2"
+                color="warning"
+                className="rounded-full h-3"
                 value={programProgress}
                 classes={{
-                  bar: 'bg-green-500',
+                  bar: 'bg-secondary',
                 }}
               />
               <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
@@ -260,7 +260,7 @@ const CustomerProgramDetails = () => {
                   <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
                     <BiCheck
                       size={20}
-                      className={`rounded-full text-white ${item.completed ? 'bg-green-500' : 'bg-white'}`}
+                      className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white'}`}
                     />
                   </div>
                   <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>

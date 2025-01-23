@@ -1,5 +1,7 @@
+'use client';
 import React, { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { useUI } from '@/context/UIProvider';
 
 const options = {
   legend: {
@@ -7,7 +9,6 @@ const options = {
     position: 'top',
     horizontalAlign: 'left',
   },
-  colors: ['#3C50E0', '#80CAEE'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     height: 335,
@@ -47,10 +48,6 @@ const options = {
     width: [2, 2],
     curve: 'straight',
   },
-  // labels: {
-  //   show: false,
-  //   position: "top",
-  // },
   grid: {
     xaxis: {
       lines: {
@@ -69,7 +66,6 @@ const options = {
   markers: {
     size: 4,
     colors: '#fff',
-    strokeColors: ['#3056D3', '#80CAEE'],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
@@ -102,6 +98,7 @@ const options = {
 };
 
 const ChartOne = () => {
+  const { theme } = useUI();
   const [state, setState] = useState({
     series: [
       {
@@ -163,7 +160,18 @@ const ChartOne = () => {
 
       <div>
         <div id="chartOne" className="-ml-5">
-          <ReactApexChart options={options} series={state.series} type="area" height={350} />
+          <ReactApexChart
+            options={{
+              ...options,
+              colors: [theme.colors.primary, theme.colors.secondary],
+              markers: {
+                strokeColors: [theme.colors.primary, theme.colors.secondary],
+              },
+            }}
+            series={state.series}
+            type="area"
+            height={350}
+          />
         </div>
       </div>
     </div>

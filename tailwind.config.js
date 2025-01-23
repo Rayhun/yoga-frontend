@@ -36,8 +36,8 @@ const config = {
         bodydark: '#AEB7C0',
         bodydark1: '#DEE4EE',
         bodydark2: '#8A99AF',
-        primary: '#3C50E0',
-        secondary: '#80CAEE',
+        primary: '#69962B',
+        secondary: '#FF8544',
         stroke: '#E2E8F0',
         gray: {
           ...colors.gray,
@@ -53,6 +53,7 @@ const config = {
         strokedark: '#2E3A47',
         'form-strokedark': '#3d4d60',
         'form-input': '#1d2a39',
+        'nav-item': '#565656',
         meta: {
           1: '#DC3545',
           2: '#EFF2F7',
