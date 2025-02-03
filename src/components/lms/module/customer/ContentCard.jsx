@@ -52,43 +52,40 @@ const ContentCard = ({ item }) => {
   }, [content_type, duration, session_type]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
-      {/* Image */}
-      <div className="relative">
-        <Image
-          width={0}
-          height={0}
-          src={item?.image || '/images/content/default.png'}
-          alt="image"
-          sizes="100vw"
-          className="w-full h-40 object-cover rounded-t-lg"
-        />
-        {/* Completion Icon */}
-        {item.completed ? (
-          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
+    <Link href={contentRef.href}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
+        {/* Image */}
+        <div className="relative">
+          <div className="aspect-[16/9]">
+            <Image
+              width={0}
+              height={0}
+              src={item?.image || '/images/content/default.png'}
+              alt="image"
+              sizes="100vw"
+              className="w-full h-full object-cover rounded-t-lg"
+            />
           </div>
-        ) : null}
-      </div>
-
-      {/* Course Info */}
-      <div className="p-4 flex flex-col justify-between h-[160px]">
-        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
-
-        {/* Details */}
-        <div className="flex gap-2">
-          <Icon size={18} className="text-secondary" />
-          <p className="text-bodydark2 text-sm">{text}</p>
+          {/* Completion Icon */}
+          {item.completed ? (
+            <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
+              <BiCheck size={24} className="bg-secondary rounded-full text-white" />
+            </div>
+          ) : null}
         </div>
 
-        {/* Action Button */}
-        <Link href={contentRef.href}>
-          <button className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/80 transition">
-            {item.completed ? 'View' : 'Start'} {contentRef.label}
-          </button>
-        </Link>
+        {/* Course Info */}
+        <div className="p-4 flex flex-col justify-between h-[90px]">
+          <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
+
+          {/* Details */}
+          <div className="flex gap-2">
+            <Icon size={18} className="text-secondary" />
+            <p className="text-bodydark2 text-sm">{text}</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

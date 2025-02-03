@@ -28,10 +28,6 @@ const AudioSessionDetails = () => {
 
   return (
     <div>
-      <div className="flex justify-end mb-3">
-        <Button>Mark As Done</Button>
-      </div>
-
       {/* Details Card */}
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}

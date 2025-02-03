@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FaFilter } from 'react-icons/fa';
 import useToggle from '@/hooks/useToggle';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import Popup from '@/components/common/popup';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
@@ -15,11 +16,13 @@ import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {
   const router = useRouter();
+  const searchParams = useSearchParamUtils();
+  const selectedCategory = searchParams.get('category');
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
-  const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: getProgramsList,
-    queryKey: [queryKeys.customerPrograms],
+  const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
+    queryFn: () => getProgramsList({ category: selectedCategory }),
+    queryKey: [queryKeys.customerPrograms, selectedCategory],
   });
 
   const filteredPrograms = useMemo(
@@ -56,36 +59,38 @@ const ProgramsLibrary = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <FeaturedCategories />
+      <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
+        {/* Categories */}
+        <FeaturedCategories />
 
-      <div className="flex gap-4 items-center justify-end">
-        <input
-          className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-          placeholder="Search Programs"
-          onChange={e => setSearchText(e.target.value || '')}
-        />
-        <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
+        <div className="flex gap-4 items-center justify-end">
+          <input
+            className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            placeholder="Search Programs"
+            onChange={e => setSearchText(e.target.value || '')}
+          />
+          <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
+        </div>
+
+        {/* Content Cards */}
+        <section>
+          {isLoadingPrograms ? (
+            <div className="flex justify-center">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {filteredPrograms?.map(program => (
+                <ProgramCard
+                  key={program.id}
+                  program={program}
+                  onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-
-      {/* Content Cards */}
-      <section>
-        {isLoadingPrograms ? (
-          <div className="flex justify-center">
-            <Spinner />
-          </div>
-        ) : (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {filteredPrograms?.map(program => (
-              <ProgramCard
-                key={program.id}
-                program={program}
-                onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
 };

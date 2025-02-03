@@ -35,7 +35,7 @@ const YouTubeStyleAudioPlayer = ({ audio, thumbnail, title }) => {
   };
 
   return (
-    <div className="relative w-full max-w-lg mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
+    <div className="relative w-full bg-black rounded-xl overflow-hidden shadow-lg">
       {/* Thumbnail as Poster */}
       <div className="relative w-full flex items-center justify-center">
         <Image

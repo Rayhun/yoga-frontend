@@ -1,7 +1,7 @@
 import axios from '@/lib/axios';
 
-export const getProgramsList = async () => {
-  return axios.get('/customer/program/');
+export const getProgramsList = async ({ category = '' }) => {
+  return axios.get(`/customer/program/?category=${category}`);
 };
 
 export const getSingleProgram = async ({ id }) => {

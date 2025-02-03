@@ -128,7 +128,7 @@ const ProgramDetails = () => {
       </div>
 
       {/* Program Content */}
-      <div className="py-6 my-5 text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
+      <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
         <div className="w-full md:w-3/4">
           {/* Tabs */}
           <Tabs value={selectedTab} onChange={handleTabChange}>

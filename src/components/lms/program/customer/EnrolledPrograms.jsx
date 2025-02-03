@@ -27,7 +27,7 @@ const EnrolledPrograms = () => {
   const searchParams = useSearchParamUtils();
   const selectedStatus = searchParams.get('status') || 'all';
   const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: getProgramsList,
+    queryFn: () => getProgramsList(),
     queryKey: [queryKeys.customerPrograms],
   });
 
@@ -37,7 +37,7 @@ const EnrolledPrograms = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 md:gap-7">
+    <div className="flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
       {/* Status Filters */}
       <div className="flex gap-3 justify-center">
         {STATUS_FILTERS.map(filter => (
@@ -63,7 +63,7 @@ const EnrolledPrograms = () => {
           </div>
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {programsResponse.data?.results?.data?.['all-programs']?.map(program => (
+            {programsResponse?.data?.results?.data?.['all-programs']?.map(program => (
               <ProgramCard
                 key={program.id}
                 program={program}
