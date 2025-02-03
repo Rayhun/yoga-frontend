@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
+import Button from '@/components/common/Button';
 import { getSingleSession } from '@/services/private/customer/session';
 import queryKeys from '@/utils/query-keys';
 
@@ -53,6 +54,10 @@ const ImageSessionDetails = () => {
 
   return (
     <div>
+      <div className="flex justify-end mb-3">
+        <Button>Mark As Done</Button>
+      </div>
+
       {/* Details Card */}
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
@@ -63,14 +68,14 @@ const ImageSessionDetails = () => {
             width={0}
             height={0}
             sizes="100vw"
-            className="w-full max-h-[800px] rounded-lg shadow-lg"
+            className="w-full rounded-lg shadow-lg"
           />
         </div>
 
         {/* Right Section - Details */}
         <div className="w-full flex flex-col gap-5">
           <h3 className="text-2xl font-bold dark:text-white">{sessionDetails.title}</h3>
-          <p className="line-clamp-6 dark:text-white">{sessionDetails?.description}</p>
+          <p className="dark:text-white">{sessionDetails?.description}</p>
         </div>
       </div>
     </div>

@@ -7,13 +7,15 @@ const ProgramCard = ({ program, onClick }) => {
       className="rounded-lg border border-stroke bg-white shadow-default cursor-pointer overflow-hidden dark:bg-boxdark"
       onClick={onClick}
     >
-      <Image
-        width={200}
-        height={200}
-        src={program.image}
-        alt="image"
-        className="w-full h-52 object-cover rounded-t-lg"
-      />
+      <div className="aspect-[16/9]">
+        <Image
+          width={200}
+          height={200}
+          src={program.image}
+          alt="image"
+          className="w-full h-full object-cover rounded-t-lg"
+        />
+      </div>
 
       <div className="p-4 flex flex-col gap-1">
         <h4 className="text-lg font-semibold block truncate text-black dark:text-white">{program.title}</h4>

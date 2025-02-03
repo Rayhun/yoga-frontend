@@ -58,8 +58,8 @@ const SessionQuizContent = ({ content_type, session_type, duration = '10 min' })
 
   return (
     <div className="flex gap-2">
-      <Icon size={18} className="text-secondary" />
-      <p className="text-bodydark2 text-sm">{text}</p>
+      <Icon size={22} className="text-secondary" />
+      <p className="text-bodydark2 text-md">{text}</p>
     </div>
   );
 };
@@ -68,40 +68,37 @@ const ContentCard = ({ item }) => {
   const contentRef = getContentRef(item);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
-      {/* Image */}
-      <div className="relative">
-        <Image
-          width={0}
-          height={0}
-          src={item?.image || '/images/content/default.png'}
-          alt="image"
-          sizes="100vw"
-          className="w-full h-40 object-cover rounded-t-lg"
-        />
-        {/* Completion Icon */}
-        {item.completed ? (
-          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
+    <Link href={contentRef.href}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
+        {/* Image */}
+        <div className="relative">
+          <div className="aspect-[16/9]">
+            <Image
+              width={0}
+              height={0}
+              src={item?.image || '/images/content/default.png'}
+              alt="image"
+              sizes="100vw"
+              className="w-full h-full object-cover rounded-t-lg"
+            />
           </div>
-        ) : null}
+          {/* Completion Icon */}
+          {item.completed ? (
+            <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
+              <BiCheck size={24} className="bg-secondary rounded-full text-white" />
+            </div>
+          ) : null}
+        </div>
+
+        {/* Course Info */}
+        <div className="p-4 flex flex-col justify-between h-[110px]">
+          <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
+
+          {/* Details */}
+          {item.content_type === 'module' ? <ModuleContent {...item} /> : <SessionQuizContent {...item} />}
+        </div>
       </div>
-
-      {/* Course Info */}
-      <div className="p-4 flex flex-col justify-between h-[160px]">
-        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
-
-        {/* Details */}
-        {item.content_type === 'module' ? <ModuleContent {...item} /> : <SessionQuizContent {...item} />}
-
-        {/* Action Button */}
-        <Link href={contentRef.href}>
-          <button className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/80 transition">
-            {item.completed ? 'View' : 'Start'} {contentRef.label}
-          </button>
-        </Link>
-      </div>
-    </div>
+    </Link>
   );
 };
 

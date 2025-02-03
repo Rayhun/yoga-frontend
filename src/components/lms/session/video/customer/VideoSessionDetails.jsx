@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
+import Button from '@/components/common/Button';
 import VideoPlayer from '@/components/common/player/VideoPlayer';
 import { getSingleSession } from '@/services/private/customer/session';
 import queryKeys from '@/utils/query-keys';
@@ -28,7 +29,7 @@ const VideoSessionDetails = () => {
   const SESSION_CARDS = [
     {
       label: 'Total Run Time',
-      value: `${sessionDetails.duration} sec`,
+      value: sessionDetails.duration,
     },
     {
       label: 'Category',
@@ -44,7 +45,7 @@ const VideoSessionDetails = () => {
     },
     {
       label: 'Equipment',
-      value: sessionDetails.intensity.equipments?.[0],
+      value: sessionDetails.equipments?.[0],
     },
     {
       label: 'Focus Area',
@@ -54,6 +55,10 @@ const VideoSessionDetails = () => {
 
   return (
     <div>
+      <div className="flex justify-end mb-3">
+        <Button>Mark As Done</Button>
+      </div>
+
       {/* Details Card */}
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Video */}
@@ -85,7 +90,7 @@ const VideoSessionDetails = () => {
             </div>
           </div>
 
-          <p className="line-clamp-4 dark:text-white">{sessionDetails?.description}</p>
+          <p className="dark:text-white">{sessionDetails?.description}</p>
         </div>
       </div>
     </div>

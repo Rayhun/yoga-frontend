@@ -3,6 +3,7 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import Button from '@/components/common/Button';
 import PageLoader from '@/components/common/loader/PageLoader';
 import AudioPlayer from '@/components/common/player/AudioPlayer';
 import { getSingleSession } from '@/services/private/customer/session';
@@ -27,11 +28,15 @@ const AudioSessionDetails = () => {
 
   return (
     <div>
+      <div className="flex justify-end mb-3">
+        <Button>Mark As Done</Button>
+      </div>
+
       {/* Details Card */}
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
         <div className="w-full flex justify-center">
-          <AudioPlayer src={sessionDetails.content_link} size={200} />
+          <AudioPlayer audio={sessionDetails.content_link} thumbnail={sessionDetails.image} />
         </div>
 
         {/* Right Section - Details */}
@@ -46,7 +51,7 @@ const AudioSessionDetails = () => {
             </div>
           </div>
 
-          <p className="line-clamp-6 dark:text-white">{sessionDetails?.description}</p>
+          <p className="dark:text-white">{sessionDetails?.description}</p>
         </div>
       </div>
     </div>

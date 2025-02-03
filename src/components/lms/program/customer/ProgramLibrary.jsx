@@ -37,14 +37,14 @@ const ProgramsLibrary = () => {
       </Popup>
 
       {/* Hero Section */}
-      <div className="bg-bodydark1 rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
+      <div className="bg-white rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl md:text-4xl font-bold">Your Journey Starts Here</h1>
           <p className="break-words line-clamp-2 dark:text-gray-300">
             Achieve your personal goals with curated wellness plans developed by our expert
           </p>
         </div>
-        <div className="md:w-1/2 mt-6 md:mt-0">
+        <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
           <Image
             src="/images/content/default.png"
             alt="Hero Image"

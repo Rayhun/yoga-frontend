@@ -1,86 +1,98 @@
 'use client';
-import { useRef, useState } from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
-import { FaCirclePlay, FaCirclePause } from 'react-icons/fa6';
-import { TbRewindBackward10, TbRewindForward10 } from 'react-icons/tb';
+import { useState, useRef } from 'react';
+import ReactPlayer from 'react-player';
+import { FaPlay, FaPause } from 'react-icons/fa6';
+import Image from 'next/image';
 
-const AudioPlayer = ({ src, size = 150 }) => {
-  const audioRef = useRef(null);
+const YouTubeStyleAudioPlayer = ({ audio, thumbnail, title }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const playerRef = useRef(null);
 
+  // Toggle play/pause
   const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
     setIsPlaying(!isPlaying);
   };
 
-  const handleTimeUpdate = () => {
-    const currentTime = audioRef.current.currentTime;
-    const duration = audioRef.current.duration;
-    setProgress((currentTime / duration) * 100);
+  // Handle progress bar change
+  const handleSeek = e => {
+    const seekTime = (e.target.value / 100) * duration;
+    playerRef.current.seekTo(seekTime, 'seconds');
+    setProgress(seekTime);
   };
 
-  const rewind10 = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
-    }
+  // Update progress
+  const handleProgress = state => {
+    setProgress(state.playedSeconds);
   };
 
-  const forward10 = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.min(
-        audioRef.current.duration || 0,
-        audioRef.current.currentTime + 10
-      );
-    }
-  };
-
-  const handleAudioEnd = () => {
-    setIsPlaying(false);
-    setProgress(0);
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-    }
+  // Format time (seconds to MM:SS)
+  const formatTime = seconds => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div class="relative">
-        <CircularProgress
-          variant="determinate"
-          value={progress}
-          size={size}
-          thickness={size / 30}
-          className="text-primary/50"
+    <div className="relative w-full max-w-lg mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
+      {/* Thumbnail as Poster */}
+      <div className="relative w-full flex items-center justify-center">
+        <Image
+          src={thumbnail}
+          alt={title}
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-full object-cover"
         />
-        <div class="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
-          <button onClick={togglePlayPause}>
-            <span className="text-primary">
-              {isPlaying ? <FaCirclePause size={size / 2} /> : <FaCirclePlay size={size / 2} />}
-            </span>
-          </button>
+        {/* Play Button */}
+        <button
+          onClick={togglePlayPause}
+          className="absolute bg-white p-6 rounded-full shadow-lg hover:scale-105 transition"
+        >
+          {isPlaying ? (
+            <FaPause size={40} className="text-black" />
+          ) : (
+            <FaPlay size={40} className="text-black" />
+          )}
+        </button>
+      </div>
+
+      {/* Player Controls */}
+      <div className="controls p-4 bg-gray-700 text-white">
+        {/* Title */}
+        <h3 className="text-lg font-semibold mb-2 truncate">{title}</h3>
+
+        {/* Progress Bar */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-secondary">{formatTime(progress)}</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={(progress / duration) * 100 || 0}
+            onChange={handleSeek}
+            className="flex-1 h-1 bg-secondary appearance-none rounded-full cursor-pointer"
+          />
+          <span className="text-sm text-secondary">{formatTime(duration)}</span>
         </div>
-        <audio ref={audioRef} src={src} onTimeUpdate={handleTimeUpdate} onEnded={handleAudioEnd}></audio>
       </div>
-      <div className="mt-5 flex justify-center items-center gap-10">
-        <TbRewindBackward10 size={size / 7} className="cursor-pointer" onClick={rewind10} />
-        <p className="text-sm text-center min-w-12 text-gray-600 dark:text-white">
-          {Math.floor((audioRef.current?.currentTime || 0) / 60)
-            .toString()
-            .padStart(2, '0')}
-          :
-          {Math.floor((audioRef.current?.currentTime || 0) % 60)
-            .toString()
-            .padStart(2, '0')}
-        </p>
-        <TbRewindForward10 size={size / 7} className="cursor-pointer" onClick={forward10} />
-      </div>
+
+      {/* Hidden ReactPlayer */}
+      <ReactPlayer
+        ref={playerRef}
+        url={audio}
+        playing={isPlaying}
+        controls={false}
+        onProgress={handleProgress}
+        onDuration={d => setDuration(d)}
+        height={0}
+        width={0}
+        onEnded={() => setIsPlaying(false)}
+      />
     </div>
   );
 };
 
-export default AudioPlayer;
+export default YouTubeStyleAudioPlayer;

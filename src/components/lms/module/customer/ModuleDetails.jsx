@@ -94,7 +94,7 @@ const ModuleDetails = () => {
             <p>(27 ratings)</p>
           </div> */}
 
-          {moduleDetails?.experts.length > 0 ? (
+          {moduleDetails?.experts?.length > 0 ? (
             <div
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleViewExperts(moduleDetails?.experts)}
@@ -113,13 +113,6 @@ const ModuleDetails = () => {
               </p>
             </div>
           ) : null}
-
-          {/* Begin Module Button */}
-          <div className="flex flex-col gap-3">
-            <button className="w-full md:w-auto bg-primary text-white p-4 rounded-md shadow hover:bg-primary/80">
-              Begin Module
-            </button>
-          </div>
         </div>
       </div>
 
