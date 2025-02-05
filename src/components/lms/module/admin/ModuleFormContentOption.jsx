@@ -5,11 +5,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useFormikContext } from 'formik';
 import IconButton from '@mui/material/IconButton';
 import { RiCloseCircleLine } from 'react-icons/ri';
+import useUpdateEffect from '@/hooks/useUpdateEffect';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { getModuleContentOptions } from '@/services/private/lms/module';
 import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 
-const ModuleFormContentOption = ({ name, onRemove }) => {
+const ModuleFormContentOption = ({ values, name, onRemove }) => {
   const { setFieldValue } = useFormikContext();
   const [contentOptions, setContentOptions] = useState([]);
 
@@ -17,25 +18,18 @@ const ModuleFormContentOption = ({ name, onRemove }) => {
     mutationFn: getModuleContentOptions,
   });
 
-  const handleContentTypeChange = useCallback(async selectedType => {
-    try {
-      if (!selectedType) return;
+  useUpdateEffect(() => {
+    // setFieldValue(`${name}.content_id`, '');
 
-      setContentOptions([]);
-      setFieldValue(`${name}.content_id`, '');
-
-      const contentOptionsResponse = await getContentOptions({ type: selectedType });
+    getContentOptions({ type: values.content_type }).then(contentOptionsResponse => {
       const modifiedOptionsData = contentOptionsResponse?.data?.map(i => ({
         label: i.title,
         value: i.id,
       }));
 
       setContentOptions(modifiedOptionsData);
-    } catch (error) {
-      toast.error('Something went wrong in fetching content options');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    });
+  }, [values.content_type]);
 
   return (
     <div className="flex gap-x-6 gap-y-1 items-center overflow-auto">
@@ -45,7 +39,7 @@ const ModuleFormContentOption = ({ name, onRemove }) => {
           label="Type"
           placeholder="Type"
           options={MODULE_TYPE_OPTIONS}
-          onChange={value => handleContentTypeChange(value)}
+          onChange={() => setFieldValue(`${name}.content_id`, '')}
           required
         />
       </div>

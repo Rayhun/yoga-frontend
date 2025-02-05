@@ -45,7 +45,7 @@ const ModuleForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    module_content: (selected?.module_content || [{ content_id: '', content_type: '' }]).map(
+    module_content: (selected?.module || [{ content_id: '', content_type: '' }]).map(
       ({ content_id, content_type }) => ({
         content_id,
         content_type,
@@ -137,7 +137,7 @@ const ModuleForm = ({ selected }) => {
                 <FormikDropzone
                   name="file"
                   label="File"
-                  fileURLs={selected?.file ? [selected.file] : []}
+                  fileURLs={selected?.image ? [selected.image] : []}
                   Icon={FaRegFileImage}
                   required
                 />

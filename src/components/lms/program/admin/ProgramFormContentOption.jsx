@@ -1,42 +1,31 @@
 'use client';
-import { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useFormikContext } from 'formik';
 import IconButton from '@mui/material/IconButton';
 import { RiCloseCircleLine } from 'react-icons/ri';
+import useUpdateEffect from '@/hooks/useUpdateEffect';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikField from '@/components/common/form/formik/FormikField';
 import { getProgramContentOptions } from '@/services/private/lms/program';
 import { PROGRAM_TYPE_OPTIONS } from '@/utils/options';
 
-const ProgramFormContentOption = ({ name, onRemove }) => {
-  const { setFieldValue } = useFormikContext();
+const ProgramFormContentOption = ({ values, name, onRemove }) => {
   const [contentOptions, setContentOptions] = useState([]);
 
   const { mutateAsync: getContentOptions } = useMutation({
     mutationFn: getProgramContentOptions,
   });
 
-  const handleContentTypeChange = useCallback(async selectedType => {
-    try {
-      if (!selectedType) return;
-
-      setContentOptions([]);
-      setFieldValue(`${name}.content_id`, '');
-
-      const contentOptionsResponse = await getContentOptions({ type: selectedType });
+  useUpdateEffect(() => {
+    getContentOptions({ type: values.content_type }).then(contentOptionsResponse => {
       const modifiedOptionsData = contentOptionsResponse?.data?.map(i => ({
         label: i.title,
         value: i.id,
       }));
 
       setContentOptions(modifiedOptionsData);
-    } catch (error) {
-      toast.error('Something went wrong in fetching content options');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    });
+  }, [values.content_type]);
 
   return (
     <div className="flex gap-x-6 gap-y-1 items-center overflow-auto">
@@ -46,7 +35,7 @@ const ProgramFormContentOption = ({ name, onRemove }) => {
           label="Type"
           placeholder="Type"
           options={PROGRAM_TYPE_OPTIONS}
-          onChange={value => handleContentTypeChange(value)}
+          onChange={() => setFieldValue(`${name}.content_id`, '')}
           required
         />
       </div>

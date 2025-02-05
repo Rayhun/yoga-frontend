@@ -45,7 +45,7 @@ const ProgramForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    program_content: (selected?.program_content || [{ content_id: '', content_type: '', drip: '' }]).map(
+    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }]).map(
       ({ content_id, content_type, drip }) => ({
         content_id,
         content_type,
@@ -138,7 +138,7 @@ const ProgramForm = ({ selected }) => {
                 <FormikDropzone
                   name="file"
                   label="File"
-                  fileURLs={selected?.file ? [selected.file] : []}
+                  fileURLs={selected?.image ? [selected.image] : []}
                   Icon={FaRegFileImage}
                   required
                 />

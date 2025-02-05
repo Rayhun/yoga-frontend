@@ -8,7 +8,12 @@ const ModuleFormContentOptions = ({ form, name, push, remove }) => {
   return (
     <div className="flex flex-col gap-3">
       {form.values?.[name]?.map((_, i) => (
-        <ModuleFormContentOption key={i} name={`${name}[${i}]`} onRemove={() => remove(i)} />
+        <ModuleFormContentOption
+          key={i}
+          name={`${name}[${i}]`}
+          values={form.values?.[name]?.[i]}
+          onRemove={() => remove(i)}
+        />
       ))}
       <Button
         type="button"
