@@ -116,6 +116,15 @@ const CUSTOMER = [
   },
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER };
+const TEACHER = [
+  {
+    Icon: MdHome,
+    label: 'Home',
+    href: '/portal',
+    isActive: pathname => pathname === '/portal',
+  },
+];
+
+const SIDEBAR = { ADMIN, CUSTOMER, TEACHER };
 
 export default SIDEBAR;

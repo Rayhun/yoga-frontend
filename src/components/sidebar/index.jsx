@@ -59,6 +59,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
+    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.TEACHER;
     return SIDEBAR.CUSTOMER;
   }, [userRole]);
 
