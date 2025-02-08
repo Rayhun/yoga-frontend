@@ -69,3 +69,19 @@ export const ONBOARDING_QUIZ_CONTENT_TYPE = {
   text: 'Single Select without Image',
   image: 'Single Select with Image',
 };
+
+export const SUBSCRIPTION_PAGE_STATUS = {
+  active: 'Active',
+  in_active: 'InActive',
+};
+
+export const SUBSCRIPTION_PAGE_TYPE = {
+  individual: 'Individual',
+  busniess: 'Business',
+};
+
+export const SUBSCRIPTION_PAGE_TENURE = {
+  monthly: 'Monthly',
+  quaterly: 'Quarterly',
+  yearly: 'Yearly',
+};

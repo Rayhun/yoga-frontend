@@ -4,7 +4,7 @@ import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Spinner from '@/components/common/loader/Spinner';
 
-const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
+const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = true, showFooter = true }) => {
   const { getHeaderGroups, getRowModel, getPageCount, getState, setGlobalFilter, setPageSize, setPageIndex } =
     table;
 
@@ -16,35 +16,37 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
   const pagesCount = getPageCount();
 
   return (
-    <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white py-4 shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="flex justify-between border-b border-stroke px-8 pb-4 dark:border-strokedark">
-        <div className="w-100">
-          <input
-            type="text"
-            value={globalFilter}
-            onChange={e => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-stroke px-5 py-2.5 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
-            placeholder="Search..."
-          />
-        </div>
+    <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      {showHeader ? (
+        <div className="flex justify-between border-b border-stroke px-8 py-4 dark:border-strokedark">
+          <div className="w-100">
+            <input
+              type="text"
+              value={globalFilter}
+              onChange={e => setGlobalFilter(e.target.value)}
+              className="w-full rounded-md border border-stroke px-5 py-2.5 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+              placeholder="Search..."
+            />
+          </div>
 
-        <div className="flex items-center font-medium">
-          <select
-            value={pageSize}
-            onChange={e => setPageSize(Number(e.target.value))}
-            className="bg-transparent pl-2"
-          >
-            {[5, 10, 20, 50].map(page => (
-              <option key={page} value={page}>
-                {page}
-              </option>
-            ))}
-          </select>
-          <p className="pl-2 text-black dark:text-white">Entries Per Page</p>
+          <div className="flex items-center font-medium">
+            <select
+              value={pageSize}
+              onChange={e => setPageSize(Number(e.target.value))}
+              className="bg-transparent pl-2"
+            >
+              {[5, 10, 20, 50].map(page => (
+                <option key={page} value={page}>
+                  {page}
+                </option>
+              ))}
+            </select>
+            <p className="pl-2 text-black dark:text-white">Entries Per Page</p>
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <table className="datatable-table w-full table-auto !border-collapse overflow-hidden break-words px-4 md:table-fixed md:overflow-auto md:px-8">
+      <table className="datatable-table w-full table-auto !border-collapse overflow-hidden break-words px-4 md:table-fixed md:overflow-auto md:px-8 !h-[300px]">
         <thead>
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id} className="bg-[#F9FAFB] dark:bg-meta-4">
@@ -124,17 +126,19 @@ const CustomTable = ({ isLoading = false, table, pagination = {} }) => {
         </tbody>
       </table>
 
-      <div className="flex justify-between border-t border-stroke px-8 pt-5 dark:border-strokedark">
-        <p className="font-medium">
-          Showing {pageIndex + 1} 0f {pagesCount} pages
-        </p>
-        <Pagination
-          count={pagesCount}
-          page={pageIndex + 1}
-          onChange={(_, page) => setPageIndex(page - 1)}
-          renderItem={item => <PaginationItem {...item} color="primary" className="dark:text-white" />}
-        />
-      </div>
+      {showFooter ? (
+        <div className="flex justify-between border-t border-stroke px-8 py-5 dark:border-strokedark">
+          <p className="font-medium">
+            Showing {pageIndex + 1} 0f {pagesCount} pages
+          </p>
+          <Pagination
+            count={pagesCount}
+            page={pageIndex + 1}
+            onChange={(_, page) => setPageIndex(page - 1)}
+            renderItem={item => <PaginationItem {...item} color="primary" className="dark:text-white" />}
+          />
+        </div>
+      ) : null}
     </section>
   );
 };

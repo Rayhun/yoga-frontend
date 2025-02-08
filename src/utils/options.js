@@ -8,6 +8,9 @@ import {
   VISIBILITY_SETTING,
   PROGRAM_TYPE,
   ONBOARDING_QUIZ_CONTENT_TYPE,
+  SUBSCRIPTION_PAGE_STATUS,
+  SUBSCRIPTION_PAGE_TYPE,
+  SUBSCRIPTION_PAGE_TENURE,
 } from './enums';
 
 export const CONTENT_TYPE_OPTIONS = [
@@ -190,5 +193,42 @@ export const ONBOARDING_QUIZ_CONTENT_TYPE_OPTIONS = [
   {
     label: 'Image',
     value: ONBOARDING_QUIZ_CONTENT_TYPE.image,
+  },
+];
+
+export const SUBSCRIPTION_PAGE_STATUS_OPTIONS = [
+  {
+    label: 'Active',
+    value: SUBSCRIPTION_PAGE_STATUS.active,
+  },
+  {
+    label: 'InActive',
+    value: SUBSCRIPTION_PAGE_STATUS.inactive,
+  },
+];
+
+export const SUBSCRIPTION_PAGE_TYPE_OPTIONS = [
+  {
+    label: 'Individual',
+    value: SUBSCRIPTION_PAGE_TYPE.individual,
+  },
+  {
+    label: 'Business',
+    value: SUBSCRIPTION_PAGE_TYPE.busniess,
+  },
+];
+
+export const SUBSCRIPTION_PAGE_TENURE_OPTIONS = [
+  {
+    label: 'Monthly',
+    value: SUBSCRIPTION_PAGE_TENURE.monthly,
+  },
+  {
+    label: 'Quaterly',
+    value: SUBSCRIPTION_PAGE_TENURE.quaterly,
+  },
+  {
+    label: 'Yearly',
+    value: SUBSCRIPTION_PAGE_TENURE.yearly,
   },
 ];

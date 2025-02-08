@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table';
 import CustomTable from './Table';
 
-const BasicTable = ({ isLoading = false, columns = [], data = [] }) => {
+const BasicTable = ({ isLoading = false, columns = [], data = [], ...restProps }) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
@@ -28,7 +28,7 @@ const BasicTable = ({ isLoading = false, columns = [], data = [] }) => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  return <CustomTable table={table} pagination={pagination} isLoading={isLoading} />;
+  return <CustomTable {...restProps} table={table} pagination={pagination} isLoading={isLoading} />;
 };
 
 export default BasicTable;

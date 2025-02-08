@@ -1,38 +1,7 @@
 'use client';
-import { useMemo } from 'react';
-import Link from 'next/link';
-import { FaRegFileAudio, FaRegFileImage, FaRegFileVideo, FaRegNewspaper } from 'react-icons/fa6';
-import { IoMdPaper } from 'react-icons/io';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
-import { MODULE_TYPE } from '@/utils/enums';
-
-const ContentCard = ({ content_id, content_type }) => {
-  const Icon = useMemo(() => {
-    if (content_type === MODULE_TYPE.audio) return FaRegFileAudio;
-    if (content_type === MODULE_TYPE.image) return FaRegFileImage;
-    if (content_type === MODULE_TYPE.video) return FaRegFileVideo;
-    if (content_type === MODULE_TYPE.quiz) return FaRegNewspaper;
-    return IoMdPaper;
-  }, [content_type]);
-
-  const docLink = useMemo(() => {
-    if (content_type === MODULE_TYPE.audio) return '/portal/admin/lms/session/audio';
-    if (content_type === MODULE_TYPE.image) return '/portal/admin/lms/session/image';
-    if (content_type === MODULE_TYPE.video) return '/portal/admin/lms/session/video';
-    if (content_type === MODULE_TYPE.quiz) return '/portal/admin/lms/quiz';
-    return '/';
-  }, [content_type]);
-
-  return (
-    <Link href={`${docLink}/${content_id}/details`}>
-      <div className="w-[100px] h-[100px] bg-gray-300 rounded-lg shadow-lg relative group flex flex-col gap-2 justify-center items-center">
-        <Icon size={30} />
-        <p className="max-w-[80%] break-words dark:text-white">{content_type}</p>
-      </div>
-    </Link>
-  );
-};
+import { BasicTable } from '@/components/common/table';
 
 const ModuleDetails = ({ data = {} }) => {
   return (
@@ -56,11 +25,21 @@ const ModuleDetails = ({ data = {} }) => {
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
         <DetailsRecord label="Content">
-          <div className="flex flex-wrap gap-3">
-            {data.module?.map(item => (
-              <ContentCard key={item.id} {...item} />
-            ))}
-          </div>
+          <BasicTable
+            columns={[
+              {
+                header: 'Content Type',
+                accessorKey: 'content_type',
+              },
+              {
+                header: 'Content',
+                accessorKey: 'content_id',
+              },
+            ]}
+            data={data.module}
+            showHeader={false}
+            showFooter={false}
+          />
         </DetailsRecord>
       </div>
     </DetailsLayoutWrapper>

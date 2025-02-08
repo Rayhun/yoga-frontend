@@ -128,7 +128,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {/* Sidebar Menu */}
         <nav className="mt-3 px-4 py-4 lg:px-6 flex flex-col h-full">
           {/* Menu Group */}
-          <ul className="flex-grow flex flex-col gap-2">
+          <ul className="flex-grow flex flex-col gap-2 mb-20">
             {subRoleBasedSidebarMenuItems.map(menuItem => (
               <React.Fragment key={menuItem.label}>
                 {menuItem.sub_menu ? (

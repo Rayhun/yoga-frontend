@@ -1,4 +1,4 @@
-import { MdOutlineHome, MdViewModule, MdCategory, MdHome } from 'react-icons/md';
+import { MdOutlineHome, MdViewModule, MdCategory, MdHome, MdSubscriptions, MdPages } from 'react-icons/md';
 import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
@@ -79,6 +79,18 @@ const ADMIN = [
     label: 'Tags',
     href: '/portal/admin/lms/tag',
     isActive: pathname => pathname.includes('/portal/admin/lms/tag'),
+  },
+  {
+    Icon: MdSubscriptions,
+    label: 'Subscription Plans',
+    href: '/portal/admin/subscription/plan',
+    isActive: pathname => pathname.includes('/portal/admin/subscription/plan'),
+  },
+  {
+    Icon: MdPages,
+    label: 'Subscription Pages',
+    href: '/portal/admin/subscription/page',
+    isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
   },
 ];
 
