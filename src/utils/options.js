@@ -203,7 +203,7 @@ export const SUBSCRIPTION_PAGE_STATUS_OPTIONS = [
   },
   {
     label: 'InActive',
-    value: SUBSCRIPTION_PAGE_STATUS.inactive,
+    value: SUBSCRIPTION_PAGE_STATUS.in_active,
   },
 ];
 

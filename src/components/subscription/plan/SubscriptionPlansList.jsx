@@ -25,8 +25,16 @@ const SubscriptionPlansList = () => {
         accessorKey: 'title',
       },
       {
-        header: 'Description',
-        accessorKey: 'description',
+        header: 'Tenure',
+        accessorKey: 'subscription_tenure',
+      },
+      {
+        header: 'Price',
+        cell: ({ row }) => row?.original?.discounted_price || row?.original?.price,
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
       },
     ],
     []

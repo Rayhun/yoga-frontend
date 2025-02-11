@@ -4,7 +4,7 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
 import SubscriptionPlanForm from '@/components/subscription/plan/SubscriptionPlanForm';
-import { getSingleTag } from '@/services/private/lms/tag';
+import { getSingleSubscriptionPlan } from '@/services/private/subscription/plan';
 import queryKeys from '@/utils/query-keys';
 
 const Page = ({ params }) => {
@@ -13,8 +13,8 @@ const Page = ({ params }) => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleTag({ id: params.id }),
-    queryKey: [queryKeys.lmsTags, params.id],
+    queryFn: () => getSingleSubscriptionPlan({ id: params.id }),
+    queryKey: [queryKeys.subscriptionPlans, params.id],
   });
 
   useHandleApiResponse(failureReason);

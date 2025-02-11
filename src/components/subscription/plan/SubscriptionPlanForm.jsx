@@ -30,22 +30,24 @@ const SubscriptionPlanForm = ({ selected }) => {
   });
 
   const initialValues = {
-    name: selected?.name || '',
+    title: selected?.title || '',
     status: selected?.status || '',
     subscription_type: selected?.subscription_type || '',
     subscription_tenure: selected?.subscription_tenure || '',
     price: selected?.price || '',
     discounted_price: selected?.discounted_price || '',
+    price_id: selected?.price_id || '',
     features: selected?.features || '',
   };
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Required!'),
+    title: Yup.string().required('Required!'),
     status: Yup.string().required('Required!'),
     subscription_type: Yup.string().required('Required!'),
     subscription_tenure: Yup.string().required('Required!'),
     price: Yup.number().required('Required!'),
     discounted_price: Yup.number().required('Required!'),
+    price_id: Yup.string().required('Required!'),
     features: Yup.string().required('Required!'),
   });
 
@@ -81,7 +83,7 @@ const SubscriptionPlanForm = ({ selected }) => {
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full xl:w-1/2">
-                <FormikField name="name" label="Name" placeholder="Name" required />
+                <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full xl:w-1/2">
                 <FormikSelect
@@ -127,6 +129,7 @@ const SubscriptionPlanForm = ({ selected }) => {
                 />
               </div>
             </div>
+            <FormikField name="price_id" label="Stripe Price ID" placeholder="Stripe Price ID" required />
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
