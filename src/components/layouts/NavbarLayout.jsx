@@ -6,10 +6,8 @@ const NavbarLayout = ({ children }) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <SimpleNavbar />
-      <main>
-        <Toolbar />
-        {children}
-      </main>
+      <Toolbar />
+      <main className="h-full overflow-y-auto">{children}</main>
     </div>
   );
 };

@@ -8,8 +8,8 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
   const [selectedTenure, setSelectedTenure] = useState(pageDetails?.tenure?.[1]);
 
   const filteredSubscriptionPlans = useMemo(
-    () => (pageDetails?.plans || []).filter(plan => plan.subscription_tenure),
-    [pageDetails?.plans]
+    () => (pageDetails?.plans || []).filter(plan => plan.subscription_tenure === selectedTenure),
+    [pageDetails?.plans, selectedTenure]
   );
 
   return (
@@ -35,8 +35,8 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
 
       <Grid container spacing={6} justifyContent="center" className="w-full md:w-[80%]">
         {filteredSubscriptionPlans.map((plan, i) => (
-          <Grid key={plan.id} size={4}>
-            <Slide in direction="down" timeout={500 + i * 500}>
+          <Grid key={plan.id} size={{ xs: 12, md: 6, lg: 4 }}>
+            <Slide in direction="right" timeout={300 + i * 300}>
               <div>
                 <SubscriptionPlanCard data={plan} />
               </div>

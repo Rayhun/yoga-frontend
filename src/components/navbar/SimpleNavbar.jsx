@@ -18,13 +18,11 @@ const SimpleNavbar = () => {
     setMobileOpen(prevState => !prevState);
   };
 
-  const container = window !== undefined ? () => window.document.body : undefined;
-
   return (
-    <div className="flex">
+    <div>
       <AppBar component="nav">
-        <Toolbar className="bg-white dark:bg-boxdark flex justify-between">
-          <IconButton edge="start" onClick={handleDrawerToggle} className="mr-3 sm:hidden">
+        <Toolbar className="w-full h-full bg-white dark:bg-boxdark flex justify-between">
+          <IconButton edge="start" onClick={handleDrawerToggle} className="mr-3 sm:!hidden">
             <MdMenu className="text-bodydark dark:text-white" />
           </IconButton>
           {/* Logo */}
@@ -55,7 +53,7 @@ const SimpleNavbar = () => {
       </AppBar>
       <nav>
         <Drawer
-          container={container}
+          container={document.body}
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
@@ -65,7 +63,7 @@ const SimpleNavbar = () => {
           PaperProps={{
             className: 'bg-white dark:bg-boxdark p-3',
           }}
-          className="sm:hidden"
+          className="sm:!hidden"
           sx={{
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 300 },
           }}
