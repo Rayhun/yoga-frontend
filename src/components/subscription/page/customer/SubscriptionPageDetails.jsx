@@ -5,10 +5,18 @@ import Slide from '@mui/material/Slide';
 import SubscriptionPlanCard from '@/components/subscription/plan/customer/SubscriptionPlanCard';
 
 const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
-  const [selectedTenure, setSelectedTenure] = useState(pageDetails?.tenure?.[1]);
+  const [selectedTenure, setSelectedTenure] = useState('');
+
+  const tenureOptions = useMemo(() => {
+    const options = (pageDetails?.tenure || []).map(i => ({ label: i, value: i }));
+    return [{ label: 'All', value: '' }, ...options];
+  }, [pageDetails?.tenure]);
 
   const filteredSubscriptionPlans = useMemo(
-    () => (pageDetails?.plans || []).filter(plan => plan.subscription_tenure === selectedTenure),
+    () =>
+      (pageDetails?.plans || []).filter(plan =>
+        selectedTenure ? plan.subscription_tenure === selectedTenure : true
+      ),
     [pageDetails?.plans, selectedTenure]
   );
 
@@ -20,15 +28,15 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
       </div>
 
       <div className="flex border-2 border-primary bg-gray-100 rounded-full">
-        {pageDetails?.tenure?.map(tenure => (
+        {tenureOptions?.map(tenure => (
           <button
-            key={tenure}
+            key={tenure.value}
             className={`px-4 py-2 text-xs md:text-sm rounded-full transition-colors duration-300 ${
-              selectedTenure === tenure ? 'bg-primary text-white' : 'text-gray-700'
+              selectedTenure === tenure.value ? 'bg-primary text-white' : 'text-gray-700'
             }`}
-            onClick={() => setSelectedTenure(tenure)}
+            onClick={() => setSelectedTenure(tenure.value)}
           >
-            {tenure}
+            {tenure.label}
           </button>
         ))}
       </div>
