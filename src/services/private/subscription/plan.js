@@ -19,3 +19,7 @@ export const updateExistingSubscriptionPlan = async ({ payload: { id, ...payload
 export const deleteSingleSubscriptionPlan = async ({ id }) => {
   return axios.delete(`/subscription/plan/${id}/`);
 };
+
+export const createCheckoutSessionForSubscriptionPlan = async ({ id }) => {
+  return axios.post(`/subscription/plan/${id}/checkout/`);
+};

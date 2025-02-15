@@ -37,7 +37,7 @@ const SubscriptionPlanForm = ({ selected }) => {
     price: selected?.price || '',
     discounted_price: selected?.discounted_price || '',
     price_id: selected?.price_id || '',
-    features: selected?.features || '',
+    features: selected?.features?.join('\n') || '',
   };
 
   const validationSchema = Yup.object({

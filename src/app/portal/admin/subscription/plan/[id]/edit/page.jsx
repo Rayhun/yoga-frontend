@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import SubscriptionPlanForm from '@/components/subscription/plan/SubscriptionPlanForm';
+import SubscriptionPlanForm from '@/components/subscription/plan/admin/SubscriptionPlanForm';
 import { getSingleSubscriptionPlan } from '@/services/private/subscription/plan';
 import queryKeys from '@/utils/query-keys';
 

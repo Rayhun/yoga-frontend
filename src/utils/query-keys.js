@@ -13,6 +13,7 @@ const queryKeys = {
   lmsPrograms: 'lmsPrograms',
   subscriptionPages: 'subscriptionPages',
   subscriptionPlans: 'subscriptionPlans',
+  stripeCheckoutSessions: 'stripeCheckoutSessions',
   customerQuizes: 'customerQuizes',
   customerPrograms: 'customerPrograms',
   customerModules: 'customerModules',

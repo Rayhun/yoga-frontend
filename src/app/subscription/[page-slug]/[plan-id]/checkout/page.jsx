@@ -1,0 +1,45 @@
+'use client';
+import { useQuery } from '@tanstack/react-query';
+import Alert from '@mui/material/Alert';
+import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import { createCheckoutSessionForSubscriptionPlan } from '@/services/private/subscription/plan';
+import queryKeys from '@/utils/query-keys';
+import StripeCheckout from '@/components/subscription/checkout/StripeCheckout';
+import LoadingWrapper from '@/components/common/loader/Wrapper';
+
+const Page = ({ params }) => {
+  const planID = params['plan-id'];
+
+  const {
+    data: response,
+    isLoading,
+    failureReason,
+  } = useQuery({
+    queryFn: () => createCheckoutSessionForSubscriptionPlan({ id: planID }),
+    queryKey: [queryKeys.stripeCheckoutSessions, planID],
+  });
+
+  useHandleApiResponse(failureReason);
+
+  const clientSecret = response?.data?.data?.checkout_session_client_secret;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-900">Checkout</h2>
+        <Alert className="mt-5" variant="filled" severity="warning">
+          Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
+        </Alert>
+      </div>
+      <LoadingWrapper isLoading={isLoading}>
+        {clientSecret ? (
+          <StripeCheckout clientSecret={clientSecret} />
+        ) : (
+          <div className="text-center">Checkout Session not created properly</div>
+        )}
+      </LoadingWrapper>
+    </div>
+  );
+};
+
+export default Page;

@@ -1,4 +1,4 @@
-import SubscriptionPagesList from '@/components/subscription/page/SubscriptionPagesList';
+import SubscriptionPagesList from '@/components/subscription/page/admin/SubscriptionPagesList';
 
 export const metadata = {
   title: 'Subscription Pages',

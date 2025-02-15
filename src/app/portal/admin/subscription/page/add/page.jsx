@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/common/page';
-import SubscriptionPageForm from '@/components/subscription/page/SubscriptionPageForm';
+import SubscriptionPageForm from '@/components/subscription/page/admin/SubscriptionPageForm';
 
 export const metadata = {
   title: 'Add New Subscription Page',

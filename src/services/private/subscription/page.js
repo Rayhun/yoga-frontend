@@ -8,6 +8,10 @@ export const getSingleSubscriptionPage = async ({ id }) => {
   return axios.get(`/subscription/page/${id}/`);
 };
 
+export const getSubscriptionPageDetailsBySlug = async ({ slug }) => {
+  return axios.get(`/subscription/plan/page?slug=${slug}`);
+};
+
 export const addNewSubscriptionPage = async ({ payload }) => {
   return axios.post('/subscription/page/', payload);
 };

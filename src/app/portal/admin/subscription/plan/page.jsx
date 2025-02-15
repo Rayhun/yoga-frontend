@@ -1,4 +1,4 @@
-import SubscriptionPlansList from '@/components/subscription/plan/SubscriptionPlansList';
+import SubscriptionPlansList from '@/components/subscription/plan/admin/SubscriptionPlansList';
 
 export const metadata = {
   title: 'Subscription Plans',
