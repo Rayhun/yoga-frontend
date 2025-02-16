@@ -1,5 +1,5 @@
 import { MdOutlineHome, MdViewModule, MdCategory, MdHome, MdSubscriptions, MdPages } from 'react-icons/md';
-import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags } from 'react-icons/fa';
+import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags, FaUser } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
@@ -122,6 +122,12 @@ const TEACHER = [
     label: 'Home',
     href: '/portal',
     isActive: pathname => pathname === '/portal',
+  },
+  {
+    Icon: FaUser,
+    label: 'Profile',
+    href: '/portal/teacher/profile',
+    isActive: pathname => pathname.includes('/portal/teacher/profile'),
   },
 ];
 
