@@ -1,5 +1,5 @@
 import { MdOutlineHome, MdViewModule, MdCategory, MdHome, MdSubscriptions, MdPages } from 'react-icons/md';
-import { FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags, FaUser } from 'react-icons/fa';
+import { FaInbox, FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags, FaUser } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
@@ -10,6 +10,12 @@ const ADMIN = [
     label: 'Home',
     href: '/portal',
     isActive: pathname => pathname === '/portal',
+  },
+  {
+    Icon: FaInbox,
+    label: 'Inbox',
+    href: '/portal/inbox',
+    isActive: pathname => pathname.includes('/portal/inbox'),
   },
   {
     Icon: FaUsers,
@@ -102,6 +108,12 @@ const CUSTOMER = [
     isActive: pathname => pathname === '/portal',
   },
   {
+    Icon: FaInbox,
+    label: 'Inbox',
+    href: '/portal/inbox',
+    isActive: pathname => pathname === '/portal/inbox',
+  },
+  {
     Icon: FaUsers,
     label: 'Users',
     href: '/portal/customer/entities/users',
@@ -122,6 +134,12 @@ const TEACHER = [
     label: 'Home',
     href: '/portal',
     isActive: pathname => pathname === '/portal',
+  },
+  {
+    Icon: FaInbox,
+    label: 'Inbox',
+    href: '/portal/inbox',
+    isActive: pathname => pathname === '/portal/inbox',
   },
   {
     Icon: FaUser,
