@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
@@ -16,7 +17,7 @@ import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
 import ContentCard from './ContentCard';
-import { getSingleProgram } from '@/services/private/customer/program';
+import { getSingleProgram, enrollProgram } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const TABS = {
@@ -28,14 +29,19 @@ const TABS = {
 const ProgramDetails = () => {
   const params = useParams();
   const renderModal = useModal();
+  const programID = params.id;
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
   const {
     data: response,
     isLoading,
     failureReason,
+    refetch,
   } = useQuery({
-    queryFn: () => getSingleProgram({ id: params.id }),
-    queryKey: [queryKeys.customerPrograms, params.id],
+    queryFn: () => getSingleProgram({ id: programID }),
+    queryKey: [queryKeys.customerPrograms, programID],
+  });
+  const { mutateAsync: enroll, isPending: isEnrolling } = useMutation({
+    mutationFn: enrollProgram,
   });
 
   useHandleApiResponse(failureReason);
@@ -48,6 +54,16 @@ const ProgramDetails = () => {
       content: <LMSExpertsList experts={experts} />,
       size: 'md',
     });
+  };
+
+  const handleEnrollProgram = async () => {
+    try {
+      await enroll({ id: programID });
+      refetch();
+      toast.success('Program enrolled successfully');
+    } catch (error) {
+      toast.error('Something went wrong in enrolling the program');
+    }
   };
 
   const handleTabChange = (_, newValue) => {
@@ -63,7 +79,7 @@ const ProgramDetails = () => {
   return (
     <div>
       {/* Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
@@ -118,12 +134,20 @@ const ProgramDetails = () => {
             </div>
           ) : null}
 
-          {/* Begin Program Button */}
-          <div className="flex flex-col gap-3">
-            <button className="w-full md:w-auto bg-primary text-white p-4 rounded-md shadow hover:bg-primary/80">
-              Begin Program
+          {/* Enrollment */}
+          {programDetails?.is_enroll ? (
+            <div className="!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl bg-orange-500 text-white">
+              {programDetails?.status}
+            </div>
+          ) : (
+            <button
+              className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 rounded-md shadow hover:bg-primary/80"
+              disabled={isEnrolling}
+              onClick={handleEnrollProgram}
+            >
+              {isEnrolling ? 'Enrolling' : 'Begin Program'}
             </button>
-          </div>
+          )}
         </div>
       </div>
 

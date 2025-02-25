@@ -7,3 +7,7 @@ export const getProgramsList = async ({ category = '' }) => {
 export const getSingleProgram = async ({ id }) => {
   return axios.get(`/customer/program/${id}/`);
 };
+
+export const enrollProgram = async ({ id }) => {
+  return axios.post(`/customer/program/${id}/enroll/`);
+};
