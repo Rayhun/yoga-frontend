@@ -8,7 +8,6 @@ import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import { MdMenu } from 'react-icons/md';
 import Toolbar from '@mui/material/Toolbar';
-import NAVBAR from '@/utils/navbar';
 
 const SimpleNavbar = () => {
   const pathname = usePathname();
@@ -21,7 +20,7 @@ const SimpleNavbar = () => {
   return (
     <div>
       <AppBar component="nav">
-        <Toolbar className="w-full h-full bg-white dark:bg-boxdark flex justify-between">
+        <Toolbar className="w-full h-full bg-white dark:bg-boxdark flex justify-center">
           <IconButton edge="start" onClick={handleDrawerToggle} className="mr-3 sm:!hidden">
             <MdMenu className="text-bodydark dark:text-white" />
           </IconButton>
@@ -30,13 +29,13 @@ const SimpleNavbar = () => {
             <Image
               width={176}
               height={32}
-              src={'/images/logo/logo.svg'}
+              src={'/images/logo/logo.png'}
               className="hidden sm:block"
               alt="Logo"
               priority
             />
           </Link>
-          <div className="hidden sm:flex sm:items-center sm:gap-5">
+          {/* <div className="hidden sm:flex sm:items-center sm:gap-5">
             {NAVBAR.map(item => (
               <Link
                 key={item.href}
@@ -48,7 +47,7 @@ const SimpleNavbar = () => {
                 <p className="text-gray-500 dark:text-white">{item.label}</p>
               </Link>
             ))}
-          </div>
+          </div> */}
         </Toolbar>
       </AppBar>
       <nav>
@@ -73,14 +72,14 @@ const SimpleNavbar = () => {
               <Image
                 width={176}
                 height={32}
-                src={'/images/logo/logo.svg'}
+                src={'/images/logo/logo.png'}
                 className="my-3"
                 alt="Logo"
                 priority
               />
             </Link>
             <br />
-            <div className="w-full flex flex-col items-center text-center">
+            {/* <div className="w-full flex flex-col items-center text-center">
               {NAVBAR.map(item => (
                 <Link
                   key={item.href}
@@ -93,7 +92,7 @@ const SimpleNavbar = () => {
                   <p className="text-body dark:text-white">{item.label}</p>
                 </Link>
               ))}
-            </div>
+            </div> */}
           </div>
         </Drawer>
       </nav>

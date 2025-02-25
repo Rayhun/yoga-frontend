@@ -26,7 +26,6 @@ const Page = ({ params }) => {
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900">Checkout</h2>
         <Alert className="mt-5" variant="filled" severity="warning">
           Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
         </Alert>

@@ -24,7 +24,7 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
     <div className="flex flex-col items-center gap-7 md:gap-10">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900">{pageDetails?.title}</h2>
-        <p className="text-gray-500">P{pageDetails?.description}</p>
+        <p className="text-gray-500">{pageDetails?.description}</p>
       </div>
 
       <div className="flex border-2 border-primary bg-gray-100 rounded-full">
