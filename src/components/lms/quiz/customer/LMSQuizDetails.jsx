@@ -1,30 +1,37 @@
 'use client';
-import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import PageLoader from '@/components/common/loader/PageLoader';
+import { toast } from 'react-toastify';
+import { useMutation } from '@tanstack/react-query';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Button from '@/components/common/Button';
-import { getSingleQuiz } from '@/services/private/customer/quiz';
-import queryKeys from '@/utils/query-keys';
+import { completeProgramContent } from '@/services/private/customer/program';
 import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
 
-const LMSQuizDetails = () => {
-  const params = useParams();
-  const {
-    data: response,
-    isLoading,
-    failureReason,
-  } = useQuery({
-    queryFn: () => getSingleQuiz({ id: params.id }),
-    queryKey: [queryKeys.customerQuizes, params.id],
+const LMSQuizDetails = ({ data: quizDetails }) => {
+  const searchParams = useSearchParamUtils();
+  const programID = searchParams.get('program');
+  const moduleID = searchParams.get('module');
+
+  const [selectedOption, setSelectedOption] = useState({});
+
+  const { isPending: isSubmittingQuiz, mutateAsync: submitQuiz } = useMutation({
+    mutationFn: completeProgramContent,
   });
 
-  useHandleApiResponse(failureReason);
-
-  if (isLoading) return <PageLoader />;
-
-  const quizDetails = response?.data?.data || {};
+  const handleSubmitQuiz = async (req, res) => {
+    try {
+      await submitQuiz({
+        id: programID,
+        module: moduleID,
+        content_type: 'Quiz',
+        content_id: quizDetails.id,
+      });
+      toast.success('Quiz submitted successfully');
+    } catch (error) {
+      toast.error('Something went wrong in submitting quiz');
+    }
+  };
 
   return (
     <div>
@@ -36,16 +43,21 @@ const LMSQuizDetails = () => {
           {quizDetails.options?.map(option => (
             <button
               key={option.text}
-              className="w-full border border-gray-400 rounded-md p-4 flex flex-col gap-2 items-center justify-center hover:border-primary dark:border-white"
+              className={`w-full border border-gray-400 rounded-md p-4 flex flex-col gap-2 items-center justify-center hover:border-primary dark:border-white ${
+                option.text === selectedOption.text ? 'bg-primary text-white' : ''
+              }`}
+              onClick={() => setSelectedOption(option)}
             >
               {quizDetails.screen_type === ONBOARDING_QUIZ_CONTENT_TYPE.image ? (
                 <Image width={50} height={50} src={option.image_url} alt="image" priority />
               ) : null}
-              <span className="text-gray-700 dark:text-gray-400">{option.text}</span>
+              <span>{option.text}</span>
             </button>
           ))}
         </div>
-        <Button size="xl">Submit</Button>
+        <Button size="xl" isLoading={isSubmittingQuiz} disabled={isSubmittingQuiz} onClick={handleSubmitQuiz}>
+          {isSubmittingQuiz ? 'Submitting' : 'Submit'}
+        </Button>
       </div>
     </div>
   );
