@@ -1,57 +1,8 @@
 'use client';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import PageLoader from '@/components/common/loader/PageLoader';
-import Button from '@/components/common/Button';
-import { getSingleSession } from '@/services/private/customer/session';
-import queryKeys from '@/utils/query-keys';
 
-const ImageSessionDetails = () => {
-  const params = useParams();
-  const {
-    data: response,
-    isLoading,
-    failureReason,
-  } = useQuery({
-    queryFn: () => getSingleSession({ id: params.id }),
-    queryKey: [queryKeys.customerImageSessions, params.id],
-  });
-
-  useHandleApiResponse(failureReason);
-
-  if (isLoading) return <PageLoader />;
-
-  const sessionDetails = response?.data?.data || {};
-
-  const SESSION_CARDS = [
-    {
-      label: 'Total Run Time',
-      value: `${sessionDetails.duration} sec`,
-    },
-    {
-      label: 'Category',
-      value: sessionDetails.categories?.[0],
-    },
-    {
-      label: 'Difficulty',
-      value: sessionDetails.difficulty,
-    },
-    {
-      label: 'Intensity',
-      value: sessionDetails.intensity,
-    },
-    {
-      label: 'Equipment',
-      value: sessionDetails.intensity.equipments?.[0],
-    },
-    {
-      label: 'Focus Area',
-      value: sessionDetails.focus_areas?.[0],
-    },
-  ];
-
+const ImageSessionDetails = ({ data: sessionDetails }) => {
   return (
     <div>
       {/* Details Card */}

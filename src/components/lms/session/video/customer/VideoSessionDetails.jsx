@@ -1,30 +1,15 @@
 'use client';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import PageLoader from '@/components/common/loader/PageLoader';
-import Button from '@/components/common/Button';
+import { toast } from 'react-toastify';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import VideoPlayer from '@/components/common/player/VideoPlayer';
-import { getSingleSession } from '@/services/private/customer/session';
-import queryKeys from '@/utils/query-keys';
+import { updateProgramContentProgress } from '@/services/private/customer/program';
+import { SESSION_TYPE } from '@/utils/enums';
 
-const VideoSessionDetails = () => {
-  const params = useParams();
-  const {
-    data: response,
-    isLoading,
-    failureReason,
-  } = useQuery({
-    queryFn: () => getSingleSession({ id: params.id }),
-    queryKey: [queryKeys.customerVideoSessions, params.id],
-  });
-
-  useHandleApiResponse(failureReason);
-
-  if (isLoading) return <PageLoader />;
-
-  const sessionDetails = response?.data?.data || {};
+const VideoSessionDetails = ({ data: sessionDetails }) => {
+  const searchParams = useSearchParamUtils();
+  const programID = searchParams.get('program');
+  const moduleID = searchParams.get('module');
 
   const SESSION_CARDS = [
     {
@@ -53,13 +38,33 @@ const VideoSessionDetails = () => {
     },
   ];
 
+  const handleUpdateSessionProgress = async currentTime => {
+    try {
+      await updateProgramContentProgress({
+        id: programID,
+        module: moduleID,
+        content_type: SESSION_TYPE.video,
+        content_id: sessionDetails.id,
+        duration: currentTime.toString(),
+      });
+    } catch (error) {
+      toast.error('Something went wrong in updating session progress');
+    }
+  };
+
   return (
     <div>
       {/* Details Card */}
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Video */}
         <div className="w-full">
-          <VideoPlayer video="115783408" />
+          <VideoPlayer
+            url="https://vimeo.com/115783408"
+            onReady={player => {
+              player.seekTo(120);
+            }}
+            onUpdateProgress={handleUpdateSessionProgress}
+          />
         </div>
 
         {/* Right Section - Details */}

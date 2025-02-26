@@ -1,30 +1,29 @@
 'use client';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import Avatar from '@mui/material/Avatar';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import Button from '@/components/common/Button';
-import PageLoader from '@/components/common/loader/PageLoader';
+import { toast } from 'react-toastify';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import AudioPlayer from '@/components/common/player/AudioPlayer';
-import { getSingleSession } from '@/services/private/customer/session';
-import queryKeys from '@/utils/query-keys';
+import { updateProgramContentProgress } from '@/services/private/customer/program';
+import { SESSION_TYPE } from '@/utils/enums';
 
-const AudioSessionDetails = () => {
-  const params = useParams();
-  const {
-    data: response,
-    isLoading,
-    failureReason,
-  } = useQuery({
-    queryFn: () => getSingleSession({ id: params.id }),
-    queryKey: [queryKeys.customerAudioSessions, params.id],
-  });
+const AudioSessionDetails = ({ data: sessionDetails }) => {
+  const searchParams = useSearchParamUtils();
+  const programID = searchParams.get('program');
+  const moduleID = searchParams.get('module');
 
-  useHandleApiResponse(failureReason);
-
-  if (isLoading) return <PageLoader />;
-
-  const sessionDetails = response?.data?.data || {};
+  const handleUpdateSessionProgress = async currentTime => {
+    try {
+      await updateProgramContentProgress({
+        id: programID,
+        module: moduleID,
+        content_type: SESSION_TYPE.audio,
+        content_id: sessionDetails.id,
+        duration: currentTime.toString(),
+      });
+    } catch (error) {
+      toast.error('Something went wrong in updating session progress');
+    }
+  };
 
   return (
     <div>
@@ -32,7 +31,15 @@ const AudioSessionDetails = () => {
       <div className="flex flex-col gap-7 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
         {/* Left Section - Image */}
         <div className="w-full flex justify-center">
-          <AudioPlayer audio={sessionDetails.content_link} thumbnail={sessionDetails.image} />
+          <AudioPlayer
+            url={sessionDetails.content_link}
+            title={sessionDetails.title}
+            thumbnail={sessionDetails.image}
+            onUpdateProgress={handleUpdateSessionProgress}
+            // onReady={player => {
+            //   player.seekTo(30);
+            // }}
+          />
         </div>
 
         {/* Right Section - Details */}

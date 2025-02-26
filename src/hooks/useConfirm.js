@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
 import IconButton from '@mui/material/IconButton';
-import { MdErrorOutline, MdClose } from 'react-icons/md';
+import { MdClose } from 'react-icons/md';
 
 const StyledMainWrapper = styled.div`
   padding: 20px;
@@ -127,7 +127,6 @@ function useConfirm() {
               </StyledIconButton>
               <StyledWrapper>
                 <HeadingWrapper>
-                  <MdErrorOutline color="black" size={40} />
                   <Heading>{heading}</Heading>
                 </HeadingWrapper>
                 <Separator />

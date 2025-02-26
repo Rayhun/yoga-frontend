@@ -85,3 +85,8 @@ export const SUBSCRIPTION_PAGE_TENURE = {
   quaterly: 'Quarterly',
   yearly: 'Yearly',
 };
+
+export const PROGRAM_PROGRESS = {
+  in_progress: 'InProgress',
+  completed: 'Complete',
+};

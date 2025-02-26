@@ -1,96 +1,48 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import ReactPlayer from 'react-player';
-import { FaPlay, FaPause } from 'react-icons/fa6';
-import Image from 'next/image';
 
-const YouTubeStyleAudioPlayer = ({ audio, thumbnail, title }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const playerRef = useRef(null);
+const YouTubeStyleAudioPlayer = ({ url, thumbnail, title, onUpdateProgress = () => null, ...restProps }) => {
+  const [lastTrackedTime, setLastTrackedTime] = useState(0);
 
-  // Toggle play/pause
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  // Handle progress bar change
-  const handleSeek = e => {
-    const seekTime = (e.target.value / 100) * duration;
-    playerRef.current.seekTo(seekTime, 'seconds');
-    setProgress(seekTime);
-  };
-
-  // Update progress
   const handleProgress = state => {
-    setProgress(state.playedSeconds);
-  };
+    const currentTime = state.playedSeconds;
 
-  // Format time (seconds to MM:SS)
-  const formatTime = seconds => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    // Check if 30 seconds have passed since the last update
+    if (currentTime - lastTrackedTime >= 30) {
+      onUpdateProgress(currentTime);
+      setLastTrackedTime(currentTime);
+    }
   };
 
   return (
-    <div className="relative w-full bg-black rounded-xl overflow-hidden shadow-lg">
-      {/* Thumbnail as Poster */}
-      <div className="relative w-full flex items-center justify-center">
-        <Image
-          src={thumbnail}
-          alt={title}
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="w-full h-full object-cover"
-        />
-        {/* Play Button */}
-        <button
-          onClick={togglePlayPause}
-          className="absolute bg-white p-6 rounded-full shadow-lg hover:scale-105 transition"
-        >
-          {isPlaying ? (
-            <FaPause size={40} className="text-black" />
-          ) : (
-            <FaPlay size={40} className="text-black" />
-          )}
-        </button>
-      </div>
-
-      {/* Player Controls */}
-      <div className="controls p-4 bg-gray-700 text-white">
-        {/* Title */}
-        <h3 className="text-lg font-semibold mb-2 truncate">{title}</h3>
-
-        {/* Progress Bar */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-secondary">{formatTime(progress)}</span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={(progress / duration) * 100 || 0}
-            onChange={handleSeek}
-            className="flex-1 h-1 bg-secondary appearance-none rounded-full cursor-pointer"
-          />
-          <span className="text-sm text-secondary">{formatTime(duration)}</span>
+    <div className="w-full max-w-4xl mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+      {/* Thumbnail Section */}
+      <div className="relative h-[500px] bg-cover bg-center" style={{ backgroundImage: `url(${thumbnail})` }}>
+        {/* Overlay for Title */}
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <h2 className="text-white text-2xl font-bold text-center">{title}</h2>
         </div>
       </div>
 
-      {/* Hidden ReactPlayer */}
-      <ReactPlayer
-        ref={playerRef}
-        url={audio}
-        playing={isPlaying}
-        controls={false}
-        onProgress={handleProgress}
-        onDuration={d => setDuration(d)}
-        height={0}
-        width={0}
-        onEnded={() => setIsPlaying(false)}
-      />
+      {/* Audio Player Section */}
+      <div className="px-4 py-2 bg-[#f0f4f8]">
+        <ReactPlayer
+          {...restProps}
+          url={url}
+          controls
+          width="100%"
+          height="50px"
+          onProgress={handleProgress}
+          config={{
+            file: {
+              attributes: {
+                controlsList: 'nodownload',
+              },
+            },
+          }}
+        />
+      </div>
     </div>
   );
 };

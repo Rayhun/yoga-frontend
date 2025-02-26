@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import LinearProgress from '@mui/material/LinearProgress';
 import { BiCheck } from 'react-icons/bi';
 import { FaTv, FaImage, FaHeadphones, FaPlayCircle } from 'react-icons/fa';
@@ -65,40 +65,50 @@ const SessionQuizContent = ({ content_type, session_type, duration = '10 min' })
 };
 
 const ContentCard = ({ item }) => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const contentRef = getContentRef(item);
 
+  const handleNavigate = () => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('program', params.id);
+    router.push(`${contentRef.href}?${newParams.toString()}`);
+  };
+
   return (
-    <Link href={contentRef.href}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
-        {/* Image */}
-        <div className="relative">
-          <div className="aspect-[16/9]">
-            <Image
-              width={0}
-              height={0}
-              src={item?.image || '/images/content/default.png'}
-              alt="image"
-              sizes="100vw"
-              className="w-full h-full object-cover rounded-t-lg"
-            />
+    <div
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
+      onClick={handleNavigate}
+    >
+      {/* Image */}
+      <div className="relative">
+        <div className="aspect-[16/9]">
+          <Image
+            width={0}
+            height={0}
+            src={item?.image || '/images/content/default.png'}
+            alt="image"
+            sizes="100vw"
+            className="w-full h-full object-cover rounded-t-lg"
+          />
+        </div>
+        {/* Completion Icon */}
+        {item.completed ? (
+          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
+            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
           </div>
-          {/* Completion Icon */}
-          {item.completed ? (
-            <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-              <BiCheck size={24} className="bg-secondary rounded-full text-white" />
-            </div>
-          ) : null}
-        </div>
-
-        {/* Course Info */}
-        <div className="p-4 flex flex-col justify-between h-[110px]">
-          <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
-
-          {/* Details */}
-          {item.content_type === 'module' ? <ModuleContent {...item} /> : <SessionQuizContent {...item} />}
-        </div>
+        ) : null}
       </div>
-    </Link>
+
+      {/* Course Info */}
+      <div className="p-4 flex flex-col justify-between h-[110px]">
+        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
+
+        {/* Details */}
+        {item.content_type === 'module' ? <ModuleContent {...item} /> : <SessionQuizContent {...item} />}
+      </div>
+    </div>
   );
 };
 

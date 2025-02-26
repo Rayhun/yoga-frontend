@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { BiCheck } from 'react-icons/bi';
 import { FaTv, FaImage, FaHeadphones, FaPlayCircle } from 'react-icons/fa';
 import { MdCheckBox } from 'react-icons/md';
@@ -32,6 +32,9 @@ const getContentRef = item => {
 };
 
 const ContentCard = ({ item }) => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { content_type, duration, session_type } = item;
   const contentRef = getContentRef(item);
 
@@ -51,41 +54,48 @@ const ContentCard = ({ item }) => {
     return FaTv;
   }, [content_type, duration, session_type]);
 
+  const handleNavigate = () => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('module', params.id);
+    router.push(`${contentRef.href}?${newParams.toString()}`);
+  };
+
   return (
-    <Link href={contentRef.href}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition">
-        {/* Image */}
-        <div className="relative">
-          <div className="aspect-[16/9]">
-            <Image
-              width={0}
-              height={0}
-              src={item?.image || '/images/content/default.png'}
-              alt="image"
-              sizes="100vw"
-              className="w-full h-full object-cover rounded-t-lg"
-            />
-          </div>
-          {/* Completion Icon */}
-          {item.completed ? (
-            <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
-              <BiCheck size={24} className="bg-secondary rounded-full text-white" />
-            </div>
-          ) : null}
+    <div
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
+      onClick={handleNavigate}
+    >
+      {/* Image */}
+      <div className="relative">
+        <div className="aspect-[16/9]">
+          <Image
+            width={0}
+            height={0}
+            src={item?.image || '/images/content/default.png'}
+            alt="image"
+            sizes="100vw"
+            className="w-full h-full object-cover rounded-t-lg"
+          />
         </div>
-
-        {/* Course Info */}
-        <div className="p-4 flex flex-col justify-between h-[90px]">
-          <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
-
-          {/* Details */}
-          <div className="flex gap-2">
-            <Icon size={18} className="text-secondary" />
-            <p className="text-bodydark2 text-sm">{text}</p>
+        {/* Completion Icon */}
+        {item.completed ? (
+          <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
+            <BiCheck size={24} className="bg-secondary rounded-full text-white" />
           </div>
+        ) : null}
+      </div>
+
+      {/* Course Info */}
+      <div className="p-4 flex flex-col justify-between h-[90px]">
+        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
+
+        {/* Details */}
+        <div className="flex gap-2">
+          <Icon size={18} className="text-secondary" />
+          <p className="text-bodydark2 text-sm">{text}</p>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
