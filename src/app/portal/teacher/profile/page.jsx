@@ -2,7 +2,7 @@
 import useAuthContext from '@/hooks/useAuthContext';
 import { DetailsLayoutWrapper } from '@/components/common/details';
 import { PageHeader } from '@/components/common/page';
-import UserProfileDetails from '@/components/common/user/UserProfileDetails';
+import UserProfileDetails from '@/components/common/user/profile';
 
 const Page = () => {
   const {
@@ -11,8 +11,8 @@ const Page = () => {
 
   return (
     <div>
-      <PageHeader title="My Profile" />
-      <DetailsLayoutWrapper title="Profile">
+      <PageHeader title="User Profile" />
+      <DetailsLayoutWrapper title="Profile Details">
         <UserProfileDetails data={userProfile} />
       </DetailsLayoutWrapper>
     </div>
