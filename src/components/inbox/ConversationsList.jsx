@@ -52,7 +52,7 @@ const ConversationsList = () => {
               label={filter.label}
               className={`cursor-pointer ${
                 activeFilter.key === filter.key
-                  ? 'bg-primary text-white hover:bg-primary hover:text-white'
+                  ? '!bg-primary !text-white hover:!bg-primary hover:!text-white'
                   : ''
               }`}
               onClick={() => setActiveFilter(filter)}
