@@ -46,7 +46,7 @@ function InboxProvider({ children }) {
   const { isFetching: isLoadingConversations, data: conversationsResponse } = useQuery({
     queryFn: getMyConversations,
     queryKey: [queryKeys.inboxConversations],
-    refetchOnMount: true,
+    refetchOnMount: 'always',
   });
 
   const conversationsData = conversationsResponse?.data?.data;
