@@ -21,7 +21,7 @@ const ActiveConversationHeader = () => {
               height={44}
             />
           ) : (
-            <Avatar className="w-full h-full" />
+            <Avatar className="!w-full !h-full" />
           )}
         </div>
         <div>
