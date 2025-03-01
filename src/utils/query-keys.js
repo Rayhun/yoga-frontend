@@ -20,6 +20,7 @@ const queryKeys = {
   customerImageSessions: 'customerImageSessions',
   customerAudioSessions: 'customerAudioSessions',
   customerVideoSessions: 'customerVideoSessions',
+  inboxConversations: 'inboxConversations',
 };
 
 export default queryKeys;

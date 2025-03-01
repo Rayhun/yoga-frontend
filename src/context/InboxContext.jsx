@@ -1,5 +1,10 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import useChatSocket from '@/hooks/useChatSocket';
+import { getMyConversationMessages, getMyConversations } from '@/services/private/inbox/conversation';
+import queryKeys from '@/utils/query-keys';
 
 const initialState = {
   conversations: {
@@ -11,8 +16,13 @@ const initialState = {
     isLoading: true,
     data: [],
   },
+  connection: {
+    isConnected: false,
+    status: '',
+  },
   actions: {
     setActiveConversation: () => null,
+    sendMessage: () => null,
   },
 };
 
@@ -21,62 +31,95 @@ export const InboxContext = createContext(initialState);
 export const useInbox = () => useContext(InboxContext);
 
 function InboxProvider({ children }) {
+  const [roomID, setRoomID] = useState('');
   const [conversations, setConversations] = useState(initialState.conversations);
   const [messages, setMessages] = useState(initialState.messages);
 
+  const { lastJsonMessage: conversationMessage } = useChatSocket(`conversation`);
+
+  const {
+    lastJsonMessage: chatRoomMessage,
+    connection: chatRoomConnection,
+    sendJsonMessage: sendMessageToChatRoom,
+  } = useChatSocket(roomID ? `conversation/${roomID}` : '');
+
+  const { isFetching: isLoadingConversations, data: conversationsResponse } = useQuery({
+    queryFn: getMyConversations,
+    queryKey: [queryKeys.inboxConversations],
+  });
+
+  const conversationsData = conversationsResponse?.data?.data;
+
   useEffect(() => {
-    setTimeout(() => {
-      setConversations({
-        isLoading: false,
+    setConversations(prevState => ({
+      ...prevState,
+      isLoading: false,
+      data:
+        conversationsData?.map(conversation => ({
+          id: conversation.conversation_id,
+          name: conversation.name,
+          message: conversation.last_message,
+          time: conversation.last_message_time,
+          unread_count: conversation.unread_message_count,
+        })) || [],
+    }));
+  }, [conversationsData]);
+
+  useEffect(() => {
+    if (conversationMessage) {
+      const targetConversation = conversationMessage || {};
+      const restConversations = conversations.data.filter(i => i.id !== targetConversation.conversation_id);
+      setConversations(prevState => ({
+        ...prevState,
         data: [
           {
-            id: 1,
-            img: '/images/user/user-03.png',
-            name: 'Henry Dholi',
-            message: 'I cam across your profile and...',
+            id: targetConversation.conversation_id,
+            name: targetConversation.name || 'No',
+            message: targetConversation.last_message,
+            time: targetConversation.last_message_time,
+            unread_count: targetConversation.unread_message_count,
           },
-          {
-            id: 2,
-            img: '/images/user/user-04.png',
-            name: 'Mariya Desoja',
-            message: 'I like your confidence 💪',
-          },
-          {
-            id: 3,
-            img: '/images/user/user-05.png',
-            name: 'Robert Jhon',
-            message: 'Can you share your offer?',
-          },
-          {
-            id: 4,
-            img: '/images/user/user-01.png',
-            name: 'Cody Fisher',
-            message: `I'm waiting for you response!`,
-          },
-          {
-            id: 5,
-            img: '/images/user/user-02.png',
-            name: 'Jenny Wilson',
-            message: 'I cam across your profile and...',
-          },
+          ...restConversations,
         ],
-      });
-    }, 1000);
-  }, []);
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationMessage]);
 
-  const setActiveConversation = useCallback(selected => {
+  useEffect(() => {
+    if (chatRoomMessage) {
+      setMessages(prevState => ({ ...prevState, data: [...prevState.data, chatRoomMessage.data] }));
+    }
+  }, [chatRoomMessage]);
+
+  useEffect(() => {
+    const emptyMessage = document.getElementById('empty-message');
+    emptyMessage?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.data]);
+
+  const setActiveConversation = useCallback(async selected => {
     setConversations(prevState => ({ ...prevState, active: selected }));
+    setRoomID(selected.id);
     setMessages(prevState => ({ ...prevState, isLoading: true }));
-    setTimeout(() => {
-      setMessages({
-        isLoading: false,
-        data: [],
-      });
-    }, 1000);
+
+    try {
+      const { data: response } = await getMyConversationMessages({ id: selected.id });
+      setMessages({ isLoading: false, data: response?.data || [] });
+    } catch (error) {
+      setMessages({ isLoading: false, data: [] });
+      toast.error('Something went wrong in fetching conversation messages');
+    }
   }, []);
 
   return (
-    <InboxContext.Provider value={{ conversations, messages, actions: { setActiveConversation } }}>
+    <InboxContext.Provider
+      value={{
+        conversations: { ...conversations, isLoading: isLoadingConversations || conversations.isLoading },
+        messages,
+        connection: chatRoomConnection,
+        actions: { setActiveConversation, sendMessage: sendMessageToChatRoom },
+      }}
+    >
       {children}
     </InboxContext.Provider>
   );
