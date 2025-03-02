@@ -5,7 +5,7 @@ const UserAvatar = ({ isGroup }) => {
 
   return (
     <div className="w-full h-full rounded-full bg-gray-300 flex justify-center items-center p-3">
-      <Icon size={30} className="text-bodydark2" />
+      <Icon size={30} className="!text-bodydark2" />
     </div>
   );
 };
