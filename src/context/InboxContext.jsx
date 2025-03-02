@@ -58,6 +58,7 @@ function InboxProvider({ children }) {
       data:
         conversationsData?.map(conversation => ({
           id: conversation.conversation_id,
+          is_group: conversation.is_group,
           name: conversation.name,
           message: conversation.last_message,
           time: conversation.last_message_time,
@@ -75,6 +76,7 @@ function InboxProvider({ children }) {
         data: [
           {
             id: targetConversation.conversation_id,
+            is_group: targetConversation.is_group,
             name: targetConversation.name || 'No',
             message: targetConversation.last_message,
             time: targetConversation.last_message_time,

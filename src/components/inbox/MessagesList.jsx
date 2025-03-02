@@ -4,7 +4,7 @@ import useAuthContext from '@/hooks/useAuthContext';
 import { useInbox } from '@/context/InboxContext';
 import LoadingWrapper from '../common/loader/Wrapper';
 
-const Message = ({ isMyMessage, time, children }) => (
+const Message = ({ isMyMessage, senderName, time, children }) => (
   <>
     {isMyMessage ? (
       <div className="ml-auto max-w-125">
@@ -15,6 +15,7 @@ const Message = ({ isMyMessage, time, children }) => (
       </div>
     ) : (
       <div className="max-w-125">
+        {senderName ? <p className="text-sm mb-1">{senderName}</p> : null}
         <div className="mb-2.5 rounded-2xl rounded-tl-none bg-gray px-5 py-3 dark:bg-boxdark-2">
           <p>{children}</p>
         </div>
@@ -31,6 +32,7 @@ const MessagesList = () => {
     },
   } = useAuthContext();
   const {
+    conversations: { active: activeConversation },
     messages: { isLoading: isLoadingMessages, data: messages },
   } = useInbox();
 
@@ -42,6 +44,7 @@ const MessagesList = () => {
             <Message
               key={message.id}
               time={message.created_at}
+              senderName={activeConversation.is_group ? message.sender_name : undefined}
               isMyMessage={message.sender === loggedInUserID}
             >
               {message.content}

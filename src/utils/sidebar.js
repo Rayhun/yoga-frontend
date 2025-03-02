@@ -1,5 +1,14 @@
 import { MdOutlineHome, MdViewModule, MdCategory, MdHome, MdSubscriptions, MdPages } from 'react-icons/md';
-import { FaInbox, FaUsers, FaFileInvoice, FaNewspaper, FaTv, FaTags, FaUser } from 'react-icons/fa';
+import {
+  FaInbox,
+  FaUsers,
+  FaUserFriends,
+  FaFileInvoice,
+  FaNewspaper,
+  FaTv,
+  FaTags,
+  FaUser,
+} from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
@@ -24,8 +33,14 @@ const ADMIN = [
     isActive: pathname => pathname.includes('/portal/admin/entities/users'),
   },
   {
+    Icon: FaUserFriends,
+    label: 'Groups',
+    href: '/portal/admin/chat/group',
+    isActive: pathname => pathname.includes('/portal/admin/chat/group'),
+  },
+  {
     Icon: FaFileInvoice,
-    label: 'Quiz',
+    label: 'Onboarding Quiz',
     href: '/portal/admin/onboarding/quiz',
     isActive: pathname => pathname.includes('/portal/admin/onboarding/quiz'),
   },

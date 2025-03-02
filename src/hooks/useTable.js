@@ -4,24 +4,28 @@ import { TableActions } from '@/components/common/table';
 import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from './useHandleApiResponse';
 
-function useTable({ columns = [], queryFn, queryKey, rowActions = [] }) {
+function useTable({ columns = [], queryFn, queryKey, rowActions = [], removeActionColumn = false }) {
   const modifiedColumns = useMemo(
     () => [
       ...columns,
-      {
-        id: 'action',
-        header: 'Action',
-        cell: ({ row }) => (
-          <TableActions
-            actions={rowActions.map(action => ({
-              ...action,
-              onClick: () => action.onClick(row),
-            }))}
-          />
-        ),
-      },
+      ...(removeActionColumn
+        ? []
+        : [
+            {
+              id: 'action',
+              header: 'Action',
+              cell: ({ row }) => (
+                <TableActions
+                  actions={rowActions.map(action => ({
+                    ...action,
+                    onClick: () => action.onClick(row),
+                  }))}
+                />
+              ),
+            },
+          ]),
     ],
-    [columns, rowActions]
+    [columns, removeActionColumn, rowActions]
   );
 
   const {

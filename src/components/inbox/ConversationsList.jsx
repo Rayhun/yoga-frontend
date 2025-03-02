@@ -18,6 +18,11 @@ const FILTERS = [
     key: 'unread',
     fn: i => i.unread_count > 0,
   },
+  {
+    label: 'Groups',
+    key: 'groups',
+    fn: i => i.is_group,
+  },
 ];
 
 const ConversationsList = () => {

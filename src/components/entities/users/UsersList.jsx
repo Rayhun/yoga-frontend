@@ -1,9 +1,9 @@
 'use client';
-import { useMemo, useState } from 'react';
-import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
+import { useMemo } from 'react';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import { getUsersList } from '@/services/private/user';
 import queryKeys from '@/utils/query-keys';
 
 const UsersList = () => {
@@ -11,76 +11,38 @@ const UsersList = () => {
     () => [
       {
         header: 'First Name',
-        accessorKey: 'firstName',
-        cell: info => info.getValue(),
+        accessorKey: 'profile.first_name',
       },
       {
         header: 'Last Name',
-        accessorKey: 'lastName',
-        cell: info => info.getValue(),
+        accessorKey: 'profile.last_name',
+      },
+      {
+        header: 'Email',
+        accessorKey: 'email',
+      },
+      {
+        header: 'Role',
+        accessorKey: 'profile.role',
       },
     ],
     []
   );
 
-  const rowActions = useMemo(
-    () => [
-      {
-        id: 'edit',
-        Icon: MdOutlineEdit,
-        onClick: () => null,
-      },
-      {
-        id: 'view',
-        Icon: MdOutlineRemoveRedEye,
-        onClick: () => null,
-      },
-      {
-        id: 'delete',
-        Icon: MdDeleteOutline,
-        onClick: () => null,
-      },
-    ],
-    []
-  );
+  const rowActions = useMemo(() => [], []);
 
-  const headerQuickActions = useMemo(
-    () => [
-      {
-        id: 'add',
-        Icon: MdOutlineAdd,
-        label: 'Add New User',
-        onClick: () => null,
-      },
-    ],
-    []
-  );
+  const headerQuickActions = useMemo(() => [], []);
 
-  const { columns, data } = useTable({
+  const {
+    isLoading,
+    columns,
+    data: response,
+  } = useTable({
     columns: tableColumns,
-    queryFn: () =>
-      Promise.resolve({
-        data: [
-          {
-            firstName: 'John',
-            lastName: 'Doe',
-            age: 35,
-            visits: 10,
-            progress: 90,
-            status: 'single',
-          },
-          {
-            firstName: 'Albert',
-            lastName: 'Tim',
-            age: 32,
-            visits: 30,
-            progress: 70,
-            status: 'married',
-          },
-        ],
-      }),
-    queryKey: [queryKeys.quizes],
+    queryFn: getUsersList,
+    queryKey: [queryKeys.users],
     rowActions,
+    removeActionColumn: true,
   });
 
   return (
@@ -89,7 +51,7 @@ const UsersList = () => {
         <PageHeaderQuickActions actions={headerQuickActions} />
       </PageHeader>
 
-      <BasicTable isLoading={false} columns={columns} data={data} />
+      <BasicTable isLoading={isLoading} columns={columns} data={response?.data} />
     </div>
   );
 };

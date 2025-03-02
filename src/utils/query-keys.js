@@ -1,4 +1,5 @@
 const queryKeys = {
+  users: 'users',
   loggedInUser: 'loggedInUser',
   onboardingQuiz: 'onboardingQuiz',
   lmsCategories: 'lmsCategories',
@@ -21,6 +22,7 @@ const queryKeys = {
   customerAudioSessions: 'customerAudioSessions',
   customerVideoSessions: 'customerVideoSessions',
   inboxConversations: 'inboxConversations',
+  chatGroups: 'chatGroups',
 };
 
 export default queryKeys;
