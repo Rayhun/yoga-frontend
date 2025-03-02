@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
-import Avatar from '@mui/material/Avatar';
 import { useInbox } from '@/context/InboxContext';
+import UserAvatar from './UserAvatar';
 
 const ActiveConversationHeader = () => {
   const {
@@ -21,7 +21,7 @@ const ActiveConversationHeader = () => {
               height={44}
             />
           ) : (
-            <Avatar className="!w-full !h-full" />
+            <UserAvatar isGroup={activeConversation?.is_group} />
           )}
         </div>
         <div>

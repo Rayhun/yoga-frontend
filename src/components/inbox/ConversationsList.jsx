@@ -1,11 +1,11 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import Avatar from '@mui/material/Avatar';
+import dayjs from 'dayjs';
 import Chip from '@mui/material/Chip';
 import { useInbox } from '@/context/InboxContext';
+import UserAvatar from './UserAvatar';
 import LoadingWrapper from '../common/loader/Wrapper';
-import dayjs from 'dayjs';
 
 const FILTERS = [
   {
@@ -94,7 +94,7 @@ const ConversationsList = () => {
                       height={44}
                     />
                   ) : (
-                    <Avatar className="w-full h-full" />
+                    <UserAvatar isGroup={conversation.is_group} />
                   )}
                 </div>
                 <div className="w-full">
