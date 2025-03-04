@@ -23,6 +23,7 @@ const queryKeys = {
   customerVideoSessions: 'customerVideoSessions',
   inboxConversations: 'inboxConversations',
   chatGroups: 'chatGroups',
+  teacherProfile: 'teacherProfile',
 };
 
 export default queryKeys;

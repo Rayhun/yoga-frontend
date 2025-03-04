@@ -1,7 +1,7 @@
-import { ExpertProvider } from '@/context/ExpertProfileContext';
+import { ExpertProvider } from "@/context/ExpertProfileContext";
 
 export const metadata = {
-  title: 'Profile Details',
+  title: 'Edit Profile',
 };
 
 const Layout = ({ children }) => {

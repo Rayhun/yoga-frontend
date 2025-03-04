@@ -22,7 +22,8 @@ export const addNewExpert = async ({ payload: { categories, tags, ...payload } }
 export const updateExistingExpert = async ({ payload: { id, categories, tags, ...payload } }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
+    if (key==='available' || value) formData.set(key, value);
+
   });
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));

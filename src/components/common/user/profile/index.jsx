@@ -65,9 +65,9 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         </div>
         <div className="mt-4">
           <h3 className="text-2xl font-semibold text-black dark:text-white">
-            {userProfileDetails?.first_name} {userProfileDetails?.last_name}
+            {userProfileDetails?.name}
           </h3>
-          <p className="my-2 font-medium">{userProfileDetails?.role}</p>
+          <p className="my-2 font-medium">{userProfileDetails?.title}</p>
           <button className="bg-primary text-white rounded-full px-8 py-2">Follow</button>
         </div>
       </div>
@@ -104,7 +104,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>
-            <UserProfileAbout />
+            <UserProfileAbout data={userProfileDetails} />
           </div>
         </div>
       </div>
