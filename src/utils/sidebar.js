@@ -160,7 +160,8 @@ const TEACHER = [
     Icon: FaUser,
     label: 'Profile',
     href: '/portal/teacher/profile',
-    isActive: pathname => pathname.includes('/portal/teacher/profile'),
+    isActive: pathname => pathname.includes('/portal/teacher/profile') || pathname.includes('/portal/teacher/editProfile'),
+    
   },
 ];
 
