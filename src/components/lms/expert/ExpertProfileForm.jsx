@@ -38,7 +38,7 @@ const ExpertProfileForm = ({ selected }) => {
     categories: selected?.categories?.map(i => i.id) || [],
     tags: selected?.tags?.map(i => i.id) || [],
     languages: selected?.languages?.[0]?.split(',') || [],
-    credentials: selected?.credentials || [],
+    credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
     coaching_content: selected?.coaching_content?.split(',') || [],
