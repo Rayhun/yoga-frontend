@@ -1,9 +1,9 @@
 'use client';
 import React from 'react';
 import DataStatsThree from '../DataStats/DataStatsThree';
-import ChartSeven from '../charts/ChartSeven';
-import ChartEight from '../charts/ChartEight';
-import ChartNine from '../charts/ChartNine';
+import ChartSeven from '../../charts/ChartSeven';
+import ChartEight from '../../charts/ChartEight';
+import ChartNine from '../../charts/ChartNine';
 import LeadsReport from '../LeadsReport';
 import ToDoList from '../Todo/ToDoList';
 

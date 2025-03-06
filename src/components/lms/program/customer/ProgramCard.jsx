@@ -25,7 +25,7 @@ const ProgramCard = ({ program, onClick }) => {
           <p>{program.sessions} sessions</p>
         </div>
         <p className="break-words line-clamp-1 text-sm text-gray-400" title={program.description}>
-          {program.experts.join(', ')}
+          {program.experts.join(', ') || 'No experts'}
         </p>
       </div>
     </div>

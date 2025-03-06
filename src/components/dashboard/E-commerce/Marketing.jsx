@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
 import DataStatsTwo from '../DataStats/DataStatsTwo';
-import ChartFive from '../charts/ChartFive';
+import ChartFive from '../../charts/ChartFive';
 import TableFour from '../Tables/TableFour';
 import ExternalLink from '../ExternalLink';
-import ChartSix from '../charts/ChartSix';
+import ChartSix from '../../charts/ChartSix';
 import FeaturedCampaigns from '../FeaturedCampaigns';
 import Feedback from '../Feedback';
 
