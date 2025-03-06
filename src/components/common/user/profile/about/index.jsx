@@ -34,17 +34,20 @@ const UserProfileAbout = ({data}) => {
       </AboutSection>
       <AboutSection label="Credentials">
         <div className="flex flex-wrap gap-2">
-          {data?.credentials?.map(tag => (
-            <ProfileChip key={tag.id} label={tag?.name} />
+          {data?.credentials?.[0]?.split(',').map((tag, index) => (
+            <ProfileChip key={index} label={tag} />
           ))}
         </div>
       </AboutSection>
       <AboutSection label="My Coaching Content">
         <div className="flex flex-wrap gap-2">
-          {data?.coaching_content.split(',').map((content, index) => (
+          {data?.coaching_content?.split(',').map((content, index) => (
             <ProfileChip key={index} label={content} />
           ))}
         </div>
+      </AboutSection>
+      <AboutSection label="Experience">
+        <p>{`${data?.experience} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
       </AboutSection>
       <AboutSection label="My Availability">
         <Chip color={data?.available ? "success": "error"} label={data?.available ? "Available For Coaching" : "Not Available"} />

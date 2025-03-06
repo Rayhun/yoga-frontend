@@ -11,14 +11,13 @@ export function ExpertProvider({ children }) {
   const {
     user: { profile: userProfile },
   } = useAuthContext();
-
   const {
     data: expertData,
     isLoading,
     failureReason,
   } = useQuery({
     queryFn: () => getSingleExpert({ id: userProfile.expert }),
-    queryKey: [queryKeys.lmsExperts, userProfile.expert],
+    queryKey: [queryKeys.teacherProfile, userProfile.expert],
     enabled: !!userProfile?.expert, // Only fetch if expert ID exists
   });
 

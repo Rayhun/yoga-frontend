@@ -33,8 +33,8 @@ const LoginForm = () => {
 
       if (response?.data?.token) {
         Cookies.set('token', response?.data?.token);
-
-        if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/');
+        if(response?.data?.user?.profile?.role?.toLowerCase() === 'teacher') router.replace('/portal/teacher/profile')
+        else if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/');
         else router.replace('/onboarding');
       }
     } catch (error) {
