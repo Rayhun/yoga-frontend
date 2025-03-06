@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import ChartOne from '../charts/ChartOne';
-import ChartTwo from '../charts/ChartTwo';
-import CardDataStats from '../stats/CardDataStats';
+import ChartOne from '../../charts/ChartOne';
+import ChartTwo from '../../charts/ChartTwo';
+import CardDataStats from '../../stats/CardDataStats';
 
 const ECommerce = () => {
   return (

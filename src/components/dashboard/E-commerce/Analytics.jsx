@@ -4,9 +4,9 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import dynamic from 'next/dynamic';
 
-const ChartFour = require('../charts/ChartFour').default;
+const ChartFour = require('../../charts/ChartFour').default;
 const DataStats = require('../DataStats/DataStats').default;
-const ChartThree = require('../charts/ChartThree').default;
+const ChartThree = require('../../charts/ChartThree').default;
 const TopContent = require('../TopContent').default;
 const TopChannels = require('../TopChannels').default;
 const TableTwo = require('../Tables/TableTwo').default;
