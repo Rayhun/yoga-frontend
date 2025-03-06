@@ -1,21 +1,5 @@
-'use client';
-import CustomerDashboard from '@/components/dashboard/Customer';
-import ECommerce from '@/components/dashboard/E-commerce/E-commerce';
-import useAuthContext from '@/hooks/useAuthContext';
+import ClientPortalPage from "@/components/dashboard";
 
-const Page = () => {
-  const {user} = useAuthContext();
-  const userRole = user?.profile?.role ?? ''; 
-  const renderDashboard = () => {
-    switch (userRole) {
-      case 'Customer':
-        return <CustomerDashboard />;
-      default:
-        return <ECommerce />;
-    }
-  };
-
-  return renderDashboard();
-};
-
-export default Page;
+export default function Page() {
+  return <ClientPortalPage />;
+}
