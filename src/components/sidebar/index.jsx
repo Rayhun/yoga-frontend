@@ -194,15 +194,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 ) : (
                   <li className="list-none">
                     <Link
-                      href={menuItem.href || '#'}
-                      className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out hover:text-primary ${
-                        (menuItem.isActive ? menuItem.isActive(pathname) : false)
-                          ? 'text-primary'
-                          : 'text-nav-item'
-                      }`}
+                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
+                      className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
+                        ${menuItem.disabled ? 'cursor-not-allowed opacity-50 text-gray-400' : 'hover:text-primary'} 
+                        ${menuItem.isActive?.(pathname) ? 'text-primary' : 'text-nav-item'}`}
+                      aria-disabled={menuItem.disabled} // Improves accessibility
+                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
                     >
-                      {menuItem.Icon ? <menuItem.Icon size={24} /> : null}
+
+                      {menuItem.Icon && <menuItem.Icon size={24} />}
                       {menuItem.label}
+
                     </Link>
                   </li>
                 )}

@@ -15,7 +15,7 @@ const TABS = {
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
+  const [selectedTab, setSelectedTab] = useState(TABS.ABOUT);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -27,7 +27,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         <div className="relative z-30 mx-auto h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
           <div className="relative drop-shadow-2">
             <Image
-              src="/images/user/user-06.png"
+              src={userProfileDetails?.file || "/images/user/user-06.png"}
               width={0}
               height={0}
               sizes="100vw"
@@ -79,10 +79,10 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           onChange={handleTabChange}
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
-          <Tab value={TABS.PROGRAMS} label="Programs" />
-          <Tab value={TABS.WORKSHOPS} label="Workshops" />
-          <Tab value={TABS.EVENTS} label="Events" />
-          <Tab value={TABS.CONSULT} label="Consult" />
+          <Tab disabled value={TABS.PROGRAMS} label="Programs" />
+          <Tab disabled value={TABS.WORKSHOPS} label="Workshops" />
+          <Tab disabled value={TABS.EVENTS} label="Events" />
+          <Tab disabled value={TABS.CONSULT} label="Consult" />
           <Tab value={TABS.ABOUT} label="About" />
         </Tabs>
         <div className="py-5">
