@@ -1,4 +1,10 @@
-import Link from 'next/link';
+import { redirect } from 'next/navigation';
+
+export default function Home() {
+  return redirect('/auth/expert/signup');
+}
+
+/*import Link from 'next/link';
 import Image from 'next/image';
 import SignupForm from '@/components/auth/SignupForm';
 
@@ -14,7 +20,8 @@ const Page = () => {
           <div className="px-26 py-17.5 text-center">
             <Link className="mb-5.5 inline-block" href="/">
               <Image src="/images/logo/logo.png" alt="Logo" width={176} height={32} />
-              {/* <Image
+              Below these two images should be commented when this code is uncommented
+               <Image
                 className="hidden dark:block"
                 src="/images/logo/logo.png"
                 alt="Logo"
@@ -27,7 +34,7 @@ const Page = () => {
                 alt="Logo"
                 width={176}
                 height={32}
-              /> */}
+              />
             </Link>
             <p className="2xl:px-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit suspendisse.</p>
 
@@ -175,3 +182,4 @@ const Page = () => {
 };
 
 export default Page;
+*/
