@@ -17,15 +17,16 @@ const QuickLearningsSection = ({ title, viewAllLink, items }) => {
       </div>
 
       {/* Cards Container */}
-      <div className="flex overflow-x-auto no-scrollbar space-x-8 items-stretch">
-        {items.map(item => (
-          <div key={item.id} className="w-72">
-            <ProgramCard
-              program={item}
-              onClick={() => router.push(`/portal/customer/lms/program/${item.id}/details`)}
-            />
-          </div>
-        ))}
+      <div className='overflow-x-auto no-scrollbar'>
+        <div className="no-scrollbar grid grid-flow-col auto-cols-[300px] gap-4">
+          {items.map(item => (
+              <ProgramCard
+                key={item.id} 
+                program={item}
+                onClick={() => router.push(`/portal/customer/lms/program/${item.id}/details`)}
+              />
+          ))}
+        </div>
       </div>
     </div>
   );
