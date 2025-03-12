@@ -4,40 +4,42 @@ import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import ProgramCard from './ProgramCard';
-import { getProgramsList } from '@/services/private/customer/program';
+import { getEnrolledProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const STATUS_FILTERS = [
   {
     label: 'All',
-    value: 'all',
+    value: '',
   },
   {
     label: 'In Progress',
-    value: 'in_progress',
+    value: 'InProgress',
   },
   {
     label: 'Completed',
-    value: 'completed',
+    value: 'Complete',
   },
 ];
 
 const EnrolledPrograms = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
-  const selectedStatus = searchParams.get('status') || 'all';
+  const selectedStatus = searchParams.get('status') || '';
   const { isLoading: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: () => getProgramsList(),
-    queryKey: [queryKeys.customerPrograms],
+    queryFn: () => getEnrolledProgramsList({ status: selectedStatus }),
+    queryKey: [queryKeys.customerEnrolledPrograms, selectedStatus],
   });
 
   const handleStatusSelect = selected => {
-    if (selected.value === 'all') searchParams.remove('status');
+    if (!selected.value) searchParams.remove('status');
     else searchParams.set('status', selected?.value);
   };
 
+  const programs = programsResponse?.data?.results?.data?.['all-programs'] || [];
+
   return (
-    <div className="flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-[60vh] flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
       {/* Status Filters */}
       <div className="flex gap-3 justify-center">
         {STATUS_FILTERS.map(filter => (
@@ -62,14 +64,20 @@ const EnrolledPrograms = () => {
             <Spinner />
           </div>
         ) : (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {programsResponse?.data?.results?.data?.['all-programs']?.map(program => (
-              <ProgramCard
-                key={program.id}
-                program={program}
-                onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
-              />
-            ))}
+          <div>
+            {programs.length > 0 ? (
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {programsResponse?.data?.results?.data?.['all-programs']?.map(program => (
+                  <ProgramCard
+                    key={program.id}
+                    program={program}
+                    onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="w-full h-[300px] flex justify-center items-center">No programs found</div>
+            )}
           </div>
         )}
       </section>
