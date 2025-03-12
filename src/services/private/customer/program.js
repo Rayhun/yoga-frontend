@@ -1,9 +1,11 @@
 import axios from '@/lib/axios';
 import dayjs from 'dayjs';
 import { PROGRAM_PROGRESS } from '@/utils/enums';
+import { getSearchParamsFromObject } from '@/utils/helpers';
 
-export const getProgramsList = async ({ category = '' }) => {
-  return axios.get(`/customer/program/?category=${category}`);
+export const getProgramsList = async params => {
+  const searchParams = getSearchParamsFromObject(params);
+  return axios.get(`/customer/program/?${searchParams}`);
 };
 
 export const getEnrolledProgramsList = async ({ status = '' }) => {

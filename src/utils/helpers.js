@@ -35,3 +35,22 @@ export const getFileFromURL = async url => {
 
   return new File([response.data], filename, { type: fileType });
 };
+
+export const getSearchParamsFromObject = obj => {
+  const params = new URLSearchParams();
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') return;
+
+    if (Array.isArray(value)) {
+      const filteredValues = value.filter(v => v !== null && v !== undefined);
+      if (filteredValues.length > 0) {
+        params.append(key, filteredValues.join(','));
+      }
+    } else {
+      params.append(key, value);
+    }
+  });
+
+  return params.toString();
+};

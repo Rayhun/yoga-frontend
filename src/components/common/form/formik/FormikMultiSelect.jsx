@@ -13,6 +13,7 @@ const FormikMultiSelect = ({
   Icon,
   required,
   onChange = () => null,
+  ...rest
 }) => {
   const { setFieldValue } = useFormikContext();
   const [field, meta] = useField(name);
@@ -44,6 +45,7 @@ const FormikMultiSelect = ({
       )}
       <div className="relative">
         <Autocomplete
+          {...rest}
           id={name}
           options={options}
           getOptionLabel={option => option.label}

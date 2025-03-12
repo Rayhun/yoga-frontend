@@ -9,20 +9,21 @@ import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import Popup from '@/components/common/popup';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
-import ProgramLibraryFilter from '../admin/ProgramLibraryFilter';
+import ProgramLibraryFilter from './ProgramLibraryFilter';
 import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {
   const router = useRouter();
-  const searchParams = useSearchParamUtils();
-  const selectedCategory = searchParams.get('category');
+
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState({});
+
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: () => getProgramsList({ category: selectedCategory }),
-    queryKey: [queryKeys.customerPrograms, selectedCategory],
+    queryFn: () => getProgramsList(filters),
+    queryKey: [queryKeys.customerPrograms, JSON.stringify(filters)],
   });
 
   const filteredPrograms = useMemo(
@@ -33,10 +34,25 @@ const ProgramsLibrary = () => {
     [programsResponse?.data?.results?.data, searchText]
   );
 
+  const handleApplyFilter = values => {
+    setFilters(values);
+    toggleFilterModal(false);
+  };
+
+  const handleSelectFeaturedCategory = selected => {
+    setFilters(prevState => {
+      const existingCategories = selected.id
+        ? [...new Set([...(prevState.categories || []), selected.id])]
+        : [];
+
+      return { ...prevState, categories: existingCategories };
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 md:gap-7">
-      <Popup open={isFilterModalOpen} onClose={() => toggleFilterModal()}>
-        <ProgramLibraryFilter />
+      <Popup heading="Program Filters" open={isFilterModalOpen} onClose={() => toggleFilterModal()}>
+        <ProgramLibraryFilter filters={filters} onApplyFilter={handleApplyFilter} />
       </Popup>
 
       {/* Hero Section */}
@@ -61,7 +77,7 @@ const ProgramsLibrary = () => {
 
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Categories */}
-        <FeaturedCategories />
+        <FeaturedCategories selected={filters.categories} onSelect={handleSelectFeaturedCategory} />
 
         <div className="flex gap-4 items-center justify-end">
           <input
