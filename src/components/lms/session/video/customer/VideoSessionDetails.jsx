@@ -59,11 +59,11 @@ const VideoSessionDetails = ({ data: sessionDetails }) => {
         {/* Left Section - Video */}
         <div className="w-full">
           <VideoPlayer
-            url="https://vimeo.com/115783408"
-            onReady={player => {
-              player.seekTo(120);
-            }}
+            url={sessionDetails.content_link}
             onUpdateProgress={handleUpdateSessionProgress}
+            onReady={player => {
+              player.seekTo(parseInt(sessionDetails.watch_duration || '0'));
+            }}
           />
         </div>
 

@@ -8,8 +8,8 @@ const YouTubeStyleAudioPlayer = ({ url, thumbnail, title, onUpdateProgress = () 
   const handleProgress = state => {
     const currentTime = state.playedSeconds;
 
-    // Check if 30 seconds have passed since the last update
-    if (currentTime - lastTrackedTime >= 30) {
+    // Check if 15 seconds have passed since the last update
+    if (currentTime - lastTrackedTime >= 15) {
       onUpdateProgress(currentTime);
       setLastTrackedTime(currentTime);
     }

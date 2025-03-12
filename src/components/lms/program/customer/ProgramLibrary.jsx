@@ -73,7 +73,7 @@ const ProgramsLibrary = () => {
         </div>
 
         {/* Content Cards */}
-        <section>
+        <section className="min-h-[50vh]">
           {isLoadingPrograms ? (
             <div className="flex justify-center">
               <Spinner />
