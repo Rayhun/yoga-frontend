@@ -1,8 +1,12 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 
 const LMSQuizDetails = ({ data = {} }) => {
+  const router = useRouter();
+
   return (
-    <DetailsLayoutWrapper title="Quiz">
+    <DetailsLayoutWrapper title="Quiz" onEdit={() => router.push(`/portal/admin/lms/quiz/${data.id}/edit`)}>
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Quiz Number">{data.quiz_number}</DetailsRecord>

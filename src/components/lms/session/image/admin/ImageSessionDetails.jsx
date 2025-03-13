@@ -1,9 +1,16 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 
 const ImageSessionDetails = ({ data = {} }) => {
+  const router = useRouter();
+
   return (
-    <DetailsLayoutWrapper title="Image Session">
+    <DetailsLayoutWrapper
+      title="Image Session"
+      onEdit={() => router.push(`/portal/admin/lms/session/image/${data.id}/edit`)}
+    >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>

@@ -9,6 +9,7 @@ import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import { addNewCategory, updateExistingCategory } from '@/services/private/lms/category';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -28,12 +29,14 @@ const CategoryForm = ({ selected }) => {
 
   const initialValues = {
     name: selected?.name || '',
-    parent: selected?.parent || '',
+    parent: selected?.parent?.id || '',
+    is_feature: selected?.is_feature || false,
   };
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Required!'),
     parent: Yup.number(),
+    is_feature: Yup.bool(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -75,6 +78,7 @@ const CategoryForm = ({ selected }) => {
                 <FormikSelect name="parent" label="Parent" placeholder="Parent" options={categoriesOptions} />
               </div>
             </div>
+            <FormikCheckbox name="is_feature" label="Featured" />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>

@@ -1,10 +1,17 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { DetailsLayoutWrapper, DetailsRecord } from '@/components/common/details';
 import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
 
 const OnboardingQuizDetails = ({ data = {} }) => {
+  const router = useRouter();
+
   return (
-    <DetailsLayoutWrapper title="Quiz">
+    <DetailsLayoutWrapper
+      title="Quiz"
+      onEdit={() => router.push(`/portal/admin/onboarding/quiz/${data.id}/edit`)}
+    >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Type">{data.screen_type}</DetailsRecord>
