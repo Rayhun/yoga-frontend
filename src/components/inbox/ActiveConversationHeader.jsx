@@ -9,7 +9,7 @@ const ActiveConversationHeader = () => {
     connection: { isConnected: isSocketConnected, status: connectionStatus },
   } = useInbox();
   return (
-    <div className="sticky flex items-center justify-between border-b border-stroke px-6 py-4.5 dark:border-strokedark">
+    <div className="sticky h-[90px] flex items-center justify-between border-b border-stroke px-6 py-4.5 dark:border-strokedark">
       <div className="flex items-center min-w-[200px]">
         <div className="mr-4.5 h-13 w-full max-w-13 overflow-hidden rounded-full">
           {activeConversation.img ? (

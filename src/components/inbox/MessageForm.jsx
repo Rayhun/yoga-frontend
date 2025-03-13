@@ -27,7 +27,7 @@ const MessageForm = () => {
   };
 
   return (
-    <div className="sticky bottom-0 border-t border-stroke bg-white px-6 py-5 dark:border-strokedark dark:bg-boxdark">
+    <div className="sticky h-[90px] bottom-0 border-t border-stroke bg-white px-6 py-5 dark:border-strokedark dark:bg-boxdark">
       <div className="flex items-center justify-between space-x-4.5">
         <div className="relative w-full">
           <input

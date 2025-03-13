@@ -81,7 +81,7 @@ const ConversationsList = () => {
                 }`}
                 onClick={() => setActiveConversation(conversation)}
                 style={{
-                  fontWeight: !isConversationActive && hasUnreadMessages > 0 ? 'bold' : 'normal',
+                  fontWeight: !isConversationActive && hasUnreadMessages > 0 ? '800' : 'normal',
                 }}
               >
                 <div className="relative mr-3.5 h-11 w-full max-w-11 rounded-full">
@@ -99,7 +99,7 @@ const ConversationsList = () => {
                 </div>
                 <div className="w-full">
                   <div className="flex items-center justify-between gap-2">
-                    <h5 className="text-sm line-clamp-1 text-black dark:text-white">{conversation.name}</h5>
+                    <h5 className="text-sm line-clamp-1">{conversation.name}</h5>
                     {conversation.time ? (
                       <p className="text-[10px]">{dayjs(conversation.time).format('hh:mm A')}</p>
                     ) : null}
