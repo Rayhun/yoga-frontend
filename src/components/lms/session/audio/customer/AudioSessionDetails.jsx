@@ -36,9 +36,9 @@ const AudioSessionDetails = ({ data: sessionDetails }) => {
             title={sessionDetails.title}
             thumbnail={sessionDetails.image}
             onUpdateProgress={handleUpdateSessionProgress}
-            // onReady={player => {
-            //   player.seekTo(30);
-            // }}
+            onReady={player => {
+              player.seekTo(parseInt(sessionDetails.watch_duration || '0'));
+            }}
           />
         </div>
 

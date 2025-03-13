@@ -60,6 +60,8 @@ const ContentCard = ({ item }) => {
     router.push(`${contentRef.href}?${newParams.toString()}`);
   };
 
+  const contentImage = item.content_type === 'quiz' ? '/images/content/quiz.png' : item?.image;
+
   return (
     <div
       className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
@@ -71,7 +73,7 @@ const ContentCard = ({ item }) => {
           <Image
             width={0}
             height={0}
-            src={item?.image || '/images/content/default.png'}
+            src={contentImage || '/images/content/default.png'}
             alt="image"
             sizes="100vw"
             className="w-full h-full object-cover rounded-t-lg"

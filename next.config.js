@@ -27,6 +27,10 @@ const nextConfig = {
         hostname: 'nurishdoc.s3.amazonaws.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'nurishdoc.s3.us-west-1.amazonaws.com',
+      },
     ],
   },
 };

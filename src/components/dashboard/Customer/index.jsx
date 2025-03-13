@@ -19,7 +19,7 @@ const CustomerDashboard = () => {
   const selectedCategory = searchParams.get('category');
   const [searchText, setSearchText] = useState('');
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: () => getProgramsList({ category: selectedCategory }),
+    queryFn: () => getProgramsList({ categories: selectedCategory }),
     queryKey: [queryKeys.customerPrograms, selectedCategory],
   });
 
@@ -42,20 +42,20 @@ const CustomerDashboard = () => {
               Achieve your personal goals with curated wellness plans developed by our expert
             </p>
             <div className="mt-10 flex justify-between items-center gap-4 pr-3">
-          <Chip
-            className="mt-10 !capitalize w-full"
-            label="Start Journey"
-            color="primary"
-            onClick={() => console.log('See Details')}
-          />
-           <Chip
-            variant='outlined'
-            className="mt-10 !capitalize w-full"
-            label="Resume"
-            color="primary"
-            onClick={() => console.log('Resume')}
-          />
-        </div>
+              <Chip
+                className="mt-10 !capitalize w-full"
+                label="Start Journey"
+                color="primary"
+                onClick={() => console.log('See Details')}
+              />
+              <Chip
+                variant="outlined"
+                className="mt-10 !capitalize w-full"
+                label="Resume"
+                color="primary"
+                onClick={() => console.log('Resume')}
+              />
+            </div>
           </div>
           <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
             <Image

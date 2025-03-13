@@ -70,6 +70,9 @@ const Popup = ({ size, heading = 'Popup', onClose = () => null, children, ...res
         '& .MuiDialog-container': {
           alignItems: 'flex-start',
         },
+        '& .MuiDialog-paper': {
+          overflowY: 'visible',
+        },
       }}
       fullWidth
     >

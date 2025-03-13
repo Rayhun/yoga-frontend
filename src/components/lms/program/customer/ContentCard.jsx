@@ -32,12 +32,21 @@ const getContentRef = item => {
   return { label, href };
 };
 
-const ModuleContent = () => (
-  <div className="flex flex-col gap-2 mb-2">
-    <p className="text-bodydark2 text-sm">50/100 completed</p>
-    <LinearProgress color="secondary" className="rounded-full" value={50} />
-  </div>
-);
+const ModuleContent = ({ total_item = 0, completed_item = 0 }) => {
+  const progress = useMemo(
+    () => (total_item <= 1 ? 0 : (completed_item / total_item) * 100),
+    [completed_item, total_item]
+  );
+
+  return (
+    <div className="flex flex-col gap-2 mb-2">
+      <p className="text-bodydark2 text-sm">
+        {completed_item}/{total_item} completed
+      </p>
+      <LinearProgress color="secondary" className="rounded-full" value={progress} />
+    </div>
+  );
+};
 
 const SessionQuizContent = ({ content_type, session_type, duration = '10 min' }) => {
   const Icon = useMemo(() => {
@@ -76,6 +85,8 @@ const ContentCard = ({ item }) => {
     router.push(`${contentRef.href}?${newParams.toString()}`);
   };
 
+  const contentImage = item.content_type === 'quiz' ? '/images/content/quiz.png' : item?.image;
+
   return (
     <div
       className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
@@ -87,7 +98,7 @@ const ContentCard = ({ item }) => {
           <Image
             width={0}
             height={0}
-            src={item?.image || '/images/content/default.png'}
+            src={contentImage || '/images/content/default.png'}
             alt="image"
             sizes="100vw"
             className="w-full h-full object-cover rounded-t-lg"

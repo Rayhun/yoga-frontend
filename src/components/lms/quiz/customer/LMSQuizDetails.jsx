@@ -19,13 +19,14 @@ const LMSQuizDetails = ({ data: quizDetails }) => {
     mutationFn: completeProgramContent,
   });
 
-  const handleSubmitQuiz = async (req, res) => {
+  const handleSubmitQuiz = async () => {
     try {
       await submitQuiz({
         id: programID,
         module: moduleID,
         content_type: 'Quiz',
         content_id: quizDetails.id,
+        quiz_answer: selectedOption.text,
       });
       toast.success('Quiz submitted successfully');
     } catch (error) {
