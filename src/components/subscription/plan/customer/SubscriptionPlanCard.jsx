@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const SubscriptionPlanCard = ({ data: planDetails = {} }) => {
+const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$' }) => {
   const pathname = usePathname();
 
   return (
@@ -16,8 +16,8 @@ const SubscriptionPlanCard = ({ data: planDetails = {} }) => {
       {/* Price */}
       {planDetails.discounted_price ? (
         <div className="text-gray-500 text-xl">
-          <span className="text-2xl md:text-4xl font-bold text-black">${planDetails.discounted_price}</span>
-          <span className="line-through ml-2 text-lg">${planDetails.price}</span>
+          <span className="text-2xl md:text-4xl font-bold text-black">{currencySymbol}{planDetails.discounted_price}</span>
+          <span className="line-through ml-2 text-lg">{currencySymbol}{planDetails.price}</span>
         </div>
       ) : (
         <p className="text-2xl md:text-4xl font-bold text-black">${planDetails.price}</p>
