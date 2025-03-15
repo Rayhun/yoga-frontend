@@ -1,9 +1,16 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 
 const VideoSessionDetails = ({ data = {} }) => {
+  const router = useRouter();
+
   return (
-    <DetailsLayoutWrapper title="Video Session">
+    <DetailsLayoutWrapper
+      title="Video Session"
+      onEdit={() => router.push(`/portal/admin/lms/session/video/${data.id}/edit`)}
+    >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>

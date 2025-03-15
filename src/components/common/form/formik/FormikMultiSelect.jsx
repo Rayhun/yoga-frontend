@@ -62,7 +62,7 @@ const FormikMultiSelect = ({
                   label={option.label}
                   variant="filled"
                   color="primary"
-                  className="bg-gray-300 text-black-2 dark:text-white dark:bg-primary"
+                  className="!bg-gray-300 !text-black-2 dark:text-white dark:bg-primary"
                 />
               ))}
             </div>

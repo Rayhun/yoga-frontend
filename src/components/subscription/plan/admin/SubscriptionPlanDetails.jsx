@@ -1,8 +1,15 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord } from '@/components/common/details';
 
 const SubscriptionPlanDetails = ({ data = {} }) => {
+  const router = useRouter();
+
   return (
-    <DetailsLayoutWrapper title="Subscription Plan">
+    <DetailsLayoutWrapper
+      title="Subscription Plan"
+      onEdit={() => router.push(`/portal/admin/subscription/plan/${data.id}/edit`)}
+    >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>

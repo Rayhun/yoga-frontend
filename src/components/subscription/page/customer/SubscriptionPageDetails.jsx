@@ -46,7 +46,7 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
           <Grid key={plan.id} size={{ xs: 12, md: 6, lg: 4 }}>
             <Slide in direction="right" timeout={300 + i * 300}>
               <div>
-                <SubscriptionPlanCard data={plan} />
+                <SubscriptionPlanCard data={plan} currencySymbol={pageDetails?.currency_symbol} />
               </div>
             </Slide>
           </Grid>
