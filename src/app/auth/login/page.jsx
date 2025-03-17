@@ -34,7 +34,7 @@ function Page() {
               Log in to manage your offerings, track your earnings, and inspire more transformations every day
             </p>
 
-            <span className="mt-15 inline-block">
+            {/* <span className="mt-15 inline-block">
               <svg
                 width="350"
                 height="350"
@@ -149,7 +149,7 @@ function Page() {
                   fill="#1C2434"
                 />
               </svg>
-            </span>
+            </span> */}
           </div>
         </div>
 
