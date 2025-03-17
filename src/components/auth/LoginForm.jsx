@@ -33,7 +33,8 @@ const LoginForm = () => {
 
       if (response?.data?.token) {
         Cookies.set('token', response?.data?.token);
-        if(response?.data?.user?.profile?.role?.toLowerCase() === 'teacher') router.replace('/portal/teacher/profile')
+        if (response?.data?.user?.profile?.role?.toLowerCase() === 'teacher')
+          router.replace('/portal/teacher/profile');
         else if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/');
         else router.replace('/onboarding');
       }
@@ -62,6 +63,17 @@ const LoginForm = () => {
               Forgot Password?
             </Link>
           </div>
+          <p className="text-sm">
+            By logging in to your account, you are agreeing to the{' '}
+            <Link href="https://www.nourishdoc.com/terms" target="_blank" className="text-primary">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="https://www.nourishdoc.com/privacy-policy" target="_blank" className="text-primary">
+              Privacy Policy
+            </Link>
+            .
+          </p>
           <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
             {isSubmitting ? 'Sigining In...' : 'Sign In'}
           </Button>

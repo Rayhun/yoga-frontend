@@ -23,11 +23,11 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
   return (
     <div>
-      <div className="text-center">
-        <div className="relative z-30 mx-auto h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
+      <div className="text-center flex items-center">
+        <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
           <div className="relative drop-shadow-2">
             <Image
-              src={userProfileDetails?.file || "/images/user/user-06.png"}
+              src={userProfileDetails?.file || '/images/user/user-06.png'}
               width={0}
               height={0}
               sizes="100vw"
@@ -63,11 +63,12 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
             </label> */}
           </div>
         </div>
-        <div className="mt-4">
-          <h3 className="text-2xl font-semibold text-black dark:text-white">
-            {userProfileDetails?.name}
-          </h3>
-          <p className="my-2 font-medium">{userProfileDetails?.title}</p>
+        <div className="w-full text-left flex items-center justify-between">
+          <div>
+            <h3 className="text-2xl font-semibold text-black dark:text-white">{userProfileDetails?.name}</h3>
+            <p className="my-1 font-medium">{userProfileDetails?.title}</p>
+            <p className="text-sm">42.1k followers</p>
+          </div>
           <button className="bg-primary text-white rounded-full px-8 py-2">Follow</button>
         </div>
       </div>

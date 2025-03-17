@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
@@ -7,6 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FiMail, FiLock, FiUser, FiPhone } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
 import { extractFormFieldError, toastApiError } from '@/utils/helpers';
@@ -25,6 +27,7 @@ const SignupForm = () => {
     mobile_number: '',
     password: '',
     confirm_password: '',
+    terms: false,
   };
 
   const validationSchema = Yup.object({
@@ -39,6 +42,7 @@ const SignupForm = () => {
     confirm_password: Yup.string()
       .required('Required!')
       .oneOf([Yup.ref('password'), null], 'Passwords do not match'),
+    terms: Yup.bool().isTrue('Please check to the terms and conditions to proceed'),
   });
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
@@ -48,7 +52,7 @@ const SignupForm = () => {
     })
       .then(async () => {
         try {
-          const { email, password, confirm_password, ...rest } = values;
+          const { email, password, confirm_password, terms, ...rest } = values;
 
           const payload = {
             email,
@@ -107,6 +111,27 @@ const SignupForm = () => {
             label="Confirm Password"
             placeholder="Confirm Password"
             Icon={FiLock}
+            required
+          />
+          <FormikCheckbox
+            name="terms"
+            label={
+              <p>
+                By checking this box, I understand and agree to the{' '}
+                <Link href="https://www.nourishdoc.com/terms" target="_blank" className="text-primary">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link
+                  href="https://www.nourishdoc.com/privacy-policy"
+                  target="_blank"
+                  className="text-primary"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+            }
             required
           />
           <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
