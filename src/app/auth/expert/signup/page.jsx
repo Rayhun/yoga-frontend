@@ -22,8 +22,8 @@ const Page = () => {
             </p>
             <div className="mt-10 2xl:px-20">
               <div className="flex flex-col gap-3">
-                <p className="text-left">Unlimited Earning Possibilities</p>
                 {[
+                  'Unlimited Earning Possibilities',
                   'Instant Client Access',
                   'Create on Your Terms',
                   'Built-In Marketing Power',
