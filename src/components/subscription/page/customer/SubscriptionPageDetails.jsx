@@ -5,7 +5,7 @@ import Slide from '@mui/material/Slide';
 import SubscriptionPlanCard from '@/components/subscription/plan/customer/SubscriptionPlanCard';
 
 const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
-  const [selectedTenure, setSelectedTenure] = useState('');
+  const [selectedTenure, setSelectedTenure] = useState(pageDetails?.tenure?.[0]);
 
   const tenureOptions = useMemo(() => {
     const options = (pageDetails?.tenure || []).map(i => ({ label: i, value: i }));

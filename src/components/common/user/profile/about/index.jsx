@@ -10,7 +10,7 @@ const AboutSection = ({ label, children }) => (
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-primary/10 text-primary" />;
 
-const UserProfileAbout = ({data}) => {
+const UserProfileAbout = ({ data }) => {
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="Coaching Areas">
@@ -21,9 +21,7 @@ const UserProfileAbout = ({data}) => {
         </div>
       </AboutSection>
       <AboutSection label="About">
-        <ControllableText>
-          {data?.description || 'No description provided'}
-        </ControllableText>
+        <ControllableText>{data?.description || 'No description provided'}</ControllableText>
       </AboutSection>
       <AboutSection label="Languages">
         <div className="flex flex-wrap gap-2">
@@ -50,7 +48,7 @@ const UserProfileAbout = ({data}) => {
         <p>{`${data?.experience} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
       </AboutSection>
       <AboutSection label="My Availability">
-        <Chip color={data?.available ? "success": "error"} label={data?.available ? "Available For Coaching" : "Not Available"} />
+        <ProfileChip label={data?.available ? 'Available For Coaching' : 'Not Available'} />
       </AboutSection>
     </div>
   );
