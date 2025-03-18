@@ -6,17 +6,27 @@ const ControllableText = ({ numberOfWords = 50, children, ...rest }) => {
 
   const toggleTextVisibility = () => setIsFullTextVisible(prevState => !prevState);
 
+  const totalWords = useMemo(() => children.split(' '), [children]);
+
   const truncatedText = useMemo(
-    () => children.split(' ').slice(0, numberOfWords).join(' '),
-    [children, numberOfWords]
+    () => totalWords.slice(0, numberOfWords).join(' '),
+    [totalWords, numberOfWords]
   );
+
+  const hasTruncableText = totalWords.length > numberOfWords;
 
   return (
     <p {...rest}>
-      <span>{isFullTextVisible ? children : truncatedText + '...'}</span>
-      <span className="text-primary cursor-pointer ml-2" onClick={toggleTextVisibility}>
-        {isFullTextVisible ? 'See Less' : 'See More'}
-      </span>
+      {hasTruncableText ? (
+        <>
+          <span>{isFullTextVisible ? children : truncatedText + '...'}</span>
+          <span className="text-primary cursor-pointer ml-2" onClick={toggleTextVisibility}>
+            {isFullTextVisible ? 'See Less' : 'See More'}
+          </span>
+        </>
+      ) : (
+        <span>{children}</span>
+      )}
     </p>
   );
 };
