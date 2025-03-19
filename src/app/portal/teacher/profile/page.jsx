@@ -15,8 +15,8 @@ const Page = () => {
   if (isLoading) return <PageLoader />;
   return (
     <div>
-      <PageHeader title="User Profile" />
-      <DetailsLayoutWrapper title="Profile Details" onEdit={() => router.push('/portal/teacher/editProfile')}>
+      <PageHeader title="Expert Profile" />
+      <DetailsLayoutWrapper title="Expert Profile Details" onEdit={() => router.push('/portal/teacher/editProfile')}>
         <UserProfileDetails data={expertData} />
       </DetailsLayoutWrapper>
     </div>
