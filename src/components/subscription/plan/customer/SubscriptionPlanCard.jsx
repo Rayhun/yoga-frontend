@@ -8,16 +8,17 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
   return (
     <div
       key={planDetails.id}
-      className="bg-white py-5 rounded-lg text-center hover:border-t-[4px] hover:border-t-black-2 hover:shadow-[0_1rem_3rem_rgba(31,45,61,0.125)] hover:transform -translate-y-1.5"
+      className="bg-white py-5 rounded-lg text-center hover:border-t-[4px] hover:border-t-black-2 shadow-[0_1rem_3rem_rgba(31,45,61,0.125)] hover:transform -translate-y-1.5"
     >
-      <p className="my-3 text-lg font-semibold text-primary">{planDetails.title}</p>
+      <p className="my-3 text-lg font-semibold text-black">{planDetails.title}</p>
       {/* Price */}
-      <div className={`p-3 ${isFeatured ? 'bg-primary text-white' : 'text-gray-600'}`}>
+      <div className={`p-3 ${isFeatured ? 'bg-[#8BC24A] text-white' : 'text-gray-600'}`}>
         {planDetails.discounted_price ? (
           <div className="text-xl">
             <span className="text-2xl md:text-4xl font-bold">
               <span className="text-lg">{currencySymbol}</span>
               {planDetails.discounted_price}
+              <span className="text-lg">/{planDetails.subscription_tenure_period}</span>
             </span>
             <span className="line-through ml-2 text-lg">
               <span className="text-lg">{currencySymbol}</span>
@@ -25,7 +26,10 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
             </span>
           </div>
         ) : (
-          <p className="text-2xl md:text-4xl font-bold">${planDetails.price}</p>
+          <p className="text-2xl md:text-4xl font-bold">
+            ${planDetails.price}
+            <span className="text-lg">/{planDetails.subscription_tenure_period}</span>
+          </p>
         )}
       </div>
       <ul className="px-3 mt-4 space-y-2">
@@ -37,7 +41,7 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
       </ul>
       <div className="p-3">
         <Link href={`${pathname}/${planDetails.id}/checkout`}>
-          <button className="mt-6 px-6 py-2 text-sm font-medium text-white bg-black transition-all rounded-full border-solid border-2 border-transparent hover:border-black hover:text-black hover:bg-white">
+          <button className="mt-6 px-6 py-2 text-sm font-medium text-white bg-primary transition-all rounded-full border-solid border-2 border-transparent hover:border-black hover:text-black hover:bg-white">
             Subscribe
           </button>
         </Link>

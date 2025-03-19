@@ -27,12 +27,12 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
         <p className="text-gray-700 my-3 text-lg">{pageDetails?.description}</p>
       </div>
 
-      <div className="flex border-2 border-primary bg-gray-100 rounded-full">
+      <div className="flex border-2 border-[#8BC24A] bg-gray-100 rounded-full">
         {tenureOptions?.map(tenure => (
           <button
             key={tenure.value}
             className={`px-4 py-2 text-xs md:text-sm rounded-full transition-colors duration-300 ${
-              selectedTenure === tenure.value ? 'bg-primary text-white' : 'text-gray-700'
+              selectedTenure === tenure.value ? 'bg-[#8BC24A] text-white' : 'text-gray-700'
             }`}
             onClick={() => setSelectedTenure(tenure.value)}
           >
