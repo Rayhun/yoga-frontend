@@ -8,29 +8,18 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
   return (
     <div
       key={planDetails.id}
-      className="bg-white py-5 rounded-lg text-center hover:border-t-[4px] hover:border-t-black-2 shadow-[0_1rem_3rem_rgba(31,45,61,0.125)] hover:transform -translate-y-1.5"
+      className="bg-white py-5 rounded-lg text-center border-[1px] border-gray-400 hover:border-t-[4px] hover:border-t-black-2 shadow-[0_1rem_3rem_rgba(31,45,61,0.125)] hover:transform -translate-y-1.5"
     >
       <p className="my-3 text-lg font-semibold text-black">{planDetails.title}</p>
       {/* Price */}
       <div className={`p-3 ${isFeatured ? 'bg-[#8BC24A] text-white' : 'text-gray-600'}`}>
-        {planDetails.discounted_price ? (
-          <div className="text-xl">
-            <span className="text-2xl md:text-4xl font-bold">
-              <span className="text-lg">{currencySymbol}</span>
-              {planDetails.discounted_price}
-              <span className="text-lg">/{planDetails.subscription_tenure_period}</span>
-            </span>
-            <span className="line-through ml-2 text-lg">
-              <span className="text-lg">{currencySymbol}</span>
-              {planDetails.price}
-            </span>
-          </div>
-        ) : (
-          <p className="text-2xl md:text-4xl font-bold">
-            ${planDetails.price}
+        <div className="text-xl">
+          <span className="text-2xl md:text-4xl font-bold">
+            <span className="text-lg">{currencySymbol}</span>
+            {planDetails.discounted_price}
             <span className="text-lg">/{planDetails.subscription_tenure_period}</span>
-          </p>
-        )}
+          </span>
+        </div>
       </div>
       <ul className="px-3 mt-4 space-y-2">
         {planDetails.features.map((feature, i) => (

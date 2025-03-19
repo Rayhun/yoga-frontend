@@ -89,115 +89,126 @@ const ExpertProfileForm = ({ selected }) => {
     }
   };
 
+  const handleCancel = () => {
+    router.back();
+  };
+
   return (
-    <FormLayoutWrapper title="Expert Profile Form">
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-        enableReinitialize
-      >
-        {({ isSubmitting }) => (
-          <Form className="flex flex-col gap-3">
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField name="first_name" label="First Name" placeholder="First Name" required />
-              </div>
+    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="p-6.5">
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({ isSubmitting }) => (
+            <Form className="flex flex-col gap-3">
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="first_name" label="First Name" placeholder="First Name" required />
+                </div>
 
-              <div className="w-full xl:w-1/2">
-                <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" disabled />
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" disabled />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField name="last_name" label="Last Name" placeholder="Last Name" required />
-              </div>
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="last_name" label="Last Name" placeholder="Last Name" required />
+                </div>
 
-              <div className="w-full xl:w-1/2">
-                <FormikField type="email" name="email" label="Email" placeholder="Email" disabled />
+                <div className="w-full xl:w-1/2">
+                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField name="title" label="Title" placeholder="Title" required />
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="title" label="Title" placeholder="Title" required />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" />
+                </div>
               </div>
-              <div className="w-full xl:w-1/2">
-                <FormikField name="business_name" label="Business Name" placeholder="Business Name" />
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField
+                    type="number"
+                    name="experience"
+                    label="Experience (Years)"
+                    placeholder="Experience in Years"
+                    required
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  {/* <FormikField name="title" label="Title" placeholder="Title" required /> */}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField
-                  type="number"
-                  name="experience"
-                  label="Experience (Years)"
-                  placeholder="Experience in Years"
-                  required
-                />
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <FormikField name="website" label="Website URL" placeholder="Website URL" />
+                </div>
               </div>
-              <div className="w-full xl:w-1/2">
-                {/* <FormikField name="title" label="Title" placeholder="Title" required /> */}
-              </div>
-            </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
-              </div>
-              <div className="w-full xl:w-1/2">
-                <FormikField name="website" label="Website URL" placeholder="Website URL" />
-              </div>
-            </div>
-            <FormikField name="description" label="About" placeholder="About" rows={5} required />
-            <TagsField name="tags" label="Coaching Areas" placeholder="Coaching Areas" required />
-            <FormikSubmittableField
-              name="credentials"
-              label="Credentials"
-              placeholder="Credentials"
-              required
-            />
-            <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
-            <FormikSubmittableField
-              name="coaching_content"
-              label="My Coaching Content"
-              placeholder="My Coaching Content"
-              required
-            />
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikDropzone
-                  name="file"
-                  label="Profile Image"
-                  fileURLs={selected?.file ? [selected.file] : []}
-                  Icon={FaRegFileImage}
-                  required
-                />
-              </div>
+              <FormikField name="description" label="About" placeholder="About" rows={5} required />
+              <TagsField name="tags" label="Coaching Areas" placeholder="Coaching Areas" required />
+              <FormikSubmittableField
+                name="credentials"
+                label="Credentials"
+                placeholder="Credentials"
+                required
+              />
+              <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
+              <FormikSubmittableField
+                name="coaching_content"
+                label="My Coaching Content"
+                placeholder="My Coaching Content"
+                required
+              />
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikDropzone
+                    name="file"
+                    label="Profile Image"
+                    fileURLs={selected?.file ? [selected.file] : []}
+                    Icon={FaRegFileImage}
+                    required
+                  />
+                </div>
 
-              <div className="w-full xl:w-1/2">
-                <FormikDropzone
-                  name="program_file"
-                  label="Program File"
-                  fileURLs={selected?.program_file ? [selected.program_file] : []}
-                  Icon={FaFile}
-                  accept={{
-                    'text/csv': ['.csv'],
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                    'application/vnd.ms-excel': ['.xls'],
-                  }}
-                  required
-                />
+                <div className="w-full xl:w-1/2">
+                  <FormikDropzone
+                    name="program_file"
+                    label="Program File"
+                    fileURLs={selected?.program_file ? [selected.program_file] : []}
+                    Icon={FaFile}
+                    accept={{
+                      'text/csv': ['.csv'],
+                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                      'application/vnd.ms-excel': ['.xls'],
+                    }}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <div className="my-5">
-              <FormikSwitch name="available" label="Available for Coaching" />
-            </div>
-            <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </FormLayoutWrapper>
+              <div className="my-5">
+                <FormikSwitch name="available" label="Available for Coaching" />
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </Button>
+                <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
   );
 };
 
