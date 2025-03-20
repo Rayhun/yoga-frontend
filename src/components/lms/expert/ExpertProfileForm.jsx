@@ -158,7 +158,7 @@ const ExpertProfileForm = ({ selected }) => {
               <FormikSubmittableField
                 name="credentials"
                 label="Certifications"
-                placeholder="Upload your CV (URL of your certifications)"
+                placeholder="Your Certifications Link or URL"
                 required
               />
               <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
