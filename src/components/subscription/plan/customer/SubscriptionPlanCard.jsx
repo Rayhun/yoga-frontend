@@ -12,8 +12,8 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
     >
       <p className="my-3 text-lg font-semibold text-black">{planDetails.title}</p>
       {/* Price */}
-      <div className={`p-3 ${isFeatured ? 'bg-[#8BC24A] text-white' : 'text-gray-600'}`}>
-        <div className="text-xl">
+      <div className={`p-3 ${isFeatured ? 'bg-[#8BC24A] text-white' : 'border-t border-b border-gray-300 text-gray-600'}`}>
+      <div className="text-xl">
           <span className="text-2xl md:text-4xl font-bold">
             <span className="text-lg">{currencySymbol}</span>
             {planDetails.discounted_price}

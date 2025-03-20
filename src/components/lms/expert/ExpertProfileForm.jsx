@@ -33,6 +33,7 @@ const ExpertProfileForm = ({ selected }) => {
     linkedin: selected?.linkedin || '',
     website: selected?.website || '',
     title: selected?.title || '',
+    intro: selected?.intro || '',
     business_name: selected?.business_name || '',
     description: selected?.description || '',
     categories: selected?.categories?.map(i => i.id) || [],
@@ -141,7 +142,7 @@ const ExpertProfileForm = ({ selected }) => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  {/* <FormikField name="title" label="Title" placeholder="Title" required /> */}
+                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -156,8 +157,8 @@ const ExpertProfileForm = ({ selected }) => {
               <TagsField name="tags" label="Coaching Areas" placeholder="Coaching Areas" required />
               <FormikSubmittableField
                 name="credentials"
-                label="Credentials"
-                placeholder="Credentials"
+                label="Certifications"
+                placeholder="Upload your CV (URL of your certifications)"
                 required
               />
               <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
@@ -196,11 +197,11 @@ const ExpertProfileForm = ({ selected }) => {
                 <FormikSwitch name="available" label="Available for Coaching" />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </Button>
-                <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
+              <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
                   Cancel
+                </Button>
+                <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'Create My Profile'}
                 </Button>
               </div>
             </Form>
