@@ -7,7 +7,7 @@ const Page = () => {
 
   return (
     <div>
-      <PageHeader title="Edit Expert Profile" />
+      <PageHeader title="Show the World Your Expertise!" />
       <ExpertProfileForm selected={expertData} />
     </div>
   );

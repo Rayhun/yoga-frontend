@@ -28,6 +28,10 @@ const SubscriptionPagesList = () => {
         header: 'Description',
         accessorKey: 'description',
       },
+      {
+        header: 'URL',
+        accessorKey: 'url',
+      },
     ],
     []
   );
