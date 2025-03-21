@@ -2,26 +2,26 @@ import Chip from '@mui/material/Chip';
 import ControllableText from '@/components/common/details/ControllableText';
 
 const AboutSection = ({ label, children }) => (
-  <div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm">
     <h5 className="font-bold">{label}</h5>
     <div>{children}</div>
   </div>
 );
 
-const ProfileChip = ({ label }) => <Chip label={label} className="bg-primary/10 text-primary" />;
+const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
 const UserProfileAbout = ({ data }) => {
   return (
     <div className="flex flex-col gap-7">
+      <AboutSection label="About">
+        <ControllableText>{data?.description || 'No description provided'}</ControllableText>
+      </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
           {data?.tags?.map(tag => (
             <ProfileChip key={tag.id} label={tag?.name} />
           ))}
         </div>
-      </AboutSection>
-      <AboutSection label="About">
-        <ControllableText>{data?.description || 'No description provided'}</ControllableText>
       </AboutSection>
       <AboutSection label="Languages">
         <div className="flex flex-wrap gap-2">
