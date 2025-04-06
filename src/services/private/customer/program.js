@@ -20,6 +20,10 @@ export const enrollProgram = async ({ id }) => {
   return axios.post(`/customer/program/${id}/enroll/`);
 };
 
+export const buyProgram = async ({ id }) => {
+  return axios.post(`/program/checkout/`, { program: id });
+};
+
 export const updateProgramContentProgress = async ({ id, ...payload }) => {
   return axios.post(`/customer/program/${id}/progress/`, payload);
 };

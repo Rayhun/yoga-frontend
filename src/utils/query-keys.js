@@ -25,6 +25,7 @@ const queryKeys = {
   inboxConversations: 'inboxConversations',
   chatGroups: 'chatGroups',
   teacherProfile: 'teacherProfile',
+  checkoutProgram: 'checkoutProgram',
 };
 
 export default queryKeys;

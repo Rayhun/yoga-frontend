@@ -27,6 +27,11 @@ const ProgramCard = ({ program, onClick }) => {
         <p className="break-words line-clamp-1 text-sm text-gray-400" title={program.description}>
           {program.experts.join(', ') || 'No experts'}
         </p>
+        {program?.is_paid && program?.price && (
+          <p className="break-words line-clamp-1 text-sm font-semibold text-primary" title={program.description}>
+            {`${program.currency_symbol} ${program.price}`}
+          </p>
+        )}
       </div>
     </div>
   );
