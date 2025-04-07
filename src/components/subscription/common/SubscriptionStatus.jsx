@@ -8,7 +8,7 @@ const VARIANT = {
   error: 'error',
 };
 
-const SubscriptionMessage = ({ variant = VARIANT.error }) => {
+const SubscriptionMessage = ({ variant = VARIANT.error, renderButton = null }) => {
   const isSuccess = variant === VARIANT.success;
 
   const {
@@ -40,11 +40,11 @@ const SubscriptionMessage = ({ variant = VARIANT.error }) => {
       <p className="text-gray-700 mb-4">{messageDescription}</p>
       <p className="text-gray-400 mb-6 italic text-sm">{messageRegards}</p>
 
-      <Link href="/">
+     {renderButton || <Link href="/">
         <button className="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/70 transition duration-300">
           Go to Home
         </button>
-      </Link>
+      </Link>}
     </div>
   );
 };
