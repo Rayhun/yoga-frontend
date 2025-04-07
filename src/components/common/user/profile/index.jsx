@@ -5,6 +5,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import UserProfilePrograms from './programs';
 import UserProfileAbout from './about';
+import UserProfileEvents from './Events';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -15,7 +16,7 @@ const TABS = {
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.ABOUT);
+  const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -80,9 +81,9 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           onChange={handleTabChange}
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
-          <Tab disabled value={TABS.PROGRAMS} label="Programs" />
-          <Tab disabled value={TABS.WORKSHOPS} label="Workshops" />
-          <Tab disabled value={TABS.EVENTS} label="Events" />
+          <Tab value={TABS.PROGRAMS} label="Programs" />
+          {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
+          <Tab value={TABS.EVENTS} label="Events" />
           <Tab disabled value={TABS.CONSULT} label="Consult" />
           <Tab value={TABS.ABOUT} label="About" />
         </Tabs>
@@ -95,10 +96,12 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
 
           {/* WORKSHOPS */}
-          <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div>
+          {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
 
           {/* EVENTS */}
-          <div hidden={selectedTab !== TABS.EVENTS}>Events</div>
+          <div hidden={selectedTab !== TABS.EVENTS}>
+            <UserProfileEvents />
+          </div>
 
           {/* CONSULT */}
           <div hidden={selectedTab !== TABS.CONSULT}>Consult</div>
