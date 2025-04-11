@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -30,6 +30,7 @@ const TABS = {
 const ProgramDetails = () => {
   const params = useParams();
   const renderModal = useModal();
+  const router = useRouter();
   const programID = params.id;
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
   const {
@@ -49,13 +50,18 @@ const ProgramDetails = () => {
 
   if (isLoading) return <PageLoader />;
 
+  const handleExpertClick = expert => {
+    router.push(`/portal/customer/lms/expert/${expert.id}/profile`);
+  };
+
   const handleViewExperts = async experts => {
     await renderModal({
       heading: 'Experts',
-      content: <LMSExpertsList experts={experts} />,
+      content: <LMSExpertsList experts={experts} handleExpertClick={handleExpertClick} />,
       size: 'md',
     });
   };
+
 
   const handleEnrollProgram = async () => {
     try {

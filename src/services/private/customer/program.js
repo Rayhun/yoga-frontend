@@ -35,3 +35,7 @@ export const completeProgramContent = async ({ id, ...payload }) => {
     completed_at: dayjs().format('YYYY-MM-DD'),
   });
 };
+
+export const getExpertProgramsList = async ({ id }) => {
+  return axios.get(`/customer/expert/programs/${id}`);
+};

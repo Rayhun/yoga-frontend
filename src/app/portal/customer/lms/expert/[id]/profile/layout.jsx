@@ -1,7 +1,7 @@
 import { ExpertProvider } from "@/context/ExpertProfileContext";
 
 export const metadata = {
-  title: 'Add Event',
+  title: 'Expert Profile Details',
 };
 
 const Layout = ({ children }) => {

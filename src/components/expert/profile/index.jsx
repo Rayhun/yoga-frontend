@@ -3,9 +3,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import UserProfilePrograms from './programs';
-import UserProfileAbout from './about';
-import UserProfileGroupCoaching from './groupCoaching';
+import ExpertProfilePrograms from './programs';
+import ExpertProfileAbout from './about';
+import ExpertProfileGroupCoaching from './groupCoaching';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -69,11 +69,11 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
             <h3 className="text-2xl font-semibold text-black dark:text-white">{`${userProfileDetails?.first_name} ${userProfileDetails?.last_name}`}</h3>
             <p className="my-1 font-medium">{userProfileDetails?.title}</p>
             <p className="text-sm">42.1k followers</p>
-            <button className="bg-primary text-white rounded-full mt-2 px-8 py-2">Follow</button>
+            {/* <button className="bg-primary text-white rounded-full mt-2 px-8 py-2">Follow</button> */}
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
+      <div className='bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6'>
         {/* Tabs */}
         <Tabs
           value={selectedTab}
@@ -92,7 +92,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* PROGRAMS */}
           <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <UserProfilePrograms />
+            <ExpertProfilePrograms />
           </div>
 
           {/* WORKSHOPS */}
@@ -100,7 +100,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* EVENTS */}
           <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <UserProfileGroupCoaching />
+            <ExpertProfileGroupCoaching />
           </div>
 
           {/* CONSULT */}
@@ -108,7 +108,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>
-            <UserProfileAbout data={userProfileDetails} />
+            <ExpertProfileAbout data={userProfileDetails} />
           </div>
         </div>
       </div>

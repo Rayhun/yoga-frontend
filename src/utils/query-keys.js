@@ -26,6 +26,10 @@ const queryKeys = {
   chatGroups: 'chatGroups',
   teacherProfile: 'teacherProfile',
   checkoutProgram: 'checkoutProgram',
+  expertCustomerPrograms: 'expertCustomerPrograms',
+  expertGroupCoaching: 'expertGroupCoaching',
+  expertGroupCoachingDetails: 'expertGroupCoachingDetails',
+  checkoutGroupCoaching: 'checkoutGroupCoaching',
 };
 
 export default queryKeys;

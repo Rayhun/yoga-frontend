@@ -1,11 +1,11 @@
 'use client';
-import { DetailsLayoutWrapper } from '@/components/common/details';
-import { PageHeader } from '@/components/common/page';
-import UserProfileDetails from '@/components/common/user/profile';
+import React from 'react'
+import UserProfileDetails from '@/components/expert/profile';
 import { useRouter } from 'next/navigation';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
 import { useExpertContext } from '@/hooks/useExpert';
+import { RiEdit2Line } from "react-icons/ri";
 
 const Page = () => {
   const { expertData, isLoading, failureReason } = useExpertContext();
@@ -17,10 +17,11 @@ const Page = () => {
   return (
     <div className='relative'>
       <button
-        className="absolute right-0 top-0 inline-flex items-center justify-center rounded-md bg-primary px-4 py-1 text-sm text-center font-medium text-white hover:bg-opacity-90"
+        className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
         onClick={onEdit}
       >
-        Edit
+        <RiEdit2Line />
+        Edit Profile
       </button>
       {/* <PageHeader title="Expert Profile" /> */}
       {/* <DetailsLayoutWrapper title="Expert Profile Details" onEdit={() => router.push('/portal/teacher/editProfile')}> */}

@@ -1,5 +1,6 @@
 'use client';
 
+import dayjs from 'dayjs';
 import Image from 'next/image';
 import { GoDotFill } from 'react-icons/go';
 
@@ -25,7 +26,7 @@ const EventCard = ({ event, onClick }) => {
         </h4>
 
         <div className="text-sm text-gray-500">
-          <span className="font-medium">Organizer:</span> {event.organizer}
+          {event.event_type}
         </div>
 
         <div className="text-sm text-gray-400 truncate" title={event.agenda}>
@@ -33,11 +34,11 @@ const EventCard = ({ event, onClick }) => {
         </div>
 
         <div className="flex gap-1 items-center text-sm text-gray-500">
-          <p>{event.date}</p>
+          <p>{dayjs(event.start_date).format('MMM DD, YYYY')}</p>
           <GoDotFill size={8} />
-          <p>{event.time}</p>
+          <p>{dayjs(event.start_date).format('h:mm A')}</p>
           <GoDotFill size={8} />
-          <p>{event.duration}</p>
+          <p>{event.duration} mins</p>
         </div>
       </div>
     </div>
