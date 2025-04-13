@@ -12,7 +12,7 @@ const ExpertProfilePrograms = () => {
 
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getExpertProgramsList({ id }),
-    queryKey: [queryKeys.expertCustomerPrograms],
+    queryKey: [queryKeys.expertCustomerPrograms, id],
   });
   const filteredPrograms = useMemo(
     () =>
