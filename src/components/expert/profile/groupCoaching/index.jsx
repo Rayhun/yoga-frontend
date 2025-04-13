@@ -5,13 +5,14 @@ import { getExpertGroupCoachingList } from '@/services/private/expert/groupCoach
 import queryKeys from '@/utils/query-keys';
 import UserProfileGroupCoaching from '@/components/common/user/profile/groupCoaching';
 
-const ExpertProfileGroupCoaching = () => {
+const ExpertProfileGroupCoaching = ({tabEnabled}) => {
   const [searchText, setSearchText] = useState('');
   const router = useRouter();
 
   const { isFetching: isLoadingCoachings, data: coachingResponse } = useQuery({
     queryFn: getExpertGroupCoachingList,
     queryKey: [queryKeys.expertGroupCoaching],
+    enabled: tabEnabled
   });
 
   const filteredCoachings = useMemo(

@@ -3,12 +3,13 @@ import Spinner from '@/components/common/loader/Spinner';
 import EventCard from '@/components/lms/common/EventCard';
 import Button from '@/components/common/Button';
 import { useRouter } from 'next/navigation';
+import ConsultationCard from '@/components/lms/common/ConsultationCard';
 
-const UserProfileGroupCoaching = ({
-  filteredCoachings,
-  isLoadingCoachings,
+const UserProfileConsultations = ({
+  filteredConsultations,
+  isLoadingConsultations,
   setSearchText,
-  onClickEvent,
+  onClickConsultation,
   isPublicView = false,
 }) => {
   const router = useRouter();
@@ -17,27 +18,31 @@ const UserProfileGroupCoaching = ({
       <div className="flex gap-4 items-center justify-end">
         <input
           className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-          placeholder="Search Group Coaching"
+          placeholder="Search Consultations"
           onChange={e => setSearchText(e.target.value || '')}
         />
         {!isPublicView && (
           <Button
             size="lg"
             className="text-xl"
-            onClick={() => router.push('/portal/teacher/group_coaching/add')}
+            onClick={() => router.push('/portal/teacher/consultation/add')}
           >
             +
           </Button>
         )}
       </div>
-      {isLoadingCoachings ? (
+      {isLoadingConsultations ? (
         <div className="flex justify-center">
           <Spinner />
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredCoachings.map(event => (
-            <EventCard key={event.id} event={event} onClick={() => onClickEvent(event)} />
+          {filteredConsultations.map(consultation => (
+            <ConsultationCard
+              key={consultation.id}
+              consultation={consultation}
+              onClick={() => onClickConsultation(consultation)}
+            />
           ))}
         </div>
       )}
@@ -45,4 +50,4 @@ const UserProfileGroupCoaching = ({
   );
 };
 
-export default UserProfileGroupCoaching;
+export default UserProfileConsultations;

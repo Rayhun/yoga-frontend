@@ -6,6 +6,7 @@ import Tab from '@mui/material/Tab';
 import ExpertProfilePrograms from './programs';
 import ExpertProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
+import ExpertConsultations from './consultation';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -84,7 +85,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' />
           {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
           <Tab value={TABS.GROUP_COACHING} label="Group Coaching" className='!capitalize' />
-          <Tab disabled value={TABS.CONSULT} label="Consult" className='!capitalize' />
+          <Tab value={TABS.CONSULT} label="Consult" className='!capitalize' />
           <Tab value={TABS.ABOUT} label="About" className='!capitalize' />
         </Tabs>
         <div className="">
@@ -100,11 +101,13 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* EVENTS */}
           <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <ExpertProfileGroupCoaching />
+            <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
           </div>
 
-          {/* CONSULT */}
-          <div hidden={selectedTab !== TABS.CONSULT}>Consult</div>
+          {/* CONSULT  */}
+          <div hidden={selectedTab !== TABS.CONSULT}>
+            <ExpertConsultations tabEnabled={selectedTab === TABS.CONSULT} />
+          </div>
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>

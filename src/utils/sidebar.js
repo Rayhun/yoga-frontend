@@ -8,10 +8,12 @@ import {
   FaTv,
   FaTags,
   FaUser,
+  FaChalkboardTeacher
 } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
+import { GiTeacher } from "react-icons/gi";
 
 const ADMIN = [
   {
@@ -157,6 +159,20 @@ const CUSTOMER = [
     label: 'Programs',
     href: '/portal/customer/lms/program',
     isActive: pathname => pathname.includes('/portal/customer/lms/program'),
+    disabled: false,
+  },
+  {
+    Icon: GiTeacher,
+    label: 'Group Coachings',
+    href: '/portal/customer/lms/group_coaching',
+    isActive: pathname => pathname.includes('/portal/customer/lms/group_coaching'),
+    disabled: false,
+  },
+  {
+    Icon: FaChalkboardTeacher,
+    label: 'Consultations',
+    href: '/portal/customer/lms/consultation',
+    isActive: pathname => pathname.includes('/portal/customer/lms/consultation'),
     disabled: false,
   },
 ];
