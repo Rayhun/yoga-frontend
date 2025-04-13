@@ -29,7 +29,7 @@ const TABS = {
 
 const ProgramDetails = () => {
   const params = useParams();
-  const renderModal = useModal();
+  const {render: renderModal, closeModal} = useModal();
   const router = useRouter();
   const programID = params.id;
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
@@ -51,6 +51,7 @@ const ProgramDetails = () => {
   if (isLoading) return <PageLoader />;
 
   const handleExpertClick = expert => {
+    closeModal()
     router.push(`/portal/customer/lms/expert/${expert.id}/profile`);
   };
 

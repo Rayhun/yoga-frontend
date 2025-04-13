@@ -20,3 +20,11 @@ export const createNewGroupCoaching = async ({ payload: { categories, tags, ...p
 
   return axios.post('/LMS/events/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
+
+export const cancelGroupCoaching = async ({ id }) => {
+  return axios.post(`/event/${id}/status/`, { event_status: 'cancelled', recording_link: '' });
+};
+
+export const completeGroupCoaching = async ({ id, recording_link }) => {
+  return axios.post(`/event/${id}/status/`, { event_status: 'completed', recording_link });
+};

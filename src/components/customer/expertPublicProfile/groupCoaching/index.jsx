@@ -17,8 +17,11 @@ const ExpertProfileGroupCoaching = () => {
   });
 
   const filteredCoachings = useMemo(
-    () => (coachingResponse?.data?.data || []).filter(event => event.title.includes(searchText)),
-    [coachingResponse?.data?.data, searchText]
+    () =>
+      (coachingResponse?.data?.results?.data?.['all-events'] || []).filter(event =>
+        event.title.includes(searchText)
+      ),
+    [coachingResponse?.data?.results?.data, searchText]
   );
 
   return (
@@ -27,7 +30,7 @@ const ExpertProfileGroupCoaching = () => {
       isLoadingCoachings={isLoadingCoachings}
       searchText={searchText}
       setSearchText={setSearchText}
-      onClick={event => router.push(`/portal/customer/group_coaching/${event.id}/details`)}
+      onClickEvent={event => router.push(`/portal/customer/group_coaching/${event.id}/details`)}
       isPublicView={true}
     />
   );

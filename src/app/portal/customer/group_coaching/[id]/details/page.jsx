@@ -1,12 +1,12 @@
 'use client';
 import { PageHeader } from '@/components/common/page';
-import { GroupCoachingDetails } from '@/components/common/groupCoaching/GroupCoachingDetailsPage';
+import { ExpertGroupCoachingDetails } from '@/components/customer/groupCoachingDetails';
 
 const Page = () => {
   return (
     <div>
       <PageHeader title="Group Coaching Details" />
-      <GroupCoachingDetails isCustomerView={true} />
+      <ExpertGroupCoachingDetails isCustomerView={true} />
     </div>
   );
 };

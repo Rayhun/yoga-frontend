@@ -25,7 +25,7 @@ const ExpertProfileGroupCoaching = () => {
       isLoadingCoachings={isLoadingCoachings}
       searchText={searchText}
       setSearchText={setSearchText}
-      onClick={event => router.push(`/portal/teacher/group_coaching/${event.id}/details`)}
+      onClickEvent={event => router.push(`/portal/teacher/group_coaching/${event.id}/details`)}
     />
   );
 };

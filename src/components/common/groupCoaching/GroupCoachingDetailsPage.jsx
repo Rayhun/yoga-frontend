@@ -3,33 +3,21 @@ import Image from 'next/image';
 import { Chip } from '@mui/material';
 import { FaTv } from 'react-icons/fa';
 import { PiClockCountdown } from 'react-icons/pi';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { getExpertGroupCoachingDetails } from '@/services/private/expert/groupCoaching';
-import queryKeys from '@/utils/query-keys';
+import Link from 'next/link';
 import PageLoader from '../loader/PageLoader';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
-export const GroupCoachingDetails = ({ isCustomerView = false }) => {
-  const params = useParams();
-  const eventId = params.id;
-
-  const {
-    data: response,
-    isLoading,
-    failureReason,
-    refetch,
-  } = useQuery({
-    queryFn: () => getExpertGroupCoachingDetails({ id: eventId }),
-    queryKey: [queryKeys.expertGroupCoachingDetails, eventId],
-  });
-
-  const eventDetails = response?.data?.data || {};
-
-  useHandleApiResponse(failureReason);
-
+export const GroupCoachingDetails = ({
+  eventDetails,
+  isLoading,
+  isCustomerView = false,
+  eventId,
+  handleCancelEvent,
+  canceling,
+  completingEvent,
+  toggleCompletionModal,
+}) => {
   if (isLoading) return <PageLoader />;
 
   return (
@@ -58,7 +46,7 @@ export const GroupCoachingDetails = ({ isCustomerView = false }) => {
           <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
             <div className="flex items-center gap-3">
               <FaTv size={24} className="text-primary" />
-              <span>{eventDetails?.is_online ? 'Online' : 'Online'}</span>
+              <span>{eventDetails?.is_online ? 'Online' : 'Offline'}</span>
             </div>
             <div className="flex items-center gap-3">
               <PiClockCountdown size={24} className="text-primary" />
@@ -67,41 +55,58 @@ export const GroupCoachingDetails = ({ isCustomerView = false }) => {
           </div>
 
           {/* Instructor Info */}
-          <div className="flex items-center gap-3">
-            <span className="h-12 w-12 rounded-full text-dark">
-              <Image
-                width={40}
-                height={40}
-                src={eventDetails?.instructors?.[0]?.image || '/images/user/user-06.png'}
-                style={{
-                  width: 'auto',
-                  height: 'auto',
-                }}
-                alt="Instructor"
-              />
-            </span>
-            <span className="font-bold">Instructors:</span>
-            {eventDetails?.instructors?.map((instructor, index) => (
-              <span key={index} className="text-gray-600 dark:text-white">
-                {instructor.name}
-                {index < eventDetails?.instructors?.length - 1 && ', '}
-              </span>
-            ))}
-          </div>
           {isCustomerView && (
-            <>
-              {eventDetails?.is_paid ? (
-                <Link href={`/payment/group_coaching/${eventId}`}>
-                  <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 text-center rounded-md shadow hover:bg-primary/80">
-                    {'Buy Now'}
-                  </div>
-                </Link>
-              ) : (
-                <button className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 rounded-md shadow hover:bg-primary/80">
-                  {'Join now'}
-                </button>
-              )}
-            </>
+            <div className="flex items-center gap-3">
+              <span className="h-12 w-12 rounded-full text-dark">
+                <Image
+                  width={40}
+                  height={40}
+                  src={eventDetails?.instructors?.[0]?.image || '/images/user/user-06.png'}
+                  style={{
+                    width: 'auto',
+                    height: 'auto',
+                  }}
+                  alt="Instructor"
+                />
+              </span>
+              <span className="font-bold">Instructors:</span>
+              {eventDetails?.instructors?.map((instructor, index) => (
+                <span key={index} className="text-gray-600 dark:text-white">
+                  {instructor.name}
+                  {index < eventDetails?.instructors?.length - 1 && ', '}
+                </span>
+              ))}
+            </div>
+          )}
+          {isCustomerView && eventDetails?.is_paid && !eventDetails?.is_enroll && (
+            <Link href={`/payment/group_coaching/${eventId}`}>
+              <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 text-center rounded-md shadow hover:bg-primary/80">
+                {'Buy Now'}
+              </div>
+            </Link>
+          )}
+          {isCustomerView && eventDetails?.is_enroll && (
+            <p className="break-words text-right line-clamp-1 text-sm font-semibold text-primary">
+              {`Joined`}
+            </p>
+          )}
+          {!isCustomerView && eventDetails?.status === 'Scheduled' && (
+            <div className="flex gap-4 items-center">
+              <button
+                disabled={completingEvent}
+                onClick={toggleCompletionModal}
+                className="flex-1 md:w-auto bg-primary text-white disabled:bg-primary-300/90 p-4 text-center rounded-md shadow hover:bg-primary/80"
+              >
+                {completingEvent ? 'Completing...' : 'Mark as Completed'}
+              </button>
+              <button
+                disabled={canceling}
+                onClick={handleCancelEvent}
+                className="flex-1 md:w-auto bg-red-500 text-white disabled:bg-red-300/90 p-4 text-center rounded-md shadow hover:bg-red-500/80"
+              >
+                {canceling ? 'Cancelling...' : 'Cancel Coaching'}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -120,17 +125,36 @@ export const GroupCoachingDetails = ({ isCustomerView = false }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <h5 className="text-lg text-primary font-bold">Zoom Integration</h5>
+            <h5 className="text-lg text-primary font-bold">Meeting Link Integration</h5>
             <span>{eventDetails?.is_online ? 'Enabled' : 'Disabled'}</span>
           </div>
-          <div className="flex flex-col gap-2">
-            <h5 className="text-lg text-primary font-bold">Meeting ID</h5>
-            <span>{eventDetails?.meeting_link || 'Not available'}</span>
-          </div>
+          {eventDetails?.recording_link ? (
+            <div className="flex flex-col gap-2">
+              <h5 className="text-lg text-primary font-bold">Recoding Link</h5>
+              <a href={eventDetails?.recording_link} target="_blank">
+                {eventDetails?.recording_link || 'Not available'}
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <h5 className="text-lg text-primary font-bold">Meeting ID</h5>
+              <span>{eventDetails?.meeting_link || 'Not available'}</span>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <h5 className="text-lg text-primary font-bold">Status</h5>
-            <span>{eventDetails?.status || 'Not available'}</span>
+            <span
+              className={`capitalize font-semibold ${
+                eventDetails?.status === 'completed'
+                  ? 'text-green-600'
+                  : eventDetails?.status === 'cancelled'
+                  ? 'text-red-500'
+                  : 'text-yellow-500'
+              }`}
+            >
+              {eventDetails?.status || 'Not available'}
+            </span>
           </div>
         </div>
 
