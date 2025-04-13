@@ -185,11 +185,12 @@ const ExpertProfileForm = ({ selected }) => {
                     label="Program File"
                     fileURLs={selected?.program_file ? [selected.program_file] : []}
                     Icon={FaFile}
-                    accept={{
-                      'text/csv': ['.csv'],
-                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                      'application/vnd.ms-excel': ['.xls'],
-                    }}
+                    multiple
+                    // accept={{
+                    //   'text/csv': ['.csv'],
+                    //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                    //   'application/vnd.ms-excel': ['.xls'],
+                    // }}
                   />
                 </div>
               </div>

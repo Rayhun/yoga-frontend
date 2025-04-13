@@ -6,7 +6,7 @@ import FileSelectorForm from '@/components/common/form/FileSelectorForm';
 import { toastApiError } from '@/utils/helpers';
 
 const useImport = ({ mutationFn, invalidateQueryKey = [], onSuccess = () => null }) => {
-  const modal = useModal();
+  const {render: modal} = useModal();
   const queryClient = useQueryClient();
   const { isPending, mutateAsync } = useMutation({
     mutationFn,

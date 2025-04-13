@@ -3,9 +3,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import UserProfilePrograms from './programs';
+import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
-import UserProfileGroupCoaching from './groupCoaching';
+import ExpertProfileGroupCoaching from './groupCoaching';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -92,7 +92,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* PROGRAMS */}
           <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <UserProfilePrograms />
+            <ExpertProfilePrograms />
           </div>
 
           {/* WORKSHOPS */}
@@ -100,7 +100,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* EVENTS */}
           <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <UserProfileGroupCoaching />
+            <ExpertProfileGroupCoaching />
           </div>
 
           {/* CONSULT */}

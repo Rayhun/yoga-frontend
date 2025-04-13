@@ -27,7 +27,7 @@ const TABS = {
 
 const ModuleDetails = () => {
   const params = useParams();
-  const renderModal = useModal();
+  const {render: renderModal} = useModal();
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
   const {
     data: response,
