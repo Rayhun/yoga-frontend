@@ -13,7 +13,7 @@ const ExpertProfileGroupCoaching = () => {
 
   const { isFetching: isLoadingCoachings, data: coachingResponse } = useQuery({
     queryFn: () => getExpertGroupCoachingList({ id }),
-    queryKey: [queryKeys.expertGroupCoaching],
+    queryKey: [queryKeys.expertGroupCoaching, id],
   });
 
   const filteredCoachings = useMemo(

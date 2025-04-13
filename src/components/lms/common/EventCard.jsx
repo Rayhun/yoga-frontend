@@ -40,6 +40,11 @@ const EventCard = ({ event, onClick }) => {
           <GoDotFill size={8} />
           <p>{event.duration} mins</p>
         </div>
+        {event?.is_paid && event?.price && (
+          <p className="break-words line-clamp-1 text-sm font-semibold text-primary">
+            {`${event.currency_symbol} ${event.price}`}
+          </p>
+        )}
       </div>
     </div>
   );

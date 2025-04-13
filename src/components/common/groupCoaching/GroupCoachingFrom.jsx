@@ -115,8 +115,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false }) => {
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting, values, errors }) => {
-            console.log('errors', errors);
+          {({ isSubmitting, values }) => {
             return (
               <Form className="flex flex-col gap-4">
                 <FormikField name="title" label="Title" required />
