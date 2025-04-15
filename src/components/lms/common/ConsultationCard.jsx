@@ -27,9 +27,11 @@ const ConsultationCard = ({ consultation, onClick }) => {
         <h4 className="text-lg font-semibold text-black dark:text-white">{consultation.title}</h4>
 
         <div className="flex gap-1 items-center text-sm text-gray-500">
-          {consultation.event_type.split(',').map(type => (
-            <ProfileChip label={type} />
-          ))}
+          {consultation.event_type
+            ? consultation?.event_type?.split(',').map(type => <ProfileChip key={type} label={type} />)
+            : consultation?.consultation_type
+                ?.split(',')
+                .map(type => <ProfileChip key={type} label={type} />)}
         </div>
 
         {/* <div className="text-sm text-gray-400 truncate" title={consultation.description}>
