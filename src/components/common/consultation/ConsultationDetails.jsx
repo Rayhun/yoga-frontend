@@ -5,6 +5,9 @@ import { FaTv } from 'react-icons/fa';
 import { PiClockCountdown } from 'react-icons/pi';
 import Link from 'next/link';
 import PageLoader from '../loader/PageLoader';
+import { RiEdit2Line } from 'react-icons/ri';
+import { useRouter } from 'next/navigation';
+import ControllableText from '@/components/common/details/ControllableText';
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
@@ -12,14 +15,35 @@ export const ConsultationDetails = ({
   consultationDetails,
   isLoading,
   isCustomerView = false,
-  consultationId
+  consultationId,
+  handleCancelConsultation,
+  canceling,
+  completingConsultation,
+  handleConsultationCompletion,
 }) => {
+  const router = useRouter();
+
   if (isLoading) return <PageLoader />;
+
+  console.log('consultationDetails', consultationDetails);
+
+  const onEdit = () => {
+    router.push(`/portal/teacher/consultation/${consultationId}/edit`);
+  };
 
   return (
     <div>
       {/* Event Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+        {!isCustomerView && (
+          <button
+            className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
+            onClick={onEdit}
+          >
+            <RiEdit2Line />
+            Edit
+          </button>
+        )}
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
@@ -74,9 +98,14 @@ export const ConsultationDetails = ({
               ))}
             </div>
           )}
+          {consultationDetails?.is_paid && consultationDetails?.price && (
+            <p className="break-words line-clamp-1 text-lg font-semibold text-primary">
+              {`${consultationDetails.currency_symbol || '$'} ${consultationDetails.price}`}
+            </p>
+          )}
           {isCustomerView && consultationDetails?.is_paid && !consultationDetails?.is_enroll && (
             <Link href={`/payment/consultation/${consultationId}`}>
-              <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 text-center rounded-md shadow hover:bg-primary/80">
+              <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80">
                 {'Buy Now'}
               </div>
             </Link>
@@ -86,54 +115,66 @@ export const ConsultationDetails = ({
               {`Enrolled`}
             </p>
           )}
+          {/* {!isCustomerView && !consultationDetails?.status && (
+            <div className="flex gap-4 items-center">
+              <button
+                disabled={canceling}
+                onClick={handleCancelConsultation}
+                className="flex-1 md:w-auto bg-red-500 text-white disabled:bg-red-300/90 p-4 text-center rounded-md shadow hover:bg-red-500/80"
+              >
+                {canceling ? 'Cancelling...' : 'Cancel Coaching'}
+              </button>
+              <button
+                disabled={completingConsultation}
+                onClick={handleConsultationCompletion}
+                className="flex-1 md:w-auto bg-primary text-white disabled:bg-primary-300/90 p-4 text-center rounded-md shadow hover:bg-primary/80"
+              >
+                {completingConsultation ? 'Completing...' : 'Mark as Completed'}
+              </button>
+            </div>
+          )} */}
         </div>
       </div>
 
       {/* Event Content */}
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
-        <div className="grid grid-cols-2 gap-4 flex-col gap-5">
-          {/* Event Info */}
-
-          {consultationDetails?.recording_link ? (
-            <div className="flex flex-col gap-2">
-              <h5 className="text-lg text-primary font-bold">Recoding Link</h5>
-              <a href={consultationDetails?.recording_link} target="_blank">
-                {consultationDetails?.recording_link || 'Not available'}
-              </a>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <h5 className="text-lg text-primary font-bold">Calender ID</h5>
-              <span>{consultationDetails?.calender_link || 'Not available'}</span>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <h5 className="text-lg text-primary font-bold">Status</h5>
-            <span
-              className={`capitalize font-semibold ${
-                consultationDetails?.status === 'completed'
-                  ? 'text-green-600'
-                  : consultationDetails?.status === 'cancelled'
-                  ? 'text-red-500'
-                  : 'text-yellow-500'
-              }`}
-            >
-              {consultationDetails?.status || 'Not available'}
-            </span>
+        <div className="flex flex-col gap-2">
+          <p className="font-bold text-gray-400">Description</p>
+          <ControllableText>{consultationDetails?.description || 'Not Available'}</ControllableText>
+        </div>
+        <div className="flex gap-10">
+          <div className="flex gap-2">
+            <p className="font-bold">Calender Link:</p>
+            <a className="text-gray-500">{consultationDetails?.calender_link}</a>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <h5 className="text-lg text-primary font-bold">Consultation Type</h5>
+          <p className="font-bold text-gray-400">Status</p>
+          <span
+            className={`capitalize font-semibold ${
+              consultationDetails?.status === 'completed'
+                ? 'text-green-600'
+                : consultationDetails?.status === 'cancelled'
+                ? 'text-red-500'
+                : 'text-yellow-500'
+            }`}
+          >
+            {consultationDetails?.status || 'Not available'}
+          </span>
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="font-bold text-gray-400">Consultation Type</p>
           <div className="flex flex-wrap gap-2">
-            {consultationDetails?.event_type?.split(',').map(tag => (
-              <ProfileChip key={tag} label={tag} />
-            ))}
+            {consultationDetails?.consultation_type
+              ? consultationDetails?.consultation_type
+                  ?.split(',')
+                  .map(tag => <ProfileChip key={tag} label={tag} />)
+              : consultationDetails?.event_type?.split(',').map(tag => <ProfileChip key={tag} label={tag} />)}
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <h5 className="text-lg text-primary font-bold">Tags</h5>
+          <p className="font-bold text-gray-400">Tags</p>
           <div className="flex flex-wrap gap-2">
             {consultationDetails?.tags?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />
@@ -141,16 +182,12 @@ export const ConsultationDetails = ({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <h5 className="text-lg text-primary font-bold">Categories</h5>
+          <p className="font-bold text-gray-400">Categories</p>
           <div className="flex flex-wrap gap-2">
             {consultationDetails?.categories?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />
             ))}
           </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <h5 className="text-lg text-primary font-bold">Description</h5>
-          <p>{consultationDetails?.description || 'Not Available'}</p>
         </div>
       </div>
     </div>

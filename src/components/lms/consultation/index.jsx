@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import GroupCoachingLibrary from './GroupCoachingLiabrary';
+import ConsultationsLibrary from './ConsultationsLibrary';
 
 const TABS = {
   LIBRARY: 'library',
-  MY_COACHINGS: 'my-coachings',
+  ENROLLED_CONSULTATIONS: 'enrolled-consultations',
 };
 
-const GroupCoaching = () => {
+const PersonalConsultation = () => {
   const [selectedTab, setSelectedTab] = useState(TABS.LIBRARY);
 
   const handleTabChange = (_, newValue) => {
@@ -21,14 +21,14 @@ const GroupCoaching = () => {
       {/* Tabs */}
       <Tabs value={selectedTab} onChange={handleTabChange}>
         <Tab value={TABS.LIBRARY} label="Library" />
-        <Tab value={TABS.MY_PROGRAMS} disabled label="My Group Coachings" />
+        <Tab value={TABS.ENROLLED_CONSULTATIONS} disabled label="Enrolled Consultations" />
       </Tabs>
       <div className="py-5">
         {/* Tabs Content */}
         <div hidden={selectedTab !== TABS.LIBRARY}>
-          <GroupCoachingLibrary />
+          <ConsultationsLibrary />
         </div>
-        <div hidden={selectedTab !== TABS.MY_COACHINGS}>
+        <div hidden={selectedTab !== TABS.ENROLLED_CONSULTATIONS}>
           <h1>My Coachings</h1>
         </div>
       </div>
@@ -36,4 +36,4 @@ const GroupCoaching = () => {
   );
 };
 
-export default GroupCoaching;
+export default PersonalConsultation;

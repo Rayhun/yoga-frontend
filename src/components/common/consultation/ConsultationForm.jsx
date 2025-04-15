@@ -6,11 +6,9 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { toast } from 'react-toastify';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { createNewConsultation } from '@/services/private/expert/consultation';
+import { createNewConsultation, updateExistingConsultation } from '@/services/private/expert/consultation';
 import { toastApiError } from '@/utils/helpers';
 import FormikMultiSelect from '../form/formik/FormikMultiSelect';
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
@@ -22,7 +20,7 @@ const consultationTypeOptions = [
   { label: 'Video', value: 'video' },
 ];
 
-const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
+const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -30,18 +28,22 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
     mutationFn: createNewConsultation,
   });
 
+  const { mutateAsync: updateConsultation } = useMutation({
+    mutationFn: updateExistingConsultation,
+  });
+
   const initialValues = {
     title: initialData?.title || '',
     description: initialData?.description || '',
     duration: initialData?.duration || 0,
     price: initialData?.price || 0,
-    calendar_link: initialData?.calendar_link || '',
-    consultation_type: initialData?.consultation_type || [],
-    follow_up_support: initialData?.follow_up_support || [],
+    calender_link: initialData?.calender_link || '',
+    consultation_type: initialData?.consultation_type?.split(',') || [],
+    followup_support: initialData?.followup_support || [],
     followup_duration: initialData?.followup_duration || '',
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
-    image: null,
+    image: initialData?.image || null,
   };
 
   const validationSchema = Yup.object({
@@ -49,9 +51,9 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
     description: Yup.string().required('Description is required'),
     duration: Yup.number().required('Duration is required'),
     price: Yup.number().required('Price is required'),
-    calendar_link: Yup.string().required('Calendar Link is required'),
+    calender_link: Yup.string().required('Calender Link is required'),
     consultation_type: Yup.array().min(1, 'At least one consultation type is required').required(),
-    follow_up_support: Yup.array(),
+    followup_support: Yup.array(),
     followup_duration: Yup.number(),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
@@ -63,8 +65,8 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (isEditMode) {
-        // Update existing consultation logic can go here
-        console.log('On Edit Mode');
+        await updateConsultation({ payload: { ...values }, id: consultationId });
+        toast.success('Personal Consultation updated successfully');
       } else {
         await createConsultation({ payload: { ...values } });
         toast.success('Personal Consultation added successfully');
@@ -104,7 +106,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
                   <FormikField name="duration" label="Duration" type="number" required />
                   <FormikField name="price" label="Price" type="number" required />
 
-                  <FormikField name="calendar_link" label="Calendar Link" required />
+                  <FormikField name="calender_link" label="Calendar Link" required />
 
                   <FormikMultiSelect
                     name="consultation_type"
@@ -113,7 +115,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false }) => {
                     required
                   />
                   <FormikMultiSelect
-                    name="follow_up_support"
+                    name="followup_support"
                     label="Follow-up Support (optional)"
                     options={consultationTypeOptions}
                   />

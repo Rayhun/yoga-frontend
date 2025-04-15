@@ -12,6 +12,7 @@ import queryKeys from '@/utils/query-keys';
 import EventCard from '../common/EventCard';
 import ListFilter from '../common/ListFilters';
 import { getCustomerConsultationsList } from '@/services/private/customer/consultation';
+import ConsultationCard from '../common/ConsultationCard';
 
 const ConsultationsLibrary = () => {
   const router = useRouter();
@@ -20,7 +21,7 @@ const ConsultationsLibrary = () => {
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState({});
 
-  const { isFetching: isLoadingCoachings, data: groupCoachingResponse } = useQuery({
+  const { isFetching: isLoadingCoachings, data: consultationResponse } = useQuery({
     queryFn: () => getCustomerConsultationsList(filters),
     queryKey: [queryKeys.customerConsultations, JSON.stringify(filters)],
     onError: (err) => {
@@ -28,12 +29,14 @@ const ConsultationsLibrary = () => {
     },
   });
 
-  const filteredCoachings = useMemo(
+
+
+  const filteredConsultations = useMemo(
     () =>
-      (groupCoachingResponse?.data?.results?.data?.['all-events'] || []).filter(event =>
+      (consultationResponse?.data?.results?.data?.['all-events'] || []).filter(event =>
         event.title.includes(searchText)
       ),
-    [groupCoachingResponse?.data?.results?.data, searchText]
+    [consultationResponse?.data?.results?.data, searchText]
   );
 
   const handleApplyFilter = values => {
@@ -58,11 +61,11 @@ const ConsultationsLibrary = () => {
       </Popup>
 
       {/* Hero Section */}
-      {/* <div className="bg-white rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
+      <div className="bg-white rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
         <div className="md:w-1/2 space-y-4">
           <h1 className="text-3xl md:text-4xl font-bold">Your Journey Starts Here</h1>
           <p className="break-words line-clamp-2 dark:text-gray-300">
-            Achieve your personal goals with curated wellness plans developed by our expert
+            Achieve your personal goals with personal consultations arranged by our experts
           </p>
         </div>
         <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
@@ -75,7 +78,7 @@ const ConsultationsLibrary = () => {
             className="w-full rounded-lg shadow-lg"
           />
         </div>
-      </div> */}
+      </div>
 
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Categories */}
@@ -98,11 +101,11 @@ const ConsultationsLibrary = () => {
             </div>
           ) : (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredCoachings?.map(event => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onClick={() => router.push(`/portal/customer/lms/consultation/${event.id}/details`)}
+              {filteredConsultations?.map(consultation => (
+                <ConsultationCard
+                  key={consultation.id}
+                  consultation={consultation}
+                  onClick={() => router.push(`/portal/customer/lms/consultation/${consultation.id}/details`)}
                 />
               ))}
             </div>

@@ -8,7 +8,7 @@ const EventCard = ({ event, onClick }) => {
   return (
     <div
       className="rounded-lg border border-stroke bg-white shadow-default cursor-pointer overflow-hidden dark:bg-boxdark"
-      onClick={onClick}
+      // onClick={onClick}
     >
       <div className="aspect-[16/9]">
         <Image
@@ -21,29 +21,44 @@ const EventCard = ({ event, onClick }) => {
       </div>
 
       <div className="p-4 flex flex-col gap-1">
-        <h4 className="text-lg font-semibold block truncate text-black dark:text-white">
-          {event.title}
-        </h4>
+        <h4 className="text-lg block truncate text-black dark:text-white">{event.title}</h4>
 
-        <div className="text-sm text-gray-500">
+        {/* <div className="text-sm text-gray-500">
           {event.event_type}
-        </div>
+        </div> */}
 
         <div className="text-sm text-gray-400 truncate" title={event.agenda}>
           {event.agenda}
         </div>
 
         <div className="flex gap-1 items-center text-sm text-gray-500">
-          <p>{dayjs(event.start_date).format('MMM DD, YYYY')}</p>
+          <p>{`${event.currency_symbol || '$'} ${event.price}`}</p>
           <GoDotFill size={8} />
-          <p>{dayjs(event.start_date).format('h:mm A')}</p>
+          <p className="capitalize">{event.event_type}</p>
           <GoDotFill size={8} />
-          <p>{event.duration} mins</p>
+          <p>{dayjs(event.start_date).format('DD MMM, YYYY')}</p>
+
+          {/* <p>{event.duration} mins</p> */}
         </div>
-        {event?.is_paid && event?.price && (
+        {/* {event?.is_paid && event?.price && (
           <p className="break-words line-clamp-1 text-sm font-semibold text-primary">
-            {`${event.currency_symbol} ${event.price}`}
+            {`${event.currency_symbol || '$'} ${event.price}`}
           </p>
+        )} */}
+        {event?.is_enroll ? (
+          <button
+            onClick={onClick}
+            className="w-full mt-4 py-1 px-4 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200 font-medium text-sm"
+          >
+            View Details
+          </button>
+        ) : (
+          <button
+            onClick={onClick}
+            className="w-full mt-4 py-1 px-4 border border-primary text-primary rounded-xl bg-primary text-white transition-colors duration-200 font-medium text-sm"
+          >
+            Enroll Now
+          </button>
         )}
       </div>
     </div>

@@ -165,7 +165,7 @@ const CUSTOMER = [
     Icon: GiTeacher,
     label: 'Group Coachings',
     href: '/portal/customer/lms/group_coaching',
-    isActive: pathname => pathname.includes('/portal/customer/lms/group_coaching'),
+    isActive: pathname => pathname.includes('/portal/customer/lms/group_coaching') || pathname.includes('/portal/customer/group_coaching'),
     disabled: false,
   },
   {
@@ -197,6 +197,13 @@ const TEACHER = [
     label: 'Profile',
     href: '/portal/teacher/profile',
     isActive: pathname => pathname.includes('/portal/teacher/profile') || pathname.includes('/portal/teacher/editProfile'),
+    disabled: false,
+  },
+  {
+    Icon: FaChalkboardTeacher,
+    label: 'Personal Consultations',
+    href: '/portal/teacher/consultation/list',
+    isActive: pathname => pathname.includes('/portal/teacher/consultation/list'),
     disabled: false,
   },
 ];

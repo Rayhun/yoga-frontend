@@ -13,3 +13,7 @@ export const getConsultationDetails = async ({ id }) => {
 export const buyConsultation = async ({ id }) => {
   return axios.post(`/consultation/checkout/`, { consultation: id });
 };
+
+export const enrollConsultation = async ({ id }) => {
+  return axios.post(`/customer/consultation/${id}/enroll/`);
+};
