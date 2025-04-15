@@ -39,7 +39,9 @@ const queryKeys = {
   expertConsultations: 'expertConsultations',
   expertconsultationDetails: 'expertconsultationDetails',
   expertPersonalConsultations: 'expertPersonalConsultations',
-  expertPersonalConsultationDetails: 'expertPersonalConsultationDetails'
+  expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',
+  customerEnrolledConsultations: 'customerEnrolledConsultations',
+  customerEnrolledGroupCoachings: 'customerEnrolledGroupCoaching',
 };
 
 export default queryKeys;

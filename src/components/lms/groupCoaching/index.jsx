@@ -3,10 +3,11 @@ import { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import GroupCoachingLibrary from './GroupCoachingLiabrary';
+import EnrolledGroupCoachings from './EnrolledGroupCoachings';
 
 const TABS = {
   LIBRARY: 'library',
-  MY_COACHINGS: 'my-coachings',
+  ENROLLED_COACHINGS: 'enrolled-coachings',
 };
 
 const GroupCoaching = () => {
@@ -20,16 +21,16 @@ const GroupCoaching = () => {
     <div>
       {/* Tabs */}
       <Tabs value={selectedTab} onChange={handleTabChange}>
-        <Tab value={TABS.LIBRARY} label="Library" />
-        <Tab value={TABS.MY_PROGRAMS} disabled label="My Group Coachings" />
+        <Tab value={TABS.LIBRARY} label="Library" className='!capitalize' />
+        <Tab value={TABS.ENROLLED_COACHINGS} label="Enrolled Group Coachings" className='!capitalize' />
       </Tabs>
       <div className="py-5">
         {/* Tabs Content */}
         <div hidden={selectedTab !== TABS.LIBRARY}>
           <GroupCoachingLibrary />
         </div>
-        <div hidden={selectedTab !== TABS.MY_COACHINGS}>
-          <h1>My Coachings</h1>
+        <div hidden={selectedTab !== TABS.ENROLLED_COACHINGS}>
+          <EnrolledGroupCoachings />
         </div>
       </div>
     </div>
