@@ -29,7 +29,7 @@ const ExpertsList = () => {
     () => [
       {
         header: 'Name',
-        accessorKey: 'name',
+        accessorKey: 'first_name',
       },
       {
         header: 'Email',

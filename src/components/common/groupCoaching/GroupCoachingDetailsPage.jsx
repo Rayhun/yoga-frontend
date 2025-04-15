@@ -19,6 +19,8 @@ export const GroupCoachingDetails = ({
   canceling,
   completingEvent,
   toggleCompletionModal,
+  handleEnrollGroupCoaching,
+  enrolling
 }) => {
   if (isLoading) return <PageLoader />;
 
@@ -80,13 +82,23 @@ export const GroupCoachingDetails = ({
               ))}
             </div>
           )}
-          {isCustomerView && eventDetails?.is_paid && !eventDetails?.is_enroll && (
-            <Link href={`/payment/group_coaching/${eventId}`}>
-              <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80">
-                {'Buy Now'}
-              </div>
-            </Link>
-          )}
+          {isCustomerView &&
+            !eventDetails?.is_enroll &&
+            (eventDetails?.is_paid ? (
+              <Link href={`/payment/group_coaching/${eventId}`}>
+                <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80">
+                  {'Buy Now'}
+                </div>
+              </Link>
+            ) : (
+              <button
+                onClick={handleEnrollGroupCoaching}
+                disabled={enrolling}
+                className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80"
+              >
+                {enrolling ? 'Enrolling...' : 'Enroll Now'}
+              </button>
+            ))}
           {isCustomerView && eventDetails?.is_enroll && (
             <p className="break-words text-right line-clamp-1 text-sm font-semibold text-primary">
               {`Joined`}

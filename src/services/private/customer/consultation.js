@@ -17,3 +17,7 @@ export const buyConsultation = async ({ id }) => {
 export const enrollConsultation = async ({ id }) => {
   return axios.post(`/customer/consultation/${id}/enroll/`);
 };
+
+export const getEnrolledConsultations = async () => {
+  return axios.get(`/customer/my/consultations/`);
+};

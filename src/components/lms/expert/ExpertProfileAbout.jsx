@@ -10,7 +10,7 @@ const AboutSection = ({ label, children }) => (
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
-const UserProfileAbout = ({ data }) => {
+const ExpertProfileAbout = ({ data }) => {
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="About">
@@ -37,21 +37,21 @@ const UserProfileAbout = ({ data }) => {
           ))}
         </div>
       </AboutSection>
-      <AboutSection label="My Coaching Content">
+      <AboutSection label="Coaching Content">
         <div className="flex flex-wrap gap-2">
           {data?.coaching_content?.split(',').map((content, index) => (
-            <ProfileChip key={index} label={content} />
+            content && <ProfileChip key={index} label={content} />
           ))}
         </div>
       </AboutSection>
       <AboutSection label="Experience">
         <p>{`${data?.experience || '0'} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
       </AboutSection>
-      <AboutSection label="My Availability">
+      <AboutSection label="Availability">
         <ProfileChip label={data?.available ? 'Available For Coaching' : 'Not Available'} />
       </AboutSection>
     </div>
   );
 };
 
-export default UserProfileAbout;
+export default ExpertProfileAbout;
