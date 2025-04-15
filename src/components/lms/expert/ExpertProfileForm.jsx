@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
-import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
@@ -186,11 +185,12 @@ const ExpertProfileForm = ({ selected }) => {
                     fileURLs={selected?.program_file ? [selected.program_file] : []}
                     Icon={FaFile}
                     multiple
-                    // accept={{
-                    //   'text/csv': ['.csv'],
-                    //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                    //   'application/vnd.ms-excel': ['.xls'],
-                    // }}
+                    accept={{
+                      'text/csv': ['.csv'],
+                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                      'application/vnd.ms-excel': ['.xls'],
+                    }}
+                    supportedFilesText = 'csv, xlsx and xls files files are supported'
                   />
                 </div>
               </div>

@@ -17,7 +17,7 @@ export const ConsultationDetailsView = () => {
     refetch,
   } = useQuery({
     queryFn: () => getConsultationDetails({ id: consultationId }),
-    queryKey: [queryKeys.getexpertGroupCoachingDetails, consultationId],
+    queryKey: [queryKeys.consultationDetails, consultationId],
   });
 
   const consultationDetails = response?.data?.data || {};

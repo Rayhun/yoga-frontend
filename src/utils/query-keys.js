@@ -35,7 +35,11 @@ const queryKeys = {
   expertConsultationDetails: 'expertConsultationDetails',
   customerEvents: 'customerEvents',
   customerConsultations: 'customerConsultations',
-  consultationDetails: 'consultationDetails'
+  consultationDetails: 'consultationDetails',
+  expertConsultations: 'expertConsultations',
+  expertconsultationDetails: 'expertconsultationDetails',
+  expertPersonalConsultations: 'expertPersonalConsultations',
+  expertPersonalConsultationDetails: 'expertPersonalConsultationDetails'
 };
 
 export default queryKeys;

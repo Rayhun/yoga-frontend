@@ -1,4 +1,5 @@
-import ConsultationsLibrary from '@/components/lms/consultation/Consultations';
+import PersonalConsultation from '@/components/lms/consultation';
+import ConsultationsLibrary from '@/components/lms/consultation/ConsultationsLibrary';
 
 export const metadata = {
   title: 'LMS Personal Consultations',
@@ -7,7 +8,7 @@ export const metadata = {
 const Page = () => {
   return (
     <div>
-      <ConsultationsLibrary />
+      <PersonalConsultation />
     </div>
   );
 };

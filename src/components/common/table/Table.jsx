@@ -4,7 +4,7 @@ import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Spinner from '@/components/common/loader/Spinner';
 
-const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = true, showFooter = true }) => {
+const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = true, showFooter = true, CustomFilters = null }) => {
   const { getHeaderGroups, getRowModel, getPageCount, getState, setGlobalFilter, setPageSize, setPageIndex } =
     table;
 
@@ -19,6 +19,7 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
     <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       {showHeader ? (
         <div className="flex justify-between border-b border-stroke px-8 py-4 dark:border-strokedark">
+          <div className='flex gap-4'>
           <div className="w-100">
             <input
               type="text"
@@ -28,7 +29,9 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
               placeholder="Search..."
             />
           </div>
-
+          {CustomFilters}
+          </div>
+         
           <div className="flex items-center font-medium">
             <select
               value={pageSize}

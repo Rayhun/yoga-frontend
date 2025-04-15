@@ -6,11 +6,12 @@ import queryKeys from '@/utils/query-keys';
 import UserProfileConsultations from '@/components/common/user/profile/consultation';
 
 const ExpertConsultations = ({ tabEnabled }) => {
+  const router = useRouter();
   const [searchText, setSearchText] = useState('');
 
   const { isFetching: isLoadingConsultations, data: consultationResponse } = useQuery({
     queryFn: getExpertConsultationsList,
-    queryKey: [queryKeys.expertGroupCoaching],
+    queryKey: [queryKeys.expertConsultations],
     enabled: tabEnabled,
   });
 
@@ -25,7 +26,7 @@ const ExpertConsultations = ({ tabEnabled }) => {
       isLoadingConsultations={isLoadingConsultations}
       searchText={searchText}
       setSearchText={setSearchText}
-      onClickConsultation={consultation => console.log('consultation', consultation)}
+      onClickConsultation={consultation => router.push(`/portal/teacher/consultation/${consultation.id}/details`)}
     />
   );
 };
