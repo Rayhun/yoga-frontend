@@ -7,6 +7,8 @@ import Link from 'next/link';
 import PageLoader from '../loader/PageLoader';
 import ControllableText from '@/components/common/details/ControllableText';
 import dayjs from 'dayjs';
+import { RiEdit2Line } from 'react-icons/ri';
+import { useRouter } from 'next/navigation';
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
@@ -22,12 +24,27 @@ export const GroupCoachingDetails = ({
   handleEnrollGroupCoaching,
   enrolling
 }) => {
+  const router = useRouter();
   if (isLoading) return <PageLoader />;
+
+
+  const onEdit = () => {
+    router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
+  };
 
   return (
     <div>
       {/* Event Details Card */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+      {!isCustomerView && (
+          <button
+            className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
+            onClick={onEdit}
+          >
+            <RiEdit2Line />
+            Edit
+          </button>
+        )}
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
@@ -128,7 +145,7 @@ export const GroupCoachingDetails = ({
       {/* Event Content */}
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Description</p>
+          <p className="font-bold">Description</p>
           <ControllableText>{eventDetails?.description || 'Not Available'}</ControllableText>
         </div>
         <div className="flex gap-10">
@@ -163,7 +180,7 @@ export const GroupCoachingDetails = ({
         <div className="grid grid-cols-3 gap-4 flex-col gap-5">
           {/* Event Info */}
           <div className="flex flex-col gap-2">
-            <p className="font-bold text-gray-400">Status</p>
+            <p className="font-bold">Status</p>
             <span
               className={`capitalize font-semibold ${
                 eventDetails?.status === 'completed'
@@ -179,7 +196,7 @@ export const GroupCoachingDetails = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Categories</p>
+          <p className="font-bold">Categories</p>
           <div className="flex flex-wrap gap-2">
             {eventDetails?.categories?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />
@@ -187,7 +204,7 @@ export const GroupCoachingDetails = ({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Tags</p>
+          <p className="font-bold">Tags</p>
           <div className="flex flex-wrap gap-2">
             {eventDetails?.tags?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />

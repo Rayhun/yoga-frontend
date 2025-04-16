@@ -15,33 +15,29 @@ import { TIME_ZONES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
 import { toast } from 'react-toastify';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { createNewGroupCoaching } from '@/services/private/expert/groupCoaching';
+import { createNewGroupCoaching, updateGroupCoaching } from '@/services/private/expert/groupCoaching';
 import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
 // import { createEvent } from '@/services/private/lms/events';
-
-const recurrenceOptions = [
-  { label: 'None', value: 'none' },
-  { label: 'Daily', value: 'daily' },
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
-];
 
 const eventTypeOptions = [
   { label: 'Live Session', value: 'live session' },
   { label: 'Class', value: 'class' },
 ];
 
-const GroupCoachingForm = ({ initialData = {}, isEditMode = false }) => {
+const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const { mutateAsync: createGroupCoaching } = useMutation({
     mutationFn: createNewGroupCoaching,
   });
-  // const { mutateAsync: updateExpert } = useMutation({
-  //   mutationFn: updateExistingExpert,
-  // });
+
+  const { mutateAsync: update } = useMutation({
+    mutationFn: updateGroupCoaching,
+  });
+
+  console.log('initialData', initialData)
 
   const initialValues = {
     title: initialData?.title || '',
@@ -84,9 +80,8 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (isEditMode) {
-        // await updateExpert({ payload: { id: selected.id, ...values } });
-        // toast.success('Expert updated successfully');
-        console.log("On Update mode")
+        await update({ payload: { ...values }, id: eventId });
+        toast.success('Group Coaching updated successfully');
       } else {
         await createGroupCoaching({ payload: { ...values } });
         toast.success('Group Coaching added successfully');
@@ -94,7 +89,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false }) => {
       await queryClient.invalidateQueries([
         {
           queryKey: isEditMode
-            ? [queryKeys.expertGroupCoachingDetails, selected.id]
+            ? [queryKeys.expertGroupCoachingDetails, eventId]
             : [queryKeys.expertGroupCoaching],
         },
       ]);

@@ -27,6 +27,7 @@ const ExpertConsultations = ({ tabEnabled }) => {
       searchText={searchText}
       setSearchText={setSearchText}
       onClickConsultation={consultation => router.push(`/portal/teacher/consultation/${consultation.id}/details`)}
+      isExpertView
     />
   );
 };

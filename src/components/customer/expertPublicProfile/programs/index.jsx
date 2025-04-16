@@ -30,6 +30,7 @@ const ExpertProfilePrograms = () => {
       searchText={searchText}
       setSearchText={setSearchText}
       onClickProgram={program => router.push(`/portal/customer/lms/program/${program.id}/details`)}
+      isPublicView={true}
     />
   );
 };

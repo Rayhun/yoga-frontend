@@ -2,7 +2,7 @@ import React from 'react';
 import ProgramCard from '@/components/lms/program/customer/ProgramCard';
 import Spinner from '@/components/common/loader/Spinner';
 
-const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchText, onClickProgram }) => {
+const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchText, onClickProgram, isExpertView = false }) => {
 
   return (
     <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
@@ -24,6 +24,7 @@ const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchTex
               key={program.id}
               program={program}
               onClick={() => onClickProgram(program)}
+              isExpertView={isExpertView}
             />
           ))}
         </div>
