@@ -110,7 +110,7 @@ const ExpertProfileForm = ({ selected }) => {
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" disabled />
+                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -192,6 +192,7 @@ const ExpertProfileForm = ({ selected }) => {
                     }}
                     supportedFilesText = 'csv, xlsx and xls files files are supported'
                   />
+                  <div className='text-right mt-5'><a href="" className='text-primary hover:underline text-md'>Download Sample Csv</a></div>
                 </div>
               </div>
               <div className="my-5">

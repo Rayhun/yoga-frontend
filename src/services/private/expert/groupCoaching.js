@@ -21,6 +21,17 @@ export const createNewGroupCoaching = async ({ payload: { categories, tags, ...p
   return axios.post('/LMS/events/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
+export const updateGroupCoaching = async ({ payload: { categories, tags, ...payload }, id }) => {
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value) formData.set(key, value);
+  });
+  formData.set('categories', categories.join(','));
+  formData.set('tags', tags.join(','));
+
+  return axios.patch(`/LMS/events/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
 export const cancelGroupCoaching = async ({ id }) => {
   return axios.post(`/event/${id}/status/`, { event_status: 'cancelled', recording_link: '' });
 };

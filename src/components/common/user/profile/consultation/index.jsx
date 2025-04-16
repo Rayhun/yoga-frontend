@@ -4,13 +4,15 @@ import EventCard from '@/components/lms/common/EventCard';
 import Button from '@/components/common/Button';
 import { useRouter } from 'next/navigation';
 import ConsultationCard from '@/components/lms/common/ConsultationCard';
+import { GoPlus } from 'react-icons/go';
 
 const UserProfileConsultations = ({
   filteredConsultations,
   isLoadingConsultations,
   setSearchText,
   onClickConsultation,
-  isPublicView = false,
+  isExpertView = false,
+
 }) => {
   const router = useRouter();
   return (
@@ -21,13 +23,14 @@ const UserProfileConsultations = ({
           placeholder="Search Consultations"
           onChange={e => setSearchText(e.target.value || '')}
         />
-        {!isPublicView && (
+        {isExpertView && (
           <Button
             size="lg"
-            className="text-xl"
+            className="text-md"
             onClick={() => router.push('/portal/teacher/consultation/add')}
+            Icon={GoPlus}
           >
-            +
+            New Personal Consultation
           </Button>
         )}
       </div>
@@ -42,6 +45,7 @@ const UserProfileConsultations = ({
               key={consultation.id}
               consultation={consultation}
               onClick={() => onClickConsultation(consultation)}
+              isExpertView={isExpertView}
             />
           ))}
         </div>

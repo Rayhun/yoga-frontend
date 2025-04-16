@@ -36,8 +36,8 @@ export const cancelConsultation = async ({ id }) => {
   return axios.post(`/consultation/${id}/status/`, { event_status: 'cancelled' });
 };
 
-export const completeConsultation = async ({ id }) => {
-  return axios.post(`/consultation/${id}/status/`, { event_status: 'completed' });
+export const completeConsultation = async ({ id, ...payload }) => {
+  return axios.post(`/consultation/${id}/status/`, { event_status: 'completed', ...payload });
 };
 
 export const getExpertPersonalConsultation = async () => {

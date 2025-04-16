@@ -7,7 +7,7 @@ import Button from '@/components/common/Button';
 import { toastApiError } from '@/utils/helpers';
 import { IoLink } from 'react-icons/io5';
 
-const MarkCompleteCoachingForm = ({ handleSubmit }) => {
+const MarkCompleteForm = ({ handleSubmit }) => {
   const initialValues = {
     recording_link: '',
   };
@@ -38,4 +38,4 @@ const MarkCompleteCoachingForm = ({ handleSubmit }) => {
   );
 };
 
-export default MarkCompleteCoachingForm;
+export default MarkCompleteForm;

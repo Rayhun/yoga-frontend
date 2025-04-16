@@ -30,6 +30,7 @@ const ExpertProfilePrograms = () => {
       searchText={searchText}
       setSearchText={setSearchText}
       onClickProgram={() => console.log(`Clicked ${program.title}`)}
+      isExpertView
     />
   );
 };

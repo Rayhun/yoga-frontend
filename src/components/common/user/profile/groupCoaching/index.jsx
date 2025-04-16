@@ -3,13 +3,14 @@ import Spinner from '@/components/common/loader/Spinner';
 import EventCard from '@/components/lms/common/EventCard';
 import Button from '@/components/common/Button';
 import { useRouter } from 'next/navigation';
+import { GoPlus } from "react-icons/go";
 
 const UserProfileGroupCoaching = ({
   filteredCoachings,
   isLoadingCoachings,
   setSearchText,
   onClickEvent,
-  isPublicView = false,
+  isExpertView = false,
 }) => {
   const router = useRouter();
   return (
@@ -20,13 +21,14 @@ const UserProfileGroupCoaching = ({
           placeholder="Search Group Coaching"
           onChange={e => setSearchText(e.target.value || '')}
         />
-        {!isPublicView && (
+        {isExpertView && (
           <Button
             size="lg"
-            className="text-xl"
+            className="text-md flex gap-2"
             onClick={() => router.push('/portal/teacher/group_coaching/add')}
+            Icon={GoPlus}
           >
-            +
+            New Group Coaching
           </Button>
         )}
       </div>
@@ -37,7 +39,7 @@ const UserProfileGroupCoaching = ({
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filteredCoachings.map(event => (
-            <EventCard key={event.id} event={event} onClick={() => onClickEvent(event)} />
+            <EventCard key={event.id} event={event} onClick={() => onClickEvent(event)} isExpertView={isExpertView} />
           ))}
         </div>
       )}

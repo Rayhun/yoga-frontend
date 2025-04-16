@@ -103,8 +103,8 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                 <FormikField name="description" label="Description" rows={4} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormikField name="duration" label="Duration" type="number" required />
-                  <FormikField name="price" label="Price" type="number" required />
+                  <FormikField name="duration" label="Duration (mins)" type="number" required />
+                  <FormikField name="price" label="Price ($)" type="number" required />
 
                   <FormikField name="calender_link" label="Calendar Link" required />
 

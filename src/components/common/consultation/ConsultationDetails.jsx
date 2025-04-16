@@ -27,6 +27,7 @@ export const ConsultationDetails = ({
 
   if (isLoading) return <PageLoader />;
 
+
   const onEdit = () => {
     router.push(`/portal/teacher/consultation/${consultationId}/edit`);
   };
@@ -64,10 +65,10 @@ export const ConsultationDetails = ({
 
           {/* Event Info */}
           <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <FaTv size={24} className="text-primary" />
               <span>{consultationDetails?.is_online ? 'Online' : 'Offline'}</span>
-            </div>
+            </div> */}
             <div className="flex items-center gap-3">
               <PiClockCountdown size={24} className="text-primary" />
               <span>{consultationDetails?.duration || '30'} min</span>
@@ -112,7 +113,11 @@ export const ConsultationDetails = ({
                 </div>
               </Link>
             ) : (
-              <button onClick={handleEnrollConsultation} disabled={enrolling} className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80">
+              <button
+                onClick={handleEnrollConsultation}
+                disabled={enrolling}
+                className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80"
+              >
                 {enrolling ? 'Enrolling...' : 'Enroll Now'}
               </button>
             ))}
@@ -145,7 +150,7 @@ export const ConsultationDetails = ({
       {/* Event Content */}
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Description</p>
+          <p className="font-bold">Description</p>
           <ControllableText>{consultationDetails?.description || 'Not Available'}</ControllableText>
         </div>
         <div className="flex gap-10">
@@ -153,24 +158,33 @@ export const ConsultationDetails = ({
             <p className="font-bold">Calender Link:</p>
             <a className="text-gray-500">{consultationDetails?.calender_link}</a>
           </div>
+          <div className="flex gap-2">
+            <p className="font-bold">Followup Duration:</p>
+            <div className="flex items-center gap-3">
+              {/* <PiClockCountdown size={24} className="text-primary" /> */}
+              <span>{consultationDetails?.followup_duration || '30'} min</span>
+            </div>
+          </div>
         </div>
 
+        {consultationDetails?.status && (
+          <div className="flex flex-col gap-2">
+            <p className="font-bold">Status</p>
+            <span
+              className={`capitalize font-semibold ${
+                consultationDetails?.status === 'completed'
+                  ? 'text-green-600'
+                  : consultationDetails?.status === 'cancelled'
+                  ? 'text-red-500'
+                  : 'text-yellow-500'
+              }`}
+            >
+              {consultationDetails?.status}
+            </span>
+          </div>
+        )}
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Status</p>
-          <span
-            className={`capitalize font-semibold ${
-              consultationDetails?.status === 'completed'
-                ? 'text-green-600'
-                : consultationDetails?.status === 'cancelled'
-                ? 'text-red-500'
-                : 'text-yellow-500'
-            }`}
-          >
-            {consultationDetails?.status || 'Not available'}
-          </span>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Consultation Type</p>
+          <p className="font-bold">Consultation Type</p>
           <div className="flex flex-wrap gap-2">
             {consultationDetails?.consultation_type
               ? consultationDetails?.consultation_type
@@ -180,7 +194,17 @@ export const ConsultationDetails = ({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Tags</p>
+          <p className="font-bold">Followup Type</p>
+          <div className="flex flex-wrap gap-2">
+            {consultationDetails?.followup_support
+              ? consultationDetails?.followup_support
+                  ?.split(',')
+                  .map(tag => <ProfileChip key={tag} label={tag} />)
+              : consultationDetails?.followup_support?.split(',').map(tag => <ProfileChip key={tag} label={tag} />)}
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="font-bold">Tags</p>
           <div className="flex flex-wrap gap-2">
             {consultationDetails?.tags?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />
@@ -188,7 +212,7 @@ export const ConsultationDetails = ({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <p className="font-bold text-gray-400">Categories</p>
+          <p className="font-bold">Categories</p>
           <div className="flex flex-wrap gap-2">
             {consultationDetails?.categories?.map(tag => (
               <ProfileChip key={tag.id} label={tag?.name} />

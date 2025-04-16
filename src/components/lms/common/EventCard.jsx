@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import Image from 'next/image';
 import { GoDotFill } from 'react-icons/go';
 
-const EventCard = ({ event, onClick }) => {
+const EventCard = ({ event, onClick, isExpertView = false }) => {
   return (
     <div
       className="rounded-lg border border-stroke bg-white shadow-default cursor-pointer overflow-hidden dark:bg-boxdark"
@@ -45,7 +45,7 @@ const EventCard = ({ event, onClick }) => {
             {`${event.currency_symbol || '$'} ${event.price}`}
           </p>
         )} */}
-        {event?.is_enroll ? (
+        {event?.is_enroll || isExpertView ? (
           <button
             onClick={onClick}
             className="w-full mt-4 py-1 px-4 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200 font-medium text-sm"
