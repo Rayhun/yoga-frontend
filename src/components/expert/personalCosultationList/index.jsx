@@ -32,7 +32,7 @@ const PersonalConsultationList = () => {
         accessorKey: 'status_action',
         enableSorting: false,
         cell: ({ row }) => {
-          return row?.original?.status === 'pending' ? (
+          return row?.original?.status?.toLowerCase() === 'scheduled' ? (
             <Actions id={row.original.id} />
           ) : null;
         },
@@ -56,7 +56,7 @@ const PersonalConsultationList = () => {
   const filteredConsultations = useMemo(
     () =>
       status
-        ? (data?.results?.data?.['all-events'] || []).filter(consult => consult.status === status)
+        ? (data?.results?.data?.['all-events'] || []).filter(consult => consult?.status?.toLowerCase() === status)
         : data?.results?.data?.['all-events'],
     [data?.results?.data, status]
   );
@@ -77,9 +77,9 @@ const PersonalConsultationList = () => {
     >
       <Select id="status-select" value={status} onChange={handleChange} displayEmpty>
         <MenuItem value="">Select Status</MenuItem>
-        <MenuItem value="pending">Pending</MenuItem>
-        <MenuItem value="canceled">Canceled</MenuItem>
+        <MenuItem value="scheduled">Scheduled</MenuItem>
         <MenuItem value="completed">Completed</MenuItem>
+        <MenuItem value="cancelled">Cancelled</MenuItem>
       </Select>
     </FormControl>
   );
