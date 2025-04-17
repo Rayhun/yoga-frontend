@@ -1,7 +1,7 @@
 import { ExpertProvider } from "@/context/ExpertProfileContext";
 
 export const metadata = {
-  title: 'Add New Consultation',
+  title: 'Enrolled Consultations List',
 };
 
 const Layout = ({ children }) => {
