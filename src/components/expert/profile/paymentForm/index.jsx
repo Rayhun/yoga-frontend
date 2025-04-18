@@ -31,7 +31,7 @@ const ExpertPaymentForm = () => {
       await upload({ payload: { ...values } });
       toast.success('Payment info updated successfully');
       await queryClient.invalidateQueries([{ queryKey: [queryKeys.expertCustomerPrograms] }]);
-      router.push('/portal/teacher/profile');
+      router.push('/portal/teacher/profile?active_tab=about');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -57,18 +57,17 @@ const ExpertPaymentForm = () => {
               <Form className="flex flex-col gap-3">
                 <div className="flex flex-col gap-6">
                   <FormikField name="paypal_email" label="Paypal Email" placeholder="Paypal Email" required />
-                  <div className="flex justify-between items-center gap-20">
+                  <div className="flex justify-end items-center gap-4">
                     <Button
                       type="button"
                       variant="secondary"
                       size="2xl"
-                      className="min-w-70"
                       onClick={handleCancel}
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
-                      {isSubmitting ? 'Submitting...' : 'Submit'}
+                    <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                      {isSubmitting ? 'Submitting...' : 'Submit My Paypal Email'}
                     </Button>
                   </div>
                 </div>

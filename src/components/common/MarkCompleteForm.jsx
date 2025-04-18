@@ -23,7 +23,7 @@ const MarkCompleteForm = ({ handleSubmit }) => {
           <FormikField
             type="text"
             name="recording_link"
-            label="Recording Link"
+            label="Please enter the recording link for payment processing"
             placeholder="Recording Link"
             Icon={IoLink}
             required

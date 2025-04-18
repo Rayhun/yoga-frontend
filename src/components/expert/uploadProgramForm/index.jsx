@@ -35,7 +35,7 @@ const UploadProgramsFile = () => {
       await queryClient.invalidateQueries([
         { queryKey: [queryKeys.expertCustomerPrograms]},
       ]);
-      router.push('/portal/teacher/profile');
+      router.push('/portal/teacher/profile?active_tab=programs');
     } catch (error) {
       toastApiError(error);
     } finally {
