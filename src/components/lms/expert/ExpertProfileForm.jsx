@@ -14,6 +14,9 @@ import { TagsField } from '@/components/lms/general/fields';
 import { updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
+import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS } from '@/utils/constants';
 
 const ExpertProfileForm = ({ selected }) => {
   const router = useRouter();
@@ -41,7 +44,9 @@ const ExpertProfileForm = ({ selected }) => {
     credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
-    coaching_content: selected?.coaching_content?.split(',') || [],
+    // coaching_content: selected?.coaching_content?.split(',') || [],
+    culture_experience: selected?.culture_experience?.split(',') || [],
+    coaching_style: selected?.coaching_style || '',
     file: null,
     program_file: null,
   };
@@ -64,9 +69,11 @@ const ExpertProfileForm = ({ selected }) => {
     credentials: Yup.array()
       .of(Yup.string().required('Required!'))
       .min(1, 'At least 1 credential is required'),
-    coaching_content: Yup.array()
-      .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 coaching content is required'),
+    // coaching_content: Yup.array()
+    //   .of(Yup.string().required('Required!'))
+    //   .min(1, 'At least 1 coaching content is required'),
+    // culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
+    // coaching_style: Yup.string().required('Coanching Style is required'),
     experience: Yup.number()
       .required('Experience is required')
       .integer('Experience must be a whole number')
@@ -152,6 +159,22 @@ const ExpertProfileForm = ({ selected }) => {
                   <FormikField name="website" label="Website URL" placeholder="Website URL" />
                 </div>
               </div>
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikSelect
+                    name="coaching_style"
+                    label="Coaching Style"
+                    options={COACHING_STYLES_OPTIONS}
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <FormikMultiSelect
+                    name="culture_experience"
+                    label="Culture Experience"
+                    options={CULTURE_EXPERIENCE_OPTIONS}
+                  />
+                </div>
+              </div>
               <FormikField name="description" label="About" placeholder="About" rows={5} required />
               <TagsField name="tags" label="Coaching Areas" placeholder="Coaching Areas" required />
               <FormikSubmittableField
@@ -161,24 +184,24 @@ const ExpertProfileForm = ({ selected }) => {
                 required
               />
               <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
-              <FormikSubmittableField
+              {/* <FormikSubmittableField
                 name="coaching_content"
                 label="My Coaching Content"
                 placeholder="My Coaching Content"
                 required
-              />
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
-                  <FormikDropzone
-                    name="file"
-                    label="Profile Image"
-                    fileURLs={selected?.file ? [selected.file] : []}
-                    Icon={FaRegFileImage}
-                    required
-                  />
-                </div>
+              /> */}
+              <div className="">
+                {/* <div className="w-full xl:w-1/2"> */}
+                <FormikDropzone
+                  name="file"
+                  label="Profile Image"
+                  fileURLs={selected?.file ? [selected.file] : []}
+                  Icon={FaRegFileImage}
+                  required
+                />
+                {/* </div> */}
 
-                <div className="w-full xl:w-1/2">
+                {/* <div className="w-full xl:w-1/2">
                   <FormikDropzone
                     name="program_file"
                     label="Program File"
@@ -193,18 +216,26 @@ const ExpertProfileForm = ({ selected }) => {
                     supportedFilesText = 'csv, xlsx and xls files files are supported'
                   />
                   <div className='text-right mt-5'><a href="" className='text-primary hover:underline text-md'>Download Sample Csv</a></div>
-                </div>
+                </div> */}
               </div>
               <div className="my-5">
                 <FormikSwitch name="available" label="Available for Coaching" />
               </div>
               <div className="flex gap-2">
-              <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Create My Profile'}
-                </Button>
+                <div className="flex justify-between items-center gap-20">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="2xl"
+                    className="min-w-70"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </Button>
+                </div>
               </div>
             </Form>
           )}

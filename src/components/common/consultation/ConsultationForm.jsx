@@ -87,6 +87,10 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     }
   };
 
+  const handleCancel = () => {
+    router.back();
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="p-6.5">
@@ -127,11 +131,17 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
 
                 <FormikDropzone name="image" label="Image" required />
 
-                <div className="flex justify-between items-center mt-5">
-                  <Button type="button" variant="secondary" size="2xl" onClick={() => router.back()}>
+                <div className="flex justify-between items-center gap-20">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="2xl"
+                    className="min-w-70"
+                    onClick={handleCancel}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </Button>
                 </div>
