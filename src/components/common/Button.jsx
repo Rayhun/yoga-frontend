@@ -38,7 +38,7 @@ const Button = ({
     if (variant === BUTTON_VARIANT.primary)
       return 'border-primary bg-primary text-white transition hover:bg-opacity-90';
     if (variant === BUTTON_VARIANT.secondary)
-      return 'border-stroke bg-gray hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50';
+      return 'border-stroke bg-gray-100 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50';
 
     return '';
   }, [variant]);

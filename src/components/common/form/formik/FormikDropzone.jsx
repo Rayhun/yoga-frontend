@@ -160,27 +160,26 @@ function FormikDropzone({
 
           {/* Show files below dropzone when in multiple mode */}
           {multiple && files.length > 0 && (
-            <div className="flex flex-wrap gap-3 p-3 border border-slate-200 rounded-md bg-slate-50 dark:border-form-strokedark dark:bg-form-input">
+            <div className="flex flex-wrap gap-3 p-3">
               <p className="w-full text-sm text-slate-500 mb-2">Selected files ({files.length}):</p>
-              {files.map(file => (
+              {files.map((file, index) => (
                 <div
-                  key={file.name || file.path}
-                  className="w-[120px] h-[120px] border border-slate-300 shadow rounded flex justify-center items-center relative"
+                  key={`${file.name || file.path}-${index}`}
+                  className="w-full border border-slate-300 shadow rounded flex justify-between items-center relative p-2"
                 >
-                  <IconButton
-                    className="absolute top-1 right-1 p-1 bg-white bg-opacity-70"
-                    onClick={() => handleRemoveFile(file)}
-                  >
-                    <MdClose size={16} color="red" />
-                  </IconButton>
                   {file?.type?.includes('image') ? (
-                    <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" alt="img" />
+                    <img src={URL.createObjectURL(file)} className="w-15 h-15 object-cover" alt="img" />
                   ) : (
                     <div className="flex flex-col items-center gap-1 p-2 text-center">
-                      <MdAttachFile size={20} />
-                      <p className="text-xs truncate max-w-full">{file?.name}</p>
+                      <p className="text-lg truncate max-w-full">{file?.name}</p>
                     </div>
                   )}
+                   <IconButton
+                    className="p-1 bg-white bg-opacity-70"
+                    onClick={() => handleRemoveFile(file)}
+                  >
+                    <MdClose size={20} color="red" />
+                  </IconButton>
                 </div>
               ))}
             </div>

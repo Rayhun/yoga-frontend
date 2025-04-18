@@ -1,9 +1,12 @@
 import React from 'react';
 import ProgramCard from '@/components/lms/program/customer/ProgramCard';
 import Spinner from '@/components/common/loader/Spinner';
+import { GoPlus } from 'react-icons/go';
+import Button from '@/components/common/Button';
+import { useRouter } from 'next/navigation';
 
 const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchText, onClickProgram, isExpertView = false }) => {
-
+  const router = useRouter();
   return (
     <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
       <div className="flex gap-4 items-center justify-end">
@@ -12,6 +15,16 @@ const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchTex
           placeholder="Search Programs"
           onChange={e => setSearchText(e.target.value || '')}
         />
+        {isExpertView && (
+          <Button
+            size="lg"
+            className="text-md flex gap-2"
+            onClick={() => router.push('/portal/teacher/program/upload')}
+            Icon={GoPlus}
+          >
+            Upload Programs
+          </Button>
+        )}
       </div>
       {isLoadingPrograms ? (
         <div className="flex justify-center">

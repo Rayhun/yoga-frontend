@@ -37,8 +37,6 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     mutationFn: updateGroupCoaching,
   });
 
-  console.log('initialData', initialData)
-
   const initialValues = {
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -101,6 +99,10 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     }
   };
 
+  const handleCancel = () => {
+    router.back();
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="p-6.5">
@@ -131,11 +133,17 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                 <FormikSwitch name="is_online" label="Online/Offline" />
                 {values?.is_online && <FormikField name="meeting_link" label="Meeting URL" required />}
                 <FormikDropzone name="image" label="Event Image" />
-                <div className="flex justify-between items-center mt-5">
-                  <Button type="button" variant="secondary" size="2xl" onClick={() => router.back()}>
+                <div className="flex justify-between items-center gap-20">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="2xl"
+                    className="min-w-70"
+                    onClick={handleCancel}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </Button>
                 </div>

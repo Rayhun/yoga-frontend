@@ -1,3 +1,23 @@
+export const COACHING_STYLES_OPTIONS = [
+  { value: 'supportive', label: 'Supportive & Gentle' },
+  { value: 'goal-focused', label: 'Goal-Focused' },
+  { value: 'holistic', label: 'Holistic' },
+  { value: 'motivational', label: 'Motivational' },
+  { value: 'educational', label: 'Educational' }
+];
+
+export const CULTURE_EXPERIENCE_OPTIONS = [
+  { value: 'south-asian', label: 'South Asian' },
+  { value: 'east-asian', label: 'East Asian' },
+  { value: 'african-american', label: 'African-American / Black' },
+  { value: 'latinx-hispanic', label: 'Latinx / Hispanic' },
+  { value: 'middle-eastern-north-african', label: 'Middle Eastern / North African' },
+  { value: 'white-european', label: 'White / European' },
+  { value: 'lgbtq', label: 'LGBTQ+' },
+  { value: 'comfortable-with-all', label: 'Comfortable with all' }
+];
+
+
 export const TIME_ZONES = [
   {
     value: 'Dateline Standard Time',

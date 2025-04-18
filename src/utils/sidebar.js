@@ -1,4 +1,13 @@
-import { MdOutlineHome, MdViewModule, MdCategory, MdHome, MdSubscriptions, MdPages } from 'react-icons/md';
+import {
+  MdOutlineHome,
+  MdViewModule,
+  MdCategory,
+  MdHome,
+  MdSubscriptions,
+  MdPages,
+  MdOutlineEventNote,
+  MdOutlinePayments,
+} from 'react-icons/md';
 import {
   FaInbox,
   FaUsers,
@@ -8,12 +17,13 @@ import {
   FaTv,
   FaTags,
   FaUser,
-  FaChalkboardTeacher
+  FaChalkboardTeacher,
 } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
-import { GiTeacher } from "react-icons/gi";
+import { GiTeacher } from 'react-icons/gi';
+import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
 
 const ADMIN = [
   {
@@ -99,35 +109,35 @@ const ADMIN = [
     label: 'Experts',
     href: '/portal/admin/lms/expert',
     isActive: pathname => pathname.includes('/portal/admin/lms/expert'),
-    disabled: false
+    disabled: false,
   },
   {
     Icon: MdCategory,
     label: 'Categories',
     href: '/portal/admin/lms/category',
     isActive: pathname => pathname.includes('/portal/admin/lms/category'),
-    disabled: false
+    disabled: false,
   },
   {
     Icon: FaTags,
     label: 'Tags',
     href: '/portal/admin/lms/tag',
     isActive: pathname => pathname.includes('/portal/admin/lms/tag'),
-    disabled: false
+    disabled: false,
   },
   {
     Icon: MdSubscriptions,
     label: 'Subscription Plans',
     href: '/portal/admin/subscription/plan',
     isActive: pathname => pathname.includes('/portal/admin/subscription/plan'),
-    disabled: false
+    disabled: false,
   },
   {
     Icon: MdPages,
     label: 'Subscription Pages',
     href: '/portal/admin/subscription/page',
     isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
-    disabled: false
+    disabled: false,
   },
 ];
 
@@ -165,7 +175,9 @@ const CUSTOMER = [
     Icon: GiTeacher,
     label: 'Group Coachings',
     href: '/portal/customer/lms/group_coaching',
-    isActive: pathname => pathname.includes('/portal/customer/lms/group_coaching') || pathname.includes('/portal/customer/group_coaching'),
+    isActive: pathname =>
+      pathname.includes('/portal/customer/lms/group_coaching') ||
+      pathname.includes('/portal/customer/group_coaching'),
     disabled: false,
   },
   {
@@ -195,8 +207,34 @@ const TEACHER = [
   {
     Icon: FaUser,
     label: 'Profile',
-    href: '/portal/teacher/profile',
-    isActive: pathname => pathname.includes('/portal/teacher/profile') || pathname.includes('/portal/teacher/editProfile'),
+    href: '/portal/teacher/profile?active_tab=about',
+    isActive: (pathname, tab) =>
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=about') ||
+      pathname.includes('/portal/teacher/editProfile'),
+    disabled: false,
+  },
+  {
+    Icon: PiFilmScriptBold,
+    label: 'Programs',
+    href: '/portal/teacher/profile?active_tab=programs',
+    isActive: (pathname, tab) =>
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs'),
+    disabled: false,
+  },
+  {
+    Icon: MdOutlineEventNote,
+    label: 'Events',
+    href: '/portal/teacher/profile?active_tab=group_coaching',
+    isActive: (pathname, tab) =>
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching'),
+    disabled: false,
+  },
+  {
+    Icon: PiUserSquareFill,
+    label: 'Consultations',
+    href: '/portal/teacher/profile?active_tab=consult',
+    isActive: (pathname, tab) =>
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult'),
     disabled: false,
   },
   {
@@ -204,6 +242,13 @@ const TEACHER = [
     label: 'Personal Consultations',
     href: '/portal/teacher/consultation/list',
     isActive: pathname => pathname.includes('/portal/teacher/consultation/list'),
+    disabled: false,
+  },
+  {
+    Icon: MdOutlinePayments,
+    label: 'Payments',
+    href: '/portal/teacher/payments',
+    isActive: pathname => pathname.includes('/portal/teacher/payments'),
     disabled: false,
   },
 ];

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { Chip } from '@mui/material';
 import { FaTv } from 'react-icons/fa';
@@ -22,11 +22,27 @@ export const GroupCoachingDetails = ({
   completingEvent,
   toggleCompletionModal,
   handleEnrollGroupCoaching,
-  enrolling
+  enrolling,
 }) => {
   const router = useRouter();
-  if (isLoading) return <PageLoader />;
 
+  const { isBeforeStartDate, isAfterStartDate } = useMemo(() => {
+    if (!eventDetails?.start_date) {
+      return { isBeforeStartDate: false, isAfterStartDate: false };
+    }
+    
+    const now = dayjs();
+    const dateToCheck = dayjs(eventDetails.start_date);
+    
+    const comparison = now.valueOf() - dateToCheck.valueOf();
+    
+    return {
+      isBeforeStartDate: comparison < 0,
+      isAfterStartDate: comparison > 0
+    };
+  }, [eventDetails?.start_date]);
+
+  if (isLoading) return <PageLoader />;
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
@@ -36,7 +52,7 @@ export const GroupCoachingDetails = ({
     <div>
       {/* Event Details Card */}
       <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
-      {!isCustomerView && (
+        {!isCustomerView && (
           <button
             className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
             onClick={onEdit}
@@ -124,16 +140,16 @@ export const GroupCoachingDetails = ({
           {!isCustomerView && eventDetails?.status === 'Scheduled' && (
             <div className="flex gap-4 items-center">
               <button
-                disabled={canceling}
+                disabled={isAfterStartDate || canceling}
                 onClick={handleCancelEvent}
-                className="flex-1 md:w-auto bg-red-500 text-white disabled:bg-red-300/90 p-2 text-center rounded-xl shadow hover:bg-red-500/80"
+                className="flex-1 md:w-auto bg-red-500 text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-red-500/80"
               >
                 {canceling ? 'Cancelling...' : 'Cancel Coaching'}
               </button>
               <button
-                disabled={completingEvent}
+                disabled={isBeforeStartDate || completingEvent}
                 onClick={toggleCompletionModal}
-                className="flex-1 md:w-auto bg-primary text-white disabled:bg-primary-300/90 p-2 text-center rounded-xl shadow hover:bg-primary/80"
+                className="flex-1 md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80"
               >
                 {completingEvent ? 'Completing...' : 'Mark as Completed'}
               </button>

@@ -7,6 +7,7 @@ import ExpertProfilePrograms from './programs';
 import ExpertProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
 import ExpertConsultations from './consultation';
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -17,10 +18,14 @@ const TABS = {
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
+  // const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
+  const searchParams = useSearchParams();
+  const selectedTab = searchParams.get("active_tab") || TABS.ABOUT;
+  const router = useRouter();
+  const pathname = usePathname()
 
   const handleTabChange = (_, newValue) => {
-    setSelectedTab(newValue);
+    router.replace(`${pathname}?active_tab=${newValue}`)
   };
 
   return (
@@ -74,7 +79,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
         </div>
       </div>
-      <div className='bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6'>
+      <div className='text-gray-800 dark:text-gray-200 flex flex-col gap-6'>
         {/* Tabs */}
         <Tabs
           value={selectedTab}

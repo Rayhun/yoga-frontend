@@ -73,7 +73,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
+      <div className="text-gray-800 dark:text-gray-200 flex flex-col gap-6">
         {/* Tabs */}
         <Tabs
           value={selectedTab}
