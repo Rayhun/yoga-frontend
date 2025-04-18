@@ -21,8 +21,9 @@ import { toastApiError } from '@/utils/helpers';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
-  { label: 'Live Session', value: 'live session' },
-  { label: 'Class', value: 'class' },
+  { label: 'Workshop', value: 'workshop' },
+  { label: 'Bootcamp', value: 'bootcamp' },
+  { label: 'Live Event', value: 'live event' }
 ];
 
 const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) => {
@@ -91,7 +92,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
             : [queryKeys.expertGroupCoaching],
         },
       ]);
-      router.push('/portal/teacher/profile');
+      router.push('/portal/teacher/profile?active_tab=group_coaching');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -133,18 +134,17 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                 <FormikSwitch name="is_online" label="Online/Offline" />
                 {values?.is_online && <FormikField name="meeting_link" label="Meeting URL" required />}
                 <FormikDropzone name="image" label="Event Image" />
-                <div className="flex justify-between items-center gap-20">
+                <div className="flex justify-end items-center gap-4">
                   <Button
                     type="button"
                     variant="secondary"
                     size="2xl"
-                    className="min-w-70"
                     onClick={handleCancel}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                    {isSubmitting ? isEditMode ? 'Updating...' : 'Submitting...' : isEditMode ? 'Update Group Coaching' : 'Submit My Group Coaching'}
                   </Button>
                 </div>
               </Form>

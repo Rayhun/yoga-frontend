@@ -35,7 +35,7 @@ const UploadProgramsFile = () => {
       await queryClient.invalidateQueries([
         { queryKey: [queryKeys.expertCustomerPrograms]},
       ]);
-      router.push('/portal/teacher/profile');
+      router.push('/portal/teacher/profile?active_tab=programs');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -108,17 +108,16 @@ const UploadProgramsFile = () => {
                   }}
                   supportedFilesText="csv, xlsx and xls files files are supported"
                 />
-                <div className="flex justify-between items-center gap-20">
+                <div className="flex justify-end items-center gap-4">
                   <Button
                     type="button"
                     variant="secondary"
                     size="2xl"
-                    className="min-w-70"
                     onClick={handleCancel}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
+                  <Button type="submit" size="2xl" isLoading={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </Button>
                 </div>

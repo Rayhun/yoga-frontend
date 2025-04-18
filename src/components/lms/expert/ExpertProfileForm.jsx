@@ -88,7 +88,7 @@ const ExpertProfileForm = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.teacherProfile, selected.id] : [queryKeys.teacherProfile] },
       ]);
-      router.push('/portal/teacher/profile');
+      router.push('/portal/teacher/profile??active_tab=about');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -221,21 +221,13 @@ const ExpertProfileForm = ({ selected }) => {
               <div className="my-5">
                 <FormikSwitch name="available" label="Available for Coaching" />
               </div>
-              <div className="flex gap-2">
-                <div className="flex justify-between items-center gap-20">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="2xl"
-                    className="min-w-70"
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" size="2xl" className="min-w-70" isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </Button>
-                </div>
+              <div className="w-ful flex justify-end items-center gap-4">
+                <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'Submit My Profile'}
+                </Button>
               </div>
             </Form>
           )}

@@ -7,13 +7,13 @@ export const getExpertProgramsList = async () => {
 };
 
 export const uploadPrograms = async ({ payload }) => {
-  // const formData = new FormData();
-  // Object.entries(payload).forEach(([key, value]) => {
-  //   if (key==='available' || value) formData.set(key, value);
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (key==='available' || value) formData.set(key, value);
 
-  // });
-  return axios.post(`LMS/experts/upload/programs/`, payload);
-  // return axios.post(`LMS/experts/upload/programs/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  });
+  // return axios.post(`LMS/experts/upload/programs/`, payload);
+  return axios.post(`LMS/experts/upload/programs/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
 export const savePaymentInfo = async ({ payload }) => {

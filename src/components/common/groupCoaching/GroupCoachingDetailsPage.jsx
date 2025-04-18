@@ -1,14 +1,16 @@
 import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { Chip } from '@mui/material';
-import { FaTv } from 'react-icons/fa';
-import { PiClockCountdown } from 'react-icons/pi';
 import Link from 'next/link';
 import PageLoader from '../loader/PageLoader';
 import ControllableText from '@/components/common/details/ControllableText';
 import dayjs from 'dayjs';
 import { RiEdit2Line } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
+import { IoVideocamOutline } from "react-icons/io5";
+import { LuClock } from "react-icons/lu";
+
+
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
@@ -30,19 +32,23 @@ export const GroupCoachingDetails = ({
     if (!eventDetails?.start_date) {
       return { isBeforeStartDate: false, isAfterStartDate: false };
     }
-    
+
     const now = dayjs();
     const dateToCheck = dayjs(eventDetails.start_date);
-    
+
     const comparison = now.valueOf() - dateToCheck.valueOf();
-    
+
     return {
       isBeforeStartDate: comparison < 0,
-      isAfterStartDate: comparison > 0
+      isAfterStartDate: comparison > 0,
     };
   }, [eventDetails?.start_date]);
 
   if (isLoading) return <PageLoader />;
+
+
+  const startDate = dayjs(eventDetails?.start_date);
+  const endDate = startDate.add(eventDetails?.duration, 'minute');
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
@@ -80,14 +86,26 @@ export const GroupCoachingDetails = ({
           </h3>
 
           {/* Event Info */}
-          <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
-            <div className="flex items-center gap-3">
-              <FaTv size={24} className="text-primary" />
-              <span>{eventDetails?.event_type || 'Offline'}</span>
+          <div className="flex flex-col gap-4 text-gray-600 dark:text-white">
+            <div className="flex items-start gap-3">
+              <LuClock size={24} className="text-gray-400" />
+              <div className='text-dark'>
+                <div className='font-bold'>{startDate.format('dddd, MMMM D, YYYY')}</div>
+                <div className='font-bold'>{`${startDate.format('h:mm A')} to ${endDate.format('h:mm A')} ${
+                  eventDetails?.time_zone || ''
+                }`}</div>
+              </div>
+              {/* <span>{eventDetails?.duration || '30'} min</span> */}
             </div>
-            <div className="flex items-center gap-3">
-              <PiClockCountdown size={24} className="text-primary" />
-              <span>{eventDetails?.duration || '30'} min</span>
+            <div className="flex items-start gap-3">
+              <IoVideocamOutline size={24} className="text-gray-400" />
+              <div>
+                <p className='capitalize font-bold'>{eventDetails?.event_type || 'Offline'}</p>
+                <p className='text-sm'>Link visible to attendees</p>
+              </div>
+            </div>
+            <div className="pl-6">
+                <span className='font-bold text-xl'>{`${eventDetails?.currency_symbol || '$'} ${eventDetails?.price}`}</span>
             </div>
           </div>
 
@@ -142,7 +160,7 @@ export const GroupCoachingDetails = ({
               <button
                 disabled={isAfterStartDate || canceling}
                 onClick={handleCancelEvent}
-                className="flex-1 md:w-auto bg-red-500 text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-red-500/80"
+                className="flex-1 md:w-auto bg-gray-200 disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-gray-300"
               >
                 {canceling ? 'Cancelling...' : 'Cancel Coaching'}
               </button>
@@ -163,21 +181,6 @@ export const GroupCoachingDetails = ({
         <div className="flex flex-col gap-2">
           <p className="font-bold">Description</p>
           <ControllableText>{eventDetails?.description || 'Not Available'}</ControllableText>
-        </div>
-        <div className="flex gap-10">
-          <div className="flex gap-2">
-            <p className="font-bold">Date:</p>
-            <p className="text-gray-500">{dayjs(eventDetails?.start_date).format('DD MMM, YYYY')}</p>
-          </div>
-          <div className="flex gap-2">
-            <p className="font-bold">Time:</p>
-            <p className="text-gray-500">{dayjs(eventDetails?.start_date).format('hh:mm A')}</p>
-          </div>
-          {eventDetails?.time_zone && (
-            <div className="flex gap-2">
-              <p className="text-gray-500">{eventDetails?.time_zone}</p>
-            </div>
-          )}
         </div>
         <div className="flex gap-10">
           <div className="flex gap-2">
