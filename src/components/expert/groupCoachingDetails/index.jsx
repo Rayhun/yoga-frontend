@@ -81,8 +81,8 @@ export const ExpertGroupCoachingDetails = () => {
         completingEvent={isCompleting}
         toggleCompletionModal={toggleCompletionModal}
       />
-      <Popup heading="Complete Coaching" open={isCompletionModalOpen} onClose={() => toggleCompletionModal()}>
-        <MarkCompleteForm handleSubmit={handleEventCompletion} />
+      <Popup heading={null} open={isCompletionModalOpen} onClose={() => toggleCompletionModal()}>
+        <MarkCompleteForm handleSubmit={handleEventCompletion} toggleCompletionModal={toggleCompletionModal} />
       </Popup>
     </>
   );

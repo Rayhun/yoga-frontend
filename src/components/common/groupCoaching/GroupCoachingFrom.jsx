@@ -18,17 +18,20 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { createNewGroupCoaching, updateGroupCoaching } from '@/services/private/expert/groupCoaching';
 import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
+import useUserTimeZone from '@/hooks/useUserTimeZone';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
   { label: 'Workshop', value: 'workshop' },
   { label: 'Bootcamp', value: 'bootcamp' },
-  { label: 'Live Event', value: 'live event' }
+  { label: 'Live Event', value: 'live event' },
 ];
 
 const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { userTimeZone, mappedTimeZone } = useUserTimeZone();
 
   const { mutateAsync: createGroupCoaching } = useMutation({
     mutationFn: createNewGroupCoaching,
@@ -44,7 +47,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     category: initialData?.category || '',
     start_date: initialData?.start_date || '',
     duration: initialData?.duration || 0,
-    time_zone: initialData?.time_zone || '',
+    time_zone: initialData?.time_zone || mappedTimeZone?.value || userTimeZone,
     event_type: initialData?.event_type || '',
     price: initialData?.price || 0,
     is_online: initialData?.is_online || true,
@@ -133,18 +136,24 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                 </div>
                 <FormikSwitch name="is_online" label="Online/Offline" />
                 {values?.is_online && <FormikField name="meeting_link" label="Meeting URL" required />}
-                <FormikDropzone name="image" label="Event Image" />
+                <FormikDropzone
+                  name="image"
+                  label="Event Image"
+                  fileURLs={initialData?.image ? [initialData.image] : []}
+                  required
+                />
                 <div className="flex justify-end items-center gap-4">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="2xl"
-                    onClick={handleCancel}
-                  >
+                  <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
                     Cancel
                   </Button>
                   <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                    {isSubmitting ? isEditMode ? 'Updating...' : 'Submitting...' : isEditMode ? 'Update Group Coaching' : 'Submit My Group Coaching'}
+                    {isSubmitting
+                      ? isEditMode
+                        ? 'Updating...'
+                        : 'Submitting...'
+                      : isEditMode
+                      ? 'Update Group Coaching'
+                      : 'Submit My Group Coaching'}
                   </Button>
                 </div>
               </Form>

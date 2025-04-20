@@ -5,7 +5,7 @@ const Page = () => {
 
   return (
     <div>
-      <PageHeader title="Transform people with and Workshop, Bootcamp, or Live Group Coaching!" />
+      <PageHeader title="Host a Workshop, Bootcamp, or Live Group Coaching" />
       <GroupCoachingForm />
     </div>
   );

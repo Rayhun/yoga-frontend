@@ -218,7 +218,7 @@ const TEACHER = [
     label: 'Programs',
     href: '/portal/teacher/profile?active_tab=programs',
     isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs'),
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs') || pathname.includes('/portal/teacher/program'),
     disabled: false,
   },
   {
@@ -226,15 +226,15 @@ const TEACHER = [
     label: 'Events',
     href: '/portal/teacher/profile?active_tab=group_coaching',
     isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching'),
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') || pathname.includes('/portal/teacher/group_coaching'),
     disabled: false,
   },
   {
     Icon: PiUserSquareFill,
-    label: 'Consultations',
+    label: 'Consult',
     href: '/portal/teacher/profile?active_tab=consult',
     isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult'),
+      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult') || pathname.includes('/portal/teacher/consultation/'),
     disabled: false,
   },
   {
