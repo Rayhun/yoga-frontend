@@ -96,7 +96,7 @@ const UploadProgramsFile = () => {
               <div className="flex flex-col gap-6">
                 <FormikDropzone
                   name="program_file"
-                  label="Program File"
+                  label="Program Files"
                   fileURLs={[]}
                   Icon={FaFile}
                   multiple
@@ -118,7 +118,7 @@ const UploadProgramsFile = () => {
                     Cancel
                   </Button>
                   <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                    {isSubmitting ? 'Submitting...' : 'Submit My Programs'}
                   </Button>
                 </div>
               </div>

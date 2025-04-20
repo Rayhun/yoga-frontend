@@ -5,7 +5,7 @@ import ExpertPaymentForm from '@/components/expert/profile/paymentForm';
 const Page = () => {
   return (
     <div>
-      <PageHeader title="Add your payment information" />
+      <PageHeader title="Payments" />
       <ExpertPaymentForm />
     </div>
   );

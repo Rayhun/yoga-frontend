@@ -129,7 +129,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                   <TagsField required />
                 </div>
 
-                <FormikDropzone name="image" label="Image" required />
+                <FormikDropzone name="image" label="Image" required fileURLs={initialData?.image ? [initialData.image] : []} />
 
                 <div className="flex justify-end items-center gap-4">
                   <Button

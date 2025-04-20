@@ -5,7 +5,7 @@ const Page = () => {
 
   return (
     <div>
-      <PageHeader title="Ready to offer life-changing session?" />
+      <PageHeader title="Create a 1:1 Consultation Offer" />
       <ConsultationForm />
     </div>
   );

@@ -115,9 +115,9 @@ function FormikDropzone({
       {!multiple && files.length ? (
         // Single file mode - show only the selected file
         <div className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-h-[200px] w-full flex items-center justify-center bg-slate-50 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
-          {files.map(file => (
+          {files.map((file, index) => (
             <div
-              key={file.name || file.path}
+              key={`${file.name || file.path}-${index}`}
               className="w-[150px] h-[150px] border border-slate-300 shadow rounded flex justify-center items-center relative"
             >
               <IconButton className="absolute top-1 right-1 p-1" onClick={() => handleRemoveFile(file)}>
