@@ -45,7 +45,7 @@ const ExpertProfileForm = ({ selected }) => {
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
-    culture_experience: selected?.culture_experience || [],
+    culture_experience: selected?.culture_experience?.split(',') || [],
     coaching_style: selected?.coaching_style || '',
     file: null,
     program_file: null,
