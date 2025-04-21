@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
@@ -11,6 +11,8 @@ import { MdLogout } from 'react-icons/md';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("active_tab");
   const {
     user: {
       profile: { role: userRole, sub_role: userSubRole },
@@ -174,7 +176,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                     className={`group relative flex items-center gap-2.5 rounded-md px-4 py-2 pl-8 font-medium duration-300 ease-in-out hover:text-primary ${
                                       (
                                         childSubMenuItem.isActive
-                                          ? childSubMenuItem.isActive(pathname)
+                                          ? childSubMenuItem.isActive(pathname, activeTab)
                                           : false
                                       )
                                         ? 'text-primary'
@@ -197,7 +199,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                       href={menuItem.disabled ? '#' : menuItem.href || '#'}
                       className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
                         ${menuItem.disabled ? 'cursor-not-allowed opacity-50 text-gray-400' : 'hover:text-primary'} 
-                        ${menuItem.isActive?.(pathname) ? 'text-primary' : 'text-nav-item'}`}
+                        ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
                       aria-disabled={menuItem.disabled} // Improves accessibility
                       tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
                     >

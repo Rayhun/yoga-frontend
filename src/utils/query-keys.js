@@ -25,6 +25,23 @@ const queryKeys = {
   inboxConversations: 'inboxConversations',
   chatGroups: 'chatGroups',
   teacherProfile: 'teacherProfile',
+  checkoutProgram: 'checkoutProgram',
+  expertCustomerPrograms: 'expertCustomerPrograms',
+  expertGroupCoaching: 'expertGroupCoaching',
+  expertGroupCoachingDetails: 'expertGroupCoachingDetails',
+  checkoutGroupCoaching: 'checkoutGroupCoaching',
+  getexpertGroupCoachingDetails: 'getexpertGroupCoachingDetails',
+  expertConsultations: 'expertConsultations',
+  expertConsultationDetails: 'expertConsultationDetails',
+  customerEvents: 'customerEvents',
+  customerConsultations: 'customerConsultations',
+  consultationDetails: 'consultationDetails',
+  expertConsultations: 'expertConsultations',
+  expertconsultationDetails: 'expertconsultationDetails',
+  expertPersonalConsultations: 'expertPersonalConsultations',
+  expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',
+  customerEnrolledConsultations: 'customerEnrolledConsultations',
+  customerEnrolledGroupCoachings: 'customerEnrolledGroupCoaching',
 };
 
 export default queryKeys;

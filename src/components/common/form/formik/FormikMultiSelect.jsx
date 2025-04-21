@@ -43,7 +43,7 @@ const FormikMultiSelect = ({
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className="relative rounded-xl">
         <Autocomplete
           {...rest}
           id={name}

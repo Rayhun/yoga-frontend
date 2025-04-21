@@ -37,15 +37,15 @@ const UserProfileAbout = ({ data }) => {
           ))}
         </div>
       </AboutSection>
-      <AboutSection label="My Coaching Content">
+      {/* <AboutSection label="My Coaching Content">
         <div className="flex flex-wrap gap-2">
           {data?.coaching_content?.split(',').map((content, index) => (
             <ProfileChip key={index} label={content} />
           ))}
         </div>
-      </AboutSection>
+      </AboutSection> */}
       <AboutSection label="Experience">
-        <p>{`${data?.experience} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
+        <p>{`${data?.experience || '0'} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
       </AboutSection>
       <AboutSection label="My Availability">
         <ProfileChip label={data?.available ? 'Available For Coaching' : 'Not Available'} />

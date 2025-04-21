@@ -5,25 +5,26 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import UserProfilePrograms from './programs';
 import UserProfileAbout from './about';
+import UserProfileGroupCoaching from './groupCoaching';
 
 const TABS = {
   PROGRAMS: 'programs',
   WORKSHOPS: 'workshops',
-  EVENTS: 'events',
+  GROUP_COACHING: 'group_coaching',
   CONSULT: 'consult',
   ABOUT: 'about',
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.ABOUT);
+  const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
   };
 
   return (
-    <div>
-      <div className="text-center flex items-center">
+    <div className='flex flex-col gap-6'>
+      <div className="text-center bg-white rounded-lg shadow-md flex items-center">
         <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
           <div className="relative drop-shadow-2">
             <Image
@@ -72,7 +73,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
         </div>
       </div>
-      <div>
+      <div className="bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
         {/* Tabs */}
         <Tabs
           value={selectedTab}
@@ -80,13 +81,13 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           onChange={handleTabChange}
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
-          <Tab disabled value={TABS.PROGRAMS} label="Programs" />
-          <Tab disabled value={TABS.WORKSHOPS} label="Workshops" />
-          <Tab disabled value={TABS.EVENTS} label="Events" />
-          <Tab disabled value={TABS.CONSULT} label="Consult" />
-          <Tab value={TABS.ABOUT} label="About" />
+          <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' />
+          {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
+          <Tab value={TABS.GROUP_COACHING} label="Group Coaching" className='!capitalize' />
+          <Tab disabled value={TABS.CONSULT} label="Consult" className='!capitalize' />
+          <Tab value={TABS.ABOUT} label="About" className='!capitalize' />
         </Tabs>
-        <div className="py-5">
+        <div className="">
           {/* Tabs Content */}
 
           {/* PROGRAMS */}
@@ -95,10 +96,12 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
 
           {/* WORKSHOPS */}
-          <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div>
+          {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
 
           {/* EVENTS */}
-          <div hidden={selectedTab !== TABS.EVENTS}>Events</div>
+          <div hidden={selectedTab !== TABS.GROUP_COACHING}>
+            <UserProfileGroupCoaching />
+          </div>
 
           {/* CONSULT */}
           <div hidden={selectedTab !== TABS.CONSULT}>Consult</div>

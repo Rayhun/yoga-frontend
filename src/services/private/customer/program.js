@@ -20,6 +20,10 @@ export const enrollProgram = async ({ id }) => {
   return axios.post(`/customer/program/${id}/enroll/`);
 };
 
+export const buyProgram = async ({ id }) => {
+  return axios.post(`/program/checkout/`, { program: id });
+};
+
 export const updateProgramContentProgress = async ({ id, ...payload }) => {
   return axios.post(`/customer/program/${id}/progress/`, payload);
 };
@@ -30,4 +34,8 @@ export const completeProgramContent = async ({ id, ...payload }) => {
     status: PROGRAM_PROGRESS.completed,
     completed_at: dayjs().format('YYYY-MM-DD'),
   });
+};
+
+export const getExpertProgramsList = async ({ id }) => {
+  return axios.get(`/customer/expert/programs/${id}`);
 };
