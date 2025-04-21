@@ -47,7 +47,7 @@ const ExpertProfileForm = ({ selected }) => {
     // coaching_content: selected?.coaching_content?.split(',') || [],
     culture_experience: selected?.culture_experience?.split(',') || [],
     coaching_style: selected?.coaching_style || '',
-    file: null,
+    file: selected?.file || null,
     program_file: null,
   };
 
@@ -86,7 +86,11 @@ const ExpertProfileForm = ({ selected }) => {
       await updateExpert({ payload: { id: selected.id, ...values } });
       toast.success('Expert updated successfully');
       await queryClient.invalidateQueries([
-        { queryKey: isEditMode ? [queryKeys.teacherProfile, selected.id] : [queryKeys.teacherProfile] },
+        {
+          queryKey: isEditMode
+            ? [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser]
+            : [queryKeys.teacherProfile],
+        },
       ]);
       router.push('/portal/teacher/profile??active_tab=about');
     } catch (error) {
