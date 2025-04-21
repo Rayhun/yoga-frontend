@@ -221,14 +221,14 @@ const TEACHER = [
       `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs') || pathname.includes('/portal/teacher/program'),
     disabled: false,
   },
-  {
-    Icon: MdOutlineEventNote,
-    label: 'Events',
-    href: '/portal/teacher/profile?active_tab=group_coaching',
-    isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') || pathname.includes('/portal/teacher/group_coaching'),
-    disabled: false,
-  },
+  // { Hidden on Client Demand
+  //   Icon: MdOutlineEventNote,
+  //   label: 'Events',
+  //   href: '/portal/teacher/profile?active_tab=group_coaching',
+  //   isActive: (pathname, tab) =>
+  //     `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') || pathname.includes('/portal/teacher/group_coaching'),
+  //   disabled: false,
+  // },
   {
     Icon: PiUserSquareFill,
     label: 'Consult',

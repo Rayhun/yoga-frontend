@@ -65,7 +65,7 @@ const DropdownUser = () => {
           <Image
             width={112}
             height={112}
-            src={'/images/user/user-06.png'}
+            src={loggedInUser?.profile?.image || '/images/user/user-06.png'}
             style={{
               width: 'auto',
               height: 'auto',
