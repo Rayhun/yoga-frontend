@@ -12,6 +12,7 @@ import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
 import { extractFormFieldError, toastApiError } from '@/utils/helpers';
+import FormikPhoneField from '../common/form/formik/FormikPhoneField';
 
 const SignupForm = () => {
   const router = useRouter();
@@ -36,9 +37,13 @@ const SignupForm = () => {
     email: Yup.string().email('Invalid Email').required('Required!'),
     mobile_number: Yup.string()
       .min(11, 'Mobile number must contain at least 11 digits')
-      .max(13, 'Mobile number must not contain more than 13 digits')
       .required('Required!'),
-    password: Yup.string().min(8, 'Password must be at least 8 characters').required('Required!'),
+    password: Yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .matches(/[0-9]/, 'Password must contain at least one number')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
+      .required('Required!'),
     confirm_password: Yup.string()
       .required('Required!')
       .oneOf([Yup.ref('password'), null], 'Passwords do not match'),
@@ -68,7 +73,7 @@ const SignupForm = () => {
 
           const userDetails = createdUserAccount?.user;
           router.push(
-            `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}`
+            `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}&step=email`,
           );
         } catch (error) {
           setErrors(extractFormFieldError(error));
@@ -84,17 +89,16 @@ const SignupForm = () => {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-      {({ isSubmitting }) => (
+      {({ isSubmitting, values }) => (
         <Form className="flex flex-col gap-3">
           <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
           <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
           <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
-          <FormikField
+          <FormikPhoneField
             type="number"
             name="mobile_number"
             label="Phone"
             placeholder="+971123456789"
-            Icon={FiPhone}
             required
           />
           <FormikField

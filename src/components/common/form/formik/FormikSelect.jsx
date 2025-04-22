@@ -47,6 +47,16 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
               // style={{ border: isErrorField ? '1px solid red' : undefined }}
             />
           )}
+          slotProps={{
+            paper: {
+              elevation: 4,
+              sx: {
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
+                borderWidth: '2px',
+                borderColor: '#e2e8f0'
+              }
+            }
+          }}
         />
         {Icon && (
           <span className="absolute right-4 top-4">
