@@ -1,18 +1,23 @@
 'use client';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import OTPVerificationForm from './OTPVerificationForm';
 import { verifyEmail, verifyPhone, resendEmailOTPCode, resendPhoneOTPCode } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';
+import { Alert } from '@mui/material';
 
 const AccountVerificationForm = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParamUtils();
   const email = searchParams.get('email');
   const phone = searchParams.get('phone');
+  const step = searchParams.get('step');
+  const isEmailVerification = step === 'email';
+  const isPhoneVerification = step === 'phone';
 
   const { mutateAsync: verifyEmailOTP, isSuccess: isEmailVerified } = useMutation({
     mutationFn: verifyEmail,
@@ -47,6 +52,7 @@ const AccountVerificationForm = () => {
       await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
       setSubmitting(false);
       toast.success('Email verified successfully');
+      setParams('step', 'phone');
     } catch (error) {
       toastApiError(error);
     }
@@ -71,25 +77,42 @@ const AccountVerificationForm = () => {
     }
   };
 
+  const setParams = (name, value) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(name, value);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="flex flex-col gap-5">
-      <OTPVerificationForm
-        label="Email OTP"
-        btnText="Verify Email"
-        isVerified={isEmailVerified}
-        onSubmit={handleSubmitEmailOTP}
-        onResendOTP={handleResendEmailOTP}
-        otpDuration={60}
-      />
-      <hr className="my-5 w-1/2 self-center" />
-      <OTPVerificationForm
-        label="Phone OTP"
-        btnText="Verify Phone"
-        isVerified={isPhoneVerified}
-        onSubmit={handleSubmitPhoneOTP}
-        onResendOTP={handleResendPhoneOTP}
-        otpDuration={120}
-      />
+      {isEmailVerification && (
+        <>
+          <div className="text-center">
+            <Alert variant="filled" severity="info" className="text-xs">
+              If you do not recieve the OTP in 10 seconds, please check your spam folder or click on resend
+              OTP
+            </Alert>
+          </div>
+          <OTPVerificationForm
+            label="Email OTP"
+            btnText="Verify Email"
+            isVerified={isEmailVerified}
+            onSubmit={handleSubmitEmailOTP}
+            onResendOTP={handleResendEmailOTP}
+            otpDuration={60}
+          />
+        </>
+      )}
+      {isPhoneVerification && (
+        <OTPVerificationForm
+          label="Phone OTP"
+          btnText="Verify Phone"
+          isVerified={isPhoneVerified}
+          onSubmit={handleSubmitPhoneOTP}
+          onResendOTP={handleResendPhoneOTP}
+          otpDuration={60}
+        />
+      )}
     </div>
   );
 };

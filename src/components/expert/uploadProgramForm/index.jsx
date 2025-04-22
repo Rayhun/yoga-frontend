@@ -7,7 +7,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import { updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import { uploadPrograms } from '@/services/private/expert/program';
@@ -32,9 +31,7 @@ const UploadProgramsFile = () => {
     try {
       await upload({ payload: { ...values } });
       toast.success('Program uploaded successfully');
-      await queryClient.invalidateQueries([
-        { queryKey: [queryKeys.expertCustomerPrograms]},
-      ]);
+      await queryClient.invalidateQueries([{ queryKey: [queryKeys.expertCustomerPrograms] }]);
       router.push('/portal/teacher/profile?active_tab=programs');
     } catch (error) {
       toastApiError(error);
@@ -47,9 +44,6 @@ const UploadProgramsFile = () => {
     router.back();
   };
 
-  const handleDownloadSampleCSV = () => {
-    console.log('handleDownloadSampleCSV');
-  };
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="p-6.5">
@@ -67,63 +61,63 @@ const UploadProgramsFile = () => {
               } else {
                 setFieldValue('program_file', [file]);
               }
-            }
+            };
             return (
-            <Form className="flex flex-col gap-3">
-              <div className="flex justify-end items-center gap-6">
-                <div className="flex items-center gap-10 p-4">
-                  <button
-                    onClick={handleDownloadSampleCSV}
-                    className="text-primary hover:underline text-sm font-normal"
-                  >
-                    Download Sample CSV Format
-                  </button>
+              <Form className="flex flex-col gap-3">
+                <div className="flex justify-end items-center gap-6">
+                  <div className="flex items-center gap-10 p-4">
+                    <a
+                      href={
+                        'https://docs.google.com/spreadsheets/d/1iLekLbCU3StiwVOVjlh1uW9OuHnGYmDcaGUow49Kw0g/edit?usp=sharing'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm font-normal"
+                    >
+                      Download Sample CSV Format
+                    </a>
 
-                  <div className="relative inline-block">
-                    <label className="flex items-center min-w-70 justify-center px-4 py-2 bg-white text-primary border border-primary rounded-lg text-sm hover:bg-primary hover:text-white cursor-pointer transition-colors duration-200">
-                      + Upload New Program
-                      <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept=".csv"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        aria-label="Upload file"
-                      />
-                    </label>
+                    <div className="relative inline-block">
+                      <label className="flex items-center min-w-70 justify-center px-4 py-2 bg-white text-primary border border-primary rounded-lg text-sm hover:bg-primary hover:text-white cursor-pointer transition-colors duration-200">
+                        + Upload New Program
+                        <input
+                          type="file"
+                          onChange={handleFileChange}
+                          accept=".csv"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          aria-label="Upload file"
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-6">
-                <FormikDropzone
-                  name="program_file"
-                  label="Program Files"
-                  fileURLs={[]}
-                  Icon={FaFile}
-                  multiple
-                  required
-                  accept={{
-                    'text/csv': ['.csv'],
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                    'application/vnd.ms-excel': ['.xls'],
-                  }}
-                  supportedFilesText="csv, xlsx and xls files files are supported"
-                />
-                <div className="flex justify-end items-center gap-4">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="2xl"
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit My Programs'}
-                  </Button>
+                <div className="flex flex-col gap-6">
+                  <FormikDropzone
+                    name="program_file"
+                    label="Program Files"
+                    fileURLs={[]}
+                    Icon={FaFile}
+                    multiple
+                    required
+                    accept={{
+                      'text/csv': ['.csv'],
+                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                      'application/vnd.ms-excel': ['.xls'],
+                    }}
+                    supportedFilesText="csv, xlsx and xls files files are supported"
+                  />
+                  <div className="flex justify-end items-center gap-4">
+                    <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" size="2xl" isLoading={isSubmitting}>
+                      {isSubmitting ? 'Submitting...' : 'Submit My Programs'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Form>
-          )}}
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </div>
