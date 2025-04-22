@@ -62,7 +62,7 @@ const ExpertProfileForm = ({ selected }) => {
       .required('Required!')
       .test('max_length', 'Your content must be between 100 and 150 words', value => {
         const wordsCount = value.split(' ').length;
-        return wordsCount >= 100 && wordsCount <= 150;
+        return wordsCount >= 25 && wordsCount <= 150;
       }),
     tags: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
     languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
@@ -72,8 +72,8 @@ const ExpertProfileForm = ({ selected }) => {
     // coaching_content: Yup.array()
     //   .of(Yup.string().required('Required!'))
     //   .min(1, 'At least 1 coaching content is required'),
-    // culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
-    // coaching_style: Yup.string().required('Coanching Style is required'),
+    culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
+    coaching_style: Yup.string().required('Coanching Style is required'),
     experience: Yup.number()
       .required('Experience is required')
       .integer('Experience must be a whole number')
@@ -169,6 +169,7 @@ const ExpertProfileForm = ({ selected }) => {
                     name="coaching_style"
                     label="Coaching Style"
                     options={COACHING_STYLES_OPTIONS}
+                    required
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
@@ -176,6 +177,7 @@ const ExpertProfileForm = ({ selected }) => {
                     name="culture_experience"
                     label="Culture Experience"
                     options={CULTURE_EXPERIENCE_OPTIONS}
+                    required
                   />
                 </div>
               </div>

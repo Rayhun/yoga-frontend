@@ -2,6 +2,8 @@
 import { useState, useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import Chip from '@mui/material/Chip';
+import { Button, IconButton, Tooltip } from '@mui/material';
+import { MdInfoOutline } from 'react-icons/md';
 
 const FormikSubmittable = ({
   name = '',
@@ -46,11 +48,18 @@ const FormikSubmittable = ({
 
   return (
     <div className="flex flex-col gap-1">
-      {label ? (
-        <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
-          {label}
-        </label>
-      ) : null}
+      <div className="flex items-center gap-4">
+        {label ? (
+          <label
+            className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}
+          >
+            {label}
+          </label>
+        ) : null}
+        <Tooltip title="Please press enter to submit entered value." placement="right" arrow>
+          <IconButton><MdInfoOutline className="text-primary" size={20} /></IconButton>
+        </Tooltip>
+      </div>
       <div className="relative">
         <input
           {...field}
