@@ -1,5 +1,6 @@
 import Chip from '@mui/material/Chip';
 import ControllableText from '@/components/common/details/ControllableText';
+import { LANGUAGES } from '@/utils/constants';
 
 const AboutSection = ({ label, children }) => (
   <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm">
@@ -10,7 +11,20 @@ const AboutSection = ({ label, children }) => (
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
+const findRelatedLanguages = (languages) => {
+  if (!languages || !Array.isArray(languages)) return [];
+  
+  const normalizedLanguages = languages.flatMap(lang => 
+    typeof lang === 'string' ? lang.split(',') : lang
+  );
+  
+  return normalizedLanguages
+    .map(lang => LANGUAGES.find(item => item.value === lang))
+    .filter(lang => lang !== undefined);
+};
+
 const UserProfileAbout = ({ data }) => {
+  const relatedLanguages = findRelatedLanguages(data?.languages);
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="About">
@@ -25,8 +39,8 @@ const UserProfileAbout = ({ data }) => {
       </AboutSection>
       <AboutSection label="Languages">
         <div className="flex flex-wrap gap-2">
-          {data?.languages?.[0]?.split(',').map((tag, index) => (
-            <ProfileChip key={index} label={tag} />
+          {relatedLanguages?.map((language, index) => (
+            <ProfileChip key={index} label={language?.label} />
           ))}
         </div>
       </AboutSection>

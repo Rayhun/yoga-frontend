@@ -80,7 +80,14 @@ const FormikPhoneField = ({
               }
             }}
             renderValue={(value) => {
-              return value;
+              const selectedCountry = COUNTRIES_CALLING_CODE.find(item => item.callingCode === value);
+              if (!selectedCountry) return value;
+              
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>{`${selectedCountry.callingCode} (${selectedCountry.code})`}</span>
+                </div>
+              );
             }}
           >
             {COUNTRIES_CALLING_CODE.map((item, index) => (
