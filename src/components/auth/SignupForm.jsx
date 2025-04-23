@@ -36,7 +36,7 @@ const SignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().email('Invalid Email').required('Required!'),
     mobile_number: Yup.string()
-      .min(11, 'Mobile number must contain at least 11 digits')
+      // .min(11, 'Mobile number must contain at least 11 digits')
       .required('Required!'),
     password: Yup.string()
       .min(8, 'Password must be at least 8 characters')
@@ -98,7 +98,7 @@ const SignupForm = () => {
             type="number"
             name="mobile_number"
             label="Phone"
-            placeholder="+971123456789"
+            placeholder="123456789"
             required
           />
           <FormikField
