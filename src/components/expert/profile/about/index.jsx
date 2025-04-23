@@ -9,7 +9,7 @@ const ExpertProfileAbout = ({ data }) => {
 
   const isNewUser = useMemo(() => {
     return (
-      data?.description &&
+      !data?.description &&
       !data?.languages?.length &&
       !data?.tags?.length &&
       !data?.credentials?.length
