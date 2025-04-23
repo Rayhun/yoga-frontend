@@ -19,6 +19,7 @@ const AccountVerificationForm = () => {
   const isEmailVerification = step === 'email';
   const isPhoneVerification = step === 'phone';
 
+
   const { mutateAsync: verifyEmailOTP, isSuccess: isEmailVerified } = useMutation({
     mutationFn: verifyEmail,
   });
@@ -52,7 +53,7 @@ const AccountVerificationForm = () => {
       await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
       setSubmitting(false);
       toast.success('Email verified successfully');
-      setParams('step', 'phone');
+      nextStep('phone');
     } catch (error) {
       toastApiError(error);
     }
@@ -60,7 +61,7 @@ const AccountVerificationForm = () => {
 
   const handleResendPhoneOTP = async () => {
     try {
-      await resendPhoneOTP({ payload: { phone } });
+      await resendPhoneOTP({ payload: { phone: phone.replace(' ', '+') } });
       toast.success('OTP resent to your phone');
     } catch (error) {
       toastApiError(error);
@@ -77,10 +78,8 @@ const AccountVerificationForm = () => {
     }
   };
 
-  const setParams = (name, value) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(name, value);
-    router.replace(`${pathname}?${params.toString()}`);
+  const nextStep = value => {
+    router.replace(`${pathname}?email=${email}&phone=${phone}&step=${value}`);
   };
 
   return (

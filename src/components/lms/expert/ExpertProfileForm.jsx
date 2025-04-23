@@ -60,7 +60,7 @@ const ExpertProfileForm = ({ selected }) => {
     business_name: Yup.string(),
     description: Yup.string()
       .required('Required!')
-      .test('max_length', 'Your content must be between 100 and 150 words', value => {
+      .test('max_length', 'Your content must be between 25 and 150 words', value => {
         const wordsCount = value.split(' ').length;
         return wordsCount >= 25 && wordsCount <= 150;
       }),
