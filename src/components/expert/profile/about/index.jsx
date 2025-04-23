@@ -12,9 +12,7 @@ const ExpertProfileAbout = ({ data }) => {
       data?.description &&
       !data?.languages?.length &&
       !data?.tags?.length &&
-      !data?.credentials?.length &&
-      !data?.experience &&
-      !data?.available
+      !data?.credentials?.length
     );
   }, [data]);
 

@@ -74,7 +74,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           <div className=''>
             <h3 className="text-2xl font-semibold text-black dark:text-white">{`${userProfileDetails?.first_name} ${userProfileDetails?.last_name}`}</h3>
             <p className="my-1 font-medium">{userProfileDetails?.title}</p>
-            <p className="text-sm">42.1k followers</p>
+            {/* <p className="text-sm">42.1k followers</p> */}
             {/* <button className="bg-primary text-white rounded-full mt-2 px-8 py-2">Follow</button> */}
           </div>
         </div>
