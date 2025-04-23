@@ -16,7 +16,7 @@ import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS } from '@/utils/constants';
+import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
 
 const ExpertProfileForm = ({ selected }) => {
   const router = useRouter();
@@ -189,7 +189,13 @@ const ExpertProfileForm = ({ selected }) => {
                 placeholder="Your Certifications Link or URL"
                 required
               />
-              <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
+              <FormikMultiSelect
+                options={LANGUAGES}
+                name="languages"
+                label="Languages"
+                placeholder="Languages"
+                required
+              />
               {/* <FormikSubmittableField
                 name="coaching_content"
                 label="My Coaching Content"

@@ -18,7 +18,7 @@ const ExpertProfileAbout = ({ data }) => {
 
   if (isNewUser)
     return (
-      <div className="flex justify-center items-center h-available text-center mt-20">
+      <div className="bg-white rounded-lg shadow-md p-8 flex justify-center items-center h-available text-center mt-20">
         <div className="flex flex-col gap-3">
           <h1 className="text-xl font-bold">Welcome to your profile!</h1>
           <p className="text-gray-500">Please complete your profile to get started.</p>

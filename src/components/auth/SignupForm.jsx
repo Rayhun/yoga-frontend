@@ -39,7 +39,7 @@ const SignupForm = () => {
       // .min(11, 'Mobile number must contain at least 11 digits')
       .required('Required!'),
     password: Yup.string()
-      .min(8, 'Password must be at least 8 characters')
+      .min(12, 'Password must be at least 12 characters')
       .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
       .matches(/[0-9]/, 'Password must contain at least one number')
       .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
@@ -89,7 +89,7 @@ const SignupForm = () => {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-      {({ isSubmitting, values }) => (
+      {({ isSubmitting }) => (
         <Form className="flex flex-col gap-3">
           <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
           <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
@@ -109,6 +109,7 @@ const SignupForm = () => {
             Icon={FiLock}
             required
           />
+          <span className='text-sm text-gray-500 pl-2'>Min 12 characters with at least 1 uppercase/lowercase letter, number and special character</span>
           <FormikField
             type="password"
             name="confirm_password"
