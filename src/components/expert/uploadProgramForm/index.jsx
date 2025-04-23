@@ -68,7 +68,7 @@ const UploadProgramsFile = () => {
                   <div className="flex items-center gap-10 p-4">
                     <a
                       href={
-                        'https://docs.google.com/spreadsheets/d/1iLekLbCU3StiwVOVjlh1uW9OuHnGYmDcaGUow49Kw0g/edit?usp=sharing'
+                        'https://docs.google.com/spreadsheets/d/1iLekLbCU3StiwVOVjlh1uW9OuHnGYmDcaGUow49Kw0g/template/preview'
                       }
                       target="_blank"
                       rel="noopener noreferrer"

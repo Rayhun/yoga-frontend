@@ -91,8 +91,10 @@ const SignupForm = () => {
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
       {({ isSubmitting }) => (
         <Form className="flex flex-col gap-3">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
           <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
+          </div>
           <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
           <FormikPhoneField
             type="number"
