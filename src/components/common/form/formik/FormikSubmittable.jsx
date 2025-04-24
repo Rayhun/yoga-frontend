@@ -57,7 +57,9 @@ const FormikSubmittable = ({
           </label>
         ) : null}
         <Tooltip title="Please press enter to submit entered value." placement="right" arrow>
-          <IconButton><MdInfoOutline className="text-primary" size={20} /></IconButton>
+          <IconButton>
+            <MdInfoOutline className="text-primary" size={20} />
+          </IconButton>
         </Tooltip>
       </div>
       <div className="relative">
@@ -75,6 +77,11 @@ const FormikSubmittable = ({
         {Icon ? (
           <span className="absolute right-4 top-4">
             <Icon size={20} color="#B5BDC8" />
+          </span>
+        ) : null}
+        {value ? (
+          <span className={`absolute ${Icon ? 'right-16' : 'right-4'} top-4 text-gray-400`}>
+            <span>Press Enter ↵</span>
           </span>
         ) : null}
       </div>
