@@ -8,7 +8,6 @@ import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 const ExpertDetails = ({ data }) => {
   const router = useRouter();
 
-
   const onEdit = () => router.push(`/portal/admin/lms/expert/${data.id}/edit`);
 
   return (
@@ -72,7 +71,7 @@ const ExpertDetails = ({ data }) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-7 bg-white rounded-lg shadow-sm">
+        <div className="flex flex-col gap-7">
           <ExpertProfileAbout data={data} />
           <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm">
             <h5 className="font-bold">Files</h5>
