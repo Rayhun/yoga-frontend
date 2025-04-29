@@ -17,7 +17,7 @@ const DetailSection = ({ label, children }) => (
   </div>
 );
 
-const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
+const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark capitalize" />;
 
 export const ConsultationDetails = ({
   consultationDetails,
@@ -26,10 +26,6 @@ export const ConsultationDetails = ({
   consultationId,
   handleEnrollConsultation,
   enrolling,
-  handleCancelConsultation,
-  canceling,
-  completingConsultation,
-  handleConsultationCompletion,
 }) => {
   const router = useRouter();
 

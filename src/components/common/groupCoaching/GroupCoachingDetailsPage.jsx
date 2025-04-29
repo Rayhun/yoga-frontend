@@ -18,7 +18,7 @@ const DetailSection = ({ label, children }) => (
   </div>
 );
 
-const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
+const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark capitalize" />;
 
 export const GroupCoachingDetails = ({
   eventDetails,
@@ -166,7 +166,7 @@ export const GroupCoachingDetails = ({
           {!isCustomerView && eventDetails?.status === 'Scheduled' && (
             <>
               <Button
-                variant='primary'
+                variant="primary"
                 size="2xl"
                 disabled={isBeforeStartDate || completingEvent}
                 onClick={toggleCompletionModal}
@@ -179,7 +179,7 @@ export const GroupCoachingDetails = ({
                 size="2xl"
                 disabled={isAfterStartDate || canceling}
                 onClick={handleCancelEvent}
-                
+
                 // className="flex-1  w-full md:w-auto bg-gray-200 disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-gray-300"
               >
                 {canceling ? 'Cancelling...' : 'Cancel Coaching'}
@@ -218,6 +218,14 @@ export const GroupCoachingDetails = ({
           >
             {eventDetails?.status || 'Not available'}
           </span>
+        </DetailSection>
+
+        <DetailSection label={'Followup Type'}>
+          <div className="flex flex-wrap gap-2">
+            {eventDetails?.followup_support
+              ? eventDetails?.followup_support?.split(',').map(tag => <ProfileChip key={tag} label={tag} />)
+              : null}
+          </div>
         </DetailSection>
 
         <DetailSection label={'Categories'}>

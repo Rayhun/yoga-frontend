@@ -13,12 +13,7 @@ import { toastApiError } from '@/utils/helpers';
 import FormikMultiSelect from '../form/formik/FormikMultiSelect';
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import queryKeys from '@/utils/query-keys';
-
-const consultationTypeOptions = [
-  { label: 'Chat', value: 'chat' },
-  { label: 'Audio', value: 'audio' },
-  { label: 'Video', value: 'video' },
-];
+import { CONSULTATION_TYPES } from '@/utils/constants';
 
 const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
@@ -53,8 +48,8 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     price: Yup.number().required('Price is required'),
     calender_link: Yup.string().required('Calender Link is required'),
     consultation_type: Yup.array().min(1, 'At least one consultation type is required').required(),
-    followup_support: Yup.array(),
-    followup_duration: Yup.number(),
+    followup_support:  Yup.array().min(1, 'At least one consultation type is required').required(),
+    followup_duration: Yup.number().required('Follow up Duration is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
@@ -115,16 +110,17 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                   <FormikMultiSelect
                     name="consultation_type"
                     label="Consultation Type"
-                    options={consultationTypeOptions}
+                    options={CONSULTATION_TYPES}
                     required
                   />
                   <FormikMultiSelect
                     name="followup_support"
-                    label="Follow-up Support (optional)"
-                    options={consultationTypeOptions}
+                    label="Follow-up Support"
+                    options={CONSULTATION_TYPES}
+                    required
                   />
 
-                  <FormikField name="followup_duration" label="Followup Duration (optional)" type="number" />
+                  <FormikField name="followup_duration" label="Followup Duration (mins)" type="number" required />
                   <CategoriesField required />
                   <TagsField required />
                 </div>
