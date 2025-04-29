@@ -17,6 +17,12 @@ export const CULTURE_EXPERIENCE_OPTIONS = [
   { value: 'comfortable-with-all', label: 'Comfortable with all' },
 ];
 
+export const CONSULTATION_TYPES = [
+  { label: 'Chat', value: 'chat' },
+  { label: 'Audio', value: 'audio' },
+  { label: 'Video', value: 'video' },
+];
+
 export const TIME_ZONES = [
   {
     value: 'Dateline Standard Time',

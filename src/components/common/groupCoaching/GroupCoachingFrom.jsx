@@ -11,7 +11,7 @@ import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { duration } from '@mui/material';
-import { TIME_ZONES } from '@/utils/constants';
+import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
 import { toast } from 'react-toastify';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
@@ -19,6 +19,7 @@ import { createNewGroupCoaching, updateGroupCoaching } from '@/services/private/
 import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
 import useUserTimeZone from '@/hooks/useUserTimeZone';
+import FormikMultiSelect from '../form/formik/FormikMultiSelect';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
@@ -64,6 +65,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     duration: Yup.number().required('Duration is required'),
     time_zone: Yup.string().required('Timezone is required'),
     event_type: Yup.string().required(),
+    followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
     meeting_link: Yup.string().when('is_online', {
       is: true,
       then: schema => schema.required('Meeting URL is required'),
@@ -121,10 +123,18 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
               <Form className="flex flex-col gap-4">
                 <FormikField name="title" label="Title" required />
                 <FormikField name="description" label="Description" rows={4} required />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <DateTimePicker name="start_date" label="Start Date & Time" required />
-                  <FormikField name="duration" label="Duration" type="number" required />
                   <FormikSelect name="time_zone" label="Time Zone" options={TIME_ZONES} required />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormikMultiSelect
+                    name="followup_support"
+                    label="Follow-up Support"
+                    options={CONSULTATION_TYPES}
+                    required
+                  />
+                  <FormikField name="duration" label="Duration" type="number" required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />
