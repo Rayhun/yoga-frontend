@@ -67,6 +67,14 @@ const UploadProgramsFile = () => {
                 <div className="flex justify-end items-center gap-6">
                   <div className="flex items-center gap-10 p-4 flex-wrap">
                     <a
+                      href={'https://youtu.be/j32hlENyVvo'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm font-normal"
+                    >
+                      Watch Instructions Video
+                    </a>
+                    <a
                       href={
                         'https://docs.google.com/spreadsheets/d/1iLekLbCU3StiwVOVjlh1uW9OuHnGYmDcaGUow49Kw0g/template/preview'
                       }
@@ -75,16 +83,6 @@ const UploadProgramsFile = () => {
                       className="text-primary hover:underline text-sm font-normal"
                     >
                       Download Sample CSV Format
-                    </a>
-                    <a
-                      href={
-                        '#'
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm font-normal"
-                    >
-                      Watch Video Tutorial
                     </a>
 
                     <div className="relative inline-block">

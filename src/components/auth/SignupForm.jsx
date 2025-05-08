@@ -72,6 +72,7 @@ const SignupForm = () => {
           toast.success('Account created successfully and OTP sent to your email and phone');
 
           const userDetails = createdUserAccount?.user;
+          sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
           router.push(
             `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}&step=email`,
           );

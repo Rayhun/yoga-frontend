@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import OTPVerificationForm from './OTPVerificationForm';
 import { verifyEmail, verifyPhone, resendEmailOTPCode, resendPhoneOTPCode } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';
 import { Alert } from '@mui/material';
+import Cookies from 'js-cookie';
 
 const AccountVerificationForm = () => {
   const router = useRouter();
@@ -16,26 +17,42 @@ const AccountVerificationForm = () => {
   const email = searchParams.get('email');
   const phone = searchParams.get('phone');
   const step = searchParams.get('step');
+  const email_verify = searchParams.get('email_verify') === 'true';
+  const mobile_verify = searchParams.get('mobile_verify') === 'true';
   const isEmailVerification = step === 'email';
   const isPhoneVerification = step === 'phone';
 
-
-  const { mutateAsync: verifyEmailOTP, isSuccess: isEmailVerified } = useMutation({
+  const { mutateAsync: verifyEmailOTP, isSuccess: emailVerfied } = useMutation({
     mutationFn: verifyEmail,
   });
   const { mutateAsync: resendEmailOTP } = useMutation({
     mutationFn: resendEmailOTPCode,
   });
-  const { mutateAsync: verifyPhoneOTP, isSuccess: isPhoneVerified } = useMutation({
+  const { mutateAsync: verifyPhoneOTP, isSuccess: phoneVerfied } = useMutation({
     mutationFn: verifyPhone,
   });
   const { mutateAsync: resendPhoneOTP } = useMutation({
     mutationFn: resendPhoneOTPCode,
   });
 
+  const isEmailVerified = useMemo(() => {
+    return Boolean(email_verify) || emailVerfied;
+  }, [emailVerfied, email_verify]);
+
+  const isPhoneVerified = useMemo(() => {
+    return mobile_verify || phoneVerfied;
+  }, [phoneVerfied, mobile_verify]);
+
   useEffect(() => {
     if (isEmailVerified && isPhoneVerified) {
-      router.replace('/auth/login');
+      const pendingToken = sessionStorage.getItem('pendingVerificationToken');
+      if (pendingToken) {
+        Cookies.set('token', pendingToken);
+        sessionStorage.removeItem('pendingVerificationToken');
+        router.replace('/portal/teacher/profile?active_tab=about');
+      } else {
+        router.replace('/auth/login');
+      }
     }
   }, [isEmailVerified, isPhoneVerified, router]);
 
@@ -50,7 +67,7 @@ const AccountVerificationForm = () => {
 
   const handleSubmitEmailOTP = async (values, { setSubmitting }) => {
     try {
-      await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
+      const res = await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
       setSubmitting(false);
       toast.success('Email verified successfully');
       nextStep('phone');
@@ -70,7 +87,7 @@ const AccountVerificationForm = () => {
 
   const handleSubmitPhoneOTP = async (values, { setSubmitting }) => {
     try {
-      await verifyPhoneOTP({ payload: { email, number_otp: values.otp } });
+      const res = await verifyPhoneOTP({ payload: { email, number_otp: values.otp } });
       setSubmitting(false);
       toast.success('Phone verified successfully');
     } catch (error) {
@@ -79,7 +96,9 @@ const AccountVerificationForm = () => {
   };
 
   const nextStep = value => {
-    router.replace(`${pathname}?email=${email}&phone=${phone}&step=${value}`);
+    router.replace(
+      `${pathname}?email=${email}&phone=${phone}&step=${value}&email_verify=${email_verify || ''}&mobile_verify=${mobile_verify || ''}`
+    );
   };
 
   return (
