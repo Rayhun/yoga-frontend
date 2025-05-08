@@ -9,7 +9,7 @@ const UserProfilePrograms = ({ filteredPrograms, isLoadingPrograms, setSearchTex
   const router = useRouter();
   return (
     <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
-      <div className="flex gap-4 items-center justify-end">
+      <div className="flex gap-4 items-center justify-end flex-wrap-reverse">
         <input
           className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           placeholder="Search Programs"

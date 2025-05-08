@@ -31,7 +31,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
   return (
     <div className='flex flex-col gap-6'>
       <div className="text-center bg-white rounded-lg shadow-md flex items-center">
-        <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
+        <div className="relative z-30 w-full rounded-full bg-white/20 backdrop-blur h-44 max-w-44 p-3">
           <div className="relative drop-shadow-2">
             <Image
               src={userProfileDetails?.file || '/images/user/placeholder_profile.png'}
