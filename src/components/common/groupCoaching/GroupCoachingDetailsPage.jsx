@@ -62,16 +62,7 @@ export const GroupCoachingDetails = ({
   return (
     <div className="flex flex-col gap-7">
       {/* Event Details Card */}
-      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 relative">
-        {!isCustomerView && (
-          <button
-            className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
-            onClick={onEdit}
-          >
-            <RiEdit2Line />
-            Edit
-          </button>
-        )}
+      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
         {/* Left Section - Image */}
         <div className="w-full md:w-1/2">
           <Image
@@ -85,7 +76,16 @@ export const GroupCoachingDetails = ({
         </div>
 
         {/* Right Section - Event Details */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark">
+        <div className="w-full md:w-1/2 flex flex-col gap-5 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark relative">
+          {!isCustomerView && (
+            <button
+              className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
+              onClick={onEdit}
+            >
+              <RiEdit2Line />
+              Edit
+            </button>
+          )}
           <h3 className="text-2xl font-bold dark:text-white">
             {eventDetails?.title || 'Group Coaching Program'}
           </h3>
