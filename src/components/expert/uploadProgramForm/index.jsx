@@ -65,7 +65,15 @@ const UploadProgramsFile = () => {
             return (
               <Form className="flex flex-col gap-3">
                 <div className="flex justify-end items-center gap-6">
-                  <div className="flex items-center gap-10 p-4">
+                  <div className="flex items-center gap-10 p-4 flex-wrap">
+                    <a
+                      href={'https://youtu.be/j32hlENyVvo'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm font-normal"
+                    >
+                      Watch Instructions Video
+                    </a>
                     <a
                       href={
                         'https://docs.google.com/spreadsheets/d/1iLekLbCU3StiwVOVjlh1uW9OuHnGYmDcaGUow49Kw0g/template/preview'
@@ -106,7 +114,7 @@ const UploadProgramsFile = () => {
                     }}
                     supportedFilesText="csv, xlsx and xls files files are supported"
                   />
-                  <div className="flex justify-end items-center gap-4">
+                  <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                     <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
                       Cancel
                     </Button>

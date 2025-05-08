@@ -30,7 +30,7 @@ function Page() {
               /> */}
             </Link>
 
-            <p className="2xl:px-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit suspendisse.</p>
+            <p className="2xl:px-20">Keep your account secure. Update your password here.</p>
 
             <span className="mt-15 inline-block">
               <svg
@@ -153,11 +153,18 @@ function Page() {
         <div className="w-full xl:w-1/2">
           <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
             <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-              Forgot Password?
+              Reset Password?
             </h2>
-            <p className="mb-7.5">Enter your email address to receive a password reset link.</p>
+            <p className="mb-7.5">Enter your new password  to reset password  on your account.</p>
 
             <ResetPasswordForm />
+            <div>
+              <p className="mt-4 text-center text-body text-black dark:text-white">
+                <Link href="/auth/login" className="text-primary hover:underline">
+                  Return to Login
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

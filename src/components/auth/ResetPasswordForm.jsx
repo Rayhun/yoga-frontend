@@ -24,7 +24,12 @@ const ResetPasswordForm = () => {
   };
 
   const validationSchema = Yup.object({
-    password: Yup.string().min(8, 'Password must be at least 8 characters').required('Required!'),
+    password: Yup.string()
+    .min(12, 'Password must be at least 12 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
+    .required('Required!'),
     confirm_password: Yup.string()
       .required('Required!')
       .oneOf([Yup.ref('password'), null], 'Passwords do not match'),
@@ -62,6 +67,7 @@ const ResetPasswordForm = () => {
             Icon={FiLock}
             required
           />
+          <span className='text-sm text-gray-500 pl-2'>Min 12 characters with at least 1 uppercase/lowercase letter, number and special character</span>
           <FormikField
             type="password"
             name="confirm_password"

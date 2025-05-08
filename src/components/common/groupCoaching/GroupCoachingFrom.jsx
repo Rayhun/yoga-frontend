@@ -152,7 +152,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                   fileURLs={initialData?.image ? [initialData.image] : []}
                   required
                 />
-                <div className="flex justify-end items-center gap-4">
+                <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                   <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
                     Cancel
                   </Button>

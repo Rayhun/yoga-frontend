@@ -57,7 +57,7 @@ const ExpertPaymentForm = () => {
               <Form className="flex flex-col gap-3">
                 <div className="flex flex-col gap-6">
                   <FormikField name="paypal_email" label="Payment Details" placeholder="Enter Paypal email for payments" required />
-                  <div className="flex justify-end items-center gap-4">
+                  <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                     <Button
                       type="button"
                       variant="secondary"

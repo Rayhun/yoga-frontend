@@ -32,10 +32,22 @@ const LoginForm = () => {
       const { data: response } = await mutateAsync({ payload: values });
 
       if (response?.data?.token) {
-        Cookies.set('token', response?.data?.token);
-        if (response?.data?.user?.profile?.role?.toLowerCase() === 'teacher')
-          router.replace('/portal/teacher/profile?active_tab=about');
-        else if (response?.data?.user?.profile?.on_boarding_quiz) router.replace('/');
+        const userDetails = response?.data?.user;
+        const { email_verify, mobile_number_verify, on_boarding_quiz, role, mobile_number } =
+          userDetails?.profile;
+        if (role?.toLowerCase() === 'teacher') {
+          if (!email_verify || !mobile_number_verify) {
+            sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
+            router.replace(
+              `/auth/verify-account?email_verify=${email_verify}&mobile_verify=${mobile_number_verify}&email=${
+                userDetails?.email
+              }&phone=${mobile_number}&step=${email_verify ? 'phone' : 'email'}`
+            );
+          } else {
+            Cookies.set('token', response?.data?.token);
+            router.replace('/portal/teacher/profile?active_tab=about');
+          }
+        } else if (on_boarding_quiz) router.replace('/');
         else router.replace('/onboarding');
       }
     } catch (error) {

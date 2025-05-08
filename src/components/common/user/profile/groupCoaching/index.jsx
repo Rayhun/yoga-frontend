@@ -15,9 +15,9 @@ const UserProfileGroupCoaching = ({
   const router = useRouter();
   return (
     <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-between items-center gap-2 flex-wrap">
         <h2 className="text-title-md2 font-semibold text-black dark:text-white">Group Coaching Events</h2>
-        <div className="flex gap-4 items-center justify-end">
+        <div className="w-full md:w-auto flex gap-4 items-center justify-end flex-wrap-reverse">
           <input
             className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Group Coaching"

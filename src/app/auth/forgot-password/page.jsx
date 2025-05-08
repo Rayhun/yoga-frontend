@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
+import { Alert } from '@mui/material';
 
 export const metadata = {
   title: 'Forgot Password',
@@ -30,7 +31,7 @@ function Page() {
               /> */}
             </Link>
 
-            <p className="2xl:px-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit suspendisse.</p>
+            <p className="2xl:px-20">Keep your account secure. Update your password here.</p>
 
             <span className="mt-15 inline-block">
               <svg
@@ -156,8 +157,18 @@ function Page() {
               Forgot Password?
             </h2>
             <p className="mb-7.5">Enter your email address to receive a password reset link.</p>
+            <Alert variant="filled" severity="info" className="text-s mb-4">
+              If you do not receive email in 10 seconds, please check your spam folder.
+            </Alert>
 
             <ForgotPasswordForm />
+            <div>
+              <p className="mt-4 text-center text-body text-black dark:text-white">
+                <Link href="/auth/login" className="text-primary hover:underline">
+                  Return to Login
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
