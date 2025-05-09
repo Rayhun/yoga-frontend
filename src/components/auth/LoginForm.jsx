@@ -47,8 +47,13 @@ const LoginForm = () => {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
           }
-        } else if (on_boarding_quiz) router.replace('/');
-        else router.replace('/onboarding');
+        } else if (on_boarding_quiz) {
+          Cookies.set('token', response?.data?.token);
+          router.replace('/');
+        } else {
+          Cookies.set('token', response?.data?.token);
+          router.replace('/onboarding');
+        }
       }
     } catch (error) {
       toastApiError(error);
