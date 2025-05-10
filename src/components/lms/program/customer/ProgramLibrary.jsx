@@ -96,9 +96,9 @@ const ProgramsLibrary = () => {
             </div>
           ) : (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredPrograms?.map(program => (
+              {filteredPrograms?.map((program, index) => (
                 <ProgramCard
-                  key={program.id}
+                  key={`${program.id}-${program.title}-${index}`}
                   program={program}
                   onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
                 />

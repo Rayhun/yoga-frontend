@@ -62,6 +62,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     meeting_link: initialData?.meeting_link || '',
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
+    followup_support: initialData?.followup_support || '',
     is_zoom_event: initialData?.is_zoom_event || false,
   };
 

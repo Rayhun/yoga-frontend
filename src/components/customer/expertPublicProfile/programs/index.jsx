@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react';
 import { getExpertProgramsList } from '@/services/private/customer/program';
 import { useQuery } from '@tanstack/react-query';
 import queryKeys from '@/utils/query-keys';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import UserProfilePrograms from '@/components/common/user/profile/programs';
 
 const ExpertProfilePrograms = () => {
   const params = useParams();
+  const router = useRouter();
   const { id } = params;
   const [searchText, setSearchText] = useState('');
 

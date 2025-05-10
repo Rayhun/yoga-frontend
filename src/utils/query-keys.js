@@ -28,6 +28,7 @@ const queryKeys = {
   checkoutProgram: 'checkoutProgram',
   expertCustomerPrograms: 'expertCustomerPrograms',
   expertGroupCoaching: 'expertGroupCoaching',
+  customerExpertGroupCoaching: 'customerExpertGroupCoaching',
   expertGroupCoachingDetails: 'expertGroupCoachingDetails',
   checkoutGroupCoaching: 'checkoutGroupCoaching',
   getexpertGroupCoachingDetails: 'getexpertGroupCoachingDetails',
