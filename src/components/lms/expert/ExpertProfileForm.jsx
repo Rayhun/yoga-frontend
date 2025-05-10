@@ -17,6 +17,7 @@ import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
+import { ONE_MB } from '@/utils/general';
 
 const ExpertProfileForm = ({ selected }) => {
   const router = useRouter();
@@ -210,6 +211,7 @@ const ExpertProfileForm = ({ selected }) => {
                   fileURLs={selected?.file ? [selected.file] : []}
                   Icon={FaRegFileImage}
                   required
+                  maxSize={10 * ONE_MB}
                 />
                 {/* </div> */}
 

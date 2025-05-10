@@ -14,6 +14,7 @@ import FormikMultiSelect from '../form/formik/FormikMultiSelect';
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import queryKeys from '@/utils/query-keys';
 import { CONSULTATION_TYPES } from '@/utils/constants';
+import { ONE_MB } from '@/utils/general';
 
 const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
@@ -48,7 +49,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     price: Yup.number().required('Price is required'),
     calender_link: Yup.string().required('Calender Link is required'),
     consultation_type: Yup.array().min(1, 'At least one consultation type is required').required(),
-    followup_support:  Yup.array().min(1, 'At least one consultation type is required').required(),
+    followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
     followup_duration: Yup.number().required('Follow up Duration is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
@@ -120,24 +121,36 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                     required
                   />
 
-                  <FormikField name="followup_duration" label="Followup Duration (mins)" type="number" required />
+                  <FormikField
+                    name="followup_duration"
+                    label="Followup Duration (mins)"
+                    type="number"
+                    required
+                  />
                   <CategoriesField required />
                   <TagsField required />
                 </div>
 
-                <FormikDropzone name="image" label="Image" required fileURLs={initialData?.image ? [initialData.image] : []} />
+                <FormikDropzone
+                  name="image"
+                  label="Image"
+                  required
+                  fileURLs={initialData?.image ? [initialData.image] : []}
+                  maxSize={10 * ONE_MB}
+                />
 
                 <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="2xl"
-                    onClick={handleCancel}
-                  >
+                  <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
                     Cancel
                   </Button>
                   <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                    {isSubmitting ? isEditMode ? 'Updating...' : 'Submitting...' : isEditMode ? 'Update Consultation' : 'Submit My Consultation'}
+                    {isSubmitting
+                      ? isEditMode
+                        ? 'Updating...'
+                        : 'Submitting...'
+                      : isEditMode
+                      ? 'Update Consultation'
+                      : 'Submit My Consultation'}
                   </Button>
                 </div>
               </Form>

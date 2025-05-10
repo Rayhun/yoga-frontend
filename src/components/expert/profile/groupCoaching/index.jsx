@@ -40,6 +40,7 @@ const ExpertProfileGroupCoaching = ({ tabEnabled }) => {
         searchText={searchText}
         setSearchText={setSearchText}
         onClickEvent={event => router.push(`/portal/teacher/group_coaching/${event.id}/details`)}
+        isZoomConnected={coachingResponse?.data?.is_zoom_connected}
         isExpertView
       />
     </>
