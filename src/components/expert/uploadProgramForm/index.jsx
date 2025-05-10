@@ -10,6 +10,7 @@ import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import { uploadPrograms } from '@/services/private/expert/program';
+import { ONE_MB } from '@/utils/general';
 
 const UploadProgramsFile = () => {
   const router = useRouter();
@@ -113,6 +114,7 @@ const UploadProgramsFile = () => {
                       'application/vnd.ms-excel': ['.xls'],
                     }}
                     supportedFilesText="csv, xlsx and xls files files are supported"
+                    maxSize={10 * ONE_MB}
                   />
                   <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                     <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>

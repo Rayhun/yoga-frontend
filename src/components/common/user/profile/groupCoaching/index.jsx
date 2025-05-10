@@ -11,6 +11,7 @@ const UserProfileGroupCoaching = ({
   setSearchText,
   onClickEvent,
   isExpertView = false,
+  isZoomConnected = false,
 }) => {
   const router = useRouter();
   return (
@@ -27,7 +28,9 @@ const UserProfileGroupCoaching = ({
             <Button
               size="lg"
               className="text-md flex gap-2"
-              onClick={() => router.push('/portal/teacher/group_coaching/add')}
+              onClick={() =>
+                router.push(`/portal/teacher/group_coaching/add?is_zoom_connected=${isZoomConnected}`)
+              }
               Icon={GoPlus}
             >
               New Group Coaching

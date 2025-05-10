@@ -104,6 +104,7 @@ const ExpertForm = ({ selected }) => {
               fileURLs={selected?.file ? [selected.file] : []}
               Icon={FaRegFileImage}
               required
+              maxSize={10 * ONE_MB}
             />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}

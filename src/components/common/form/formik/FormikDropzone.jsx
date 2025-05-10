@@ -17,7 +17,7 @@ function FormikDropzone({
   multiple = false,
   disabled = false,
   required = false,
-  maxSize = ONE_MB,
+  maxSize = 10 * ONE_MB,
   accept = {
     'image/png': [],
     'image/jpg': [],
@@ -112,12 +112,12 @@ function FormikDropzone({
         </label>
       ) : null}
 
-      {!multiple && files.length ? (
+      {!multiple && files?.length ? (
         // Single file mode - show only the selected file
         <div className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-h-[200px] w-full flex items-center justify-center bg-slate-50 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
-          {files.map((file, index) => (
+          {files?.map((file, index) => (
             <div
-              key={`${file.name || file.path}-${index}`}
+              key={`${file?.name || file?.path}-${index}`}
               className="w-[150px] h-[150px] border border-slate-300 shadow rounded flex justify-center items-center relative"
             >
               <IconButton className="absolute top-1 right-1 p-1" onClick={() => handleRemoveFile(file)}>
@@ -159,10 +159,10 @@ function FormikDropzone({
           </div>
 
           {/* Show files below dropzone when in multiple mode */}
-          {multiple && files.length > 0 && (
+          {multiple && files?.length > 0 && (
             <div className="flex flex-wrap gap-3 p-3">
               <p className="w-full text-sm text-slate-500 mb-2">Selected files ({files.length}):</p>
-              {files.map((file, index) => (
+              {files?.map((file, index) => (
                 <div
                   key={`${file.name || file.path}-${index}`}
                   className="w-full border border-slate-300 shadow rounded flex justify-between items-center relative p-2"

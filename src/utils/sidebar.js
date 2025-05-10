@@ -25,6 +25,8 @@ import { USER_SUB_ROLE } from './authorization';
 import { GiTeacher } from 'react-icons/gi';
 import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
 
+const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
+
 const ADMIN = [
   {
     Icon: MdOutlineHome,
@@ -197,7 +199,7 @@ const TEACHER = [
     isActive: pathname => pathname === '/portal',
     disabled: true,
   },
-  {
+  isDevelopmentEnvironment && {
     Icon: FaInbox,
     label: 'Inbox',
     href: '/portal/inbox',
@@ -251,7 +253,7 @@ const TEACHER = [
     isActive: pathname => pathname.includes('/portal/teacher/payments'),
     disabled: false,
   },
-];
+].filter(Boolean);
 
 const SIDEBAR = { ADMIN, CUSTOMER, TEACHER };
 
