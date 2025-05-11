@@ -204,16 +204,24 @@ export const ConsultationDetails = ({
       </DetailSection>
       <DetailSection label={'Categories'}>
         <div className="flex flex-wrap gap-2">
-          {consultationDetails?.categories?.map(tag => (
-            <ProfileChip key={tag.id} label={tag?.name} />
-          ))}
+          {consultationDetails?.categories?.map((tag, index) =>
+            isCustomerView ? (
+              <ProfileChip key={`${index}-${tag}`} label={tag} />
+            ) : (
+              <ProfileChip key={tag.id} label={tag?.name} />
+            )
+          )}
         </div>
       </DetailSection>
       <DetailSection label={'Tags'}>
         <div className="flex flex-wrap gap-2">
-          {consultationDetails?.tags?.map(tag => (
-            <ProfileChip key={tag.id} label={tag?.name} />
-          ))}
+          {consultationDetails?.tags?.map((tag, index) =>
+            isCustomerView ? (
+              <ProfileChip key={`${index}-${tag}`} label={tag} />
+            ) : (
+              <ProfileChip key={tag.id} label={tag?.name} />
+            )
+          )}
         </div>
       </DetailSection>
     </div>

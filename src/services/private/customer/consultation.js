@@ -21,3 +21,7 @@ export const enrollConsultation = async ({ id }) => {
 export const getEnrolledConsultations = async () => {
   return axios.get(`/customer/my/consultations/`);
 };
+
+export const getExpertProfileConsultationsList = async ({id}) => {
+  return axios.get(`/customer/expert/consultation/${id}`);
+};

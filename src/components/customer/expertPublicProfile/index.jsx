@@ -6,6 +6,7 @@ import Tab from '@mui/material/Tab';
 import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
+import ExpertProfileConsultations from './consultations';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -23,7 +24,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
   };
 
   return (
-    <div className='flex flex-col gap-6'>
+    <div className="flex flex-col gap-6">
       <div className="text-center bg-white rounded-lg shadow-md flex items-center">
         <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
           <div className="relative drop-shadow-2">
@@ -65,7 +66,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           </div>
         </div>
         <div className="w-full text-left flex items-center">
-          <div className=''>
+          <div className="">
             <h3 className="text-2xl font-semibold text-black dark:text-white">{`${userProfileDetails?.first_name} ${userProfileDetails?.last_name}`}</h3>
             <p className="my-1 font-medium">{userProfileDetails?.title}</p>
             {/* <p className="text-sm">42.1k followers</p> */}
@@ -81,18 +82,18 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           onChange={handleTabChange}
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
-          <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' />
+          <Tab value={TABS.PROGRAMS} label="Programs" className="!capitalize" />
           {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
-          <Tab value={TABS.GROUP_COACHING} label="Group Coaching" className='!capitalize' />
-          <Tab disabled value={TABS.CONSULT} label="Consult" className='!capitalize' />
-          <Tab value={TABS.ABOUT} label="About" className='!capitalize' />
+          <Tab value={TABS.GROUP_COACHING} label="Group Coaching" className="!capitalize" />
+          <Tab value={TABS.CONSULT} label="Consult" className="!capitalize" />
+          <Tab value={TABS.ABOUT} label="About" className="!capitalize" />
         </Tabs>
         <div className="">
           {/* Tabs Content */}
 
           {/* PROGRAMS */}
           <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <ExpertProfilePrograms />
+            <ExpertProfilePrograms tabEnabled={selectedTab === TABS.PROGRAMS} />
           </div>
 
           {/* WORKSHOPS */}
@@ -100,11 +101,13 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* EVENTS */}
           <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <ExpertProfileGroupCoaching />
+            <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
           </div>
 
           {/* CONSULT */}
-          <div hidden={selectedTab !== TABS.CONSULT}>Consult</div>
+          <div hidden={selectedTab !== TABS.CONSULT}>
+            <ExpertProfileConsultations tabEnabled={selectedTab === TABS.CONSULT} />
+          </div>
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>

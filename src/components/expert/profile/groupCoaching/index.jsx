@@ -8,7 +8,7 @@ import FeaturedTypeFilter from '@/components/common/FeaturedTypeFilter';
 
 const items = ['workshop', 'bootcamp', 'live event'];
 
-const ExpertProfileGroupCoaching = ({ tabEnabled }) => {
+const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
   const [searchText, setSearchText] = useState('');
   const [selectedType, setSelectedType] = useState([]);
   const router = useRouter();

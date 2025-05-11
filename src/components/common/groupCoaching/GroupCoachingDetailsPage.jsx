@@ -230,16 +230,24 @@ export const GroupCoachingDetails = ({
 
         <DetailSection label={'Categories'}>
           <div className="flex flex-wrap gap-2">
-            {eventDetails?.categories?.map(tag => (
-              <ProfileChip key={tag.id} label={tag?.name} />
-            ))}
+            {eventDetails?.categories?.map((tag, index) =>
+              isCustomerView ? (
+                <ProfileChip key={`${index}-${tag}`} label={tag} />
+              ) : (
+                <ProfileChip key={tag.id} label={tag?.name} />
+              )
+            )}
           </div>
         </DetailSection>
         <DetailSection label={'Tags'}>
           <div className="flex flex-wrap gap-2">
-            {eventDetails?.tags?.map(tag => (
-              <ProfileChip key={tag.id} label={tag?.name} />
-            ))}
+            {eventDetails?.tags?.map((tag, index) =>
+              isCustomerView ? (
+                <ProfileChip key={`${index}-${tag}`} label={tag} />
+              ) : (
+                <ProfileChip key={tag.id} label={tag?.name} />
+              )
+            )}
           </div>
         </DetailSection>
       </div>
