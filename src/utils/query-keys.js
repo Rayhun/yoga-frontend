@@ -38,6 +38,7 @@ const queryKeys = {
   customerConsultations: 'customerConsultations',
   consultationDetails: 'consultationDetails',
   expertConsultations: 'expertConsultations',
+  expertProfileConsultations: 'expertProfileConsultations',
   expertconsultationDetails: 'expertconsultationDetails',
   expertPersonalConsultations: 'expertPersonalConsultations',
   expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',

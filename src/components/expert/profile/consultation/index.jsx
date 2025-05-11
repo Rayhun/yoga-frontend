@@ -5,7 +5,7 @@ import { getExpertConsultationsList } from '@/services/private/expert/consultati
 import queryKeys from '@/utils/query-keys';
 import UserProfileConsultations from '@/components/common/user/profile/consultation';
 
-const ExpertConsultations = ({ tabEnabled }) => {
+const ExpertConsultations = ({ tabEnabled = false }) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
 

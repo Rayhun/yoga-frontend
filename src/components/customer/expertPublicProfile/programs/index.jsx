@@ -5,7 +5,7 @@ import queryKeys from '@/utils/query-keys';
 import { useParams, useRouter } from 'next/navigation';
 import UserProfilePrograms from '@/components/common/user/profile/programs';
 
-const ExpertProfilePrograms = () => {
+const ExpertProfilePrograms = ({ tabEnabled = false }) => {
   const params = useParams();
   const router = useRouter();
   const { id } = params;
@@ -14,7 +14,9 @@ const ExpertProfilePrograms = () => {
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getExpertProgramsList({ id }),
     queryKey: [queryKeys.expertCustomerPrograms, id],
+    enabled: !!id && tabEnabled,
   });
+
   const filteredPrograms = useMemo(
     () =>
       (programsResponse?.data?.results?.data?.['all-programs'] || []).filter(program =>

@@ -8,17 +8,18 @@ import FeaturedTypeFilter from '@/components/common/FeaturedTypeFilter';
 
 const items = ['workshop', 'bootcamp', 'live event'];
 
-const ExpertProfileGroupCoaching = () => {
+const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
   const params = useParams();
   const { id } = params;
   const [searchText, setSearchText] = useState('');
-  const [selectedType, setSelectedType] = useState([]); 
+  const [selectedType, setSelectedType] = useState([]);
 
   const router = useRouter();
 
   const { isFetching: isLoadingCoachings, data: coachingResponse } = useQuery({
     queryFn: () => getExpertGroupCoachingList({ id }),
     queryKey: [queryKeys.customerExpertGroupCoaching, id],
+    enabled: !!id && tabEnabled,
   });
 
   const filteredCoachings = useMemo(

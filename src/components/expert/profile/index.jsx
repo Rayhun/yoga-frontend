@@ -98,7 +98,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
 
           {/* PROGRAMS */}
           <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <ExpertProfilePrograms />
+            <ExpertProfilePrograms tabEnabled={selectedTab === TABS.PROGRAMS} />
           </div>
 
           {/* WORKSHOPS */}
