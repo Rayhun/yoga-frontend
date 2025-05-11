@@ -8,7 +8,7 @@ import FeaturedTypeFilter from '@/components/common/FeaturedTypeFilter';
 
 const items = ['workshop', 'bootcamp', 'live event'];
 
-const ExpertProfileGroupCoaching = ({ tabEnabled }) => {
+const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
   const [searchText, setSearchText] = useState('');
   const [selectedType, setSelectedType] = useState([]);
   const router = useRouter();
@@ -40,6 +40,7 @@ const ExpertProfileGroupCoaching = ({ tabEnabled }) => {
         searchText={searchText}
         setSearchText={setSearchText}
         onClickEvent={event => router.push(`/portal/teacher/group_coaching/${event.id}/details`)}
+        isZoomConnected={coachingResponse?.data?.is_zoom_connected}
         isExpertView
       />
     </>

@@ -39,3 +39,7 @@ export const cancelGroupCoaching = async ({ id }) => {
 export const completeGroupCoaching = async ({ id, recording_link }) => {
   return axios.post(`/event/${id}/status/`, { event_status: 'completed', recording_link });
 };
+
+export const checkZoomConnection = async ({ code }) => {
+  return axios.post('/zoom/account/connected/', { zoom_code: code });
+};

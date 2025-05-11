@@ -20,6 +20,8 @@ import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
 import useUserTimeZone from '@/hooks/useUserTimeZone';
 import FormikMultiSelect from '../form/formik/FormikMultiSelect';
+import ZoomMeetingConnectionButton from '../ZoomMeetingConnectionButton';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
@@ -28,9 +30,13 @@ const eventTypeOptions = [
   { label: 'Live Event', value: 'live event' },
 ];
 
+const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
+
 const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParamUtils();
+  const isZoomConnected = searchParams.get('is_zoom_connected') === 'true';
 
   const { userTimeZone, mappedTimeZone } = useUserTimeZone();
 
@@ -56,6 +62,8 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     meeting_link: initialData?.meeting_link || '',
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
+    followup_support: initialData?.followup_support || '',
+    is_zoom_event: initialData?.is_zoom_event || false,
   };
 
   const validationSchema = Yup.object({
@@ -66,9 +74,9 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     time_zone: Yup.string().required('Timezone is required'),
     event_type: Yup.string().required(),
     followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
-    meeting_link: Yup.string().when('is_online', {
-      is: true,
-      then: schema => schema.required('Meeting URL is required'),
+    meeting_link: Yup.string().when(['is_online', 'is_zoom_event'], {
+      is: (is_online, is_zoom_event) => is_online && !is_zoom_event,
+      then: schema => schema.required('Meeting URL is required for Zoom online meetings'),
       otherwise: schema => schema,
     }),
     price: Yup.number().required('Price is required'),
@@ -145,12 +153,32 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                   <TagsField required />
                 </div>
                 <FormikSwitch name="is_online" label="Online/Offline" />
-                {values?.is_online && <FormikField name="meeting_link" label="Meeting URL" required />}
+
+                {values?.is_online && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <FormikField
+                      disabled={values?.is_zoom_event}
+                      name="meeting_link"
+                      label="Meeting URL"
+                      required
+                    />
+                    {isDevelopmentEnvironment ? (
+                      isZoomConnected ? (
+                        <FormikSwitch name="is_zoom_event" label="Zoom Meeting" />
+                      ) : (
+                        <div className="mt-4">
+                          <ZoomMeetingConnectionButton />
+                        </div>
+                      )
+                    ) : null}
+                  </div>
+                )}
                 <FormikDropzone
                   name="image"
                   label="Event Image"
                   fileURLs={initialData?.image ? [initialData.image] : []}
                   required
+                  maxSize={10 * ONE_MB}
                 />
                 <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                   <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
