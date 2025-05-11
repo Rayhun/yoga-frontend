@@ -62,9 +62,9 @@ export const GroupCoachingDetails = ({
   return (
     <div className="flex flex-col gap-7">
       {/* Event Details Card */}
-      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 items-start md:items-center">
         {/* Left Section - Image */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full h-full">
           <Image
             src={eventDetails?.image || '/images/content/default.png'}
             alt="Event Image"
@@ -76,7 +76,7 @@ export const GroupCoachingDetails = ({
         </div>
 
         {/* Right Section - Event Details */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark relative">
+        <div className="w-full h-full flex flex-col gap-5 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark relative">
           {!isCustomerView && (
             <button
               className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
@@ -159,9 +159,9 @@ export const GroupCoachingDetails = ({
               </Button>
             ))}
           {isCustomerView && eventDetails?.is_enroll && (
-            <p className="break-words text-right line-clamp-1 text-sm font-semibold text-primary">
+            <div className="!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl bg-orange-500 text-white">
               {`Joined`}
-            </p>
+            </div>
           )}
           {!isCustomerView && eventDetails?.status === 'Scheduled' && (
             <>

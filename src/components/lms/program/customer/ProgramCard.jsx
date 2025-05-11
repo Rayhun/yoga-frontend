@@ -33,7 +33,7 @@ const ProgramCard = ({ program, onClick, isExpertView = false }) => {
         <p className="break-words line-clamp-1 text-sm text-gray-400" title={program.description}>
           {program.experts.join(', ') || 'No experts'}
         </p>
-        {program?.is_enroll || isExpertView ? (
+        {program?.is_enroll || program?.status === 'InProgress' || isExpertView ? (
           <button
             onClick={onClick}
             className="w-full mt-4 py-1 px-4 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200 font-medium text-sm"
