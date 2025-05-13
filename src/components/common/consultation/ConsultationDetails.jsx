@@ -109,7 +109,7 @@ export const ConsultationDetails = ({
           )}
           {isCustomerView &&
             !consultationDetails?.is_enroll &&
-            (consultationDetails?.is_paid ? (
+            (consultationDetails?.price > 0 || consultationDetails?.is_paid ? (
               <Link href={`/payment/consultation/${consultationId}`}>
                 <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 px-6 py-3 text-center rounded-lg shadow hover:bg-primary/80">
                   {'Buy Now'}

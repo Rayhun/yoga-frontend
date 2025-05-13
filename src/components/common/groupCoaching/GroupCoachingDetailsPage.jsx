@@ -59,6 +59,9 @@ export const GroupCoachingDetails = ({
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
   };
 
+  console.log("eventDetails", eventDetails);
+
+
   return (
     <div className="flex flex-col gap-7">
       {/* Event Details Card */}
@@ -141,7 +144,8 @@ export const GroupCoachingDetails = ({
 
           {isCustomerView &&
             !eventDetails?.is_enroll &&
-            (eventDetails?.is_paid ? (
+            (eventDetails?.price > 0 || eventDetails?.is_paid
+              ? (
               <Link href={`/payment/group_coaching/${eventId}`}>
                 <div className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 px-6 py-3 text-center rounded-lg shadow hover:bg-primary/80">
                   {'Buy Now'}
