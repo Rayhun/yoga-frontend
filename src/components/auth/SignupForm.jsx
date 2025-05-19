@@ -38,8 +38,8 @@ const SignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().email('Invalid Email').required('Required!'),
     mobile_number: Yup.string()
-      // .min(11, 'Mobile number must contain at least 11 digits')
-      .matches(/^\+?[0-9 ]*$/, 'Mobile number should not contain special characters')
+      .min(7, 'Invalid number. Please enter a complete number or remove any special characters.')
+      .matches(/^\+?[0-9]* ?[0-9]*$/, 'Mobile number should only contain digits, an optional plus at start, and at most one space')
       .required('Required!'),
     password: Yup.string()
       .min(12, 'Password must be at least 12 characters')
@@ -154,10 +154,10 @@ const SignupForm = () => {
             </div>
             <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
             <FormikPhoneField
-              type="number"
+              type='number'
               name="mobile_number"
               label="Phone"
-              placeholder="123456789"
+              placeholder="Enter numbers only, no dashes, parentheses, spaces etc."
               required
             />
             <FormikField

@@ -82,7 +82,7 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
 const steps = [
   { label: 'Sign Up' },
   { label: 'Verify Email' },
-  { label: 'Verify Number' },
+  { label: 'Verify Phone' },
 ];
 
 const Stepper = ({ activeStep = 1 }) => {
