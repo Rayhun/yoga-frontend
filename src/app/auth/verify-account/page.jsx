@@ -9,8 +9,8 @@ export const metadata = {
 function Page() {
   return (
     <div className="w-[calc(100vw-20px)] min-h-[calc(100vh-20px)] m-[10px] md:w-[calc(100vw-100px)] md:min-h-[calc(100vh-100px)] md:m-[50px] rounded-sm border border-stroke bg-white shadow-default flex dark:border-strokedark dark:bg-boxdark">
-      <div className="flex flex-wrap items-center">
-        <div className="hidden w-full border-stroke dark:border-strokedark xl:block xl:w-1/2 xl:border-r-2">
+      <div className="w-full flex flex-wrap items-center">
+        <div className="hidden w-full border-stroke dark:border-strokedark lg:block lg:w-1/2 lg:border-r-2">
           <div className="px-26 py-17.5 text-center">
             <Link className="mb-5.5 inline-block" href="/">
               <Image src="/images/logo/logo.png" alt="Logo" width={176} height={32} />
@@ -150,8 +150,8 @@ function Page() {
             </span>
           </div>
         </div>
-        <div className="w-full xl:w-1/2">
-          <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
+        <div className="w-full lg:w-1/2">
+          <div className="w-full p-4 sm:p-12.5 lg:p-17.5">
             <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
               Verify Your Account
             </h2>

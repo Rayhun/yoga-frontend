@@ -4,44 +4,40 @@ import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { FiPhone } from 'react-icons/fi';
 import { COUNTRIES_CALLING_CODE } from '@/utils/constants';
 
-const FormikPhoneField = ({
-  name,
-  label,
-  className,
-  required = false,
-  placeholder,
-  ...fieldProps
-}) => {
+const FormikPhoneField = ({ name, label, className, required = false, placeholder, ...fieldProps }) => {
   const [field, meta, helpers] = useField(name);
   const { setValue, setTouched } = helpers;
-  
-  const [countryCode, setCountryCode] = useState('+1');
+
+  const [countryCode, setCountryCode] = useState('US');
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+
   useEffect(() => {
     if (field.value) {
-      const countryCodeMatch = field.value.match(/^\+\d+/);
-      if (countryCodeMatch) {
-        const code = countryCodeMatch[0];
-        const number = field.value.substring(code.length).trim();
-        setCountryCode(code);
-        setPhoneNumber(number);
-      } else {
+      let matchedCountry = COUNTRIES_CALLING_CODE.find(({ callingCode }) =>
+        field.value.startsWith(callingCode)
+      );
+      if (!matchedCountry) {
         setPhoneNumber(field.value);
+        return;
       }
+      setCountryCode(matchedCountry.code);
+      const number = field.value.substring(matchedCountry.callingCode.length).trim();
+      setPhoneNumber(number);
     }
   }, []);
 
-  const handlePhoneNumberChange = (e) => {
+  const handlePhoneNumberChange = e => {
     const newPhoneNumber = e.target.value;
     setPhoneNumber(newPhoneNumber);
-    setValue(`${countryCode} ${newPhoneNumber}`);
+    const callingCode = COUNTRIES_CALLING_CODE.find(c => c.code === countryCode)?.callingCode || '';
+    setValue(`${callingCode} ${newPhoneNumber}`);
   };
 
-  const handleCountryCodeChange = (e) => {
-    const code = e.target.value;
-    setCountryCode(code);
-    setValue(`${code} ${phoneNumber}`);
+  const handleCountryCodeChange = e => {
+    const newCountryCode = e.target.value;
+    setCountryCode(newCountryCode);
+    const callingCode = COUNTRIES_CALLING_CODE.find(c => c.code === newCountryCode)?.callingCode || '';
+    setValue(`${callingCode} ${phoneNumber}`);
     setTouched(true);
   };
 
@@ -54,10 +50,10 @@ const FormikPhoneField = ({
           {label}
         </label>
       )}
-      
+
       <div className="flex">
-        <FormControl 
-          sx={{ 
+        <FormControl
+          sx={{
             minWidth: 100,
             '& .MuiOutlinedInput-root': {
               borderTopRightRadius: 0,
@@ -66,7 +62,7 @@ const FormikPhoneField = ({
               borderBottomLeftRadius: 8,
               height: '58px',
               borderColor: isErrorField ? 'red' : undefined,
-            }
+            },
           }}
         >
           <Select
@@ -77,12 +73,12 @@ const FormikPhoneField = ({
             sx={{
               '.MuiOutlinedInput-notchedOutline': {
                 borderColor: isErrorField ? 'red' : undefined,
-              }
+              },
             }}
-            renderValue={(value) => {
-              const selectedCountry = COUNTRIES_CALLING_CODE.find(item => item.callingCode === value);
+            renderValue={value => {
+              const selectedCountry = COUNTRIES_CALLING_CODE.find(item => item.code === value);
               if (!selectedCountry) return value;
-              
+
               return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span>{`${selectedCountry.callingCode} (${selectedCountry.code})`}</span>
@@ -91,23 +87,23 @@ const FormikPhoneField = ({
             }}
           >
             {COUNTRIES_CALLING_CODE.map((item, index) => (
-              <MenuItem key={`${item.callingCode}-${index}`} value={item.callingCode}>
+              <MenuItem key={`${item.code}-${index}`} value={item.code}>
                 {item.callingCode} ({item.name} {item.flag})
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-        
+
         <div className="relative flex-1">
           <input
-            type="tel"
+            type="text"
             value={phoneNumber}
             onChange={handlePhoneNumberChange}
             onBlur={field.onBlur}
             name={name}
             {...fieldProps}
             className={`w-full rounded-r-lg border border-stroke bg-transparent py-4 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${className}`}
-            style={{ 
+            style={{
               border: isErrorField ? '1px solid red' : undefined,
               borderTopLeftRadius: 0,
               borderBottomLeftRadius: 0,
@@ -119,7 +115,7 @@ const FormikPhoneField = ({
           </span>
         </div>
       </div>
-      
+
       {isErrorField && <small className="text-xs text-red-500">{meta.error}</small>}
     </div>
   );

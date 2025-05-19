@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import { verifyEmail, verifyPhone, resendEmailOTPCode, resendPhoneOTPCode } from
 import { toastApiError } from '@/utils/helpers';
 import { Alert } from '@mui/material';
 import Cookies from 'js-cookie';
+import SignupStepper from '../common/SignupStepper';
 
 const AccountVerificationForm = () => {
   const router = useRouter();
@@ -97,41 +98,46 @@ const AccountVerificationForm = () => {
 
   const nextStep = value => {
     router.replace(
-      `${pathname}?email=${email}&phone=${phone}&step=${value}&email_verify=${email_verify || ''}&mobile_verify=${mobile_verify || ''}`
+      `${pathname}?email=${email}&phone=${phone}&step=${value}&email_verify=${
+        email_verify || ''
+      }&mobile_verify=${mobile_verify || ''}`
     );
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      {isEmailVerification && (
-        <>
-          <div className="text-center">
-            <Alert variant="filled" severity="info" className="text-xs">
-              If you do not recieve the OTP in 10 seconds, please check your spam folder or click on resend
-              OTP
-            </Alert>
-          </div>
+    <React.Fragment>
+      <SignupStepper activeStep={isEmailVerification ? 2 : 3} />
+      <div className="w-full flex flex-col gap-5">
+        {isEmailVerification && (
+          <>
+            <div className="text-center">
+              <Alert variant="filled" severity="info" className="text-xs">
+                If you do not recieve the OTP in 10 seconds, please check your spam folder or click on resend
+                OTP
+              </Alert>
+            </div>
+            <OTPVerificationForm
+              label="Email OTP"
+              btnText="Verify Email"
+              isVerified={isEmailVerified}
+              onSubmit={handleSubmitEmailOTP}
+              onResendOTP={handleResendEmailOTP}
+              otpDuration={60}
+            />
+          </>
+        )}
+        {isPhoneVerification && (
           <OTPVerificationForm
-            label="Email OTP"
-            btnText="Verify Email"
-            isVerified={isEmailVerified}
-            onSubmit={handleSubmitEmailOTP}
-            onResendOTP={handleResendEmailOTP}
+            label="Phone OTP"
+            btnText="Verify Phone"
+            isVerified={isPhoneVerified}
+            onSubmit={handleSubmitPhoneOTP}
+            onResendOTP={handleResendPhoneOTP}
             otpDuration={60}
           />
-        </>
-      )}
-      {isPhoneVerification && (
-        <OTPVerificationForm
-          label="Phone OTP"
-          btnText="Verify Phone"
-          isVerified={isPhoneVerified}
-          onSubmit={handleSubmitPhoneOTP}
-          onResendOTP={handleResendPhoneOTP}
-          otpDuration={60}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </React.Fragment>
   );
 };
 
