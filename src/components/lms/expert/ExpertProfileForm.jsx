@@ -115,7 +115,7 @@ const ExpertProfileForm = ({ selected }) => {
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, values }) => (
             <Form className="flex flex-col gap-3">
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
@@ -190,6 +190,7 @@ const ExpertProfileForm = ({ selected }) => {
                 label="Certifications"
                 placeholder="Add a certification (e.g. Health Coach). Press return to confirm, max 5."
                 required
+                disabled={values?.credentials?.length >= 5}
               />
               <FormikMultiSelect
                 options={LANGUAGES}
