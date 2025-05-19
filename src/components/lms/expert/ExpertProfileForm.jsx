@@ -69,7 +69,8 @@ const ExpertProfileForm = ({ selected }) => {
     languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
     credentials: Yup.array()
       .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 credential is required'),
+      .min(1, 'At least 1 credential is required')
+      .max(5, 'Maximum 5 credentials are allowed'),
     // coaching_content: Yup.array()
     //   .of(Yup.string().required('Required!'))
     //   .min(1, 'At least 1 coaching content is required'),
@@ -114,7 +115,7 @@ const ExpertProfileForm = ({ selected }) => {
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, values }) => (
             <Form className="flex flex-col gap-3">
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
@@ -187,8 +188,9 @@ const ExpertProfileForm = ({ selected }) => {
               <FormikSubmittableField
                 name="credentials"
                 label="Certifications"
-                placeholder="Your Certifications Link or URL"
+                placeholder="Add a certification (e.g. Health Coach). Press return to confirm, max 5."
                 required
+                disabled={values?.credentials?.length >= 5}
               />
               <FormikMultiSelect
                 options={LANGUAGES}

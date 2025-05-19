@@ -27,7 +27,9 @@ const LoginForm = () => {
     password: Yup.string().min(8, 'Password must be at least 8 characters').required('Required!'),
   });
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values, formikBag) => {
+    const { setSubmitting, setStatus, setFieldError, setTouched } = formikBag;
+
     try {
       const { data: response } = await mutateAsync({ payload: values });
 
@@ -56,7 +58,37 @@ const LoginForm = () => {
         }
       }
     } catch (error) {
-      toastApiError(error);
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+
+        let fieldName = null;
+
+        if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('expert')) {
+          fieldName = 'email';
+        } else if (errorMessage.toLowerCase().includes('password')) {
+          fieldName = 'password';
+        }
+
+        if (fieldName) {
+          setFieldError(fieldName, errorMessage);
+
+          const touchedFields = { ...formikBag.touched, [fieldName]: true };
+          setTouched(touchedFields, false);
+        } else {
+          setStatus({
+            success: false,
+            error: errorMessage,
+          });
+          toastApiError(error);
+        }
+      } else {
+        const generalError = error.message || 'An error occurred during signup';
+        setStatus({
+          success: false,
+          error: generalError,
+        });
+        toastApiError(error);
+      }
     } finally {
       setSubmitting(false);
     }
