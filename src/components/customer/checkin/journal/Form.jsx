@@ -7,23 +7,48 @@ import dayjs from 'dayjs';
 import Calender from '@/components/common/Calender';
 import { useState } from 'react';
 import FormikField from '@/components/common/form/formik/FormikField';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNewJournal } from '@/services/private/customer/journal';
+import { toastApiError } from '@/utils/helpers';
+import queryKeys from '@/utils/query-keys';
+import { toast } from 'react-toastify';
 
 const text = "What's one small thing you did today that moved you close to your monthly wellness goal?";
 
 const JournalForm = () => {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: creatJournal } = useMutation({
+    mutationFn: createNewJournal,
+  });
 
   const initialValues = {
-    journal: '',
+    description: '',
     date: dayjs(),
   };
 
   const validationSchema = Yup.object({
-    journal: Yup.string().required('Please write your journal entry'),
+    description: Yup.string().required('Please write your journal entry'),
   });
 
-  const handleSubmit = values => {
-    console.log('Sleep Rating:', values);
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      await creatJournal({ payload: { ...values, date: dayjs(values.date).format('YYYY-MM-DD') } });
+      toast.success('Journal to specified date created successfully.');
+
+      resetForm();
+
+      await queryClient.invalidateQueries([
+        {
+          queryKey: [queryKeys.journalList],
+        },
+      ]);
+    } catch (error) {
+      toastApiError(error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -32,7 +57,7 @@ const JournalForm = () => {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-      {({ isSubmitting, setFieldValue, values }) => (
+      {({ isSubmitting, setFieldValue, resetForm, values }) => (
         <Form className="flex flex-col gap-3">
           <div className="flex justify-between items-center">
             <p className="text-md font-medium text-primary flex items-center gap-1">
@@ -62,9 +87,9 @@ const JournalForm = () => {
               {text}
             </div>
           </div>
-          <FormikField name="journal" rows={4} placeholder={'Write your thoughts here...'} />
+          <FormikField name="description" rows={4} placeholder={'Write your thoughts here...'} />
           <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
-            <Button type="button" variant="secondary" onClick={() => console.log('Cancel')}>
+            <Button type="button" variant="secondary" onClick={resetForm}>
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting}>

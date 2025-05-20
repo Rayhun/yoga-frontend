@@ -219,18 +219,18 @@ const CUSTOMER = [
         href: '/portal/customer/checkin/sleep_tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
       },
-      {
-        Icon: FiDroplet,
-        label: 'Periods Tracker',
-        href: '/portal/customer/checkin/periods_tracker',
-        isActive: pathname => pathname.includes('/portal/customer/checkin/periods_tracker'),
-      },
-      {
-        Icon: TbGenderTransgender,
-        label: 'Menopause',
-        href: '/portal/customer/checkin/menopause',
-        isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
-      },
+      // {
+      //   Icon: FiDroplet,
+      //   label: 'Periods Tracker',
+      //   href: '/portal/customer/checkin/periods_tracker',
+      //   isActive: pathname => pathname.includes('/portal/customer/checkin/periods_tracker'),
+      // },
+      // {
+      //   Icon: TbGenderTransgender,
+      //   label: 'Menopause',
+      //   href: '/portal/customer/checkin/menopause',
+      //   isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
+      // },
     ],
   },
 ];

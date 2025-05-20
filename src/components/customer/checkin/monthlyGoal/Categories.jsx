@@ -1,36 +1,39 @@
+import LoadingWrapper from '@/components/common/loader/Wrapper';
+import { getCocernList } from '@/services/private/customer/goal';
 import { MONTHLY_GOAL_TYPES } from '@/utils/constants';
+import queryKeys from '@/utils/query-keys';
+import { useQuery } from '@tanstack/react-query';
 
-const GoalCategories = ({selected, setSelected}) => {
+const GoalCategories = ({ selected, setSelected }) => {
+
+  const { isFetching, data: concernList } = useQuery({
+    queryFn: getCocernList,
+    queryKey: [queryKeys.concernList],
+  });
 
   const onSelect = item => {
-    setSelected(prev => {
-      const itemIndex = prev.indexOf(item);
-      if (itemIndex >= 0) {
-        const newSelected = [...prev];
-        newSelected.splice(itemIndex, 1);
-        return newSelected;
-      } else {
-        return [...prev, item];
-      }
-    });
+    setSelected(pre => (pre === item ? '' : item));
   };
 
+  if (concernList?.data?.data?.length === 0 && !isFetching)
+    return <div className="flex justify-center items-center h-full">No Concerns Found</div>;
+
   return (
-    <div className="overflow-x-auto flex gap-2 no-scrollbar">
-      {MONTHLY_GOAL_TYPES.map((category, index) => (
-        <div
-          key={`${category.name}-${index}`}
-          className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
-            selected.includes(category.value)
-              ? 'bg-primary border-primary text-white'
-              : 'text-gray-400 border-gray-400'
-          }`}
-          onClick={() => onSelect(category.value)}
-        >
-          {category.name}
-        </div>
-      ))}
-    </div>
+    <LoadingWrapper isLoading={isFetching}>
+      <div className="overflow-x-auto flex gap-2 no-scrollbar">
+        {concernList?.data?.data?.map((concern, index) => (
+          <div
+            key={`${concern}-${index}`}
+            className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
+              selected === concern ? 'bg-primary border-primary text-white' : 'text-gray-400 border-gray-400'
+            }`}
+            onClick={() => onSelect(concern)}
+          >
+            {concern}
+          </div>
+        ))}
+      </div>
+    </LoadingWrapper>
   );
 };
 

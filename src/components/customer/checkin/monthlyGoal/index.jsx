@@ -11,7 +11,7 @@ const Section = ({ children }) => (
 );
 
 const MonthlyGoal = () => {
-  const [selected, setSelected] = useState([]);
+  const [selectedConcern, setSelectedConcern] = useState("");
 
   return (
     <div className="flex flex-col gap-7">
@@ -25,10 +25,10 @@ const MonthlyGoal = () => {
         </div>
       </Section>
       <Section>
-        <GoalCategories selected={selected} setSelected={setSelected} />
+        <GoalCategories selected={selectedConcern} setSelected={setSelectedConcern} />
       </Section>
       <Section>
-        <MonthlyGoalForm />
+        <MonthlyGoalForm selectedConcern={selectedConcern} />
       </Section>
     </div>
   );
