@@ -2535,3 +2535,33 @@ export const LANGUAGES = [
     native: 'isiZulu',
   },
 ];
+
+
+export const MONTHLY_GOAL_TYPES = [
+  {name: 'Weight Management', value: 'weight management'},
+  {name: "Sleep & energy", value: 'sleep and energy'},
+  {name: 'Hormon Balance', value: 'hormon balance'},
+  {name: 'Nutrition', value: 'nutrition'},
+  {name: 'Exercise', value: 'exercise'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+  {name: 'Relationship', value: 'relationship'},
+]

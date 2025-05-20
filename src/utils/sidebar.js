@@ -22,8 +22,13 @@ import {
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
-import { GiTeacher } from 'react-icons/gi';
+import { GiTeacher, GiNightSleep } from 'react-icons/gi';
 import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
+import { LuClipboardCheck } from "react-icons/lu";
+import { FiTarget } from "react-icons/fi";
+import { LiaBookSolid } from "react-icons/lia";
+import { FiDroplet } from "react-icons/fi";
+import { TbGenderTransgender } from "react-icons/tb";
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
@@ -190,6 +195,43 @@ const CUSTOMER = [
     href: '/portal/customer/lms/consultation',
     isActive: pathname => pathname.includes('/portal/customer/lms/consultation'),
     disabled: false,
+  },
+  {
+    Icon: LuClipboardCheck,
+    label: 'Check In',
+    disabled: false,
+    sub_menu: [
+      {
+        Icon: FiTarget,
+        label: 'Monthly Goal',
+        href: '/portal/customer/checkin/monthly_goal',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/monthly_goal'),
+      },
+      {
+        Icon: LiaBookSolid,
+        label: 'Journal',
+        href: '/portal/customer/checkin/journal',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/journal'),
+      },
+      {
+        Icon: GiNightSleep,
+        label: 'Sleep Tracker',
+        href: '/portal/customer/checkin/sleep_tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
+      },
+      // {
+      //   Icon: FiDroplet,
+      //   label: 'Periods Tracker',
+      //   href: '/portal/customer/checkin/periods_tracker',
+      //   isActive: pathname => pathname.includes('/portal/customer/checkin/periods_tracker'),
+      // },
+      // {
+      //   Icon: TbGenderTransgender,
+      //   label: 'Menopause',
+      //   href: '/portal/customer/checkin/menopause',
+      //   isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
+      // },
+    ],
   },
 ];
 
