@@ -56,12 +56,8 @@ const UploadProgramsFile = () => {
         >
           {({ isSubmitting, values, setFieldValue }) => {
             const handleFileChange = e => {
-              const file = e.target.files[0];
-              if (values.program_file) {
-                setFieldValue('program_file', [...values.program_file, file]);
-              } else {
-                setFieldValue('program_file', [file]);
-              }
+            const files = Array.from(e.target.files);
+            setFieldValue('program_file', [...(values.program_file || []), ...files]);
             };
             return (
               <Form className="flex flex-col gap-3">
