@@ -183,6 +183,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                         : 'text-nav-item/90'
                                     }`}
                                   >
+                                    {childSubMenuItem.Icon ? <childSubMenuItem.Icon size={24} /> : null}
                                     {childSubMenuItem.label}
                                   </Link>
                                 </li>

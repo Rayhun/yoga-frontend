@@ -44,6 +44,10 @@ const queryKeys = {
   expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',
   customerEnrolledConsultations: 'customerEnrolledConsultations',
   customerEnrolledGroupCoachings: 'customerEnrolledGroupCoaching',
+  journalList: 'journalList',
+  goalList: 'goalList',
+  concernList: 'concernList',
+  getTracker: 'getTracker'
 };
 
 export default queryKeys;
