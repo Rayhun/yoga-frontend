@@ -7,9 +7,10 @@ export const getExpertProgramsList = async () => {
 };
 
 export const uploadPrograms = async ({ payload }) => {
+  console.log('payload', payload)
   const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (key==='available' || value) formData.set(key, value);
+  payload.program_file.forEach((file) => {
+    formData.append("program_file", file);
 
   });
   // return axios.post(`LMS/experts/upload/programs/`, payload);
