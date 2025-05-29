@@ -27,8 +27,10 @@ import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
 import { LuClipboardCheck } from "react-icons/lu";
 import { FiTarget } from "react-icons/fi";
 import { LiaBookSolid } from "react-icons/lia";
-import { FiDroplet } from "react-icons/fi";
-import { TbGenderTransgender } from "react-icons/tb";
+// import { FiDroplet } from "react-icons/fi";
+// import { TbGenderTransgender } from "react-icons/tb";
+import { RiRepeatOneFill } from "react-icons/ri";
+
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
@@ -218,6 +220,12 @@ const CUSTOMER = [
         label: 'Sleep Tracker',
         href: '/portal/customer/checkin/sleep_tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
+      },
+      {
+        Icon: RiRepeatOneFill,
+        label: 'Daily Insights',
+        href: '/portal/customer/checkin/daily_insights',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
       },
       // {
       //   Icon: FiDroplet,
