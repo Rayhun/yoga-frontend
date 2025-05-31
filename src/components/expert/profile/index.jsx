@@ -10,7 +10,7 @@ import ExpertConsultations from './consultation';
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const TABS = {
-  PROGRAMS: 'programs',
+  // PROGRAMS: 'programs',
   WORKSHOPS: 'workshops',
   GROUP_COACHING: 'group_coaching',
   CONSULT: 'consult',
@@ -87,7 +87,7 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           onChange={handleTabChange}
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
-          <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' />
+          {/* <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' /> */}
           {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
           <Tab value={TABS.GROUP_COACHING} label="Events" className='!capitalize' />
           <Tab value={TABS.CONSULT} label="Consult" className='!capitalize' />
@@ -97,9 +97,9 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           {/* Tabs Content */}
 
           {/* PROGRAMS */}
-          <div hidden={selectedTab !== TABS.PROGRAMS}>
+          {/* <div hidden={selectedTab !== TABS.PROGRAMS}>
             <ExpertProfilePrograms tabEnabled={selectedTab === TABS.PROGRAMS} />
-          </div>
+          </div> */}
 
           {/* WORKSHOPS */}
           {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
