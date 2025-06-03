@@ -4,7 +4,7 @@ import React from 'react';
 import dayjs from 'dayjs';
 import { MdOutlineDateRange } from 'react-icons/md';
 import WellnessStats from './Stats';
-import MonthlyPatternsChart from './chart';
+import MonthlyPatternsChart from './Chart';
 import KeyInsights from './KeyInsights';
 import { getDailyInsights } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
