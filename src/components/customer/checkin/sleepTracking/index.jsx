@@ -36,7 +36,9 @@ const SleepTracker = () => {
     mutationFn: createTrackerActivity,
   });
 
-  const trackerData = tracker?.data?.data || {};
+  const trackerData = tracker?.data?.data?.tracker || {};
+  const streak = tracker?.data?.data?.streak?.current_streak || 0;
+
   const initialValues = {
     selected_option: '',
     date: dayjs(),
@@ -80,7 +82,7 @@ const SleepTracker = () => {
             <span className="font-semibold">{trackerData?.title}</span>
           </div>
           <span className="text-sm flex gap-1 text-lg font-bold">
-            <PiLightningLight size={20} className="text-yellow-500" /> 0 day Streak
+            <PiLightningLight size={20} className="text-yellow-500" /> {streak} day(s) Streak
           </span>
         </div>
         <div className="bg-white rounded-b-xl p-6 shadow">

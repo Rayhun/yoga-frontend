@@ -47,7 +47,11 @@ const queryKeys = {
   journalList: 'journalList',
   goalList: 'goalList',
   concernList: 'concernList',
-  getTracker: 'getTracker'
+  getTracker: 'getTracker',
+  dailyInsight: 'dailyInsight',
+  adminGetInsightsGoals: 'adminGetInsightsGoals',
+  importInsightsGoal: 'importInsightsGoal',
+  deleteSingleInsight: 'deleteSingleInsight'
 };
 
 export default queryKeys;

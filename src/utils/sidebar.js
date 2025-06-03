@@ -30,11 +30,10 @@ import { LiaBookSolid } from "react-icons/lia";
 // import { FiDroplet } from "react-icons/fi";
 // import { TbGenderTransgender } from "react-icons/tb";
 import { RiRepeatOneFill } from "react-icons/ri";
+import { GoGoal } from "react-icons/go";
 
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
-
-console.log('isDevelopmentEnvironment', isDevelopmentEnvironment);
 
 const ADMIN = [
   {
@@ -148,6 +147,13 @@ const ADMIN = [
     label: 'Subscription Pages',
     href: '/portal/admin/subscription/page',
     isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
+    disabled: false,
+  },
+  {
+    Icon: GoGoal,
+    label: 'Insights Goal',
+    href: '/portal/admin/insights_goal',
+    isActive: pathname => pathname.includes('/portal/admin/insights_goal'),
     disabled: false,
   },
 ];
