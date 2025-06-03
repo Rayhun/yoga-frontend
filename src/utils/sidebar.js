@@ -27,12 +27,13 @@ import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
 import { LuClipboardCheck } from "react-icons/lu";
 import { FiTarget } from "react-icons/fi";
 import { LiaBookSolid } from "react-icons/lia";
-import { FiDroplet } from "react-icons/fi";
-import { TbGenderTransgender } from "react-icons/tb";
+// import { FiDroplet } from "react-icons/fi";
+// import { TbGenderTransgender } from "react-icons/tb";
+import { RiRepeatOneFill } from "react-icons/ri";
+import { GoGoal } from "react-icons/go";
+
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
-
-console.log('isDevelopmentEnvironment', isDevelopmentEnvironment);
 
 const ADMIN = [
   {
@@ -148,6 +149,13 @@ const ADMIN = [
     isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
     disabled: false,
   },
+  {
+    Icon: GoGoal,
+    label: 'Insights Goal',
+    href: '/portal/admin/insights_goal',
+    isActive: pathname => pathname.includes('/portal/admin/insights_goal'),
+    disabled: false,
+  },
 ];
 
 const CUSTOMER = [
@@ -218,6 +226,12 @@ const CUSTOMER = [
         label: 'Sleep Tracker',
         href: '/portal/customer/checkin/sleep_tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
+      },
+      {
+        Icon: RiRepeatOneFill,
+        label: 'Daily Insights',
+        href: '/portal/customer/checkin/daily_insights',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
       },
       // {
       //   Icon: FiDroplet,
