@@ -25,6 +25,8 @@ const DailyInsights = () => {
 
   const insightsData = insights?.data?.data
 
+  if(!isFetching && !insightsData) return <div className='text-center'>No data available</div>
+
   return (
     <LoadingWrapper isLoading={isFetching}>
       <div className="flex flex-col gap-7">

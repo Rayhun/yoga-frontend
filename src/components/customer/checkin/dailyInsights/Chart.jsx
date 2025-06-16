@@ -4,8 +4,8 @@ import React, { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 const MonthlyPatternsChart = ({ data }) => {
-  const categories = data.map(item => item.date);
-  const values = data.map(item => item.value);
+  const categories = data?.map(item => item.date);
+  const values = data?.map(item => item.value);
 
   const options = useMemo(() => {
     return{

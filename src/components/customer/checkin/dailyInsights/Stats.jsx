@@ -2,7 +2,7 @@ import React from 'react';
 import { IoMdTrendingDown, IoMdTrendingUp } from 'react-icons/io';
 
 const WellnessStats = ({ wellnessScore, average, latestTrend }) => {
-  const [icon, averageNumber] = average.split(' ');
+  const [icon, averageNumber] = average?.split(' ') || [];
   return (
     <div className="flex flex-col gap-4 rounded-lg sm:flex-row sm:justify-between sm:items-stretch">
       {/* Card 1: Wellness Score */}

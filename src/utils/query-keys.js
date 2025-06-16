@@ -51,7 +51,9 @@ const queryKeys = {
   dailyInsight: 'dailyInsight',
   adminGetInsightsGoals: 'adminGetInsightsGoals',
   importInsightsGoal: 'importInsightsGoal',
-  deleteSingleInsight: 'deleteSingleInsight'
+  deleteSingleInsight: 'deleteSingleInsight',
+  adminGetGoalsTracker: 'adminGetGoalsTracker',
+  adminGetGoalsTrackerDetails: 'adminGetGoalsTrackerDetails',
 };
 
 export default queryKeys;

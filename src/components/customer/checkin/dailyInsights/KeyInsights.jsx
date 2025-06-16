@@ -1,24 +1,6 @@
 import React from 'react';
 import { FaRegHeart } from 'react-icons/fa';
 
-const insights = [
-  {
-    title: 'Energy peak pattern',
-    description:
-      'Your energy consistently peaks 2–3 hours after waking up. Schedule important tasks during this window',
-  },
-  {
-    title: 'Social connection impact',
-    description:
-      'Your energy consistently peaks 2–3 hours after waking up. Schedule important tasks during this window',
-  },
-  {
-    title: 'Social connection impact',
-    description:
-      'Your energy consistently peaks 2–3 hours after waking up. Schedule important tasks during this window',
-  },
-];
-
 const KeyInsights = ({ insights }) => {
   return (
     <div className="">
