@@ -1,16 +1,17 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import Button from '@/components/common/Button';
-import dayjs from 'dayjs';
-import FormikField from '@/components/common/form/formik/FormikField';
+// import dayjs from 'dayjs';
+// import FormikField from '@/components/common/form/formik/FormikField';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
 import { createGoalTracker, getGoalList } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+// import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
 const MonthlyGoalForm = ({ selectedConcern }) => {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   const { isFetching, data: goalTrackers } = useQuery({
     queryFn: () => getGoalList({ concern: selectedConcern }),
@@ -35,7 +36,7 @@ const MonthlyGoalForm = ({ selectedConcern }) => {
       await createTracker({ payload: { ...values } });
       toast.success('Tracker for specified gaol created successfully.');
 
-      resetForm();
+      // resetForm(); Stoped from reseting the form
 
     } catch (error) {
       toastApiError(error);
@@ -74,7 +75,7 @@ const MonthlyGoalForm = ({ selectedConcern }) => {
                 Cancel
               </Button>
               <Button type="submit" isLoading={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit My Thoughts'}
+                {isSubmitting ? 'Submitting...' : 'Submit My Goals'}
               </Button>
             </div>
           </Form>

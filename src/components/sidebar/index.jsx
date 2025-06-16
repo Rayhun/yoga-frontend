@@ -136,7 +136,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <React.Fragment key={menuItem.label}>
                 {menuItem.sub_menu ? (
                   <ul className="flex flex-col gap-2">
-                    <SidebarLinkGroup activeCondition={pathname === '/'}>
+                    <SidebarLinkGroup activeCondition={menuItem?.hasActiveSubMenu(pathname)}>
                       {(handleClick, open) => (
                         <>
                           <Link
