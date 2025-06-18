@@ -1,22 +1,20 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import SubscriptionPageDetails from '@/components/subscription/page/customer/SubscriptionPageDetails';
-import { getSubscriptionPageDetailsBySlug } from '@/services/private/subscription/page';
 import queryKeys from '@/utils/query-keys';
-import FAQsList from '@/components/common/FAQsList';
+import FrequentlyAskedQuestionDetails from '@/components/FAQs/FrequentlyAskedQuestionDetails';
+import { getSingleQuestion } from '@/services/private/faqs';
 
 const Page = ({ params }) => {
-  const pageSlug = params['page-slug'];
-
   const {
     data: response,
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSubscriptionPageDetailsBySlug({ slug: pageSlug }),
-    queryKey: [queryKeys.subscriptionPages, pageSlug],
+    queryFn: () => getSingleQuestion({ id: params.id }),
+    queryKey: [queryKeys.frequentlyAskedQuestions, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -25,8 +23,8 @@ const Page = ({ params }) => {
 
   return (
     <div>
-      <SubscriptionPageDetails data={response?.data?.data} />
-      <FAQsList />
+      <PageHeader title="Frequently Asked Question Details" />
+      <FrequentlyAskedQuestionDetails data={response?.data?.data} />
     </div>
   );
 };
