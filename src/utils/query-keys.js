@@ -54,6 +54,8 @@ const queryKeys = {
   deleteSingleInsight: 'deleteSingleInsight',
   adminGetGoalsTracker: 'adminGetGoalsTracker',
   adminGetGoalsTrackerDetails: 'adminGetGoalsTrackerDetails',
+  frequentlyAskedQuestions: 'frequentlyAskedQuestions',
+  publicFrequentlyAskedQuestions: 'publicFrequentlyAskedQuestions'
 };
 
 export default queryKeys;

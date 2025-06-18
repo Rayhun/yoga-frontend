@@ -19,6 +19,7 @@ import {
   FaTags,
   FaUser,
   FaChalkboardTeacher,
+  FaQuestion
 } from 'react-icons/fa';
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
@@ -176,6 +177,13 @@ const ADMIN = [
     label: 'Tracker',
     href: '/portal/admin/tracker',
     isActive: pathname => pathname.includes('/portal/admin/tracker'),
+    disabled: false,
+  },
+  {
+    Icon: FaQuestion,
+    label: 'FAQs',
+    href: '/portal/admin/faq',
+    isActive: pathname => pathname.includes('/portal/admin/faq'),
     disabled: false,
   },
 ];
