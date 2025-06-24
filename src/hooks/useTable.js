@@ -16,10 +16,8 @@ function useTable({ columns = [], queryFn, queryKey, rowActions = [], removeActi
               header: 'Action',
               cell: ({ row }) => (
                 <TableActions
-                  actions={rowActions.map(action => ({
-                    ...action,
-                    onClick: () => action.onClick(row),
-                  }))}
+                  row={row}
+                  actions={rowActions}
                 />
               ),
             },

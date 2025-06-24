@@ -85,7 +85,7 @@ const steps = [
   { label: 'Verify Phone' },
 ];
 
-const Stepper = ({ activeStep = 1 }) => {
+const Stepper = ({ activeStep = 1, formSteps = steps }) => {
   const muiActiveStep = activeStep - 1;
   
   return (
@@ -95,7 +95,7 @@ const Stepper = ({ activeStep = 1 }) => {
         activeStep={muiActiveStep}
         connector={<CustomConnector />}
       >
-        {steps.map((step, index) => (
+        {formSteps.map((step, index) => (
           <Step key={step.label}>
             <CustomStepLabel StepIconComponent={CustomStepIcon}>
               {step.label}

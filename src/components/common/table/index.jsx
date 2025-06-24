@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export const IndeterminateCheckbox = ({ indeterminate, className = '', ...rest }) => {
   const ref = useRef(null);
@@ -35,16 +35,23 @@ export const IndeterminateCheckbox = ({ indeterminate, className = '', ...rest }
   );
 };
 
-export const TableActions = ({ actions = [] }) => {
-  return (
-    <div className="flex items-center space-x-3.5">
-      {actions.map(({ id, Icon, ...rest }) => (
-        <button {...rest} key={id} className="hover:text-primary">
-          <Icon size={20} />
-        </button>
-      ))}
-    </div>
-  );
+export const TableActions = ({ row, actions = [] }) => {
+  const actionsWithRender = useMemo(() => {
+    return actions.map(action => {
+      const shouldRenderAction = action.render ? action.render(row) : true;
+
+      return {
+        ...action,
+        render: shouldRenderAction && (
+          <button key={action.id} onClick={() => action.onClick(row)} className="hover:text-primary">
+            <action.Icon size={20} />
+          </button>
+        ),
+      };
+    });
+  }, [row, actions]);
+
+  return <div className="flex items-center space-x-3.5">{actionsWithRender.map(({ render }) => render)}</div>;
 };
 
 export { default as BasicTable } from './BasicTable';

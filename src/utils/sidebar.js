@@ -50,6 +50,13 @@ const SESSIONS_SUBMENU_ROUTES = [
   '/portal/admin/lms/session/audio',
 ];
 
+const AFFILIATES_USERS_ROUTES = [
+  '/portal/admin/affiliates/dashobaord',
+  '/portal/admin/affiliates/users',
+  '/portal/admin/affiliates/comission_type',
+];
+
+
 const ADMIN = [
   {
     Icon: MdOutlineHome,
@@ -99,6 +106,29 @@ const ADMIN = [
     href: '/portal/admin/lms/module',
     isActive: pathname => pathname.includes('/portal/admin/lms/module'),
     disabled: false,
+  },
+  {
+    Icon: FaTv,
+    label: 'Affiliates',
+    disabled: false,
+    hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Dashboard',
+        href: '/portal/admin/affiliates/dashboard',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/dashboard'),
+      },
+      {
+        label: 'Affiliates',
+        href: '/portal/admin/affiliates/users',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/users'),
+      },
+      {
+        label: 'Commision Types',
+        href: '/portal/admin/affiliates/commission_type',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/commission_type'),
+      },
+    ],
   },
   {
     Icon: FaTv,
