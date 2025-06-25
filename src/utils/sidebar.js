@@ -7,7 +7,8 @@ import {
   MdPages,
   MdOutlineEventNote,
   MdOutlinePayments,
-  MdTrackChanges
+  MdTrackChanges,
+  MdGroupAdd
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -377,6 +378,24 @@ const TEACHER = [
   },
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER, TEACHER };
+const AFFILIATE = [
+  {
+    Icon: MdHome,
+    label: 'Dashboard',
+    href: '/portal/affiliate/dashboard',
+    isActive: pathname => pathname === '/portal/affiliate/dashboard',
+    disabled: false,
+  },
+  {
+    Icon: MdGroupAdd,
+    label: 'Referrals',
+    href: '/portal/affiliate/referrals',
+    isActive: pathname => pathname === '/portal/affiliate/referrals',
+    disabled: false,
+  },
+  
+];
+
+const SIDEBAR = { ADMIN, CUSTOMER, TEACHER, AFFILIATE };
 
 export default SIDEBAR;

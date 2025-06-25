@@ -57,7 +57,8 @@ const queryKeys = {
   frequentlyAskedQuestions: 'frequentlyAskedQuestions',
   publicFrequentlyAskedQuestions: 'publicFrequentlyAskedQuestions',
   commissionTypeList: 'commissionTypeList',
-  affiliateUsers: 'affiliateUsers'
+  affiliateUsers: 'affiliateUsers',
+  referralsDetails: 'referralsDetails'
 };
 
 export default queryKeys;

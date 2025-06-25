@@ -56,13 +56,14 @@ function AuthProvider({ children }) {
   // User Role Checks
   const isAdmin = userProfile?.role === USER_ROLE.ADMIN;
   const isCustomer = userProfile?.role === USER_ROLE.CUSTOMER;
+  const isAffiliate = userProfile?.role === USER_ROLE.AFFILIATE;
   const isIndividualCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.INDIVIDUAL;
   const isBusinessCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.BUSINESS;
 
   return (
     <AuthContext.Provider
       value={{
-        user: { ...userDetails, isAdmin, isCustomer, isIndividualCustomer, isBusinessCustomer },
+        user: { ...userDetails, isAdmin, isCustomer, isIndividualCustomer, isBusinessCustomer, isAffiliate },
         logout,
       }}
     >
