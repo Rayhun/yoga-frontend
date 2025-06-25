@@ -7,7 +7,8 @@ import {
   MdPages,
   MdOutlineEventNote,
   MdOutlinePayments,
-  MdTrackChanges
+  MdTrackChanges,
+  MdGroupAdd
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -49,6 +50,13 @@ const SESSIONS_SUBMENU_ROUTES = [
   '/portal/admin/lms/session/image',
   '/portal/admin/lms/session/audio',
 ];
+
+const AFFILIATES_USERS_ROUTES = [
+  '/portal/admin/affiliates/dashobaord',
+  '/portal/admin/affiliates/users',
+  '/portal/admin/affiliates/comission_type',
+];
+
 
 const ADMIN = [
   {
@@ -99,6 +107,29 @@ const ADMIN = [
     href: '/portal/admin/lms/module',
     isActive: pathname => pathname.includes('/portal/admin/lms/module'),
     disabled: false,
+  },
+  {
+    Icon: FaTv,
+    label: 'Affiliates',
+    disabled: false,
+    hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Dashboard',
+        href: '/portal/admin/affiliates/dashboard',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/dashboard'),
+      },
+      {
+        label: 'Affiliates',
+        href: '/portal/admin/affiliates/users',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/users'),
+      },
+      {
+        label: 'Commision Types',
+        href: '/portal/admin/affiliates/commission_type',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/commission_type'),
+      },
+    ],
   },
   {
     Icon: FaTv,
@@ -347,6 +378,24 @@ const TEACHER = [
   },
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER, TEACHER };
+const AFFILIATE = [
+  {
+    Icon: MdHome,
+    label: 'Dashboard',
+    href: '/portal/affiliate/dashboard',
+    isActive: pathname => pathname === '/portal/affiliate/dashboard',
+    disabled: false,
+  },
+  {
+    Icon: MdGroupAdd,
+    label: 'Referrals',
+    href: '/portal/affiliate/referrals',
+    isActive: pathname => pathname === '/portal/affiliate/referrals',
+    disabled: false,
+  },
+  
+];
+
+const SIDEBAR = { ADMIN, CUSTOMER, TEACHER, AFFILIATE };
 
 export default SIDEBAR;

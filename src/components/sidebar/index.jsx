@@ -62,6 +62,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.TEACHER) return SIDEBAR.TEACHER;
+    if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
   }, [userRole]);
 
@@ -85,7 +86,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >

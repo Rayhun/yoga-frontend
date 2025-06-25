@@ -55,7 +55,10 @@ const queryKeys = {
   adminGetGoalsTracker: 'adminGetGoalsTracker',
   adminGetGoalsTrackerDetails: 'adminGetGoalsTrackerDetails',
   frequentlyAskedQuestions: 'frequentlyAskedQuestions',
-  publicFrequentlyAskedQuestions: 'publicFrequentlyAskedQuestions'
+  publicFrequentlyAskedQuestions: 'publicFrequentlyAskedQuestions',
+  commissionTypeList: 'commissionTypeList',
+  affiliateUsers: 'affiliateUsers',
+  referralsDetails: 'referralsDetails'
 };
 
 export default queryKeys;

@@ -3,14 +3,15 @@ import { useCallback, useMemo } from 'react';
 import { useField, useFormikContext } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import { COUNTRIES_CALLING_CODE } from '@/utils/constants';
 
-const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null }) => {
+const FormikCountrySelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null }) => {
   const { setFieldValue } = useFormikContext();
   const [field, meta] = useField(name);
 
   const handleChange = useCallback(
     (_, selected) => {
-      const selectedValue = selected?.value || '';
+      const selectedValue = selected?.name || '';
       setFieldValue(name, selectedValue);
       onChange(selectedValue);
     },
@@ -18,7 +19,7 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
   );
 
   const selectedOption = useMemo(
-    () => options.find(option => field.value === option.value),
+    () => options.find(option => field.value === option.name),
     [field.value, options]
   );
 
@@ -34,9 +35,9 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
       <div className="relative">
         <Autocomplete
           id={name}
-          options={options}
-          getOptionLabel={option => option.label}
-          getOptionKey={option => option.value}
+          options={COUNTRIES_CALLING_CODE}
+          getOptionLabel={option => `${option.flag} ${option.name}`}
+          getOptionKey={option => option.name}
           value={selectedOption || null}
           onChange={handleChange}
           renderInput={params => (
@@ -53,8 +54,7 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
               sx: {
                 boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
                 borderWidth: '2px',
-                borderColor: '#e2e8f0',
-                zIndex: 1000
+                borderColor: '#e2e8f0'
               }
             }
           }}
@@ -71,4 +71,4 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
   );
 };
 
-export default FormikSelect;
+export default FormikCountrySelect;
