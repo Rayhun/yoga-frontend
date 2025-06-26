@@ -23,6 +23,10 @@ const CommissionTypeList = () => {
         header: 'Percentage',
         accessorKey: 'percentage',
       },
+      {
+        header: 'Payout Duration',
+        accessorKey: 'payout_duration',
+      },
     ],
     []
   );

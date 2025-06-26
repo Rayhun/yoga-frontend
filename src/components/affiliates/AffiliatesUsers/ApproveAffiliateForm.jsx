@@ -7,6 +7,7 @@ import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { Modal, CircularProgress } from '@mui/material';
 import { getCommisionTypesList } from '@/services/private/affiliates/commission';
 import { useMemo } from 'react';
+import { getSubscriptionPagesList } from '@/services/private/subscription/page';
 
 const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
   const {
@@ -19,23 +20,20 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
     queryKey: [queryKeys.commissionTypeList],
   });
 
-  const DURATION_OPTIONS = [
-    { label: '1-month', value: '1' },
-    { label: '3-month', value: '3' },
-    { label: '6-month', value: '6' },
-    { label: '12-month', value: '12' },
-    { label: 'Forever', value: '0' },
-  ];
+  const { isLoading: isLoadingPages, data: subscriptions } = useQuery({
+    queryFn: getSubscriptionPagesList,
+    queryKey: [queryKeys.subscriptionPages],
+  });
 
   const initialValues = {
     commission_type: '',
-    payout_duration: '',
+    referral_link: '',
     status: 'Approved',
   };
 
   const validationSchema = Yup.object({
     commission_type: Yup.string().required('Commission type is required'),
-    payout_duration: Yup.string().required('Duration is required'),
+    referral_link: Yup.string().required('Referral link is required'),
   });
 
   const commissionTypeOptions = useMemo(
@@ -46,6 +44,16 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
       })) || [],
     [commissionTypes]
   );
+
+  const subscriptionsOptions = useMemo(
+    () => 
+      subscriptions?.data?.map(page => ({
+        label: page.title,
+        value: page.id,
+      })) || [],
+    [subscriptions]
+  );
+
 
   return (
     <Modal
@@ -89,10 +97,10 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
                 />
 
                 <FormikSelect
-                  name="payout_duration"
-                  label="Payout Duration"
-                  placeholder="Select Duration"
-                  options={DURATION_OPTIONS}
+                  name="referral_link"
+                  label="Refferal Link"
+                  placeholder="Select Referral Link"
+                  options={subscriptionsOptions}
                   required
                 />
 

@@ -13,6 +13,9 @@ const CommissionTypeDetails = ({ data = {} }) => {
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data?.title}</DetailsRecord>
         <DetailsRecord label="Percentage">{data?.percentage}</DetailsRecord>
+        <DetailsRecord label="Payout Duration">
+          {data?.payout_duration === 0 ? 'Forever' : data?.payout_duration + '-months'}
+        </DetailsRecord>
       </div>
     </DetailsLayoutWrapper>
   );
