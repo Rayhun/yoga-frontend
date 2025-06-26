@@ -10,6 +10,15 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import { createNewCommissionType, updateCommissionType } from '@/services/private/affiliates/commission';
+import FormikSelect from '@/components/common/form/formik/FormikSelect';
+
+const DURATION_OPTIONS = [
+  { label: '1-month', value: '1' },
+  { label: '3-month', value: '3' },
+  { label: '6-month', value: '6' },
+  { label: '12-month', value: '12' },
+  { label: 'Forever', value: '0' },
+];
 
 const CommissionTypeForm = ({ selected }) => {
   const router = useRouter();
@@ -26,11 +35,13 @@ const CommissionTypeForm = ({ selected }) => {
   const initialValues = {
     title: selected?.title || '',
     percentage: selected?.percentage || '',
+    payout_duration: String(selected?.payout_duration) || '',
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
-    percentage: Yup.string().required('Perecentage is required'),
+    percentage: Yup.string().required('Perecentage is required').max(100, 'Percentage must be less than 100'),
+    payout_duration: Yup.string().required('Payout Duration is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -44,9 +55,7 @@ const CommissionTypeForm = ({ selected }) => {
       }
       await queryClient.invalidateQueries([
         {
-          queryKey: isEditMode
-            ? [queryKeys.commissionTypeList, selected.id]
-            : [queryKeys.commissionTypeList],
+          queryKey: isEditMode ? [queryKeys.commissionTypeList, selected.id] : [queryKeys.commissionTypeList],
         },
       ]);
       router.push('/portal/admin/affiliates/commission_type');
@@ -67,18 +76,22 @@ const CommissionTypeForm = ({ selected }) => {
       >
         {({ isSubmitting }) => (
           <Form className="flex flex-col gap-3">
+            <FormikField name="title" label="Title" placeholder="Title" required />
+            <FormikField
+              name="percentage"
+              label="Percentage(%)"
+              placeholder="Percentage"
+              required
+              type="number"
+            />
 
-              <FormikField name="title" label="Title" placeholder="Title" required />
-              <FormikField
-                name="percentage"
-                label="Percentage(%)"
-                placeholder="Percentage"
-                required
-                type='number'
-                // min={0}
-                // max={100}
-              />
-
+            <FormikSelect
+              name="payout_duration"
+              label="Payout Duration"
+              placeholder="Select Duration"
+              options={DURATION_OPTIONS}
+              required
+            />
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
