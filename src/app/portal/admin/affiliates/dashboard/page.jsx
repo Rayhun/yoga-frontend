@@ -1,4 +1,3 @@
-'use client';
 import AdminAffiliatedDashboard from '@/components/affiliates/AdminDashboard';
 
 const Page = () => {
