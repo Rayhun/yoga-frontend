@@ -31,11 +31,19 @@ const AffiliateUsersList = () => {
     () => [
       {
         header: 'Name',
-        accessorKey: 'first_name',
+        accessorKey: 'first_name'
       },
       {
         header: 'Email',
         accessorKey: 'email',
+      },
+      {
+        header: 'Type',
+        accessorKey: 'commission_type_name',
+      },
+      {
+        header: 'Total Earning',
+        accessorKey: 'total_earning',
       },
       {
         header: 'Country',

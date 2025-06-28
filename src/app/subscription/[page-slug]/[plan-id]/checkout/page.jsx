@@ -6,17 +6,21 @@ import { createCheckoutSessionForSubscriptionPlan } from '@/services/private/sub
 import queryKeys from '@/utils/query-keys';
 import StripeCheckout from '@/components/subscription/checkout/StripeCheckout';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
+import { useSearchParams } from 'next/navigation';
 
 const Page = ({ params }) => {
   const planID = params['plan-id'];
+  const searchParams = useSearchParams();
+
+  const refferalCode = searchParams.get('ref');
 
   const {
     data: response,
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => createCheckoutSessionForSubscriptionPlan({ id: planID }),
-    queryKey: [queryKeys.stripeCheckoutSessions, planID],
+    queryFn: () => createCheckoutSessionForSubscriptionPlan({ id: planID, refferalCode }),
+    queryKey: [queryKeys.stripeCheckoutSessions, planID, refferalCode],
   });
 
   useHandleApiResponse(failureReason);
