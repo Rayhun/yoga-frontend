@@ -1,10 +1,10 @@
 'use client';
-import { PageHeader } from '@/components/common/page';
+import AdminAffiliatedDashboard from '@/components/affiliates/AdminDashboard';
 
 const Page = () => {
   return (
     <div>
-      <PageHeader title="Dashboard" />
+      <AdminAffiliatedDashboard />
     </div>
   );
 };
