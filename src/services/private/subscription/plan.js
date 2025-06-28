@@ -20,6 +20,6 @@ export const deleteSingleSubscriptionPlan = async ({ id }) => {
   return axios.delete(`/subscription/plan/${id}/`);
 };
 
-export const createCheckoutSessionForSubscriptionPlan = async ({ id }) => {
+export const createCheckoutSessionForSubscriptionPlan = async ({ id, refferalCode }) => {
   return axios.post(`/subscription/plan/${id}/checkout/?ref=${refferalCode}`);
 };
