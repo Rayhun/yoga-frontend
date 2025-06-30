@@ -218,7 +218,7 @@ const AffiliatesSignupForm = () => {
               label={
                 <p>
                   By checking this box, I understand and agree to the{' '}
-                  <Link href="https://www.nourishdoc.com/terms" target="_blank" className="text-primary">
+                  <Link href="https://www.nourishdoc.com/affiliate-terms" target="_blank" className="text-primary">
                     Terms of Service
                   </Link>{' '}
                   and{' '}

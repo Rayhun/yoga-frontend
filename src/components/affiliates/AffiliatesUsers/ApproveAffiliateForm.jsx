@@ -8,8 +8,9 @@ import { Modal, CircularProgress } from '@mui/material';
 import { getCommisionTypesList } from '@/services/private/affiliates/commission';
 import { useMemo } from 'react';
 import { getSubscriptionPagesList } from '@/services/private/subscription/page';
+import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 
-const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
+const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit }) => {
   const {
     data: commissionTypes,
     isLoading,
@@ -26,14 +27,14 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
   });
 
   const initialValues = {
-    commission_type: '',
-    referral_link: '',
+    commission_type: selected?.commission_type || '',
+    referral_link: selected?.referral_link || [],
     status: 'Approved',
   };
 
   const validationSchema = Yup.object({
     commission_type: Yup.string().required('Commission type is required'),
-    referral_link: Yup.string().required('Referral link is required'),
+    referral_link: Yup.array().required('Referral link is required'),
   });
 
   const commissionTypeOptions = useMemo(
@@ -49,7 +50,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
     () => 
       subscriptions?.data?.map(page => ({
         label: page.title,
-        value: page.id,
+        value: page.url,
       })) || [],
     [subscriptions]
   );
@@ -94,9 +95,10 @@ const ApproveAffiliateForm = ({ show = false, onClose, handleSubmit }) => {
                   placeholder="Select Commission Type"
                   options={commissionTypeOptions}
                   required
+                  disabled={selected}
                 />
 
-                <FormikSelect
+                <FormikMultiSelect
                   name="referral_link"
                   label="Refferal Link"
                   placeholder="Select Referral Link"
