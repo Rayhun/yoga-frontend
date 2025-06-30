@@ -12,6 +12,7 @@ const ReferralsDetails = ({ data = {} }) => {
     });
   };
 
+
   return (
     <DetailsLayoutWrapper title="Your Referral Links">
       <div className="space-y-6">
@@ -29,25 +30,27 @@ const ReferralsDetails = ({ data = {} }) => {
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-1">Custom Landing Page</h3>
-          <div className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
-            <span className="truncate text-gray-800">{data.referral_link}</span>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handleCopy(data.referral_link, 'Referral link')}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiCopy size={20} />
-              </button>
-              <a
-                href={data.referral_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiExternalLink size={20} />
-              </a>
+          {data?.referral_link?.map((link, index) => (
+            <div key={index} className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
+              <span className="truncate text-gray-800">{link}</span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleCopy(link, 'Referral link')}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <FiCopy size={20} />
+                </button>
+                <a
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <FiExternalLink size={20} />
+                </a>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
         <div className="flex space-x-4 pt-4">
           <button
