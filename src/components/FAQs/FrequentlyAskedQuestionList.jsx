@@ -28,6 +28,10 @@ const FrequentlyAskedQuestions = () => {
         header: 'Answer',
         accessorKey: 'description',
       },
+      {
+        header: 'Order',
+        accessorKey: 'ordering',
+      },
     ],
     []
   );

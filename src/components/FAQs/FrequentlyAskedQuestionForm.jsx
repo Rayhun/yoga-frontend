@@ -23,14 +23,17 @@ const FrequentlyAskedQuestionForm = ({ selected }) => {
     mutationFn: updateExistingQuestion,
   });
 
+
   const initialValues = {
     title: selected?.title || '',
     description: selected?.description || '',
+    ordering: selected?.ordering || 0,
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Question is required'),
     description: Yup.string().required('Description is required'),
+    ordering: Yup.number().required('Order is required').min(1).max(999),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -67,16 +70,22 @@ const FrequentlyAskedQuestionForm = ({ selected }) => {
       >
         {({ isSubmitting }) => (
           <Form className="flex flex-col gap-3">
+            <FormikField name="title" label="Question" placeholder="Question" required />
+            <FormikField
+              name="description"
+              label="Answer"
+              rows={4}
+              placeholder="Write answer here..."
+              required
+            />
 
-              <FormikField name="title" label="Question" placeholder="Question" required />
-              <FormikField
-                name="description"
-                label="Answer"
-                rows={4}
-                placeholder="Write answer here..."
-                required
-              />
-
+            <FormikField
+              name="ordering"
+              label="Order"
+              placeholder="Order"
+              required
+              type="number"
+            />
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}

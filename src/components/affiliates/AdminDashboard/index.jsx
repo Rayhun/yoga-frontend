@@ -1,7 +1,5 @@
 'use client';
 import React from 'react';
-import ChartOne from '../../charts/ChartOne';
-import ChartTwo from '../../charts/ChartTwo';
 import CardDataStats from '../../stats/CardDataStats';
 import { FiUserCheck, FiDollarSign } from 'react-icons/fi';
 import { TbUsers } from 'react-icons/tb';
@@ -52,9 +50,8 @@ const AdminAffiliatedDashboard = () => {
         </CardDataStats>
       </div>
 
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+      <div className="mt-4 ">
         <EarningChart earnings_over_time={dashboardData?.earnings_over_time} />
-        <ChartTwo />
       </div>
     </>
   );

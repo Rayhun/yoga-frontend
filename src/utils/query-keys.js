@@ -60,7 +60,8 @@ const queryKeys = {
   affiliateUsers: 'affiliateUsers',
   referralsDetails: 'referralsDetails',
   affiliatesUsersAdminDashboard: 'affiliatesUsersAdminDashboard',
-  affiliatesUsersDashboard: 'affiliatesUsersDashboard'
+  affiliatesUsersDashboard: 'affiliatesUsersDashboard',
+  payoutList: 'payoutList',
 };
 
 export default queryKeys;

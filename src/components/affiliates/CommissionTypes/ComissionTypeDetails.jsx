@@ -14,7 +14,7 @@ const CommissionTypeDetails = ({ data = {} }) => {
         <DetailsRecord label="Title">{data?.title}</DetailsRecord>
         <DetailsRecord label="Percentage">{data?.percentage}</DetailsRecord>
         <DetailsRecord label="Payout Duration">
-          {data?.payout_duration === 0 ? 'Forever' : data?.payout_duration + '-months'}
+          {data?.payout_duration === 0 ? 'Forever' : data?.payout_duration + '-month(s)'}
         </DetailsRecord>
       </div>
     </DetailsLayoutWrapper>

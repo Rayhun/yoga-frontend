@@ -10,15 +10,8 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import { createNewCommissionType, updateCommissionType } from '@/services/private/affiliates/commission';
-import FormikSelect from '@/components/common/form/formik/FormikSelect';
-
-const DURATION_OPTIONS = [
-  { label: '1-month', value: '1' },
-  { label: '3-month', value: '3' },
-  { label: '6-month', value: '6' },
-  { label: '12-month', value: '12' },
-  { label: 'Forever', value: '0' },
-];
+import { IconButton, Tooltip } from '@mui/material';
+import { MdInfoOutline } from 'react-icons/md';
 
 const CommissionTypeForm = ({ selected }) => {
   const router = useRouter();
@@ -66,6 +59,14 @@ const CommissionTypeForm = ({ selected }) => {
     }
   };
 
+  const helperIcon = (
+    <Tooltip arrow placement="right" title="Payout Duration is the number of months after the customer purchases the product or service, the affiliate will receive the commission. 0 means forever.">
+      <IconButton>
+        <MdInfoOutline />
+      </IconButton>
+    </Tooltip>
+  );
+
   return (
     <FormLayoutWrapper title="Commission Type Form" description="Add or edit a commission type">
       <Formik
@@ -85,12 +86,13 @@ const CommissionTypeForm = ({ selected }) => {
               type="number"
             />
 
-            <FormikSelect
+            <FormikField
               name="payout_duration"
               label="Payout Duration"
               placeholder="Select Duration"
-              options={DURATION_OPTIONS}
+              type="number"
               required
+              helperIcon={helperIcon}
             />
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>

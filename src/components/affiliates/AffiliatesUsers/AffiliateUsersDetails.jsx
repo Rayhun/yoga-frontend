@@ -19,6 +19,7 @@ const AffiliateUsersDetails = ({ data = {} }) => {
         <DetailsRecord label="Name">{`${data?.first_name} ${data?.last_name}`}</DetailsRecord>
         <DetailsRecord label="Email">{data?.email}</DetailsRecord>
         <DetailsRecord label="Pay Email">{data?.paypal_email}</DetailsRecord>
+        <DetailsRecord label="Business Model"><span className='capitalize'>{data?.business_model}</span></DetailsRecord>
         <DetailsRecord label="Payout Duration">{DURATION_OPTIONS[data?.payout_duration] || "N/A"}</DetailsRecord>
         <DetailsRecord label="Commission Type">{data?.commission_type_name || "N/A"}</DetailsRecord>
         <DetailsRecord label="Percentage">{data?.percentage ? `${data?.percentage}%`: "N/A"}</DetailsRecord>
@@ -26,14 +27,14 @@ const AffiliateUsersDetails = ({ data = {} }) => {
         <DetailsRecord label="Refferral Count">{data?.referral_count || "N/A"}</DetailsRecord>
         <DetailsRecord label="Refferral Links">
           <a href={data?.referral_link} target="_blank" rel="noopener noreferrer" className="flex flex-wrap gap-2">
-            {data?.referral_link.map(link => (
+            {data?.referral_link?.map(link => (
               <ProfileChip key={link} label={link} />
             ))}
           </a>
         </DetailsRecord>
         <DetailsRecord label="Channels">
           <span className="flex flex-wrap gap-2">
-            {data?.channels.map(channel => (
+            {data?.channels?.map(channel => (
               <ProfileChip key={channel} label={channel} />
             ))}
           </span>

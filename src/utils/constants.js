@@ -2565,3 +2565,14 @@ export const MONTHLY_GOAL_TYPES = [
   {name: 'Relationship', value: 'relationship'},
   {name: 'Relationship', value: 'relationship'},
 ]
+
+export const BUSINESS_MODELS = [
+  {label: 'Wellness Coach / Practitioner', value: 'wellness coach / practitioner'},
+  {label: 'Gym / Studio Owner', value: 'gym / studio owner'},
+  {label: 'Wellness Retailer', value: 'wellness retailer'},
+  {label: 'Blogger / Content Creator', value: 'blogger / content creator'},
+  {label: 'Podcast Host', value: 'podcast host'},
+  {label: 'Online Program Seller', value: 'online program seller'},
+  {label: 'Affiliate Marketer', value: 'affiliate marketer'},
+  {label: 'Other', value: 'other'},
+]
