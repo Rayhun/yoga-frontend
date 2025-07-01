@@ -17,6 +17,8 @@ import { registerNewAffiliateUser } from '@/services/private/affiliates/users';
 import FormikSubmittable from '../common/form/formik/FormikSubmittable';
 import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikCountrySelect from '../common/form/formik/FormikCountrySelect';
+import FormikSelect from '../common/form/formik/FormikSelect';
+import { BUSINESS_MODELS } from '@/utils/constants';
 
 const AffiliatesSignupForm = () => {
   const router = useRouter();
@@ -184,11 +186,11 @@ const AffiliatesSignupForm = () => {
               required
               disabled={values?.channels?.length >= 5}
             />
-            <FormikField
+            <FormikSelect
               name="business_model"
               label="Business Model"
               placeholder="Business Model"
-              Icon={LuBriefcaseBusiness}
+              options={BUSINESS_MODELS}
               required
             />
             <FormikCountrySelect name="country" label="Country" required />

@@ -129,7 +129,7 @@ const AffiliateUsersList = () => {
         onClick: row => handleEdit(row?.original),
       },
     ],
-    [setSelected, handDecline, router]
+    [setSelected, handDecline, router, handleEdit]
   );
 
   const { isLoading, columns, data } = useTable({

@@ -10,6 +10,7 @@ const FormikField = ({
   rows = 1,
   Icon,
   type = 'text',
+  helperIcon = null,
   ...fieldProps
 }) => {
   const [typeState, setTypeState] = useState(type);
@@ -24,9 +25,12 @@ const FormikField = ({
   return (
     <div className="flex flex-col gap-1">
       {label ? (
-        <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
-          {label}
-        </label>
+        <div className="flex items-center gap-2">
+          <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
+            {label}
+          </label>
+          {helperIcon}
+        </div>
       ) : null}
       <div className="relative">
         {rows > 1 ? (

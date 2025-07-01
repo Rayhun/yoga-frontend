@@ -28,7 +28,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
 
   const initialValues = {
     commission_type: selected?.commission_type || '',
-    referral_link: selected?.referral_link || [],
+    referral_link: selected?.referral_link?.map(link => link.split('?')[0]) || [],
     status: 'Approved',
   };
 
@@ -95,7 +95,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
                   placeholder="Select Commission Type"
                   options={commissionTypeOptions}
                   required
-                  disabled={selected}
+                  disabled={!!selected}
                 />
 
                 <FormikMultiSelect

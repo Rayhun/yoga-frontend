@@ -55,6 +55,7 @@ const AFFILIATES_USERS_ROUTES = [
   '/portal/admin/affiliates/dashobaord',
   '/portal/admin/affiliates/users',
   '/portal/admin/affiliates/comission_type',
+  '/portal/admin/affiliates/payout_list'
 ];
 
 
@@ -128,6 +129,11 @@ const ADMIN = [
         label: 'Commision Types',
         href: '/portal/admin/affiliates/commission_type',
         isActive: pathname => pathname.includes('/portal/admin/affiliates/commission_type'),
+      },
+      {
+        label: 'Payout List',
+        href: '/portal/admin/affiliates/payout_list',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/payout_list'),
       },
     ],
   },
