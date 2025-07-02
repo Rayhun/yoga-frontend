@@ -30,6 +30,7 @@ const ReferralsDetails = ({ data = {} }) => {
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-1">Custom Landing Page</h3>
+          <div className='space-y-4'>
           {data?.referral_link?.map((link, index) => (
             <div key={index} className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
               <span className="truncate text-gray-800">{link}</span>
@@ -51,8 +52,9 @@ const ReferralsDetails = ({ data = {} }) => {
               </div>
             </div>
           ))}
+          </div>
         </div>
-        <div className="flex space-x-4 pt-4">
+        {/* <div className="flex space-x-4 pt-4">
           <button
             onClick={() => handleCopy(data.referral_link, 'Referral link')}
             className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition"
@@ -62,14 +64,13 @@ const ReferralsDetails = ({ data = {} }) => {
           </button>
           <button
             onClick={() => {
-              /* download logic here */
             }}
             className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
           >
             <FiDownload size={18} />
             <span>Download Assets</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </DetailsLayoutWrapper>
   );
