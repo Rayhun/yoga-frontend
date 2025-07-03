@@ -182,7 +182,7 @@ const AffiliatesSignupForm = () => {
             <FormikSubmittable
               name="channels"
               label="Channels"
-              placeholder="Add a Channels, Press return to confirm, max 5."
+              placeholder="Where will you share your affiliate link? (e.g., Instagram, TikTok, YouTube, Podcast, Blog, etc.)"
               required
               disabled={values?.channels?.length >= 5}
             />
@@ -219,19 +219,19 @@ const AffiliatesSignupForm = () => {
               name="terms"
               label={
                 <p>
-                  By checking this box, I understand and agree to the{' '}
+                  By checking this box, I agree to the{' '}
                   <Link href="https://www.nourishdoc.com/affiliate-terms" target="_blank" className="text-primary">
-                    Terms of Service
+                    Affiliate Terms & Conditions
                   </Link>{' '}
-                  and{' '}
-                  <Link
+                    and understand that all payouts will be made via PayPal.{' '}
+                  {/* <Link
                     href="https://www.nourishdoc.com/privacy-policy"
                     target="_blank"
                     className="text-primary"
                   >
                     Privacy Policy
                   </Link>
-                  .
+                  . */}
                 </p>
               }
               required

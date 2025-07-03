@@ -81,13 +81,13 @@ const PayoutList = () => {
     () => [
       {
         id: 'approved',
-        render: row => row?.original?.status === 'Pending',
+        render: row => row?.original?.status === 'Pending' || row?.original?.status === 'Declined',
         Icon: FaRegCircleCheck,
         onClick: row => handleUpdateStatus(row?.original?.id, 'Approved'),
       },
       {
         id: 'declined',
-        render: row => row?.original?.status === 'Pending',
+        render: row => row?.original?.status === 'Pending' || row?.original?.status === 'Approved',
         Icon: FaRegCircleXmark,
         onClick: row => handleUpdateStatus(row?.original?.id, 'Declined'),
       },

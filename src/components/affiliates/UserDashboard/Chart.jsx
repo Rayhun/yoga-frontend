@@ -6,8 +6,8 @@ import { useUI } from '@/context/UIProvider';
 const baseOptions = {
   chart: {
     fontFamily: 'Satoshi, sans-serif',
-    type: 'bar',
-    stacked: true,
+    type: 'line',
+    stacked: false,
     toolbar: { show: false },
     zoom: { enabled: false },
     height: 335,
@@ -22,18 +22,32 @@ const baseOptions = {
       },
     },
   ],
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      borderRadius: 0,
-      columnWidth: '25%',
-      borderRadiusApplication: 'end',
-      borderRadiusWhenStacked: 'last',
-    },
+  stroke: {
+    width: [2, 2],
+    curve: 'smooth',
   },
   dataLabels: { enabled: false },
+  markers: {
+    size: 4,
+    colors: '#fff',
+    strokeWidth: 3,
+    strokeOpacity: 0.9,
+    strokeDashArray: 0,
+    fillOpacity: 1,
+    discrete: [],
+    hover: {
+      size: undefined,
+      sizeOffset: 5,
+    },
+  },
   xaxis: {
     categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+    axisBorder: {
+      show: false,
+    },
+    axisTicks: {
+      show: false,
+    },
   },
   legend: {
     position: 'top',
@@ -42,16 +56,19 @@ const baseOptions = {
     fontWeight: 500,
     fontSize: '14px',
   },
-  fill: { opacity: 1 },
+  fill: {
+    opacity: 1,
+  },
 };
 
 const ConversionChart = ({ traffic_conversions = {} }) => {
   const { theme } = useUI();
   const { conversions = [], traffic = [] } = traffic_conversions;
+
   const categories = baseOptions.xaxis.categories;
 
-  // Pad or truncate to exactly 7 points
-  const normalize = (arr) => {
+
+  const normalize = arr => {
     const len = categories.length;
     if (arr.length >= len) return arr.slice(0, len);
     return [...arr, ...Array(len - arr.length).fill(0)];
@@ -60,7 +77,7 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
   const series = useMemo(
     () => [
       { name: 'Conversions', data: normalize(conversions) },
-      { name: 'Traffic',     data: normalize(traffic)     },
+      { name: 'Traffic', data: normalize(traffic) },
     ],
     [conversions, traffic]
   );
@@ -69,6 +86,9 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
     () => ({
       ...baseOptions,
       colors: [theme.colors.primary, theme.colors.secondary],
+      markers: {
+        strokeColors: [theme.colors.primary, theme.colors.secondary],
+      },
     }),
     [theme]
   );
@@ -76,16 +96,14 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
       <div className="mb-4 justify-between gap-4 sm:flex">
-        <h4 className="text-xl font-semibold text-black dark:text-white">
-          Profit this week
-        </h4>
+        <h4 className="text-xl font-semibold text-black dark:text-white">Conversions & Traffic Over Time</h4>
       </div>
 
       <div id="chartTwo" className="-mb-9 -ml-5">
         <ReactApexChart
           options={options}
           series={series}
-          type="bar"
+          type="line"
           height={350}
         />
       </div>
