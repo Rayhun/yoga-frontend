@@ -54,23 +54,24 @@ const ReferralsDetails = ({ data = {} }) => {
           ))}
           </div>
         </div>
-        {/* <div className="flex space-x-4 pt-4">
-          <button
+        <div className="flex space-x-4 pt-4">
+          {/* <button
             onClick={() => handleCopy(data.referral_link, 'Referral link')}
             className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition"
           >
             <FiShare2 size={18} />
             <span>Share Links</span>
-          </button>
-          <button
-            onClick={() => {
-            }}
-            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+          </button> */}
+          
+          <a
+            href='https://www.nourishdoc.com/affiliate-marketing-assets'
+            target='_blank'
+            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition"
           >
             <FiDownload size={18} />
             <span>Download Assets</span>
-          </button>
-        </div> */}
+          </a>
+        </div>
       </div>
     </DetailsLayoutWrapper>
   );
