@@ -23,6 +23,7 @@ import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
+import { ACCESS_SETTING } from '@/utils/enums';
 
 const ProgramForm = ({ selected }) => {
   const router = useRouter();
@@ -52,6 +53,7 @@ const ProgramForm = ({ selected }) => {
         drip,
       })
     ),
+    price: selected?.price || 0,
   };
 
   const validationSchema = Yup.object({
@@ -81,6 +83,14 @@ const ProgramForm = ({ selected }) => {
         })
       )
       .min(1, 'At least 1 option is required.'),
+    price: Yup.number()
+      .when('access_setting', {
+        is: ACCESS_SETTING.buy_now,
+        then: schema => schema
+          .required('Price is required when buying now')
+          .typeError('Must be a number'),
+        otherwise: schema => schema.notRequired()
+      }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -115,7 +125,7 @@ const ProgramForm = ({ selected }) => {
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ isSubmitting }) => (
+        {({ values, isSubmitting }) => (
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
@@ -148,6 +158,9 @@ const ProgramForm = ({ selected }) => {
               <div className="w-full md:w-1/2">
                 <AccessSettingField required />
               </div>
+             {values.access_setting === ACCESS_SETTING.buy_now && <div className="w-full md:w-1/2">
+                <FormikField name="price" label="Price" placeholder="Price" type="number" required />
+              </div>}
               <div className="w-full md:w-1/2">
                 <VisibilitySettingField required />
               </div>

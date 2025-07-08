@@ -240,14 +240,14 @@ const CUSTOMER = [
     isActive: pathname => pathname === '/portal/inbox',
     disabled: false,
   },
-  {
-    Icon: FaUsers,
-    label: 'Users',
-    href: '/portal/customer/entities/users',
-    isActive: pathname => pathname.includes('/portal/customer/entities/users'),
-    permitted_sub_roles: [USER_SUB_ROLE.BUSINESS],
-    disabled: false,
-  },
+  // {
+  //   Icon: FaUsers,
+  //   label: 'Users',
+  //   href: '/portal/customer/entities/users',
+  //   isActive: pathname => pathname.includes('/portal/customer/entities/users'),
+  //   permitted_sub_roles: [USER_SUB_ROLE.BUSINESS],
+  //   disabled: false,
+  // },
   {
     Icon: FaNewspaper,
     label: 'Programs',
