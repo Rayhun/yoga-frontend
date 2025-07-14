@@ -137,6 +137,8 @@ const AffiliatesSignupForm = () => {
             });
             toastApiError(error);
           }
+        } finally {
+          setSubmitting(false);
         }
       });
     } catch (error) {

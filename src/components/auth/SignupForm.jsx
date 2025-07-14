@@ -38,7 +38,7 @@ const SignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().email('Invalid Email').required('Required!'),
     mobile_number: Yup.string()
-      .min(7, 'Invalid number. Please enter a complete number or remove any special characters.')
+      .min(12, 'Invalid number. Please enter a complete number or remove any special characters.')
       .matches(/^\+?[0-9]* ?[0-9]*$/, 'Mobile number should only contain digits, an optional plus at start, and at most one space')
       .required('Required!'),
     password: Yup.string()
@@ -121,6 +121,8 @@ const SignupForm = () => {
             });
             toastApiError(error);
           }
+        } finally {
+          setSubmitting(false);
         }
       });
     } catch (error) {
