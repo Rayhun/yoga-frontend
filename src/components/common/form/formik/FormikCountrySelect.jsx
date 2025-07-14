@@ -5,7 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { COUNTRIES_CALLING_CODE } from '@/utils/constants';
 
-const FormikCountrySelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null }) => {
+const FormikCountrySelect = ({ name, label, placeholder, Icon, required, onChange = () => null }) => {
   const { setFieldValue } = useFormikContext();
   const [field, meta] = useField(name);
 
@@ -19,8 +19,8 @@ const FormikCountrySelect = ({ name, label, options = [], placeholder, Icon, req
   );
 
   const selectedOption = useMemo(
-    () => options.find(option => field.value === option.name),
-    [field.value, options]
+    () => COUNTRIES_CALLING_CODE.find(option => field.value === option.name),
+    [field.value]
   );
 
   const isErrorField = Boolean(meta.touched && meta.error);
