@@ -34,7 +34,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
 
   const validationSchema = Yup.object({
     commission_type: Yup.string().required('Commission type is required'),
-    referral_link: Yup.array().required('Referral link is required'),
+    // referral_link: Yup.array().required('Referral link is required'),
   });
 
   const commissionTypeOptions = useMemo(
@@ -103,7 +103,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
                   label="Refferal Link"
                   placeholder="Select Referral Link"
                   options={subscriptionsOptions}
-                  required
+                  // required
                 />
 
                 <div className="flex justify-end gap-4">
