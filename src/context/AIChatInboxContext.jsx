@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, use, useContext, useEffect, useState } from 'react';
 import useChatSocket from '@/hooks/useChatSocket';
 import useAuthContext from '@/hooks/useAuthContext';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
@@ -36,6 +36,10 @@ function AIChatInboxProvider({ children }) {
 
   const roomID = type === 'ai_chat' ? ai_coach_id : ai_faq_id;
 
+  useEffect(() => {
+    setMessages(initialState.messages);
+  }, [type]);
+
   const {
     lastJsonMessage: chatRoomMessage,
     connection: chatRoomConnection,
@@ -44,21 +48,23 @@ function AIChatInboxProvider({ children }) {
 
   useEffect(() => {
     if (chatRoomMessage) {
-      setMessages(prevState => ({ ...prevState, data: [...prevState.data, chatRoomMessage.data] }));
+      setMessages(prevState => ({ ...prevState, data: [...prevState.data, chatRoomMessage] }));
     }
   }, [chatRoomMessage]);
 
-  useEffect(() => {
-    const emptyMessage = document.getElementById('empty-message');
-    emptyMessage?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.data]);
+  
+
+  const handleSendMessage = (message) => {
+    setMessages(prevState => ({ ...prevState, data: [...prevState.data, { message, isSentByMe: true }] }));
+    sendMessageToChatRoom({ message });
+  };
 
   return (
     <InboxContext.Provider
       value={{
         messages,
         connection: chatRoomConnection,
-        actions: { sendMessage: sendMessageToChatRoom },
+        actions: { sendMessage: handleSendMessage },
       }}
     >
       {children}
