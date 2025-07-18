@@ -5,7 +5,7 @@ import { useField } from 'formik';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 import IconButton from '@mui/material/IconButton';
-import { MdFileUpload, MdClose, MdAttachFile } from 'react-icons/md';
+import { MdFileUpload, MdDelete, MdAttachFile } from 'react-icons/md';
 import { getFileFromURL } from '@/utils/helpers';
 import { ONE_MB } from '@/utils/general';
 
@@ -120,8 +120,8 @@ function FormikDropzone({
               key={`${file?.name || file?.path}-${index}`}
               className="w-[150px] h-[150px] border border-slate-300 shadow rounded flex justify-center items-center relative"
             >
-              <IconButton className="absolute top-1 right-1 p-1" onClick={() => handleRemoveFile(file)}>
-                <MdClose size={20} color="red" />
+              <IconButton className="absolute top-1 right-1 p-1 bg-white bg-opacity-70" onClick={() => handleRemoveFile(file)}>
+                <MdDelete size={20} color="red" />
               </IconButton>
               {file?.type?.includes('image') ? (
                 <img src={URL.createObjectURL(file)} className="w-full h-full" alt="img" />
@@ -178,7 +178,7 @@ function FormikDropzone({
                     className="p-1 bg-white bg-opacity-70"
                     onClick={() => handleRemoveFile(file)}
                   >
-                    <MdClose size={20} color="red" />
+                    <MdDelete size={20} color="red" />
                   </IconButton>
                 </div>
               ))}

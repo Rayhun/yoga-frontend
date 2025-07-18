@@ -99,18 +99,20 @@ const ConversationsList = () => {
                 </div>
                 <div className="w-full">
                   <div className="flex items-center justify-between gap-2">
-                    <h5 className="text-sm line-clamp-1">{conversation.name}</h5>
-                    {conversation.time ? (
-                      <p className="text-[10px]">{dayjs(conversation.time).format('hh:mm A')}</p>
-                    ) : null}
+                    <h5 className="text-sm font-semibold truncate">{conversation.name}</h5>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm line-clamp-1">{conversation.message}</p>
+                    <p className="text-xs line-clamp-1">{conversation.message}</p>
                     {hasUnreadMessages && !isConversationActive > 0 ? (
                       <div className="bg-primary w-5 h-5 p-0.5 rounded-full text-white text-[10px] flex items-center justify-center">
                         {conversation.unread_count}
                       </div>
                     ) : null}
+                  </div>
+                  <div className='flex items-center justify-end gap-2'>
+                    {conversation.time ? (
+                        <p className="text-[10px]">{dayjs(conversation.time).format('hh:mm A')}</p>
+                      ) : null}
                   </div>
                 </div>
               </div>

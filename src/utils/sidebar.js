@@ -22,6 +22,8 @@ import {
   FaChalkboardTeacher,
   FaQuestion
 } from 'react-icons/fa';
+import { TbPrompt } from "react-icons/tb";
+
 import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
@@ -86,6 +88,13 @@ const ADMIN = [
     label: 'Groups',
     href: '/portal/admin/chat/group',
     isActive: pathname => pathname.includes('/portal/admin/chat/group'),
+    disabled: false,
+  },
+  {
+    Icon: TbPrompt,
+    label: 'AI Chat Prompts',
+    href: '/portal/admin/ai-prompts',
+    isActive: pathname => pathname.includes('/portal/admin/ai-prompts'),
     disabled: false,
   },
   {

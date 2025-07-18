@@ -31,7 +31,7 @@ const FormikSubmittable = ({
 
         const { name: fieldName, value: fieldValue } = event.target;
 
-        if (!fieldValue) return;
+        if (!fieldValue || fieldValue.trim() === '') return;
 
         setFieldValue(fieldName, [...field.value, fieldValue]);
         setValue('');

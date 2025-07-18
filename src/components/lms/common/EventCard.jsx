@@ -31,7 +31,7 @@ const EventCard = ({ event, onClick, isExpertView = false }) => {
           {event.agenda}
         </div>
 
-        <div className="flex gap-1 items-center text-sm text-gray-500">
+        <div className="flex gap-1 flex-wrap items-center text-sm text-gray-500">
           <p>{`${event.currency_symbol || '$'} ${event.price}`}</p>
           <GoDotFill size={8} />
           <p className="capitalize">{event.event_type}</p>

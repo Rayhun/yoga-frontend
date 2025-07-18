@@ -1,26 +1,27 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { FiSend } from 'react-icons/fi';
-import { useInbox } from '@/context/InboxContext';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
+import { useAIChatInbox } from '@/context/AIChatInboxContext';
 
 const MessageForm = () => {
-  const { get } = useSearchParamUtils();
+  const { get, remove } = useSearchParamUtils();
 
   const [inputText, setInputText] = useState(() => get('message') || '');
-  // const [attachments, setAttachments] = useState([]);
 
+  useEffect(() => {
+    if (get('message')) remove('message');
+  });
 
   const {
     actions: { sendMessage },
-  } = useInbox();
+  } = useAIChatInbox();
 
   const handleSendMessage = () => {
-    // if (inputText || attachments.length > 0) {
-    //   sendMessage({ message: inputText, attachments });
+    if (inputText || attachments.length > 0) {
+      sendMessage({ message: inputText });
       setInputText('');
-    //   setAttachments([]);
-    // }
+    }
   };
 
   const onInputChange = event => {

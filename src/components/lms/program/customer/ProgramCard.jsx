@@ -19,7 +19,7 @@ const ProgramCard = ({ program, onClick, isExpertView = false }) => {
 
       <div className="p-4 flex flex-col gap-1">
         <h4 className="text-lg font-semibold block truncate text-black dark:text-white">{program.title}</h4>
-        <div className="flex gap-1 items-center text-sm text-gray-500">
+        <div className="flex gap-1 flex-wrap items-center text-sm text-gray-500">
           {program?.is_paid && program?.price && (
             <>
               <p>{`${program.currency_symbol || '$'} ${program.price}`}</p>

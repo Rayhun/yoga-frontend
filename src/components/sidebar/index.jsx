@@ -7,7 +7,7 @@ import useAuthContext from '@/hooks/useAuthContext';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
-import { MdLogout } from 'react-icons/md';
+import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
@@ -16,6 +16,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const {
     user: {
       profile: { role: userRole, sub_role: userSubRole },
+      isCustomer
     },
     logout,
   } = useAuthContext();
@@ -217,6 +218,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </ul>
 
           {/* Logout */}
+         {isCustomer && <li className="list-none mt-auto">
+            <Link
+              className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
+              href={'/portal/ai-chat?type=support'}
+            >
+              <MdOutlineContactSupport size={24} />
+              Help & Support
+            </Link>
+          </li>}
           <li className="list-none mt-auto">
             <span
               className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"

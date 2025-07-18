@@ -1,13 +1,13 @@
 'use client';
-import Image from 'next/image';
-import { useInbox } from '@/context/InboxContext';
-import UserAvatar from './UserAvatar';
+import { useAIChatInbox } from '@/context/AIChatInboxContext';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 
 const ActiveConversationHeader = () => {
   const {
-    conversations: { active: activeConversation },
     connection: { isConnected: isSocketConnected, status: connectionStatus },
-  } = useInbox();
+  } = useAIChatInbox();
+  const { get } = useSearchParamUtils();
+  const type = get('type') || 'ai_chat';
   return (
     <div className="sticky h-[90px] bg-white flex items-center justify-between border-b border-stroke px-6 py-4.5 dark:border-strokedark">
       <div className="flex items-center min-w-[200px]">
@@ -25,7 +25,7 @@ const ActiveConversationHeader = () => {
           )}
         </div> */}
         <div>
-          <h5 className="font-medium text-black dark:text-white">Chat to AI</h5>
+          <h5 className="font-medium text-black dark:text-white">{type === 'ai_chat' ? 'AI Coach' : 'Help& Support'}</h5>
           <p className="text-sm">Whats on your mind?</p>
         </div>
       </div>

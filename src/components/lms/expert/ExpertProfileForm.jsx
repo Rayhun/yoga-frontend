@@ -79,7 +79,7 @@ const ExpertProfileForm = ({ selected }) => {
     experience: Yup.number()
       .required('Experience is required')
       .integer('Experience must be a whole number')
-      .min(1, 'Experience cannot be negative'),
+      .min(0, 'Experience cannot be negative'),
     available: Yup.boolean(),
   });
 
@@ -150,6 +150,7 @@ const ExpertProfileForm = ({ selected }) => {
                     name="experience"
                     label="Experience (Years)"
                     placeholder="Experience in Years"
+                    min={0}
                     required
                   />
                 </div>

@@ -43,8 +43,22 @@ const AffiliatesSignupForm = () => {
   const validationSchema = Yup.object({
     first_name: Yup.string().min(3, 'Must contain at least 3 characters').required('Required!'),
     last_name: Yup.string(),
-    email: Yup.string().email('Invalid Email').required('Required!'),
-    paypal_email: Yup.string().email('Invalid Email').required('Required!'),
+    email: Yup.string().trim()
+    .lowercase()
+    .email('Please enter a valid email address')
+    .matches(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      'Email must be in the format user@example.com'
+    )
+    .required('Email is required'),
+    paypal_email: Yup.string().trim()
+    .lowercase()
+    .email('Please enter a valid PayPal email address')
+    .matches(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      'Email must be in the format user@example.com'
+    )
+    .required('PayPal Email is required'),
     business_model: Yup.string().min(3, 'Must contain at least 3 characters').required('Required!'),
     password: Yup.string()
       .min(12, 'Password must be at least 12 characters')
