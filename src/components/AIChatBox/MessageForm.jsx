@@ -19,7 +19,7 @@ const MessageForm = () => {
 
   const handleSendMessage = () => {
     if (inputText || attachments.length > 0) {
-      sendMessage({ message: inputText });
+      sendMessage(inputText);
       setInputText('');
     }
   };
