@@ -89,7 +89,7 @@ const CommissionTypeForm = ({ selected }) => {
             <FormikField
               name="payout_duration"
               label="Payout Duration"
-              placeholder="Select Duration"
+              placeholder="Duration"
               type="number"
               required
               helperIcon={helperIcon}

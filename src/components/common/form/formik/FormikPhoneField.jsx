@@ -96,7 +96,6 @@ const FormikPhoneField = ({ name, label, className, required = false, placeholde
 
         <div className="relative flex-1">
           <input
-            type="text"
             value={phoneNumber}
             onChange={handlePhoneNumberChange}
             onBlur={field.onBlur}
@@ -109,6 +108,7 @@ const FormikPhoneField = ({ name, label, className, required = false, placeholde
               borderBottomLeftRadius: 0,
             }}
             placeholder={placeholder}
+            type="text"
           />
           <span className="absolute right-4 top-4">
             <FiPhone size={20} color="#B5BDC8" />

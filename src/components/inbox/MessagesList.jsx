@@ -41,7 +41,7 @@ const Attachment = ({ url }) => {
 const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => (
   <>
     {isMyMessage ? (
-      <div className="ml-auto max-w-125">
+      <div className="ml-auto max-w-125 w-fit">
         <div className="mb-2.5 rounded-2xl rounded-br-none bg-[rgba(208,254,207,0.62)] px-5 py-3 flex flex-col justify-between items-end gap-1">
           <p className="text-black">{children}</p>
           {attachments.map(att => (
@@ -51,7 +51,7 @@ const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) 
         </div>
       </div>
     ) : (
-      <div className="max-w-125">
+      <div className="max-w-125 w-fit">
         {senderName ? <p className="text-sm mb-1 text-black">{senderName}</p> : null}
         <div className="mb-2.5 rounded-2xl rounded-tl-none bg-white px-5 py-3 flex flex-col justify-between items-end gap-1">
           <p className="text-black">{children}</p>

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { FiPaperclip, FiSend } from 'react-icons/fi';
 import { useInbox } from '@/context/InboxContext';
 import AttachmentButton from './AttachmentButton';
+import { MdDelete } from 'react-icons/md';
+import Image from 'next/image';
 
 const Attachments = ({ attachments, removeAttachment }) => {
   return (
@@ -14,27 +16,13 @@ const Attachments = ({ attachments, removeAttachment }) => {
             <div key={idx} className="relative w-15 h-15 rounded overflow-hidden border z-full">
               <button
                 onClick={() => removeAttachment(idx)}
-                className="absolute top-0 right-0 z-999 rounded-full bg-white p-0.5 text-red-500 hover:text-gray-700"
+                className="absolute top-0 right-0 z-999 rounded-full bg-white p-0.5 text-red-500"
               >
-                <span className="sr-only">Remove attachment</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <MdDelete size={15} />
               </button>
 
               {isImage ? (
-                <img src={url} alt={`attachment-${idx}`} className="object-cover w-full h-full" />
+                <Image src={url} width={150} height={150} alt={`attachment-${idx}`} className="object-cover w-full h-full" />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-gray-100">
                   <FiPaperclip size={16} className="text-gray-500" />
@@ -56,7 +44,7 @@ const MessageForm = () => {
   } = useInbox();
 
   const handleSendMessage = () => {
-    if (inputText || attachments.length > 0) {
+    if (inputText.trim() !== '' || attachments.length > 0) {
       sendMessage({ message: inputText, attachments });
       setInputText('');
       setAttachments([]);

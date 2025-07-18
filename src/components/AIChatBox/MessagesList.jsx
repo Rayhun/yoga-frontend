@@ -1,43 +1,8 @@
 'use client';
 import dayjs from 'dayjs';
 import useAuthContext from '@/hooks/useAuthContext';
-import { useInbox } from '@/context/InboxContext';
 import LoadingWrapper from '../common/loader/Wrapper';
-
-const dummyMessages = [
-  {
-    id: 1,
-    created_at: '2025-07-15T09:15:00.000Z',
-    sender: 42,                    
-    sender_name: 'Alice Johnson',  
-    content: 'Hey! 👋 Welcome to the AI chat.',
-    attachments: [],               
-  },
-  {
-    id: 2,
-    created_at: '2025-07-15T09:16:30.000Z',
-    sender: 7,                  
-    sender_name: 'You',
-    content: "Thanks! Glad to be here.",
-    attachments: [],
-  },
-  {
-    id: 3,
-    created_at: '2025-07-15T09:18:00.000Z',
-    sender: 13,
-    sender_name: 'Carlos Pérez',
-    content: 'Glad to asist you.',
-  },
-  {
-    id: 4,
-    created_at: '2025-07-15T09:20:45.000Z',
-    sender: 7,
-    sender_name: 'You',
-    content: 'Ok I want to know more about yoga',
-    attachments: [],
-  },
-];
-
+import { useAIChatInbox } from '@/context/AIChatInboxContext';
 
 const Message = ({ isMyMessage, senderName, time, children }) => (
   <>
@@ -67,24 +32,23 @@ const MessagesList = () => {
     },
   } = useAuthContext();
   const {
-    conversations: { active: activeConversation },
     messages: { isLoading: isLoadingMessages, data: messages },
-  } = useInbox();
+  } = useAIChatInbox();
 
   return (
     <div className="h-[calc(80vh-180px)] bg-[rgba(239,233,224,0.54)]">
-      <LoadingWrapper>
+      <LoadingWrapper isLoading={isLoadingMessages}>
         <div className="no-scrollbar max-h-full space-y-3.5 overflow-auto px-6 py-7.5">
-          {[...dummyMessages].map(message => (
+          {[...messages].map(message => (
             <Message
               key={message?.id}
               time={message?.created_at}
-              senderName={activeConversation?.is_group ? message?.sender_name : undefined}
+              senderName={undefined}
               // isMyMessage={message?.sender === loggedInUserID}
               isMyMessage={message?.sender_name === 'You'}
               attachments={message?.attachments}
             >
-              {message.content}
+              {message?.content}
             </Message>
           ))}
           <div id="empty-message" className="!m-0" />

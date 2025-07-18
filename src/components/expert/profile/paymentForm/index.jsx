@@ -23,7 +23,14 @@ const ExpertPaymentForm = () => {
   };
 
   const validationSchema = Yup.object({
-    paypal_email: Yup.string().required('Paypal Email is required').email('Invalid email address'),
+    paypal_email: Yup.string().trim()
+    .lowercase()
+    .email('Please enter a valid PayPal email address')
+    .matches(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      'Email must be in the format user@example.com'
+    )
+    .required('PayPal Email is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {

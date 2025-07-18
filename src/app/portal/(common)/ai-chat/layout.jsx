@@ -1,11 +1,12 @@
-import InboxProvider from '@/context/InboxContext';
+import AIChatInboxProvider from "@/context/AIChatInboxContext";
+
 
 export const metadata = {
   title: 'AI Chat | Yoga App',
 };
 
 const Layout = ({ children }) => {
-  return <InboxProvider>{children}</InboxProvider>;
+  return <AIChatInboxProvider>{children}</AIChatInboxProvider>;
 };
 
 export default Layout;
