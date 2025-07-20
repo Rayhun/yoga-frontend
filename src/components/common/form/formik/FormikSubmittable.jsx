@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import Chip from '@mui/material/Chip';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { MdInfoOutline } from 'react-icons/md';
 
 const FormikSubmittable = ({
@@ -14,15 +14,25 @@ const FormikSubmittable = ({
   placeholder,
   ...restProps
 }) => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldError } = useFormikContext();
   const [value, setValue] = useState('');
   const [field, meta] = useField(name);
 
   const isErrorField = meta.touched && meta.error;
 
-  const handleChange = useCallback(event => {
-    setValue(event.target.value);
-  }, []);
+  const handleChange = useCallback(
+    (event) => {
+      const value = event.target.value;
+      if (value !== value.trim()) {
+        setFieldError(name, 'Value cannot have leading or trailing spaces');
+      } else {
+        setFieldError(name, undefined);
+      }
+  
+      setValue(value);
+    },
+    [name, setFieldError]
+  );
 
   const handleKeyDown = useCallback(
     event => {
@@ -31,7 +41,7 @@ const FormikSubmittable = ({
 
         const { name: fieldName, value: fieldValue } = event.target;
 
-        if (!fieldValue || fieldValue.trim() === '') return;
+        if (!fieldValue || fieldValue.trim() !== fieldValue) return;
 
         setFieldValue(fieldName, [...field.value, fieldValue]);
         setValue('');

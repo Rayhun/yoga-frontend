@@ -4,7 +4,7 @@ import { useField, useFormikContext } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 
-const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null, disabled = false }) => {
+const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null, disabled = false, loading = false }) => {
   const { setFieldValue } = useFormikContext();
   const [field, meta] = useField(name);
 
@@ -40,6 +40,7 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
           value={selectedOption || null}
           onChange={handleChange}
           disabled={disabled}
+          loading={loading}
           renderInput={params => (
             <TextField
               {...params}

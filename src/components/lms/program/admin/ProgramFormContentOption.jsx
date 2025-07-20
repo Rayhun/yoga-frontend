@@ -12,7 +12,7 @@ import { PROGRAM_TYPE_OPTIONS } from '@/utils/options';
 const ProgramFormContentOption = ({ values, name, onRemove }) => {
   const [contentOptions, setContentOptions] = useState([]);
 
-  const { mutateAsync: getContentOptions } = useMutation({
+  const { mutateAsync: getContentOptions, isPending } = useMutation({
     mutationFn: getProgramContentOptions,
   });
 
@@ -45,11 +45,12 @@ const ProgramFormContentOption = ({ values, name, onRemove }) => {
           label="Content"
           placeholder="Content"
           options={contentOptions}
+          loading={isPending}
           required
         />
       </div>
       <div className="w-[30%] min-w-[200px]">
-        <FormikField type="number" name={`${name}.drip`} label="Drip" placeholder="Drip" required />
+        <FormikField type="number" name={`${name}.drip`} label="Drip" placeholder="Drip" min={1} required />
       </div>
       <div className="w-[10%] min-w-[50px] flex items-center justify-end">
         <IconButton onClick={onRemove}>

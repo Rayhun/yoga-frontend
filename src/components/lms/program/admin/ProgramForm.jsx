@@ -83,14 +83,15 @@ const ProgramForm = ({ selected }) => {
         })
       )
       .min(1, 'At least 1 option is required.'),
-    price: Yup.number()
-      .when('access_setting', {
-        is: ACCESS_SETTING.buy_now,
-        then: schema => schema
+    price: Yup.number().when('access_setting', {
+      is: ACCESS_SETTING.buy_now,
+      then: schema =>
+        schema
           .required('Price is required when buying now')
-          .typeError('Must be a number'),
-        otherwise: schema => schema.notRequired()
-      }),
+          .typeError('Must be a number')
+          .min(0, 'Price must be at least $0'),
+      otherwise: schema => schema.notRequired(),
+    }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -158,9 +159,18 @@ const ProgramForm = ({ selected }) => {
               <div className="w-full md:w-1/2">
                 <AccessSettingField required />
               </div>
-             {values.access_setting === ACCESS_SETTING.buy_now && <div className="w-full md:w-1/2">
-                <FormikField name="price" label="Price" placeholder="Price" type="number" required />
-              </div>}
+              {values.access_setting === ACCESS_SETTING.buy_now && (
+                <div className="w-full md:w-1/2">
+                  <FormikField
+                    name="price"
+                    label="Price"
+                    placeholder="Price"
+                    type="number"
+                    min={0}
+                    required
+                  />
+                </div>
+              )}
               <div className="w-full md:w-1/2">
                 <VisibilitySettingField required />
               </div>

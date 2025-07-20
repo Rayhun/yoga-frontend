@@ -6,7 +6,7 @@ import { getExpertsList } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
 
 const ExpertField = ({ name = 'expert', label = 'Expert', placeholder = 'Expert', ...props }) => {
-  const { data: expertsResponse } = useQuery({
+  const { data: expertsResponse, isLoading } = useQuery({
     queryFn: getExpertsList,
     queryKey: [queryKeys.lmsExperts],
   });
@@ -14,14 +14,14 @@ const ExpertField = ({ name = 'expert', label = 'Expert', placeholder = 'Expert'
   const expertOptions = useMemo(
     () =>
       expertsResponse?.data.map(option => ({
-        label: option.name,
+        label: `${option.first_name || ''} ${option.last_name || ''}`,
         value: option.id,
       })),
     [expertsResponse?.data]
   );
 
   return (
-    <FormikSelect {...props} name={name} label={label} placeholder={placeholder} options={expertOptions} />
+    <FormikSelect {...props} name={name} loading={isLoading} label={label} placeholder={placeholder} options={expertOptions} />
   );
 };
 

@@ -55,7 +55,7 @@ const FormikField = ({
             className="cursor-pointer absolute right-4 top-5"
             onClick={handleTypeChange}
           >
-            {typeState === 'password' ? <FaRegEye size={20} color="#B5BDC8" /> : <FaRegEyeSlash size={21} color="#B5BDC8" />}
+            {typeState === 'password' ? <FaRegEye size={20} color="#1c2434" /> : <FaRegEyeSlash size={21} color="#1c2434" />}
           </span>
         ) : null}
         {Icon && type !== 'password' ? (
