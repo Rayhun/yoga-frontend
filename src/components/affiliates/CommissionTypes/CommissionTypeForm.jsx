@@ -33,8 +33,12 @@ const CommissionTypeForm = ({ selected }) => {
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
-    percentage: Yup.string().required('Perecentage is required').max(100, 'Percentage must be less than 100'),
-    payout_duration: Yup.string().required('Payout Duration is required'),
+    percentage: Yup.string()
+      .required('Perecentage is required')
+      .min(0, 'Percentage must be greater than 0')
+      .max(100, 'Percentage must be less than 100')
+      .matches(/^\d+(\.\d{1,2})?$/, 'Percentage must be a valid number with up to two decimal places'),
+    payout_duration: Yup.string().required('Payout Duration is required').min(0, 'Duration must be greater than 0'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -60,7 +64,11 @@ const CommissionTypeForm = ({ selected }) => {
   };
 
   const helperIcon = (
-    <Tooltip arrow placement="right" title="Payout Duration is the number of months after the customer purchases the product or service, the affiliate will receive the commission. 0 means forever.">
+    <Tooltip
+      arrow
+      placement="right"
+      title="Payout Duration is the number of months after the customer purchases the product or service, the affiliate will receive the commission. 0 means forever."
+    >
       <IconButton>
         <MdInfoOutline />
       </IconButton>
@@ -84,6 +92,7 @@ const CommissionTypeForm = ({ selected }) => {
               placeholder="Percentage"
               required
               type="number"
+              min={0}
             />
 
             <FormikField
@@ -92,6 +101,7 @@ const CommissionTypeForm = ({ selected }) => {
               placeholder="Duration"
               type="number"
               required
+              min={0}
               helperIcon={helperIcon}
             />
 

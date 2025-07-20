@@ -84,6 +84,8 @@ const FrequentlyAskedQuestionForm = ({ selected }) => {
               label="Order"
               placeholder="Order"
               required
+              min={1}
+              max={999}
               type="number"
             />
 

@@ -1,5 +1,11 @@
 import React from 'react';
-import { IoMdTrendingDown, IoMdTrendingUp } from 'react-icons/io';
+import { IoMdTrendingDown, IoMdTrendingUp, IoIosArrowRoundForward } from 'react-icons/io';
+
+const TRENDING_ICONS = {
+  'Trending Up': { icon: <IoMdTrendingUp className="text-green-500" />, class: 'text-green-500' },
+  'Trending Down': { icon: <IoMdTrendingDown className="text-orange-500" />, class: 'text-orange-500' },
+  Stable: { icon: <IoIosArrowRoundForward className="text-gray-500" />, class: 'text-gray-500' },
+};
 
 const WellnessStats = ({ wellnessScore, average, latestTrend }) => {
   const [icon, averageNumber] = average?.split(' ') || [];
@@ -25,10 +31,10 @@ const WellnessStats = ({ wellnessScore, average, latestTrend }) => {
         <p className="text-lg font-semibold text-gray-500 mb-1">Latest trend</p>
         <div
           className={`flex items-center space-x-2 text-2xl font-semibold ${
-            latestTrend === 'Declining' ? 'text-orange-500' : 'text-green-500'
+            TRENDING_ICONS[latestTrend]?.class || 'text-gray-500'
           }`}
         >
-          {latestTrend === 'Declining' ? <IoMdTrendingDown /> : <IoMdTrendingUp />}
+          {TRENDING_ICONS[latestTrend].icon || <span className="text-gray-500">N/A</span>}
           <span>{latestTrend}</span>
         </div>
       </div>

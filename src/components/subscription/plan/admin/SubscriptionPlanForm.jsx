@@ -45,8 +45,8 @@ const SubscriptionPlanForm = ({ selected }) => {
     status: Yup.string().required('Required!'),
     subscription_type: Yup.string().required('Required!'),
     subscription_tenure: Yup.string().required('Required!'),
-    price: Yup.number().required('Required!'),
-    discounted_price: Yup.number().required('Required!'),
+    price: Yup.number().required('Required!').min(0, 'Price must be at least 0'),
+    discounted_price: Yup.number().required('Required!').min(0, 'Discounted Price must be at least 0'),
     price_id: Yup.string().required('Required!'),
     features: Yup.string().required('Required!'),
   });
@@ -117,7 +117,7 @@ const SubscriptionPlanForm = ({ selected }) => {
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full xl:w-1/2">
-                <FormikField type="number" name="price" label="Price" placeholder="Price" required />
+                <FormikField type="number" name="price" min={0} label="Price" placeholder="Price" required />
               </div>
               <div className="w-full xl:w-1/2">
                 <FormikField
@@ -125,6 +125,7 @@ const SubscriptionPlanForm = ({ selected }) => {
                   name="discounted_price"
                   label="Discounted Price"
                   placeholder="Discounted Price"
+                  min={0}
                   required
                 />
               </div>

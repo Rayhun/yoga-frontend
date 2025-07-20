@@ -70,7 +70,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     title: Yup.string().required('Event title is required'),
     description: Yup.string().required('Description is required'),
     start_date: Yup.string().required('Start time is required'),
-    duration: Yup.number().required('Duration is required'),
+    duration: Yup.number().required('Duration is required').min(1, 'Duration must be at least 1 minute'),
     time_zone: Yup.string().required('Timezone is required'),
     event_type: Yup.string().required(),
     followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
@@ -79,7 +79,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
       then: schema => schema.required('Meeting URL is required for Zoom online meetings'),
       otherwise: schema => schema,
     }),
-    price: Yup.number().required('Price is required'),
+    price: Yup.number().required('Price is required').min(0, 'Price must be at least $0'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
@@ -142,11 +142,11 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                     options={CONSULTATION_TYPES}
                     required
                   />
-                  <FormikField name="duration" label="Duration" type="number" required />
+                  <FormikField name="duration" label="Duration" type="number" min={1} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />
-                  <FormikField name="price" label="Price ($)" type="number" required />
+                  <FormikField name="price" label="Price ($)" type="number" min={0} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CategoriesField required />

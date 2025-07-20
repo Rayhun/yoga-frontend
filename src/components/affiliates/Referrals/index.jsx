@@ -8,10 +8,11 @@ import { toast } from 'react-toastify';
 const ReferralsDetails = ({ data = {} }) => {
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text).then(() => {
-      toast.success(`${label} copied to clipboard`);
+      toast.success(`${label} copied to clipboard`, {
+        position: 'top-right',
+      });
     });
   };
-
 
   return (
     <DetailsLayoutWrapper title="Your Referral Links">
@@ -30,28 +31,28 @@ const ReferralsDetails = ({ data = {} }) => {
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-1">Custom Landing Page</h3>
-          <div className='space-y-4'>
-          {data?.referral_link?.map((link, index) => (
-            <div key={index} className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
-              <span className="truncate text-gray-800">{link}</span>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handleCopy(link, 'Referral link')}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <FiCopy size={20} />
-                </button>
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <FiExternalLink size={20} />
-                </a>
+          <div className="space-y-4">
+            {data?.referral_link?.map((link, index) => (
+              <div key={index} className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
+                <span className="truncate text-gray-800">{link}</span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleCopy(link, 'Referral link')}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <FiCopy size={20} />
+                  </button>
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <FiExternalLink size={20} />
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
         <div className="flex space-x-4 pt-4">
@@ -62,10 +63,10 @@ const ReferralsDetails = ({ data = {} }) => {
             <FiShare2 size={18} />
             <span>Share Links</span>
           </button> */}
-          
+
           <a
-            href='https://www.nourishdoc.com/affiliate-marketing-assets'
-            target='_blank'
+            href="https://www.nourishdoc.com/affiliate-marketing-assets"
+            target="_blank"
             className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition"
           >
             <FiDownload size={18} />
