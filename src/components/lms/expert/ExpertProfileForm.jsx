@@ -4,13 +4,13 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaRegFileImage, FaFile } from 'react-icons/fa6';
+// import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
-import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
+// import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+// import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import { TagsField } from '@/components/lms/general/fields';
+// import { TagsField } from '@/components/lms/general/fields';
 import { updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -19,6 +19,8 @@ import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect
 import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
+import CoachingAreasField from '../general/fields/CoachingAreasField';
+import CertificationsField from '../general/fields/CertificationsField';
 
 const ExpertProfileForm = ({ selected }) => {
   const router = useRouter();
@@ -41,9 +43,10 @@ const ExpertProfileForm = ({ selected }) => {
     business_name: selected?.business_name || '',
     description: selected?.description || '',
     categories: selected?.categories?.map(i => i.id) || [],
-    tags: selected?.tags?.map(i => i.id) || [],
+    coaching_areas: selected?.coaching_areas?.map(i => i.id) || [],
+    certifications: selected?.certifications?.map(i => i.id) || [],
     languages: selected?.languages?.[0]?.split(',') || [],
-    credentials: selected?.credentials?.[0]?.split(',') || [],
+    // credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
@@ -66,12 +69,16 @@ const ExpertProfileForm = ({ selected }) => {
         const wordsCount = value.split(' ').length;
         return wordsCount >= 25 && wordsCount <= 150;
       }),
-    tags: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
-    languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
-    credentials: Yup.array()
+    coaching_areas: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
+    certifications: Yup.array()
       .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 credential is required')
-      .max(5, 'Maximum 5 credentials are allowed'),
+      .min(1, 'At least 1 certification is required')
+      .max(5, 'Maximum 5 certifications are allowed'),
+    languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
+    // credentials: Yup.array()
+    //   .of(Yup.string().required('Required!'))
+    //   .min(1, 'At least 1 credential is required')
+    //   .max(5, 'Maximum 5 credentials are allowed'),
     // coaching_content: Yup.array()
     //   .of(Yup.string().required('Required!'))
     //   .min(1, 'At least 1 coaching content is required'),
@@ -118,8 +125,8 @@ const ExpertProfileForm = ({ selected }) => {
         >
           {({ isSubmitting, values }) => (
             <Form className="flex flex-col gap-3">
-              <div className='flex justify-center items-center mb-5'>
-              <FormikImageInput name="file" label="Profile Image" />
+              <div className="flex justify-center items-center mb-5">
+                <FormikImageInput name="file" label="Profile Image" />
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
@@ -189,14 +196,26 @@ const ExpertProfileForm = ({ selected }) => {
                 </div>
               </div>
               <FormikField name="description" label="About" placeholder="About" rows={5} required />
-              <TagsField name="tags" label="Coaching Areas" placeholder="Coaching Areas" required />
-              <FormikSubmittableField
+              <CoachingAreasField
+                name="coaching_areas"
+                label="Coaching Areas"
+                placeholder="Coaching Areas"
+                required
+              />
+              <CertificationsField
+                name="certifications"
+                label="Certifications"
+                placeholder="Certifications"
+                required
+              />
+
+              {/* <FormikSubmittableField
                 name="credentials"
                 label="Certifications"
                 placeholder="Add a certification (e.g. Health Coach). Press return to confirm, max 5."
                 required
                 disabled={values?.credentials?.length >= 5}
-              />
+              /> */}
               <FormikMultiSelect
                 options={LANGUAGES}
                 name="languages"

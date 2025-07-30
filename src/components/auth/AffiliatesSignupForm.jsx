@@ -72,8 +72,8 @@ const AffiliatesSignupForm = () => {
     terms: Yup.bool().isTrue('Please check to the terms and conditions to proceed'),
     channels: Yup.array()
       .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 credential is required')
-      .max(5, 'Maximum 5 credentials are allowed'),
+      .min(1, 'At least 1 channel is required')
+      .max(5, 'Maximum 5 channels are allowed'),
     country: Yup.string().required('Required!'),
   });
 

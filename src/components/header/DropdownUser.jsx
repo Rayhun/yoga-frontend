@@ -75,11 +75,8 @@ const DropdownUser = () => {
             width={112}
             height={112}
             src={loggedInUser?.profile?.image || loggedInUser?.profile?.profile_image || '/images/user/placeholder_profile.png'}
-            style={{
-              width: 'auto',
-              height: 'auto',
-            }}
             alt="User"
+            className="rounded-full"
           />
         </span>
 

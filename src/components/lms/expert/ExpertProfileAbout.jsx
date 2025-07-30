@@ -34,8 +34,8 @@ const ExpertProfileAbout = ({ data }) => {
       </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
-          {data?.tags?.map(tag => (
-            <ProfileChip key={tag.id} label={tag?.name} />
+          {data?.caoching_areas?.map(item => (
+            <ProfileChip key={item.id} label={item?.title} />
           ))}
         </div>
       </AboutSection>
@@ -46,10 +46,10 @@ const ExpertProfileAbout = ({ data }) => {
           ))}
         </div>
       </AboutSection>
-      <AboutSection label="Credentials">
+      <AboutSection label="Certifications">
         <div className="flex flex-wrap gap-2">
-          {data?.credentials?.[0]?.split(',').map((tag, index) => (
-            <ProfileChip key={index} label={tag} />
+          {data?.certifications?.map((item) => (
+            <ProfileChip key={item?.id} label={item?.title} />
           ))}
         </div>
       </AboutSection>

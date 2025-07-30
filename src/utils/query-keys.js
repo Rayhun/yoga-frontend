@@ -62,7 +62,8 @@ const queryKeys = {
   affiliatesUsersAdminDashboard: 'affiliatesUsersAdminDashboard',
   affiliatesUsersDashboard: 'affiliatesUsersDashboard',
   payoutList: 'payoutList',
-  aiPromptsList: 'aiPromptsList'
+  aiPromptsList: 'aiPromptsList',
+  lookupsByCategory: 'lookupsByCategory',
 };
 
 export default queryKeys;

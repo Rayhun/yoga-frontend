@@ -31,7 +31,7 @@ const CustomerOnboarding = () => {
   useHandleApiResponse(onboardingQuizFailureReason, isOnboardingQuizSuccess);
 
   const quizQuestions = useMemo(
-    () => onboardingQuizResponse?.data?.onboarding_get?.quiz || [],
+    () => onboardingQuizResponse?.data?.onboarding_get?.quiz || onboardingQuizResponse?.data || [],
     [onboardingQuizResponse]
   );
   const initialValues = useMemo(
