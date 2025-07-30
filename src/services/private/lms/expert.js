@@ -49,3 +49,8 @@ export const importExperts = async ({ file }) => {
 export const toggleExpertStatus = async ({ id }) => {
   return axios.post(`/LMS/experts/${id}/toggle_active/`);
 };
+
+export const exportExpertsList = async (params) => {
+  const searchParams = getSearchParamsFromObject(params);
+  return axios.get(`/LMS/experts/export/?${searchParams}`,);
+};

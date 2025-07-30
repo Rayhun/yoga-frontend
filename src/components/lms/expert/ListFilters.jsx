@@ -15,7 +15,7 @@ const EXPERT_STATUS_OPTIONS = [
 ];
 
 const validationSchema = Yup.object({
-  is_live: Yup.string(),
+  is_active: Yup.boolean(),
   status: Yup.string(),
   start_date: Yup.date(),
   end_date: Yup.date(),
@@ -23,19 +23,15 @@ const validationSchema = Yup.object({
 
 const ListFilters = ({ onClose, onApplyFilter, selected, handleReset }) => {
   const initialValues = {
-    is_live: selected?.is_live || '',
+    is_active: selected?.is_active ?? '',
     status: selected?.status || '',
     start_date: selected?.start_date || '',
     end_date: selected?.end_date || '',
   };
 
+
   const handleSubmit = (values, { setSubmitting }) => {
-    const payload = {
-      ...values,
-      is_live: values.is_live,
-      status: values.status,
-    };
-    onApplyFilter(payload);
+    onApplyFilter(values);
     setSubmitting(false);
     onClose();
   };
@@ -50,7 +46,7 @@ const ListFilters = ({ onClose, onApplyFilter, selected, handleReset }) => {
                 <InputLabel shrink={true}>Active Status</InputLabel>
                 <Select
                   name="is_active"
-                  value={values.duration}
+                  value={values.is_active}
                   onChange={handleChange}
                   label="Active Status"
                   displayEmpty
