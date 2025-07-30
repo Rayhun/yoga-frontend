@@ -21,7 +21,7 @@ export default function DefaultLayout({ children }) {
 
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
-            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10 overflow-y-auto">{children}</div>
+            <div className="mx-auto max-w-screen-3xl p-4 md:p-6 2xl:p-10 overflow-y-auto">{children}</div>
           </main>
           {/* <!-- ===== Main Content End ===== --> */}
         </div>

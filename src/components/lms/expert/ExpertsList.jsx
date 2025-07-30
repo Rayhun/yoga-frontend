@@ -9,7 +9,7 @@ import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getExpertsList, deleteSingleExpert, importExperts, toggleExpertStatus } from '@/services/private/lms/expert';
+import { getExpertsList, deleteSingleExpert, importExperts, toggleExpertStatus, exportExpertsList } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
 import Popup from '@/components/common/popup';
 import ListFilters from './ListFilters';
@@ -17,7 +17,7 @@ import Button from '@/components/common/Button';
 import { FiFilter } from 'react-icons/fi';
 import useToggle from '@/hooks/useToggle';
 import useConfirm from '@/hooks/useConfirm';
-import { toastApiError } from '@/utils/helpers';
+import { downloadCSV, toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -44,6 +44,10 @@ const ExpertsList = () => {
     mutationFn: toggleExpertStatus,
   });
 
+  const { mutateAsync: exportExperts } = useMutation({
+    mutationFn: exportExpertsList,
+  });
+
   const handleExport = useCallback(
     async (selectedId, status) => {
       try {
@@ -51,34 +55,15 @@ const ExpertsList = () => {
           message: `Are you sure you want to export experts list?`,
         });
 
-        // const response = await exportPayouts(
-        //   { id: selectedId, status },
-        //   {
-        //     responseType: 'blob',
-        //   }
-        // );
+        const response = await exportExperts(filters);
+        if (!response?.data?.data) {
+          toast.error('No data available to export');
+          return;
+        }
+        
+        downloadCSV(response.data.data, 'experts-list.csv');
 
-        // const blob = new Blob([response.data], {
-        //   type: response.headers['content-type'] || 'application/octet-stream',
-        // });
-        // const url = window.URL.createObjectURL(blob);
-
-        // const disposition = response.headers['content-disposition'];
-        // let filename = 'payouts';
-        // if (disposition) {
-        //   const match = disposition.match(/filename="?(.+)"?/);
-        //   if (match) filename = match[1];
-        // }
-        // const link = document.createElement('a');
-        // link.href = url;
-        // link.download = filename;
-        // document.body.appendChild(link);
-        // link.click();
-
-        // link.remove();
-        // window.URL.revokeObjectURL(url);
-
-        // toast.success(`Payout exported successfully`);
+        toast.success(`Experts exported successfully`);
       } catch (error) {
         if (error?.message !== 'cancel') {
           toastApiError(error);
@@ -191,7 +176,7 @@ const ExpertsList = () => {
         label: 'Add New Expert',
         onClick: () => router.push('/portal/admin/lms/expert/add'),
       },
-      // { id: 'export', label: 'Export', onClick: handleExport },
+      { id: 'export', label: 'Export', onClick: handleExport },
     ],
     [handleImportExperts, isImporting, router, handleExport]
   );
