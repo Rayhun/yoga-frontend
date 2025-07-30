@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Button from '../common/Button';
 
-const ResendOTP = ({ duration = 10, onResend }) => {
+const ResendOTP = ({ duration = 120, onResend }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
