@@ -170,13 +170,13 @@ const ExpertsList = () => {
         isLoading: isImporting,
         onClick: handleImportExperts,
       },
+      { id: 'export', label: 'Export', onClick: handleExport },
       {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Expert',
         onClick: () => router.push('/portal/admin/lms/expert/add'),
       },
-      { id: 'export', label: 'Export', onClick: handleExport },
     ],
     [handleImportExperts, isImporting, router, handleExport]
   );
