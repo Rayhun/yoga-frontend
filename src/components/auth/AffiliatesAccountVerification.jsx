@@ -67,7 +67,7 @@ const AffiliatesAccountVerificationForm = () => {
           isVerified={emailVerfied}
           onSubmit={handleSubmitEmailOTP}
           onResendOTP={handleResendEmailOTP}
-          otpDuration={60}
+          otpDuration={120}
         />
       </div>
     </React.Fragment>
