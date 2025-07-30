@@ -1,7 +1,9 @@
 import axios from '@/lib/axios';
+import { getSearchParamsFromObject } from '@/utils/helpers';
 
-export const getExpertsList = async () => {
-  return axios.get('/LMS/experts/');
+export const getExpertsList = async (params) => {
+  const searchParams = getSearchParamsFromObject(params);
+  return axios.get(`/LMS/experts/?${searchParams}`);
 };
 
 export const getSingleExpert = async ({ id }) => {
@@ -42,4 +44,8 @@ export const importExperts = async ({ file }) => {
   return axios.post('/LMS/experts/import/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+};
+
+export const toggleExpertStatus = async ({ id }) => {
+  return axios.post(`/LMS/experts/${id}/toggle_active/`);
 };

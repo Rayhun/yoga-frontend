@@ -89,8 +89,8 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         >
           {/* <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' /> */}
           {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
-          <Tab value={TABS.GROUP_COACHING} label="Events" className='!capitalize' />
-          <Tab value={TABS.CONSULT} label="Consult" className='!capitalize' />
+          <Tab value={TABS.GROUP_COACHING} label="Events" className='!capitalize' disabled={!userProfileDetails?.is_profile_complete} />
+          <Tab value={TABS.CONSULT} label="Consult" className='!capitalize'  disabled={!userProfileDetails?.is_profile_complete} />
           <Tab value={TABS.ABOUT} label="About" className='!capitalize' />
         </Tabs>
         <div className="">

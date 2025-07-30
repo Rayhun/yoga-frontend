@@ -43,6 +43,14 @@ const AIChatPromptsList = () => {
         header: 'GPT Model',
         accessorKey: 'gpt_model',
       },
+      {
+        header: 'Temperature',
+        accessorKey: 'temprature',
+      },
+      {
+        header: 'Max Tokens',
+        accessorKey: 'max_tokens',
+      },
     ],
     []
   );

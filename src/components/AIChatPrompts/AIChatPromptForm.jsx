@@ -34,6 +34,8 @@ const AIChatPromptsForm = ({ selected }) => {
     prompt: selected?.prompt || '',
     chat_type: selected?.chat_type || '',
     gpt_model: selected?.gpt_model || '',
+    temprature: selected?.temprature || '',
+    max_tokens: selected?.max_tokens || '',
   };
 
   const validationSchema = Yup.object({
@@ -41,6 +43,8 @@ const AIChatPromptsForm = ({ selected }) => {
     prompt: Yup.string().required('Prompt is required'),
     chat_type: Yup.string().required('Chat Type is required'),
     gpt_model: Yup.string().required('GPT Model is required'),
+    temprature: Yup.string().required('Temprature is required'),
+    max_tokens: Yup.string().required('Maximum Token is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -82,6 +86,11 @@ const AIChatPromptsForm = ({ selected }) => {
               <FormikSelect name="chat_type" label="Chat Type" options={CHAT_TYPE_OPTIONS} />
 
               <FormikField name="gpt_model" label="GPT Model" placeholder="GPT Model" required />
+            </div>
+
+            <div className='grid grid-cols-2 gap-4'>
+              <FormikField name="temprature" label="Temprature" required />
+              <FormikField name="max_tokens" label="Maximum Token" required />
             </div>
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>

@@ -12,10 +12,10 @@ import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get("active_tab");
+  const activeTab = searchParams.get('active_tab');
   const {
     user: {
-      profile: { role: userRole, sub_role: userSubRole },
+      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult },
       isCustomer
     },
     logout,
@@ -67,6 +67,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     return SIDEBAR.CUSTOMER;
   }, [userRole]);
 
+  const disabledSidebarMenu = useMemo(() => {
+    return (
+      userRole === USER_ROLE.TEACHER && (!is_profile_complete || !has_event_or_consult)
+    );
+  }, [userRole, is_profile_complete, has_event_or_consult]);
+
   const subRoleBasedSidebarMenuItems = useMemo(
     () =>
       roleBasedSidebarMenuItems
@@ -83,6 +89,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         })),
     [roleBasedSidebarMenuItems, userSubRole]
   );
+
 
   return (
     <aside
@@ -199,17 +206,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 ) : (
                   <li className="list-none">
                     <Link
-                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
+                      href={menuItem.disabled || disabledSidebarMenu ? '#' : menuItem.href || '#'}
                       className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
-                        ${menuItem.disabled ? 'cursor-not-allowed opacity-50 text-gray-400' : 'hover:text-primary'} 
+                        ${
+                          menuItem.disabled || disabledSidebarMenu
+                            ? 'cursor-not-allowed opacity-50 text-gray-400'
+                            : 'hover:text-primary'
+                        } 
                         ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
-                      aria-disabled={menuItem.disabled} // Improves accessibility
-                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
+                      aria-disabled={menuItem.disabled || disabledSidebarMenu} // Improves accessibility
+                      tabIndex={menuItem.disabled || disabledSidebarMenu ? -1 : 0} // Prevents focus when disabled
                     >
-
                       {menuItem.Icon && <menuItem.Icon size={24} />}
                       {menuItem.label}
-
                     </Link>
                   </li>
                 )}
@@ -218,15 +227,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </ul>
 
           {/* Logout */}
-         {isCustomer && <li className="list-none mt-auto">
-            <Link
-              className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
-              href={'/portal/ai-chat?type=support'}
-            >
-              <MdOutlineContactSupport size={24} />
-              Help & Support
-            </Link>
-          </li>}
+          {isCustomer && (
+            <li className="list-none mt-auto">
+              <Link
+                className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
+                href={'/portal/ai-chat?type=support'}
+              >
+                <MdOutlineContactSupport size={24} />
+                Help & Support
+              </Link>
+            </li>
+          )}
           <li className="list-none mt-auto">
             <span
               className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
