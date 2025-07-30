@@ -150,7 +150,12 @@ const AffiliateUsersList = () => {
 
         <BasicTable isLoading={isLoading} columns={columns} data={data || []} />
       </div>
-      <ApproveAffiliateForm show={!!selected} selected={selectedUser} onClose={handleCloseApproval} handleSubmit={handleSubmit} />
+      <ApproveAffiliateForm
+        show={!!selected}
+        selected={selectedUser}
+        onClose={handleCloseApproval}
+        handleSubmit={handleSubmit}
+      />
     </React.Fragment>
   );
 };

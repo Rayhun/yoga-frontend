@@ -18,6 +18,7 @@ import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
+import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 
 const ExpertProfileForm = ({ selected }) => {
   const router = useRouter();
@@ -117,6 +118,9 @@ const ExpertProfileForm = ({ selected }) => {
         >
           {({ isSubmitting, values }) => (
             <Form className="flex flex-col gap-3">
+              <div className='flex justify-center items-center mb-5'>
+              <FormikImageInput name="file" label="Profile Image" />
+              </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
                   <FormikField name="first_name" label="First Name" placeholder="First Name" required />
@@ -208,14 +212,14 @@ const ExpertProfileForm = ({ selected }) => {
               /> */}
               <div className="">
                 {/* <div className="w-full xl:w-1/2"> */}
-                <FormikDropzone
+                {/* <FormikDropzone
                   name="file"
                   label="Profile Image"
                   fileURLs={selected?.file ? [selected.file] : []}
                   Icon={FaRegFileImage}
                   required
                   maxSize={10 * ONE_MB}
-                />
+                /> */}
                 {/* </div> */}
 
                 {/* <div className="w-full xl:w-1/2">
