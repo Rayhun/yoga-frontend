@@ -11,8 +11,8 @@ const ExpertProfileAbout = ({ data }) => {
     return (
       !data?.description &&
       !data?.languages?.length &&
-      !data?.tags?.length &&
-      !data?.credentials?.length
+      !data?.coaching_areas?.length &&
+      !data?.certifications?.length
     );
   }, [data]);
 

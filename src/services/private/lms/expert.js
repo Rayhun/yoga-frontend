@@ -27,8 +27,8 @@ export const updateExistingExpert = async ({ payload: { id, categories, tags, ..
     if (key==='available' || value) formData.set(key, value);
 
   });
-  formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  // formData.set('categories', categories.join(','));
+  // formData.set('tags', tags.join(','));
 
   return axios.put(`/LMS/experts/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
@@ -53,4 +53,8 @@ export const toggleExpertStatus = async ({ id }) => {
 export const exportExpertsList = async (params) => {
   const searchParams = getSearchParamsFromObject(params);
   return axios.get(`/LMS/experts/export/?${searchParams}`,);
+};
+
+export const getLookupsListByCategory = async (category) => {
+  return axios.get(`/LMS/lookup/?category=${category}`);
 };
