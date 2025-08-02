@@ -32,7 +32,6 @@ const LoginForm = () => {
 
     try {
       const { data: response } = await mutateAsync({ payload: values });
-
       if (response?.data?.token) {
         const userDetails = response?.data?.user;
         const { email_verify, mobile_number_verify, on_boarding_quiz, role, mobile_number } =
@@ -49,6 +48,9 @@ const LoginForm = () => {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
           }
+        } else if (role?.toLowerCase() === 'affiliate') {
+          Cookies.set('token', response?.data?.token);
+          router.replace('/portal/affiliate/dashboard');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
           router.replace('/');

@@ -1,9 +1,11 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaGear, FaUser } from 'react-icons/fa6';
 import Link from 'next/link';
 import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
+import { USER_ROLE } from '@/utils/authorization';
+
 
 const DropdownUser = () => {
   const { user: loggedInUser } = useAuthContext();
@@ -11,7 +13,6 @@ const DropdownUser = () => {
 
   const trigger = useRef();
   const dropdown = useRef();
-
   // close on click outside
   useEffect(() => {
     const clickHandler = ({ target }) => {
@@ -33,10 +34,18 @@ const DropdownUser = () => {
     return () => document.removeEventListener('keydown', keyHandler);
   });
 
+  const url = useMemo(() => {
+    const { role } = loggedInUser?.profile || {}; 
+    if (role === USER_ROLE.ADMIN) return '#';
+    if (role === USER_ROLE.TEACHER) return '/portal/teacher/profile?active_tab=about';
+    if (role === USER_ROLE.AFFILIATE) return '/portal/affiliate/profle';
+    if (role === USER_ROLE.CUSTOMER) return '/portal/customer/profile';
+  }, [loggedInUser?.profile]);
+
   const menu = [
     {
       label: 'My Profile',
-      href: '#',
+      href: url,
       Icon: FaUser,
     },
     {
@@ -65,12 +74,9 @@ const DropdownUser = () => {
           <Image
             width={112}
             height={112}
-            src={loggedInUser?.profile?.image || '/images/user/placeholder_profile.png'}
-            style={{
-              width: 'auto',
-              height: 'auto',
-            }}
+            src={loggedInUser?.profile?.image || loggedInUser?.profile?.profile_image || '/images/user/placeholder_profile.png'}
             alt="User"
+            className="rounded-full"
           />
         </span>
 

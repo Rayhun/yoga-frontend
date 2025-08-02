@@ -38,7 +38,7 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
               onChange={e => setPageSize(Number(e.target.value))}
               className="bg-transparent pl-2"
             >
-              {[5, 10, 20, 50].map(page => (
+              {[5, 10, 20, 50, 100].map(page => (
                 <option key={page} value={page}>
                   {page}
                 </option>

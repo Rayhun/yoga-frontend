@@ -45,12 +45,12 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
     description: Yup.string().required('Description is required'),
-    duration: Yup.number().required('Duration is required'),
-    price: Yup.number().required('Price is required'),
+    duration: Yup.number().required('Duration is required').min(1, 'Duration must be at least 1 minute'),
+    price: Yup.number().required('Price is required').min(0, 'Price must be at least $0'),
     calender_link: Yup.string().required('Calender Link is required'),
     consultation_type: Yup.array().min(1, 'At least one consultation type is required').required(),
     followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
-    followup_duration: Yup.number().required('Follow up Duration is required'),
+    followup_duration: Yup.number().required('Follow up Duration is required').min(1, 'Duration must be at least 1 minute'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
@@ -103,8 +103,8 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                 <FormikField name="description" label="Description" rows={4} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormikField name="duration" label="Duration (mins)" type="number" required />
-                  <FormikField name="price" label="Price ($)" type="number" required />
+                  <FormikField name="duration" label="Duration (mins)" type="number" min={1} required />
+                  <FormikField name="price" label="Price ($)" type="number" min={0} required />
 
                   <FormikField name="calender_link" label="Calendar Link" required />
 
@@ -125,6 +125,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                     name="followup_duration"
                     label="Followup Duration (mins)"
                     type="number"
+                    min={1}
                     required
                   />
                   <CategoriesField required />

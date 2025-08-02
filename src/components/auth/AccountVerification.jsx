@@ -122,7 +122,7 @@ const AccountVerificationForm = () => {
               isVerified={isEmailVerified}
               onSubmit={handleSubmitEmailOTP}
               onResendOTP={handleResendEmailOTP}
-              otpDuration={60}
+              otpDuration={120}
             />
           </>
         )}
@@ -133,7 +133,7 @@ const AccountVerificationForm = () => {
             isVerified={isPhoneVerified}
             onSubmit={handleSubmitPhoneOTP}
             onResendOTP={handleResendPhoneOTP}
-            otpDuration={60}
+            otpDuration={120}
           />
         )}
       </div>

@@ -14,7 +14,7 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
   const { setFieldValue } = useFormikContext();
   const [contentOptions, setContentOptions] = useState([]);
 
-  const { mutateAsync: getContentOptions } = useMutation({
+  const { mutateAsync: getContentOptions, isPending } = useMutation({
     mutationFn: getModuleContentOptions,
   });
 
@@ -49,6 +49,7 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
           label="Content"
           placeholder="Content"
           options={contentOptions}
+          loading={isPending}
           required
         />
       </div>

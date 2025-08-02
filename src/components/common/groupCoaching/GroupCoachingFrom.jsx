@@ -6,11 +6,9 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker';
 import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import { duration } from '@mui/material';
 import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
 import { toast } from 'react-toastify';
@@ -20,8 +18,9 @@ import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
 import useUserTimeZone from '@/hooks/useUserTimeZone';
 import FormikMultiSelect from '../form/formik/FormikMultiSelect';
-import ZoomMeetingConnectionButton from '../ZoomMeetingConnectionButton';
+// import ZoomMeetingConnectionButton from '../ZoomMeetingConnectionButton';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
@@ -30,7 +29,7 @@ const eventTypeOptions = [
   { label: 'Live Event', value: 'live event' },
 ];
 
-const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
+// const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
 const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) => {
   const router = useRouter();
@@ -57,7 +56,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     time_zone: initialData?.time_zone || mappedTimeZone?.value || userTimeZone,
     event_type: initialData?.event_type || '',
     price: initialData?.price || 0,
-    is_online: initialData?.is_online || true,
+    is_online: initialData?.is_online ?? true,
     image: null,
     meeting_link: initialData?.meeting_link || '',
     categories: initialData?.categories?.map(i => i.id) || [],
@@ -70,7 +69,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     title: Yup.string().required('Event title is required'),
     description: Yup.string().required('Description is required'),
     start_date: Yup.string().required('Start time is required'),
-    duration: Yup.number().required('Duration is required'),
+    duration: Yup.number().required('Duration is required').min(1, 'Duration must be at least 1 minute'),
     time_zone: Yup.string().required('Timezone is required'),
     event_type: Yup.string().required(),
     followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
@@ -79,7 +78,12 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
       then: schema => schema.required('Meeting URL is required for Zoom online meetings'),
       otherwise: schema => schema,
     }),
-    price: Yup.number().required('Price is required'),
+    venue_location: Yup.string().when(['is_online'], {
+      is: (is_online) => !is_online,
+      then: schema => schema.required('Venue location is required'),
+      otherwise: schema => schema,
+    }),
+    price: Yup.number().required('Price is required').min(0, 'Price must be at least $0'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
@@ -126,7 +130,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting, values }) => {
+          {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="flex flex-col gap-4">
                 <FormikField name="title" label="Title" required />
@@ -142,27 +146,58 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                     options={CONSULTATION_TYPES}
                     required
                   />
-                  <FormikField name="duration" label="Duration" type="number" required />
+                  <FormikField name="duration" label="Duration" type="number" min={1} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />
-                  <FormikField name="price" label="Price ($)" type="number" required />
+                  <FormikField name="price" label="Price ($)" type="number" min={0} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CategoriesField required />
                   <TagsField required />
                 </div>
-                <FormikSwitch name="is_online" label="Online/Offline" />
+                {/* <FormikSwitch name="is_online" label="Is Online Event?" /> */}
+                {/* <FormikRadioGroup
+                  name="is_online"
+                  label="Event Type"
+                  options={[
+                    { label: 'Online', value: true },
+                    { label: 'Offline', value: false },
+                  ]}
+                  required
+                /> */}
 
-                {values?.is_online && (
+                <ToggleButtonGroup
+                  value={values.is_online}
+                  exclusive
+                  onChange={(_, newValue) => {
+                    // only set when the button actually changes
+                    if (newValue !== null) setFieldValue('is_online', newValue);
+                  }}
+                  size="small"
+                  itemType="button"
+                  color="primary"
+                >
+                  {[
+                    { label: 'Online', value: true },
+                    { label: 'Offline', value: false },
+                  ].map(opt => (
+                    <ToggleButton key={String(opt.value)} value={opt.value}>
+                      {opt.label}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+
+                {values?.is_online ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                     <FormikField
                       disabled={values?.is_zoom_event}
                       name="meeting_link"
                       label="Meeting URL"
+                      placeholder="Enter your meeting url eg. Zoom, Google Meet, etc."
                       required
                     />
-                    {isDevelopmentEnvironment ? (
+                    {/* {isDevelopmentEnvironment ? (
                       isZoomConnected ? (
                         <FormikSwitch name="is_zoom_event" label="Zoom Meeting" />
                       ) : (
@@ -170,7 +205,11 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                           <ZoomMeetingConnectionButton />
                         </div>
                       )
-                    ) : null}
+                    ) : null} */}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <FormikField disabled={values?.venue_location} name="venue_location" label="Venue Location" required />
                   </div>
                 )}
                 <FormikDropzone

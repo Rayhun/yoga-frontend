@@ -1,11 +1,10 @@
 import LoadingWrapper from '@/components/common/loader/Wrapper';
 import { getCocernList } from '@/services/private/customer/goal';
-import { MONTHLY_GOAL_TYPES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 const GoalCategories = ({ selected, setSelected }) => {
-
   const { isFetching, data: concernList } = useQuery({
     queryFn: getCocernList,
     queryKey: [queryKeys.concernList],
@@ -14,6 +13,10 @@ const GoalCategories = ({ selected, setSelected }) => {
   const onSelect = item => {
     setSelected(pre => (pre === item ? '' : item));
   };
+
+  useEffect(() => {
+    if (concernList?.data?.data?.length > 0) setSelected(concernList?.data?.data?.at(0));
+  }, [concernList?.data?.data, setSelected]);
 
   if (concernList?.data?.data?.length === 0 && !isFetching)
     return <div className="flex justify-center items-center h-full">No Concerns Found</div>;

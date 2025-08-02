@@ -10,6 +10,7 @@ const FormikField = ({
   rows = 1,
   Icon,
   type = 'text',
+  helperIcon = null,
   ...fieldProps
 }) => {
   const [typeState, setTypeState] = useState(type);
@@ -24,9 +25,12 @@ const FormikField = ({
   return (
     <div className="flex flex-col gap-1">
       {label ? (
-        <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
-          {label}
-        </label>
+        <div className="flex items-center gap-2">
+          <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
+            {label}
+          </label>
+          {helperIcon}
+        </div>
       ) : null}
       <div className="relative">
         {rows > 1 ? (
@@ -51,7 +55,7 @@ const FormikField = ({
             className="cursor-pointer absolute right-4 top-5"
             onClick={handleTypeChange}
           >
-            {typeState === 'password' ? <FaRegEye size={20} color="#B5BDC8" /> : <FaRegEyeSlash size={21} color="#B5BDC8" />}
+            {typeState === 'password' ? <FaRegEye size={20} color="#1c2434" /> : <FaRegEyeSlash size={21} color="#1c2434" />}
           </span>
         ) : null}
         {Icon && type !== 'password' ? (

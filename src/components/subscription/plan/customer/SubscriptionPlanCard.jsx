@@ -1,9 +1,21 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', isFeatured = false }) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+ 
+  const refferalCode = searchParams.get('ref');
+
+  console.log("refferalCode dajalkj",refferalCode)
+
+  let checkoutLink =  `${pathname}/${planDetails.id}/checkout`
+
+  if(refferalCode){
+    checkoutLink = `${checkoutLink}?ref=${refferalCode}`
+  }
+
 
   return (
     <div
@@ -29,7 +41,7 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
         ))}
       </ul>
       <div className="p-3">
-        <Link href={`${pathname}/${planDetails.id}/checkout`}>
+        <Link href={checkoutLink}>
           <button className="mt-6 px-6 py-2 text-sm font-medium text-white bg-primary transition-all rounded-full border-solid border-2 border-transparent hover:border-black hover:text-black hover:bg-white">
             Subscribe
           </button>

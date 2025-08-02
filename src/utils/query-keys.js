@@ -47,7 +47,23 @@ const queryKeys = {
   journalList: 'journalList',
   goalList: 'goalList',
   concernList: 'concernList',
-  getTracker: 'getTracker'
+  getTracker: 'getTracker',
+  dailyInsight: 'dailyInsight',
+  adminGetInsightsGoals: 'adminGetInsightsGoals',
+  importInsightsGoal: 'importInsightsGoal',
+  deleteSingleInsight: 'deleteSingleInsight',
+  adminGetGoalsTracker: 'adminGetGoalsTracker',
+  adminGetGoalsTrackerDetails: 'adminGetGoalsTrackerDetails',
+  frequentlyAskedQuestions: 'frequentlyAskedQuestions',
+  publicFrequentlyAskedQuestions: 'publicFrequentlyAskedQuestions',
+  commissionTypeList: 'commissionTypeList',
+  affiliateUsers: 'affiliateUsers',
+  referralsDetails: 'referralsDetails',
+  affiliatesUsersAdminDashboard: 'affiliatesUsersAdminDashboard',
+  affiliatesUsersDashboard: 'affiliatesUsersDashboard',
+  payoutList: 'payoutList',
+  aiPromptsList: 'aiPromptsList',
+  lookupsByCategory: 'lookupsByCategory',
 };
 
 export default queryKeys;

@@ -7,15 +7,16 @@ import useAuthContext from '@/hooks/useAuthContext';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
-import { MdLogout } from 'react-icons/md';
+import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get("active_tab");
+  const activeTab = searchParams.get('active_tab');
   const {
     user: {
-      profile: { role: userRole, sub_role: userSubRole },
+      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult },
+      isCustomer
     },
     logout,
   } = useAuthContext();
@@ -62,8 +63,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.TEACHER) return SIDEBAR.TEACHER;
+    if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
   }, [userRole]);
+
+  const disabledSidebarMenu = useMemo(() => {
+    return (
+      userRole === USER_ROLE.TEACHER && (!is_profile_complete || !has_event_or_consult)
+    );
+  }, [userRole, is_profile_complete, has_event_or_consult]);
 
   const subRoleBasedSidebarMenuItems = useMemo(
     () =>
@@ -82,10 +90,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     [roleBasedSidebarMenuItems, userSubRole]
   );
 
+
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
@@ -136,7 +145,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <React.Fragment key={menuItem.label}>
                 {menuItem.sub_menu ? (
                   <ul className="flex flex-col gap-2">
-                    <SidebarLinkGroup activeCondition={pathname === '/'}>
+                    <SidebarLinkGroup activeCondition={menuItem?.hasActiveSubMenu(pathname)}>
                       {(handleClick, open) => (
                         <>
                           <Link
@@ -197,17 +206,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 ) : (
                   <li className="list-none">
                     <Link
-                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
+                      href={menuItem.disabled || disabledSidebarMenu ? '#' : menuItem.href || '#'}
                       className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
-                        ${menuItem.disabled ? 'cursor-not-allowed opacity-50 text-gray-400' : 'hover:text-primary'} 
+                        ${
+                          menuItem.disabled || disabledSidebarMenu
+                            ? 'cursor-not-allowed opacity-50 text-gray-400'
+                            : 'hover:text-primary'
+                        } 
                         ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
-                      aria-disabled={menuItem.disabled} // Improves accessibility
-                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
+                      aria-disabled={menuItem.disabled || disabledSidebarMenu} // Improves accessibility
+                      tabIndex={menuItem.disabled || disabledSidebarMenu ? -1 : 0} // Prevents focus when disabled
                     >
-
                       {menuItem.Icon && <menuItem.Icon size={24} />}
                       {menuItem.label}
-
                     </Link>
                   </li>
                 )}
@@ -216,6 +227,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </ul>
 
           {/* Logout */}
+          {isCustomer && (
+            <li className="list-none mt-auto">
+              <Link
+                className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
+                href={'/portal/ai-chat?type=support'}
+              >
+                <MdOutlineContactSupport size={24} />
+                Help & Support
+              </Link>
+            </li>
+          )}
           <li className="list-none mt-auto">
             <span
               className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"

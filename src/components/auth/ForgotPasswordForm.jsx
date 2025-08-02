@@ -19,7 +19,14 @@ const ForgotPasswordForm = () => {
   };
 
   const validationSchema = Yup.object({
-    email: Yup.string().email('Invalid Email').required('Required!'),
+    email: Yup.string().trim()
+    .lowercase()
+    .email('Please enter a valid email address')
+    .matches(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      'Email must be in the format user@example.com'
+    )
+    .required('Email is required'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {

@@ -67,7 +67,7 @@ const Popup = ({ size, heading = 'Popup', onClose = () => null, children, ...res
       className="custom-modal"
       TransitionComponent={Transition}
       sx={{
-        zIndex: 9999,
+        zIndex: 999,
         '& .MuiDialog-container': {
           alignItems: 'flex-start',
         },
