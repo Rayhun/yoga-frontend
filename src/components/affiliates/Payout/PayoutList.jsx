@@ -106,37 +106,58 @@ const PayoutList = () => {
     async (selectedId, status) => {
       try {
         await confirm({
-          message: `Are you sure you want to export payout list?`,
+          message: 'Are you sure you want to export payout list?',
         });
-
+  
         const response = await exportPayouts(
           { id: selectedId, status },
-          {
-            responseType: 'blob',
-          }
+          { responseType: 'blob' }
         );
-
-        const blob = new Blob([response.data], {
-          type: response.headers['content-type'] || 'application/octet-stream',
-        });
+  
+        const { data: blobData, headers } = response;
+  
+        const contentType = headers['content-type'] || 'application/octet-stream';
+        const blob = new Blob([blobData], { type: contentType });
         const url = window.URL.createObjectURL(blob);
-
-        const disposition = response.headers['content-disposition'];
+  
         let filename = 'payouts';
-        if (disposition) {
-          const match = disposition.match(/filename="?(.+)"?/);
-          if (match) filename = match[1];
+        const disposition = headers['content-disposition'] || '';
+  
+        let filenameMatch =
+          disposition.match(/filename\*\s*=\s*([^;]+)/i) ||
+          disposition.match(/filename\s*=\s*"([^"]+)"/i) ||
+          disposition.match(/filename\s*=\s*([^;]+)/i);
+  
+        if (filenameMatch) {
+          let rawName = filenameMatch[1].trim();
+  
+          if (rawName.includes("''")) {
+            const parts = rawName.split("''");
+            rawName = decodeURIComponent(parts[1]);
+          }
+  
+          filename = rawName.replace(/(^"|"$)/g, '');
         }
+  
+        filename = filename.replace(/[_\s]+$/g, '');
+  
+        if (!filename.includes('.') && contentType) {
+          const ext = contentType.split('/')[1]?.split(';')[0];
+          if (ext) {
+            filename = `${filename}.${ext}`;
+          }
+        }
+  
         const link = document.createElement('a');
         link.href = url;
         link.download = filename;
         document.body.appendChild(link);
         link.click();
-
-        link.remove();
+  
+        document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-
-        toast.success(`Payout exported successfully`);
+  
+        toast.success('Payout exported successfully');
       } catch (error) {
         if (error?.message !== 'cancel') {
           toastApiError(error);
@@ -145,6 +166,7 @@ const PayoutList = () => {
     },
     [confirm, exportPayouts]
   );
+  
 
   const headerQuickActions = useMemo(
     () => [
