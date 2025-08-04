@@ -326,72 +326,75 @@ const CUSTOMER = [
   },
 ];
 
-const TEACHER = [
-  {
-    Icon: MdHome,
-    label: 'Home',
-    href: '/portal',
-    isActive: pathname => pathname === '/portal',
-    disabled: true,
-  },
-  {
-    Icon: FaInbox,
-    label: 'Inbox',
-    href: '/portal/inbox',
-    isActive: pathname => pathname === '/portal/inbox',
-    disabled: !isDevelopmentEnvironment,
-  },
-  {
-    Icon: FaUser,
-    label: 'Profile',
-    href: '/portal/teacher/profile?active_tab=about',
-    isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=about') ||
-      pathname.includes('/portal/teacher/editProfile'),
-    disabled: false,
-  },
-  {
-    Icon: PiFilmScriptBold,
-    label: 'Programs',
-    href: '/portal/teacher/profile?active_tab=programs',
-    isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs') ||
-      pathname.includes('/portal/teacher/program'),
-    disabled: false,
-  },
-  {
-    Icon: MdOutlineEventNote,
-    label: 'Events',
-    href: '/portal/teacher/profile?active_tab=group_coaching',
-    isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') ||
-      pathname.includes('/portal/teacher/group_coaching'),
-    disabled: false,
-  },
-  {
-    Icon: PiUserSquareFill,
-    label: 'Consult',
-    href: '/portal/teacher/profile?active_tab=consult',
-    isActive: (pathname, tab) =>
-      `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult') ||
-      pathname.includes('/portal/teacher/consultation/'),
-    disabled: false,
-  },
-  // {
-  //   Icon: FaChalkboardTeacher,
-  //   label: 'Personal Consultations',
-  //   href: '/portal/teacher/consultation/list',
-  //   isActive: pathname => pathname.includes('/portal/teacher/consultation/list'),
-  //   disabled: false,
-  // },
-  {
-    Icon: MdOutlinePayments,
-    label: 'Payments',
-    href: '/portal/teacher/payments',
-    isActive: pathname => pathname.includes('/portal/teacher/payments'),
-    disabled: false,
-  },
-];
+const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult) => {
+  
+  return [
+    {
+      Icon: MdHome,
+      label: 'Home',
+      href: '/portal',
+      isActive: pathname => pathname === '/portal',
+      disabled: true,
+    },
+    {
+      Icon: FaInbox,
+      label: 'Inbox',
+      href: '/portal/inbox',
+      isActive: pathname => pathname === '/portal/inbox',
+      disabled: !isDevelopmentEnvironment || !is_profile_complete || !has_event_or_consult,
+    },
+    {
+      Icon: FaUser,
+      label: 'Profile',
+      href: '/portal/teacher/profile?active_tab=about',
+      isActive: (pathname, tab) =>
+        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=about') ||
+        pathname.includes('/portal/teacher/editProfile'),
+      disabled: false,
+    },
+    // {
+    //   Icon: PiFilmScriptBold,
+    //   label: 'Programs',
+    //   href: '/portal/teacher/profile?active_tab=programs',
+    //   isActive: (pathname, tab) =>
+    //     `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs') ||
+    //     pathname.includes('/portal/teacher/program'),
+    //   disabled: false,
+    // },
+    {
+      Icon: MdOutlineEventNote,
+      label: 'Events',
+      href: '/portal/teacher/profile?active_tab=group_coaching',
+      isActive: (pathname, tab) =>
+        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') ||
+        pathname.includes('/portal/teacher/group_coaching'),
+      disabled: !is_profile_complete,
+    },
+    {
+      Icon: PiUserSquareFill,
+      label: 'Consult',
+      href: '/portal/teacher/profile?active_tab=consult',
+      isActive: (pathname, tab) =>
+        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult') ||
+        pathname.includes('/portal/teacher/consultation/'),
+      disabled: !is_profile_complete,
+    },
+    // {
+    //   Icon: FaChalkboardTeacher,
+    //   label: 'Personal Consultations',
+    //   href: '/portal/teacher/consultation/list',
+    //   isActive: pathname => pathname.includes('/portal/teacher/consultation/list'),
+    //   disabled: false,
+    // },
+    {
+      Icon: MdOutlinePayments,
+      label: 'Payments',
+      href: '/portal/teacher/payments',
+      isActive: pathname => pathname.includes('/portal/teacher/payments'),
+      disabled: !is_profile_complete || !has_event_or_consult,
+    },
+  ];
+}
 
 const AFFILIATE = [
   {
@@ -411,6 +414,6 @@ const AFFILIATE = [
   
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER, TEACHER, AFFILIATE };
+const SIDEBAR = { ADMIN, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
 
 export default SIDEBAR;
