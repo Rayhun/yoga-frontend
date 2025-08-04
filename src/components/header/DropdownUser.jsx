@@ -6,6 +6,13 @@ import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
 import { USER_ROLE } from '@/utils/authorization';
 
+const getRoleBaseTitle = (role) => {
+
+  if (role === USER_ROLE.TEACHER) return 'Wellness Expert';
+
+  return role;
+}
+
 
 const DropdownUser = () => {
   const { user: loggedInUser } = useAuthContext();
@@ -67,7 +74,7 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-black dark:text-white">
             {loggedInUser?.profile?.first_name} {loggedInUser?.profile?.last_name}
           </span>
-          <span className="block text-xs">{loggedInUser?.profile?.role}</span>
+          <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">

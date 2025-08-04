@@ -1,24 +1,32 @@
 import axios from '@/lib/axios';
 import { getSearchParamsFromObject } from '@/utils/helpers';
 
-export const createNewConsultation = async ({ payload: { categories, tags, ...payload } }) => {
+export const createNewConsultation = async ({ payload: { categories, consent_file, tags, ...payload } }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value) formData.set(key, value);
   });
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));
+
+  consent_file?.forEach((file) => {
+    formData.append('consent_file', file);
+  });
 
   return axios.post('/LMS/consultations/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
-export const updateExistingConsultation = async ({ payload: { categories, tags, ...payload }, id }) => {
+export const updateExistingConsultation = async ({ payload: { categories, consent_file, tags, ...payload }, id }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value) formData.set(key, value);
   });
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));
+
+  consent_file?.forEach((file) => {
+    formData.append('consent_file', file);
+  });
 
   return axios.patch(`/LMS/consultations/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
