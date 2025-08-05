@@ -15,6 +15,7 @@ import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import queryKeys from '@/utils/query-keys';
 import { CONSULTATION_TYPES } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
+import FormikSubmittable from '../form/formik/FormikSubmittable';
 
 const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
@@ -40,6 +41,8 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
     image: initialData?.image || null,
+    consent_file: initialData?.consent_file || [],
+    consent_file_urls: initialData?.consent_file_urls || [],
   };
 
   const validationSchema = Yup.object({
@@ -50,12 +53,22 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     calender_link: Yup.string().required('Calender Link is required'),
     consultation_type: Yup.array().min(1, 'At least one consultation type is required').required(),
     followup_support: Yup.array().min(1, 'At least one consultation type is required').required(),
-    followup_duration: Yup.number().required('Follow up Duration is required').min(1, 'Duration must be at least 1 minute'),
+    followup_duration: Yup.number()
+      .required('Follow up Duration is required')
+      .min(1, 'Duration must be at least 1 minute'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one tag is required'),
     image: Yup.mixed().required('Image is required'),
+    consent_file: Yup.array()
+      .of(Yup.mixed())
+      .max(5, 'Maximum 5 consent files allowed')
+      .optional(),
+    consent_file_urls: Yup.array()
+      .of(Yup.string())
+      .max(5, 'Maximum 5 consent file URLs allowed')
+      .optional(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -132,10 +145,30 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                   <TagsField required />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormikDropzone
+                    name="consent_file"
+                    label="Consent File"
+                    fileURLs={initialData?.consent_file ? [initialData.consent_file] : []}
+                    maxSize={10 * ONE_MB}
+                    accept={{
+                      'application/pdf': ['.pdf', '.doc', '.docx'],
+                      'application/msword': ['.doc', '.docx'],
+                      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                      'application/vnd.ms-excel': ['.xls', '.xlsx'],
+                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                      'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
+                      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+                      'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
+                    }}
+                    supportedFilesText="pdf, doc, docx, xls, xlsx, ppt, pptx"
+                    multiple
+                  />
+                  <FormikSubmittable name="consent_file_urls" label="Consent File URL" />
+                </div>
                 <FormikDropzone
                   name="image"
                   label="Image"
-                  required
                   fileURLs={initialData?.image ? [initialData.image] : []}
                   maxSize={10 * ONE_MB}
                 />

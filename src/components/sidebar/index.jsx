@@ -62,16 +62,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.TEACHER;
+    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult);
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
-  }, [userRole]);
-
-  const disabledSidebarMenu = useMemo(() => {
-    return (
-      userRole === USER_ROLE.TEACHER && (!is_profile_complete || !has_event_or_consult)
-    );
   }, [userRole, is_profile_complete, has_event_or_consult]);
+
+  // const disabledSidebarMenu = useMemo(() => {
+  //   return (
+  //     userRole === USER_ROLE.TEACHER && (!is_profile_complete || !has_event_or_consult)
+  //   );
+  // }, [userRole, is_profile_complete, has_event_or_consult]);
 
   const subRoleBasedSidebarMenuItems = useMemo(
     () =>
@@ -206,16 +206,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 ) : (
                   <li className="list-none">
                     <Link
-                      href={menuItem.disabled || disabledSidebarMenu ? '#' : menuItem.href || '#'}
+                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
                       className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
                         ${
-                          menuItem.disabled || disabledSidebarMenu
+                          menuItem.disabled
                             ? 'cursor-not-allowed opacity-50 text-gray-400'
                             : 'hover:text-primary'
                         } 
                         ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
-                      aria-disabled={menuItem.disabled || disabledSidebarMenu} // Improves accessibility
-                      tabIndex={menuItem.disabled || disabledSidebarMenu ? -1 : 0} // Prevents focus when disabled
+                      aria-disabled={menuItem.disabled} // Improves accessibility
+                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
                     >
                       {menuItem.Icon && <menuItem.Icon size={24} />}
                       {menuItem.label}

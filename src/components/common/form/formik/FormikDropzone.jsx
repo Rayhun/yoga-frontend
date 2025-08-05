@@ -171,7 +171,7 @@ function FormikDropzone({
                     <img src={URL.createObjectURL(file)} className="w-15 h-15 object-cover" alt="img" />
                   ) : (
                     <div className="flex flex-col items-center gap-1 p-2 text-center">
-                      <p className="text-lg truncate max-w-full">{file?.name}</p>
+                      <p className="text-lg truncate max-w-[200px]">{file?.name}</p>
                     </div>
                   )}
                    <IconButton
