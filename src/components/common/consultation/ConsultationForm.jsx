@@ -164,7 +164,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                     supportedFilesText="pdf, doc, docx, xls, xlsx, ppt, pptx"
                     multiple
                   />
-                  <FormikSubmittable name="consent_file_urls" label="Consent File URL" required />
+                  <FormikSubmittable name="consent_file_urls" label="Consent File URL" />
                 </div>
                 <FormikDropzone
                   name="image"
