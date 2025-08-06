@@ -24,7 +24,7 @@
     scrollbar-width: none; /* Firefox */
   }
 
-  /* Custom scrollbar styles */
+   /* Custom scrollbar styles */
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
