@@ -15,11 +15,11 @@ import Button from '@/components/common/Button';
 import { toastApiError } from '@/utils/helpers';
 import SignupStepper from '../common/SignupStepper';
 import { registerNewAffiliateUser } from '@/services/private/affiliates/users';
-import FormikSubmittable from '../common/form/formik/FormikSubmittable';
+import FormikMultiSelect from '../common/form/formik/FormikMultiSelect';
 import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikCountrySelect from '../common/form/formik/FormikCountrySelect';
 import FormikSelect from '../common/form/formik/FormikSelect';
-import { BUSINESS_MODELS } from '@/utils/constants';
+import { BUSINESS_MODELS, AFFILIATE_CHANNELS } from '@/utils/constants';
 
 const AffiliatesSignupForm = () => {
   const router = useRouter();
@@ -196,12 +196,13 @@ const AffiliatesSignupForm = () => {
               Icon={FiMail}
               required
             />
-            <FormikSubmittable
+            <FormikMultiSelect
               name="channels"
               label="Channels"
-              placeholder="Where will you share your affiliate link? (e.g., Instagram, TikTok, YouTube, Podcast, Blog, etc.)"
+              placeholder="Select where you will share your affiliate link"
+              options={AFFILIATE_CHANNELS}
               required
-              disabled={values?.channels?.length >= 5}
+              maxSelections={5}
             />
             <FormikSelect
               name="business_model"
