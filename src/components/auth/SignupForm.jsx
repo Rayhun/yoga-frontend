@@ -14,7 +14,7 @@ import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
 import { extractFormFieldError, toastApiError } from '@/utils/helpers';
-import FormikPhoneField from '../common/form/formik/FormikPhoneField';
+import FormikPhoneFieldWithValidation from '@/components/common/form/formik/FormikPhoneFieldWithValidation';
 import SignupStepper from '../common/SignupStepper';
 
 const SignupForm = () => {
@@ -164,11 +164,10 @@ const SignupForm = () => {
               <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
             </div>
             <FormikEmailField name="email" label="Email" placeholder="Email" required />
-            <FormikPhoneField
-              type='number'
+            <FormikPhoneFieldWithValidation
               name="mobile_number"
               label="Phone"
-              placeholder="Enter numbers only, no dashes, parentheses, spaces etc."
+              placeholder="Enter your phone number"
               required
             />
             <FormikField
