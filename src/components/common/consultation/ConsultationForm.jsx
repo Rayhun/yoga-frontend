@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
@@ -20,6 +21,24 @@ import FormikSubmittable from '../form/formik/FormikSubmittable';
 const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  
+  // State for consent form option selection
+  const [consentOption, setConsentOption] = useState(
+    initialData?.consent_file?.length > 0 ? 'upload' : 
+    initialData?.consent_file_urls?.length > 0 ? 'link' : 'upload'
+  );
+
+  // Function to handle consent option change and clear the other field
+  const handleConsentOptionChange = (option, setFieldValue) => {
+    setConsentOption(option);
+    
+    // Clear the other field when switching options
+    if (option === 'upload') {
+      setFieldValue('consent_file_urls', []);
+    } else if (option === 'link') {
+      setFieldValue('consent_file', []);
+    }
+  };
 
   const { mutateAsync: createConsultation } = useMutation({
     mutationFn: createNewConsultation,
@@ -109,7 +128,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting, values }) => {
+          {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="flex flex-col gap-4">
                 <FormikField name="title" label="Title" required />
@@ -144,34 +163,92 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                   <CategoriesField required />
                   <TagsField required />
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormikDropzone
-                    name="consent_file"
-                    label="Consent File"
-                    fileURLs={initialData?.consent_file ? [initialData.consent_file] : []}
-                    maxSize={10 * ONE_MB}
-                    accept={{
-                      'application/pdf': ['.pdf', '.doc', '.docx'],
-                      'application/msword': ['.doc', '.docx'],
-                      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                      'application/vnd.ms-excel': ['.xls', '.xlsx'],
-                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                      'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
-                      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-                      'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
-                    }}
-                    supportedFilesText="pdf, doc, docx, xls, xlsx, ppt, pptx"
-                    multiple
-                  />
-                  <FormikSubmittable name="consent_file_urls" label="Consent File URL" />
-                </div>
                 <FormikDropzone
                   name="image"
                   label="Image"
                   fileURLs={initialData?.image ? [initialData.image] : []}
                   maxSize={10 * ONE_MB}
                 />
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Consent or Intake Forms (Optional)</h3>
+                    <p className="text-sm text-gray-600 mb-4">Provide a link or upload a file if this consultation requires any pre-session forms. Max of 5.</p>
+                    
+                    <div className="space-y-4">
+                      {/* Upload File Option */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center mb-3">
+                          <input
+                            type="radio"
+                            name="consent_option"
+                            value="upload"
+                            className="mr-3 w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary focus:ring-2"
+                            checked={consentOption === 'upload'}
+                            onChange={(e) => handleConsentOptionChange(e.target.value, setFieldValue)}
+                          />
+                          <label className="font-medium text-gray-700 cursor-pointer">Upload File</label>
+                        </div>
+                        <div className="ml-6">
+                          {consentOption === 'upload' && (
+                            <FormikDropzone
+                              name="consent_file"
+                              label=""
+                              fileURLs={initialData?.consent_file ? [initialData.consent_file] : []}
+                              maxSize={10 * ONE_MB}
+                              accept={{
+                                'application/pdf': ['.pdf', '.doc', '.docx'],
+                                'application/msword': ['.doc', '.docx'],
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                                'application/vnd.ms-excel': ['.xls', '.xlsx'],
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                                'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
+                                'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+                                'application/vnd.ms-powerpoint': ['.ppt', '.pptx'],
+                              }}
+                              supportedFilesText="PDF, DOC, JPG"
+                              multiple
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                          <span className="px-2 bg-white text-gray-500">OR</span>
+                        </div>
+                      </div>
+
+                      {/* Provide Link Option */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center mb-3">
+                          <input
+                            type="radio"
+                            name="consent_option"
+                            value="link"
+                            className="mr-3 w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary focus:ring-2"
+                            checked={consentOption === 'link'}
+                            onChange={(e) => handleConsentOptionChange(e.target.value, setFieldValue)}
+                          />
+                          <label className="font-medium text-gray-700 cursor-pointer">Provide Link:</label>
+                        </div>
+                        <div className="ml-6">
+                          {consentOption === 'link' && (
+                            <FormikSubmittable 
+                              name="consent_file_urls" 
+                              label="" 
+                              placeholder="Paste forms URL here"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
                   <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>

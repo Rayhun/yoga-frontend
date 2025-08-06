@@ -83,6 +83,41 @@ const ADMIN = [
     isActive: pathname => pathname.includes('/portal/admin/entities/users'),
     disabled: false,
   },
+    {
+    Icon: GrUserExpert,
+    label: 'Experts',
+    href: '/portal/admin/lms/expert',
+    isActive: pathname => pathname.includes('/portal/admin/lms/expert'),
+    disabled: false,
+  },
+  {
+    Icon: FaTv,
+    label: 'Affiliates',
+    disabled: false,
+    hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Dashboard',
+        href: '/portal/admin/affiliates/dashboard',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/dashboard'),
+      },
+      {
+        label: 'Affiliates',
+        href: '/portal/admin/affiliates/users',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/users'),
+      },
+      {
+        label: 'Commision Types',
+        href: '/portal/admin/affiliates/commission_type',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/commission_type'),
+      },
+      {
+        label: 'Payout List',
+        href: '/portal/admin/affiliates/payout_list',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/payout_list'),
+      },
+    ],
+  },
   {
     Icon: FaUserFriends,
     label: 'Groups',
@@ -120,34 +155,6 @@ const ADMIN = [
   },
   {
     Icon: FaTv,
-    label: 'Affiliates',
-    disabled: false,
-    hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
-    sub_menu: [
-      {
-        label: 'Dashboard',
-        href: '/portal/admin/affiliates/dashboard',
-        isActive: pathname => pathname.includes('/portal/admin/affiliates/dashboard'),
-      },
-      {
-        label: 'Affiliates',
-        href: '/portal/admin/affiliates/users',
-        isActive: pathname => pathname.includes('/portal/admin/affiliates/users'),
-      },
-      {
-        label: 'Commision Types',
-        href: '/portal/admin/affiliates/commission_type',
-        isActive: pathname => pathname.includes('/portal/admin/affiliates/commission_type'),
-      },
-      {
-        label: 'Payout List',
-        href: '/portal/admin/affiliates/payout_list',
-        isActive: pathname => pathname.includes('/portal/admin/affiliates/payout_list'),
-      },
-    ],
-  },
-  {
-    Icon: FaTv,
     label: 'Sessions',
     disabled: false,
     hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
@@ -174,13 +181,6 @@ const ADMIN = [
     label: 'Quiz',
     href: '/portal/admin/lms/quiz',
     isActive: pathname => pathname.includes('/portal/admin/lms/quiz'),
-    disabled: false,
-  },
-  {
-    Icon: GrUserExpert,
-    label: 'Experts',
-    href: '/portal/admin/lms/expert',
-    isActive: pathname => pathname.includes('/portal/admin/lms/expert'),
     disabled: false,
   },
   {

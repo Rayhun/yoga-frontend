@@ -146,7 +146,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                     options={CONSULTATION_TYPES}
                     required
                   />
-                  <FormikField name="duration" label="Duration" type="number" min={1} required />
+                  <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />

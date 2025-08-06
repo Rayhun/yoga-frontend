@@ -136,11 +136,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       </div>
       {/* <!-- SIDEBAR HEADER --> */}
 
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear h-full">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
         {/* Sidebar Menu */}
         <nav className="mt-3 px-4 py-4 lg:px-6 flex flex-col h-full">
           {/* Menu Group */}
-          <ul className="flex-grow flex flex-col gap-2 mb-20">
+          <ul className="flex-grow flex flex-col gap-2 mb-4">
             {subRoleBasedSidebarMenuItems.map(menuItem => (
               <React.Fragment key={menuItem.label}>
                 {menuItem.sub_menu ? (
@@ -247,6 +247,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               Logout
             </span>
           </li>
+          {/* Bottom padding to ensure scrollbar doesn't cover content */}
+          <div className="pb-4"></div>
         </nav>
       </div>
     </aside>
