@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FiMail, FiLock, FiUser } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikEmailField from '@/components/common/form/formik/FormikEmailField';
 import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { toastApiError } from '@/utils/helpers';
@@ -186,7 +187,7 @@ const AffiliatesSignupForm = () => {
               />
               <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
             </div>
-            <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
+            <FormikEmailField name="email" label="Email" placeholder="Email" required />
             <FormikField
               type="email"
               name="paypal_email"
