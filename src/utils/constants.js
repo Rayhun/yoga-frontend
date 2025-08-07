@@ -23,6 +23,19 @@ export const CONSULTATION_TYPES = [
   { label: 'Video', value: 'video' },
 ];
 
+export const AFFILIATE_CHANNELS = [
+  { label: 'Website or Blog', value: 'website-blog' },
+  { label: 'Email Newsletter or SMS List', value: 'email-sms' },
+  { label: 'YouTube or Video Content', value: 'youtube-video' },
+  { label: 'Social Media (Instagram, Facebook, TikTok, etc.)', value: 'social-media' },
+  { label: 'Podcast or Audio Platform', value: 'podcast-audio' },
+  { label: 'Online Courses or Membership Communities', value: 'online-courses' },
+  { label: 'Paid Ads (Google, Meta, Native, etc.)', value: 'paid-ads' },
+  { label: 'Coupon, Deal, or Cashback Sites', value: 'coupon-deals' },
+  { label: 'Webinars or Live Events', value: 'webinars-events' },
+  { label: 'Other', value: 'other' },
+];
+
 export const TIME_ZONES = [
   {
     value: 'Dateline Standard Time',

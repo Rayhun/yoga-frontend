@@ -9,16 +9,17 @@ import { useMutation } from '@tanstack/react-query';
 import { FiMail, FiLock, FiUser } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikEmailField from '@/components/common/form/formik/FormikEmailField';
 import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { toastApiError } from '@/utils/helpers';
 import SignupStepper from '../common/SignupStepper';
 import { registerNewAffiliateUser } from '@/services/private/affiliates/users';
-import FormikSubmittable from '../common/form/formik/FormikSubmittable';
+import FormikMultiSelect from '../common/form/formik/FormikMultiSelect';
 import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikCountrySelect from '../common/form/formik/FormikCountrySelect';
 import FormikSelect from '../common/form/formik/FormikSelect';
-import { BUSINESS_MODELS } from '@/utils/constants';
+import { BUSINESS_MODELS, AFFILIATE_CHANNELS } from '@/utils/constants';
 
 const AffiliatesSignupForm = () => {
   const router = useRouter();
@@ -186,7 +187,7 @@ const AffiliatesSignupForm = () => {
               />
               <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
             </div>
-            <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
+            <FormikEmailField name="email" label="Email" placeholder="Email" required />
             <FormikField
               type="email"
               name="paypal_email"
@@ -195,12 +196,13 @@ const AffiliatesSignupForm = () => {
               Icon={FiMail}
               required
             />
-            <FormikSubmittable
+            <FormikMultiSelect
               name="channels"
               label="Channels"
-              placeholder="Where will you share your affiliate link? (e.g., Instagram, TikTok, YouTube, Podcast, Blog, etc.)"
+              placeholder="Select where you will share your affiliate link"
+              options={AFFILIATE_CHANNELS}
               required
-              disabled={values?.channels?.length >= 5}
+              maxSelections={5}
             />
             <FormikSelect
               name="business_model"

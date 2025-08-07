@@ -35,3 +35,11 @@ export const resendEmailOTPCode = async ({ payload }) => {
 export const resendPhoneOTPCode = async ({ payload }) => {
   return axios.post('/auth/resend-number-otp/', payload);
 };
+
+export const checkEmailExists = async ({ email }) => {
+  return axios.post('/auth/check-email/', { email });
+};
+
+export const checkPhoneExists = async ({ phone }) => {
+  return axios.post('/auth/check-phone/', { phone });
+};
