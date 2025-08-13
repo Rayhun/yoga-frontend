@@ -36,7 +36,6 @@ const SubscriptionPlanForm = ({ selected }) => {
     subscription_tenure: selected?.subscription_tenure || '',
     price: selected?.price || '',
     discounted_price: selected?.discounted_price || '',
-    price_id: selected?.price_id || '',
     features: selected?.features?.join('\n') || '',
   };
 
@@ -47,7 +46,6 @@ const SubscriptionPlanForm = ({ selected }) => {
     subscription_tenure: Yup.string().required('Required!'),
     price: Yup.number().required('Required!').min(0, 'Price must be at least 0'),
     discounted_price: Yup.number().required('Required!').min(0, 'Discounted Price must be at least 0'),
-    price_id: Yup.string().required('Required!'),
     features: Yup.string().required('Required!'),
   });
 
@@ -130,7 +128,6 @@ const SubscriptionPlanForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <FormikField name="price_id" label="Stripe Price ID" placeholder="Stripe Price ID" required />
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
