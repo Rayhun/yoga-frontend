@@ -17,7 +17,6 @@ const SubscriptionPlanDetails = ({ data = {} }) => {
         <DetailsRecord label="Subscription Tenure">{data.subscription_tenure}</DetailsRecord>
         <DetailsRecord label="Price">{data.price}</DetailsRecord>
         <DetailsRecord label="Discounted Price">{data.discounted_price}</DetailsRecord>
-        <DetailsRecord label="Stripe Price ID">{data.price_id}</DetailsRecord>
         <DetailsRecord label="Features">{data.features}</DetailsRecord>
       </div>
     </DetailsLayoutWrapper>
