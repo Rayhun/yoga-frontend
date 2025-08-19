@@ -23,6 +23,10 @@ export const deleteSingleModule = async ({ id }) => {
   return axios.delete(`/LMS/module/${id}/`);
 };
 
+export const deleteModuleContent = async ({ id }) => {
+  return axios.delete(`/LMS/module/content/${id}/delete/`);
+};
+
 export const getModuleContentOptions = async ({ type }) => {
   if (type === MODULE_TYPE.quiz) return getQuizesList();
   return getSessionsList({ type });

@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
@@ -21,6 +22,8 @@ const AIChatPromptsForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const [selectedChatType, setSelectedChatType] = useState(selected?.chat_type || '');
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   const { mutateAsync: addPrompt } = useMutation({
     mutationFn: createAIChatPromptType,
@@ -40,7 +43,11 @@ const AIChatPromptsForm = ({ selected }) => {
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
-    prompt: Yup.string().required('Prompt is required'),
+    prompt: Yup.string().when('chat_type', {
+      is: 'faqs',
+      then: (schema) => schema.notRequired(),
+      otherwise: (schema) => schema.required('Prompt is required'),
+    }),
     chat_type: Yup.string().required('Chat Type is required'),
     gpt_model: Yup.string().required('GPT Model is required'),
     temprature: Yup.string().required('Temprature is required'),
@@ -49,11 +56,20 @@ const AIChatPromptsForm = ({ selected }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const submitData = { ...values };
+      
+      // If chat type is faqs and file is uploaded, handle file upload logic here
+      if (selectedChatType === 'faqs' && uploadedFile) {
+        // You can add file upload logic here
+        // For now, we'll just add a note about the file
+        submitData.prompt = `File uploaded: ${uploadedFile.name}`;
+      }
+
       if (isEditMode) {
-        await updatePrompt({ payload: { id: selected.id, ...values } });
+        await updatePrompt({ payload: { id: selected.id, ...submitData } });
         toast.success('AI Chat prompt updated successfully');
       } else {
-        await addPrompt({ payload: { ...values } });
+        await addPrompt({ payload: { ...submitData } });
         toast.success('AI Chat prompt added successfully');
       }
       await queryClient.invalidateQueries([
@@ -69,6 +85,11 @@ const AIChatPromptsForm = ({ selected }) => {
     }
   };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setUploadedFile(file);
+  };
+
   return (
     <FormLayoutWrapper title="AI Chat Prompt Form" description="Add or edit a AI Chat Prompt">
       <Formik
@@ -77,13 +98,44 @@ const AIChatPromptsForm = ({ selected }) => {
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, setFieldValue }) => (
           <Form className="flex flex-col gap-3">
             <FormikField name="title" label="Title" placeholder="Title" required />
-            <FormikField name="prompt" label="Prompt" placeholder="Prompt..." required rows={4} />
+            
+            {/* Conditionally render prompt field or file upload based on chat type */}
+            {selectedChatType === 'faqs' ? (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">Upload FAQs File</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.csv"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {uploadedFile && (
+                  <p className="text-sm text-green-600">File selected: {uploadedFile.name}</p>
+                )}
+              </div>
+            ) : (
+              <FormikField name="prompt" label="Prompt" placeholder="Prompt..." required rows={4} />
+            )}
 
             <div className='grid grid-cols-2 gap-4'>
-              <FormikSelect name="chat_type" label="Chat Type" options={CHAT_TYPE_OPTIONS} />
+              <FormikSelect 
+                name="chat_type" 
+                label="Chat Type" 
+                options={CHAT_TYPE_OPTIONS}
+                onChange={(value) => {
+                  setSelectedChatType(value);
+                  setFieldValue('chat_type', value);
+                  // Clear the other field when switching
+                  if (value === 'faqs') {
+                    setFieldValue('prompt', '');
+                  } else {
+                    setUploadedFile(null);
+                  }
+                }}
+              />
 
               <FormikField name="gpt_model" label="GPT Model" placeholder="GPT Model" required />
             </div>

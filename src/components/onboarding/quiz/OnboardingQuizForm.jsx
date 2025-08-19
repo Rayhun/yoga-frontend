@@ -31,6 +31,7 @@ const OnboardingQuizForm = ({ selected }) => {
   const initialValues = {
     title: selected?.title || '',
     screen_type: selected?.screen_type || ONBOARDING_QUIZ_CONTENT_TYPE.text,
+    ordering: selected?.ordering || 0,
     description: selected?.description || '',
     is_required: selected?.required || false,
     options: (selected?.options || [{ text: '', image: null }]).map(i => ({
@@ -41,6 +42,7 @@ const OnboardingQuizForm = ({ selected }) => {
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
+    ordering: Yup.number().required('Order is required').min(1).max(999),
     description: Yup.string().required('Required!'),
     is_required: Yup.boolean(),
     options: Yup.array()
@@ -109,11 +111,26 @@ const OnboardingQuizForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <div className="flex">
-              <FormikCheckbox name="is_required" label="Is Required?" />
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row md:items-center">
+              <div className="w-full md:w-1/2">
+              <FormikField
+              name="ordering"
+              label="Order"
+              placeholder="Order"
+              required
+              min={1}
+              max={999}
+              type="number"
+            />
+              </div>
+              <div className="w-full md:w-1/2">
+                
+              </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
-
+            <div className="flex">
+                  <FormikCheckbox name="is_required" label="Is Required?" />
+                </div>
             <div className="my-5 flex flex-col gap-3">
               <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
               <FieldArray

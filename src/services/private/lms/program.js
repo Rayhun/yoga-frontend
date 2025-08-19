@@ -24,6 +24,10 @@ export const deleteSingleProgram = async ({ id }) => {
   return axios.delete(`/LMS/program/${id}/`);
 };
 
+export const deleteProgramContent = async ({ id }) => {
+  return axios.delete(`/LMS/program/content/${id}/delete/`);
+};
+
 export const getProgramContentOptions = async ({ type }) => {
   if (type === PROGRAM_TYPE.module) return getModulesList();
   if (type === PROGRAM_TYPE.quiz) return getQuizesList();
