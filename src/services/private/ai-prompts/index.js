@@ -1,7 +1,7 @@
 import axios from '@/lib/axios';
 
-export const createAIChatPromptType = async ({ payload }) => {
-  return axios.post('/ai/prompts/', payload);
+export const createAIChatPromptType = async ({ payload, config = {} }) => {
+  return axios.post('/ai/prompts/', payload, config);
 };
 
 export const getAIPromptsList = async () => {
@@ -12,8 +12,18 @@ export const getAIChatPromptDetails = async ({ id }) => {
   return axios.get(`/ai/prompts/${id}/`);
 };
 
-export const updateAIChatPrompt = async ({ payload: { id, ...payload } }) => {
-  return axios.put(`/ai/prompts/${id}/`, payload);
+export const updateAIChatPrompt = async ({ payload, config = {} }) => {
+  // Handle both FormData and regular object payloads
+  if (payload instanceof FormData) {
+    // For FormData, extract id and send the rest
+    const id = payload.get('id');
+    payload.delete('id'); // Remove id from FormData since it's in the URL
+    return axios.put(`/ai/prompts/${id}/`, payload, config);
+  } else {
+    // For regular objects, destructure as before
+    const { id, ...restPayload } = payload;
+    return axios.put(`/ai/prompts/${id}/`, restPayload, config);
+  }
 };
 
 export const toggleAIChatPromptStatus = async ({ id }) => {

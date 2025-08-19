@@ -34,6 +34,15 @@ const AIChatPromptsList = () => {
       {
         header: 'Prompt',
         accessorKey: 'prompt',
+        cell: ({ row }) => {
+          const { chat_type, prompt, file_info } = row.original;
+          
+          if (chat_type === 'faqs' && file_info?.name) {
+            return <span className="text-sm">{file_info.name}</span>;
+          }
+          
+          return <span className="text-sm">{prompt || '-'}</span>;
+        },
       },
       {
         header: 'Chat Type',
