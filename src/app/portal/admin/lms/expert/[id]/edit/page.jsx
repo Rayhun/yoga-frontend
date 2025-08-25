@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
-import ExpertForm from '@/components/lms/expert/ExpertForm';
+import ExpertProfileForm from '@/components/lms/expert/ExpertProfileForm';
 import { getSingleExpert } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
 
@@ -24,7 +24,7 @@ const Page = ({ params }) => {
   return (
     <div>
       <PageHeader title="Edit Expert" />
-      <ExpertForm selected={response?.data?.data} />
+      <ExpertProfileForm selected={response?.data?.data} isAdminContext={true} />
     </div>
   );
 };

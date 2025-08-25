@@ -11,7 +11,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 // import { TagsField } from '@/components/lms/general/fields';
-import { updateExistingExpert } from '@/services/private/lms/expert';
+import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
@@ -22,11 +22,14 @@ import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
 import CertificationsField from '../general/fields/CertificationsField';
 
-const ExpertProfileForm = ({ selected }) => {
+const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
 
+  const { mutateAsync: addExpert } = useMutation({
+    mutationFn: addNewExpert,
+  });
   const { mutateAsync: updateExpert } = useMutation({
     mutationFn: updateExistingExpert,
   });
@@ -93,16 +96,31 @@ const ExpertProfileForm = ({ selected }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      await updateExpert({ payload: { id: selected.id, ...values } });
-      toast.success('Expert updated successfully');
+      if (isEditMode) {
+        await updateExpert({ payload: { id: selected.id, ...values } });
+        toast.success('Expert updated successfully');
+      } else {
+        await addExpert({ payload: { ...values } });
+        toast.success('Expert created successfully');
+      }
       await queryClient.invalidateQueries([
         {
           queryKey: isEditMode
-            ? [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser]
-            : [queryKeys.teacherProfile],
+            ? isAdminContext 
+              ? [queryKeys.lmsExperts, selected.id]
+              : [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser]
+            : isAdminContext
+              ? [queryKeys.lmsExperts]
+              : [queryKeys.teacherProfile],
         },
       ]);
-      router.push('/portal/teacher/profile??active_tab=about');
+      
+      // Redirect based on context
+      if (isAdminContext) {
+        router.push('/portal/admin/lms/expert');
+      } else {
+        router.push('/portal/teacher/profile?active_tab=about');
+      }
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -266,7 +284,7 @@ const ExpertProfileForm = ({ selected }) => {
                   Cancel
                 </Button>
                 <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Submit My Profile'}
+                  {isSubmitting ? 'Submitting...' : isEditMode ? 'Update Expert' : 'Create Expert'}
                 </Button>
               </div>
             </Form>
