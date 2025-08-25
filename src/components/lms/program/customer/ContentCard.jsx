@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 import LinearProgress from '@mui/material/LinearProgress';
 import { BiCheck } from 'react-icons/bi';
 import { FaTv, FaImage, FaHeadphones, FaPlayCircle } from 'react-icons/fa';
@@ -73,13 +74,18 @@ const SessionQuizContent = ({ content_type, session_type, duration = '10 min' })
   );
 };
 
-const ContentCard = ({ item }) => {
+const ContentCard = ({ item, isEnrolled = false }) => {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const contentRef = getContentRef(item);
 
   const handleNavigate = () => {
+    if (!isEnrolled) {
+      toast.error('Please enroll in this program to access the content');
+      return;
+    }
+    
     const newParams = new URLSearchParams(searchParams);
     newParams.set('program', params.id);
     router.push(`${contentRef.href}?${newParams.toString()}`);
