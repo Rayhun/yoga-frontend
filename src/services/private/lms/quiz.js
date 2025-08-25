@@ -1,7 +1,7 @@
 import axios from '@/lib/axios';
 
 export const getQuizesList = async () => {
-  return axios.get('/LMS/quiz/');
+  return axios.get('/LMS/quiz/list/');
 };
 
 export const getSingleQuiz = async ({ id }) => {

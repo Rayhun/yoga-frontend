@@ -173,6 +173,9 @@ const ProgramDetails = ({ data = {} }) => {
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        {data.linked_program && (
+          <DetailsRecord label="Linked Program">{data.linked_program.title}</DetailsRecord>
+        )}
         <DetailsRecord label="Content">
           <BasicTable
             columns={tableColumns}

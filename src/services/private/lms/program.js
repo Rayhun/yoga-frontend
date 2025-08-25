@@ -5,7 +5,7 @@ import { getSessionsList } from './session';
 import { PROGRAM_TYPE } from '@/utils/enums';
 
 export const getProgramsList = async () => {
-  return axios.get('/LMS/program/');
+  return axios.get('/LMS/progrm/list/');
 };
 
 export const getSingleProgram = async ({ id }) => {

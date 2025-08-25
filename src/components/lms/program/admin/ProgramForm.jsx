@@ -24,11 +24,13 @@ import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
 import { ACCESS_SETTING } from '@/utils/enums';
+import useLMSProgramOptions from '@/hooks/useLMSProgramOptions';
 
 const ProgramForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const { options: programOptions } = useLMSProgramOptions();
   const { mutateAsync: addProgram } = useMutation({
     mutationFn: addNewProgram,
   });
@@ -46,6 +48,7 @@ const ProgramForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
+    linked_program: selected?.linked_program || '',
     program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }]).map(
       ({ content_id, content_type, drip }) => ({
         content_id,
@@ -144,17 +147,7 @@ const ProgramForm = ({ selected }) => {
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
             <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full md:w-1/2">
-                <FormikDropzone
-                  name="file"
-                  label="File"
-                  fileURLs={selected?.image ? [selected.image] : []}
-                  Icon={FaRegFileImage}
-                  required
-                />
-              </div>
-            </div>
+
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <AccessSettingField required />
@@ -181,6 +174,25 @@ const ProgramForm = ({ selected }) => {
               </div>
               <div className="md:w-1/2">
                 <TagsField required />
+              </div>
+            </div>
+            <div className="w-full xl:w-1/2">
+              <FormikSelect
+                name="linked_program"
+                label="Linked Program"
+                placeholder="Select Linked Program"
+                options={programOptions}
+              />
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full md:w-1/2">
+                <FormikDropzone
+                  name="file"
+                  label="File"
+                  fileURLs={selected?.image ? [selected.image] : []}
+                  Icon={FaRegFileImage}
+                  required
+                />
               </div>
             </div>
 

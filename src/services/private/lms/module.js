@@ -4,7 +4,7 @@ import { getSessionsList } from './session';
 import { MODULE_TYPE } from '@/utils/enums';
 
 export const getModulesList = async () => {
-  return axios.get('/LMS/module/');
+  return axios.get('/LMS/module/list/');
 };
 
 export const getSingleModule = async ({ id }) => {

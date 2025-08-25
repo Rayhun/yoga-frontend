@@ -1,7 +1,7 @@
 import axios from '@/lib/axios';
 
 export const getSessionsList = async ({ type }) => {
-  return axios.get(`/LMS/session/?type=${type}`);
+  return axios.get(`/LMS/session/list/?type=${type}`);
 };
 
 export const getSingleSession = async ({ id }) => {
