@@ -25,6 +25,10 @@ const GroupsList = () => {
         accessorKey: 'group_name',
       },
       {
+        header: 'Visibility',
+        accessorKey: 'visibility',
+      },
+      {
         header: 'Members Count',
         cell: ({ row }) => row?.original?.members?.length || 0,
       },

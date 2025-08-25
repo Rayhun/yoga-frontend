@@ -9,9 +9,11 @@ import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { addNewGroup, updateExistingGroup } from '@/services/private/chat/group';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
+import { GROUP_VISIBILITY_OPTIONS } from '@/utils/options';
 
 const GroupForm = ({ selected }) => {
   const router = useRouter();
@@ -30,11 +32,13 @@ const GroupForm = ({ selected }) => {
   const initialValues = {
     group_name: selected?.group_name || '',
     members: selected?.members.map(i => i.id) || [],
+    visibility: selected?.visibility || '',
   };
 
   const validationSchema = Yup.object({
     group_name: Yup.string().required('Required!'),
     members: Yup.array().min(1, 'Must add at least one member'),
+    visibility: Yup.string().required('Required!'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -67,8 +71,19 @@ const GroupForm = ({ selected }) => {
       >
         {({ isSubmitting }) => (
           <Form className="flex flex-col gap-3">
-            <div className="w-full xl:w-1/2">
-              <FormikField name="group_name" label="Name" placeholder="Name" required />
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full md:w-1/2">
+                <FormikField name="group_name" label="Name" placeholder="Name" required />
+              </div>
+              <div className="w-full md:w-1/2">
+                <FormikSelect
+                  name="visibility"
+                  label="Visibility"
+                  placeholder="Select Visibility"
+                  options={GROUP_VISIBILITY_OPTIONS}
+                  required
+                />
+              </div>
             </div>
             <div className="w-full xl:w-1/2">
               <FormikMultiSelect
