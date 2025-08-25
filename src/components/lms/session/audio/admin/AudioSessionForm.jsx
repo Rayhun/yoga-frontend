@@ -63,7 +63,7 @@ const AudioSession = ({ selected }) => {
     description: Yup.string().required('Required!'),
     duration: Yup.string().required('Required!'),
     status: Yup.string().required('Required!'),
-    expert: Yup.string().required('Required!'),
+    expert: Yup.string(),
     difficulty: Yup.string().required('Required!'),
     intensity: Yup.string().required('Required!'),
     access_setting: Yup.string().required('Required!'),
@@ -188,7 +188,7 @@ const AudioSession = ({ selected }) => {
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">
-                <ExpertField required />
+                <ExpertField />
               </div>
               <div className="md:w-1/2" />
             </div>

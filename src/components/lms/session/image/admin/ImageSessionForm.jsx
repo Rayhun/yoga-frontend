@@ -62,7 +62,7 @@ const ImageSession = ({ selected }) => {
     description: Yup.string().required('Required!'),
     duration: Yup.string().required('Required!'),
     status: Yup.string().required('Required!'),
-    expert: Yup.string().required('Required!'),
+    expert: Yup.string(),
     difficulty: Yup.string().required('Required!'),
     intensity: Yup.string().required('Required!'),
     access_setting: Yup.string().required('Required!'),
@@ -99,7 +99,7 @@ const ImageSession = ({ selected }) => {
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsImageSessions, selected.id] : [queryKeys.lmsImageSessions] },
       ]);
-      router.push('/portal/admin/admin/admin/lms/session/image');
+      router.push('/portal/admin/lms/session/image');
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -121,8 +121,8 @@ const ImageSession = ({ selected }) => {
               <div className="w-full md:w-1/2">
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
-              <div className="w-full md:w-1/2">
-                <FormikField name="duration" label="Duration" placeholder="Duration" required />
+              <div className="md:w-1/2">
+                <ExpertField />
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
@@ -178,17 +178,15 @@ const ImageSession = ({ selected }) => {
               </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <ExpertField required />
-              </div>
-              <div className="md:w-1/2">
-                <FormikDropzone
+            <FormikDropzone
                   name="file"
                   label="File"
                   fileURLs={selected?.content_file ? [selected?.content_file] : []}
                   Icon={FaRegFileImage}
                   required
                 />
+              <div className="md:w-1/2">
+                
               </div>
             </div>
 

@@ -14,7 +14,6 @@ const ImageSessionDetails = ({ data = {} }) => {
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Description">{data.description}</DetailsRecord>
-        <DetailsRecord label="Duration">{data.duration}</DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>
         <DetailsRecord label="Difficulty">{data.difficulty}</DetailsRecord>
         <DetailsRecord label="Intensity">{data.intensity}</DetailsRecord>
