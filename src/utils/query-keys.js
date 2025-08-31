@@ -44,6 +44,7 @@ const queryKeys = {
   expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',
   customerEnrolledConsultations: 'customerEnrolledConsultations',
   customerEnrolledGroupCoachings: 'customerEnrolledGroupCoaching',
+  customerExperts: 'customerExperts',
   journalList: 'journalList',
   goalList: 'goalList',
   concernList: 'concernList',
