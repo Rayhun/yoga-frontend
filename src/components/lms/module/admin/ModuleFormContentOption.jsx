@@ -1,34 +1,98 @@
 'use client';
-import { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useFormikContext } from 'formik';
 import IconButton from '@mui/material/IconButton';
 import { RiCloseCircleLine } from 'react-icons/ri';
-import useUpdateEffect from '@/hooks/useUpdateEffect';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { getModuleContentOptions } from '@/services/private/lms/module';
 import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 
+// Global cache to prevent duplicate API calls across multiple components
+const moduleContentOptionsCache = new Map();
+const moduleLoadingStates = new Map();
+
 const ModuleFormContentOption = ({ values, name, onRemove }) => {
   const { setFieldValue } = useFormikContext();
   const [contentOptions, setContentOptions] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const hasLoadedOptionsRef = useRef(false);
 
   const { mutateAsync: getContentOptions, isPending } = useMutation({
     mutationFn: getModuleContentOptions,
   });
 
-  useUpdateEffect(() => {
-    // setFieldValue(`${name}.content_id`, '');
-
-    getContentOptions({ type: values.content_type }).then(contentOptionsResponse => {
+  const loadContentOptions = async (selectedType) => {
+    if (!selectedType) return;
+    
+    // Check if data is already cached
+    if (moduleContentOptionsCache.has(selectedType)) {
+      setContentOptions(moduleContentOptionsCache.get(selectedType));
+      hasLoadedOptionsRef.current = true;
+      return;
+    }
+    
+    // Check if already loading for this type
+    if (moduleLoadingStates.get(selectedType)) {
+      // Wait for the ongoing request
+      const checkLoading = setInterval(() => {
+        if (!moduleLoadingStates.get(selectedType) && moduleContentOptionsCache.has(selectedType)) {
+          setContentOptions(moduleContentOptionsCache.get(selectedType));
+          hasLoadedOptionsRef.current = true;
+          clearInterval(checkLoading);
+        }
+      }, 100);
+      return;
+    }
+    
+    moduleLoadingStates.set(selectedType, true);
+    
+    try {
+      const contentOptionsResponse = await getContentOptions({ type: selectedType });
       const modifiedOptionsData = contentOptionsResponse?.data?.map(i => ({
         label: i.title,
         value: i.id,
       }));
-
+      
+      // Cache the result
+      moduleContentOptionsCache.set(selectedType, modifiedOptionsData);
       setContentOptions(modifiedOptionsData);
-    });
+      hasLoadedOptionsRef.current = true;
+    } catch (error) {
+      console.error('Error fetching content options:', error);
+      setContentOptions([]);
+    } finally {
+      moduleLoadingStates.set(selectedType, false);
+    }
+  };
+
+  const handleTypeChange = async (selectedType) => {
+    // Clear the content_id when type changes (only if not initializing)
+    if (isInitialized) {
+      setFieldValue(`${name}.content_id`, '');
+    }
+    
+    // Clear content options
+    setContentOptions([]);
+    hasLoadedOptionsRef.current = false;
+    
+    // Load new content options
+    await loadContentOptions(selectedType);
+  };
+
+  // Initialize component on mount and handle content type changes
+  useEffect(() => {
+    const handleContentType = async () => {
+      if (values.content_type && !hasLoadedOptionsRef.current) {
+        await loadContentOptions(values.content_type);
+      }
+      
+      if (!isInitialized) {
+        setIsInitialized(true);
+      }
+    };
+
+    handleContentType();
   }, [values.content_type]);
 
   return (
@@ -39,7 +103,7 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
           label="Type"
           placeholder="Type"
           options={MODULE_TYPE_OPTIONS}
-          onChange={() => setFieldValue(`${name}.content_id`, '')}
+          onChange={(value) => handleTypeChange(value)}
           required
         />
       </div>
@@ -50,6 +114,7 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
           placeholder="Content"
           options={contentOptions}
           loading={isPending}
+
           required
         />
       </div>

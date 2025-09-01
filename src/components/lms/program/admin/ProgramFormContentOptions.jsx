@@ -9,7 +9,7 @@ const ProgramFormContentOptions = ({ form, name, push, remove }) => {
     <div className="flex flex-col gap-3">
       {form.values?.[name]?.map((_, i) => (
         <ProgramFormContentOption
-          key={i}
+          key={`${name}-${i}`}
           name={`${name}[${i}]`}
           values={form.values?.[name]?.[i]}
           onRemove={() => remove(i)}

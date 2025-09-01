@@ -46,9 +46,10 @@ const ModuleForm = ({ selected }) => {
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
     module_content: (selected?.module || [{ content_id: '', content_type: '' }]).map(
-      ({ content_id, content_type }) => ({
+      ({ content_id, content_type, title }) => ({
         content_id,
         content_type,
+        title: title || '', // Preserve the title from API response
       })
     ),
   };

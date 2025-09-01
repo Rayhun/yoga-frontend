@@ -50,10 +50,11 @@ const ProgramForm = ({ selected }) => {
     tags: selected?.tags.map(i => i.id) || [],
     linked_program: selected?.linked_program || '',
     program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }]).map(
-      ({ content_id, content_type, drip }) => ({
+      ({ content_id, content_type, drip, title }) => ({
         content_id,
         content_type,
         drip,
+        title: title || '', // Preserve the title from API response
       })
     ),
     price: selected?.price || 0,
