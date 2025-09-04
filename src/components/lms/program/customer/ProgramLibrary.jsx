@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -16,10 +16,23 @@ import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {
   const router = useRouter();
+  const searchParams = useSearchParamUtils();
 
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState({});
+
+  // Get selected category from URL params
+  const selectedCategory = searchParams.get('categories') || '';
+
+  // Update filters when URL params change
+  useEffect(() => {
+    if (selectedCategory) {
+      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
+    } else {
+      setFilters(prev => ({ ...prev, categories: [] }));
+    }
+  }, [selectedCategory]);
 
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getProgramsList(filters),
@@ -34,19 +47,25 @@ const ProgramsLibrary = () => {
     [programsResponse?.data?.results?.data, searchText]
   );
 
+  // Extract categories from the API response
+  const categories = useMemo(
+    () => programsResponse?.data?.results?.data?.['all-categories'] || [],
+    [programsResponse?.data?.results?.data]
+  );
+
   const handleApplyFilter = values => {
     setFilters(values);
     toggleFilterModal(false);
   };
 
   const handleSelectFeaturedCategory = selected => {
-    setFilters(prevState => {
-      const existingCategories = selected.id
-        ? [...new Set([...(prevState.categories || []), selected.id])]
-        : [];
-
-      return { ...prevState, categories: existingCategories };
-    });
+    // If clicking the same category, remove it from URL
+    if (selectedCategory === selected.id?.toString()) {
+      searchParams.remove('categories');
+    } else {
+      // Otherwise, set the new category in URL
+      searchParams.set('categories', selected.id);
+    }
   };
 
   return (
@@ -77,7 +96,11 @@ const ProgramsLibrary = () => {
 
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Categories */}
-        <FeaturedCategories selected={filters.categories} onSelect={handleSelectFeaturedCategory} />
+        <FeaturedCategories 
+          categories={categories}
+          selected={selectedCategory ? [parseInt(selectedCategory)] : []} 
+          onSelect={handleSelectFeaturedCategory} 
+        />
 
         <div className="flex gap-4 items-center justify-end">
           <input
@@ -88,21 +111,29 @@ const ProgramsLibrary = () => {
           <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
         </div>
 
-        {/* Content Cards */}
-        <section className="min-h-[50vh]">
+        {/* Programs Grid */}
+        <section>
           {isLoadingPrograms ? (
             <div className="flex justify-center">
               <Spinner />
             </div>
           ) : (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredPrograms?.map((program, index) => (
-                <ProgramCard
-                  key={`${program.id}-${program.title}-${index}`}
-                  program={program}
-                  onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
-                />
-              ))}
+            <div>
+              {filteredPrograms.length > 0 ? (
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {filteredPrograms.map(program => (
+                    <ProgramCard
+                      key={program.id}
+                      program={program}
+                      onClick={() => router.push(`/portal/customer/lms/program/${program.id}/details`)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
+                  {searchText || selectedCategory ? 'No programs found matching your criteria' : 'No programs found'}
+                </div>
+              )}
             </div>
           )}
         </section>

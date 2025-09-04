@@ -1,45 +1,77 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
+import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import queryKeys from '@/utils/query-keys';
 import ConsultationCard from '../common/ConsultationCard';
 import { getEnrolledGroupCoachings } from '@/services/private/customer/groupCoaching';
 import EventCard from '../common/EventCard';
 
-// const STATUS_FILTERS = [
-//   {
-//     label: 'All',
-//     value: '',
-//   },
-//   {
-//     label: 'In Progress',
-//     value: 'InProgress',
-//   },
-//   {
-//     label: 'Completed',
-//     value: 'Complete',
-//   },
-// ];
-
 const EnrolledGroupCoachings = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
+  const nextSearchParams = useSearchParams();
   const selectedStatus = searchParams.get('status') || '';
+  const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState({});
+
+  // Get selected category from URL params using Next.js useSearchParams for stability
+  const selectedCategory = nextSearchParams.get('categories') || '';
+
+  // Update filters when URL params change
+  useEffect(() => {
+    if (selectedCategory) {
+      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
+    } else {
+      setFilters(prev => ({ ...prev, categories: [] }));
+    }
+  }, [selectedCategory]);
+
+  // Debug: Log filters and selected category
+  useEffect(() => {
+    console.log('Selected Category:', selectedCategory);
+    console.log('Filters:', filters);
+  }, [selectedCategory, filters]);
+
   const { isLoading: isLoadingCoachings, data: coachingsResponse } = useQuery({
-    queryFn: getEnrolledGroupCoachings,
-    queryKey: [queryKeys.customerEnrolledGroupCoachings, selectedStatus],
+    queryFn: () => {
+      console.log('API Call with filters:', filters);
+      return getEnrolledGroupCoachings(filters);
+    },
+    queryKey: [queryKeys.customerEnrolledGroupCoachings, selectedStatus, JSON.stringify(filters)],
   });
 
-  //   const handleStatusSelect = selected => {
-  //     if (!selected.value) searchParams.remove('status');
-  //     else searchParams.set('status', selected?.value);
-  //   };
-
+  // Extract categories from the API response
+  const categories = useMemo(
+    () => coachingsResponse?.data?.results?.data?.['all-categories'] || [],
+    [coachingsResponse?.data?.results?.data]
+  );
 
   const coachings = coachingsResponse?.data?.results?.data?.['all-events'] || [];
+
+  // Filter coachings based on search text only (category filtering is now handled by API)
+  const filteredCoachings = useMemo(() => {
+    if (!searchText) return coachings;
+    
+    return coachings.filter(coaching => {
+      return coaching.title.toLowerCase().includes(searchText.toLowerCase()) ||
+             coaching.description?.toLowerCase().includes(searchText.toLowerCase());
+    });
+  }, [coachings, searchText]);
+
+  const handleSelectFeaturedCategory = selected => {
+    // If clicking the same category, remove it from URL
+    if (selectedCategory === selected.id?.toString()) {
+      searchParams.remove('categories');
+    } else {
+      // Otherwise, set the new category in URL
+      searchParams.set('categories', selected.id);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 md:gap-7">
@@ -64,22 +96,21 @@ const EnrolledGroupCoachings = () => {
       </div>
 
       <div className="min-h-[60vh] flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
-        {/* Status Filters */}
-        {/* <div className="flex gap-3 justify-center">
-          {STATUS_FILTERS.map(filter => (
-            <div
-              key={filter.value}
-              className={`text-xs md:text-sm border  text-nowrap cursor-pointer px-2 py-1 md:px-4 md:py-2 rounded-full ${
-                selectedStatus === filter.value
-                  ? 'bg-primary border-primary text-white'
-                  : 'text-gray-400 border-gray-400'
-              }`}
-              onClick={() => handleStatusSelect(filter)}
-            >
-              {filter.label}
-            </div>
-          ))}
-        </div> */}
+        {/* Categories */}
+        <FeaturedCategories 
+          categories={categories}
+          selected={selectedCategory ? [parseInt(selectedCategory)] : []} 
+          onSelect={handleSelectFeaturedCategory} 
+        />
+
+        {/* Search */}
+        <div className="flex gap-4 items-center justify-end">
+          <input
+            className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            placeholder="Search Group Coachings"
+            onChange={e => setSearchText(e.target.value || '')}
+          />
+        </div>
 
         {/* Content Cards */}
         <section>
@@ -89,9 +120,9 @@ const EnrolledGroupCoachings = () => {
             </div>
           ) : (
             <div>
-              {coachings.length > 0 ? (
+              {filteredCoachings.length > 0 ? (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                  {coachingsResponse?.data?.results?.data?.['all-events']?.map(event => (
+                  {filteredCoachings.map(event => (
                     <EventCard
                       key={event.id}
                       event={event}
@@ -100,7 +131,9 @@ const EnrolledGroupCoachings = () => {
                   ))}
                 </div>
               ) : (
-                <div className="w-full h-[300px] flex justify-center items-center">No group coachings found</div>
+                <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
+                  {searchText || selectedCategory ? 'No group coachings found matching your criteria' : 'No group coachings found'}
+                </div>
               )}
             </div>
           )}

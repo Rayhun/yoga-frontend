@@ -18,8 +18,9 @@ export const enrollConsultation = async ({ id }) => {
   return axios.post(`/customer/consultation/${id}/enroll/`);
 };
 
-export const getEnrolledConsultations = async () => {
-  return axios.get(`/customer/my/consultations/`);
+export const getEnrolledConsultations = async params => {
+  const searchParams = getSearchParamsFromObject(params);
+  return axios.get(`/customer/my/consultations/?${searchParams}`);
 };
 
 export const getExpertProfileConsultationsList = async ({id}) => {

@@ -16,11 +16,24 @@ import ExpertCard from './ExpertCard';
 
 const ExpertsList = () => {
   const router = useRouter();
+  const searchParams = useSearchParamUtils();
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState({});
   const observerRef = useRef();
   const loadingRef = useRef();
+
+  // Get selected category from URL params
+  const selectedCategory = searchParams.get('categories') || '';
+
+  // Update filters when URL params change
+  useEffect(() => {
+    if (selectedCategory) {
+      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
+    } else {
+      setFilters(prev => ({ ...prev, categories: [] }));
+    }
+  }, [selectedCategory]);
 
   const {
     data,
@@ -50,6 +63,12 @@ const ExpertsList = () => {
     const experts = data?.pages?.flatMap(page => page?.data?.data.data || []) || [];
     console.log('All experts:', experts); // Debug log
     return experts;
+  }, [data?.pages]);
+
+  // Extract categories from the API response
+  const categories = useMemo(() => {
+    const lastPage = data?.pages?.[data.pages.length - 1];
+    return lastPage?.data?.data?.['all-categories'] || [];
   }, [data?.pages]);
 
   const filteredExperts = useMemo(
@@ -82,13 +101,13 @@ const ExpertsList = () => {
   };
 
   const handleSelectFeaturedCategory = selected => {
-    setFilters(prevState => {
-      const existingCategories = selected.id
-        ? [...new Set([...(prevState.categories || []), selected.id])]
-        : [];
-
-      return { ...prevState, categories: existingCategories };
-    });
+    // If clicking the same category, remove it from URL
+    if (selectedCategory === selected.id?.toString()) {
+      searchParams.remove('categories');
+    } else {
+      // Otherwise, set the new category in URL
+      searchParams.set('categories', selected.id);
+    }
   };
 
   // Intersection Observer for infinite scroll
@@ -147,7 +166,11 @@ const ExpertsList = () => {
 
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Categories */}
-        <FeaturedCategories selected={filters.categories} onSelect={handleSelectFeaturedCategory} />
+        <FeaturedCategories 
+          categories={categories}
+          selected={selectedCategory ? [parseInt(selectedCategory)] : []} 
+          onSelect={handleSelectFeaturedCategory} 
+        />
 
         <div className="flex gap-4 items-center justify-end">
           <input
