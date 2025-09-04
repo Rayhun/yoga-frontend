@@ -49,18 +49,24 @@ const SubscriptionPlanForm = ({ selected }) => {
     subscription_type: Yup.string().required('Required!'),
     subscription_tenure: Yup.string().required('Required!'),
     price: Yup.number().required('Required!').min(0, 'Price must be at least 0'),
-    discounted_price: Yup.number().required('Required!').min(0, 'Discounted Price must be at least 0'),
+    discounted_price: Yup.number().min(0, 'Discounted Price must be at least 0'),
     features: Yup.string().required('Required!'),
     programs: Yup.array(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      // Filter out empty discounted_price from payload
+      const payload = { ...values };
+      if (!payload.discounted_price || payload.discounted_price === '') {
+        delete payload.discounted_price;
+      }
+
       if (isEditMode) {
-        await updateSubscriptionPlan({ payload: { id: selected.id, ...values } });
+        await updateSubscriptionPlan({ payload: { id: selected.id, ...payload } });
         toast.success('Subscription plan updated successfully');
       } else {
-        await addSubscriptionPlan({ payload: { ...values } });
+        await addSubscriptionPlan({ payload });
         toast.success('Subscription plan added successfully');
       }
       await queryClient.invalidateQueries([
