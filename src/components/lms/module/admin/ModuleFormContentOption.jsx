@@ -2,9 +2,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useFormikContext } from 'formik';
-import IconButton from '@mui/material/IconButton';
-import { RiCloseCircleLine } from 'react-icons/ri';
+import { useRouter } from 'next/navigation';
+import { MdOutlineRemoveRedEye, MdOutlineEdit, MdDeleteOutline } from 'react-icons/md';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import FormikField from '@/components/common/form/formik/FormikField';
 import { getModuleContentOptions } from '@/services/private/lms/module';
 import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 
@@ -12,7 +13,8 @@ import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 const moduleContentOptionsCache = new Map();
 const moduleLoadingStates = new Map();
 
-const ModuleFormContentOption = ({ values, name, onRemove }) => {
+const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldError }) => {
+  const router = useRouter();
   const { setFieldValue } = useFormikContext();
   const [contentOptions, setContentOptions] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -80,6 +82,109 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
     await loadContentOptions(selectedType);
   };
 
+  const handleViewContent = (content) => {
+    if (!content.content_id) return;
+    
+    let targetUrl = '';
+    
+    if (content.content_type === 'Image' || content.content_type === 'Video' || content.content_type === 'Audio') {
+      const sessionType = content.content_type.toLowerCase();
+      targetUrl = `/portal/admin/lms/session/${sessionType}/${content.content_id}/details`;
+    } else if (content.content_type === 'Quiz') {
+      targetUrl = `/portal/admin/lms/quiz/${content.content_id}/details`;
+    } else {
+      return;
+    }
+    
+    try {
+      router.push(targetUrl);
+    } catch (error) {
+      console.error('Router navigation failed:', error);
+      window.location.href = targetUrl;
+    }
+  };
+
+  const handleEditContent = (content) => {
+    if (!content.content_id) return;
+    
+    let targetUrl = '';
+    
+    if (content.content_type === 'Image' || content.content_type === 'Video' || content.content_type === 'Audio') {
+      const sessionType = content.content_type.toLowerCase();
+      targetUrl = `/portal/admin/lms/session/${sessionType}/${content.content_id}/edit`;
+    } else if (content.content_type === 'Quiz') {
+      targetUrl = `/portal/admin/lms/quiz/${content.content_id}/edit`;
+    } else {
+      return;
+    }
+    
+    try {
+      router.push(targetUrl);
+    } catch (error) {
+      console.error('Router navigation failed:', error);
+      window.location.href = targetUrl;
+    }
+  };
+
+  const handleOrderChange = (orderValue) => {
+    // Set the field value first
+    setFieldValue(`${name}.order`, orderValue);
+    
+    // Clear any existing errors first
+    setFieldError(`${name}.order`, '');
+    
+    // Check if order is empty
+    if (!orderValue || orderValue === '') {
+      setFieldError(`${name}.order`, 'Order is required');
+      return;
+    }
+    
+    // Check if order is a valid positive number
+    const orderNum = parseInt(orderValue);
+    if (isNaN(orderNum) || orderNum < 1) {
+      setFieldError(`${name}.order`, 'Order must be a positive number');
+      return;
+    }
+    
+    // Check if order is already used by another row
+    const currentIndex = parseInt(name.match(/\d+/)[0]);
+    const isDuplicateOrder = allValues.module_content.some((item, index) => 
+      index !== currentIndex && item.order === orderNum
+    );
+    
+    if (isDuplicateOrder) {
+      setFieldError(`${name}.order`, 'Order number must be unique');
+    }
+  };
+
+  // Validate order field on blur
+  const handleOrderBlur = () => {
+    const orderValue = values.order;
+    
+    // Check if order is empty
+    if (!orderValue || orderValue === '') {
+      setFieldError(`${name}.order`, 'Order is required');
+      return;
+    }
+    
+    // Check if order is a valid positive number
+    const orderNum = parseInt(orderValue);
+    if (isNaN(orderNum) || orderNum < 1) {
+      setFieldError(`${name}.order`, 'Order must be a positive number');
+      return;
+    }
+    
+    // Check if order is already used by another row
+    const currentIndex = parseInt(name.match(/\d+/)[0]);
+    const isDuplicateOrder = allValues.module_content.some((item, index) => 
+      index !== currentIndex && item.order === orderNum
+    );
+    
+    if (isDuplicateOrder) {
+      setFieldError(`${name}.order`, 'Order number must be unique');
+    }
+  };
+
   // Initialize component on mount and handle content type changes
   useEffect(() => {
     const handleContentType = async () => {
@@ -97,7 +202,7 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
 
   return (
     <div className="flex gap-x-6 gap-y-1 items-center overflow-auto">
-      <div className="w-[40%] min-w-[200px]">
+      <div className="w-[30%] min-w-[150px]">
         <FormikSelect
           name={`${name}.content_type`}
           label="Type"
@@ -107,21 +212,54 @@ const ModuleFormContentOption = ({ values, name, onRemove }) => {
           required
         />
       </div>
-      <div className="w-[40%] min-w-[200px]">
+      <div className="w-[30%] min-w-[150px]">
         <FormikSelect
           name={`${name}.content_id`}
           label="Content"
           placeholder="Content"
           options={contentOptions}
           loading={isPending}
-
           required
         />
       </div>
-      <div className="w-[20%] min-w-[50px] flex items-center justify-end">
-        <IconButton onClick={onRemove}>
-          <RiCloseCircleLine size={30} className="text-red-500" />
-        </IconButton>
+      <div className="w-[20%] min-w-[120px]">
+        <FormikField 
+          type="number" 
+          name={`${name}.order`} 
+          label="Order" 
+          placeholder="Order" 
+          min={1} 
+          required
+          onChange={(e) => handleOrderChange(e.target.value)}
+          onBlur={handleOrderBlur}
+        />
+      </div>
+      <div className="w-[20%] min-w-[150px] flex items-center justify-center gap-2">
+        {values.content_id && (
+          <>
+            <button 
+              onClick={() => handleViewContent(values)} 
+              className="hover:text-primary p-1"
+              title="View"
+            >
+              <MdOutlineRemoveRedEye size={20} />
+            </button>
+            <button 
+              onClick={() => handleEditContent(values)} 
+              className="hover:text-primary p-1"
+              title="Edit"
+            >
+              <MdOutlineEdit size={20} />
+            </button>
+          </>
+        )}
+        <button 
+          onClick={onRemove} 
+          className="hover:text-primary p-1"
+          title="Delete"
+        >
+          <MdDeleteOutline size={20} />
+        </button>
       </div>
     </div>
   );

@@ -112,7 +112,7 @@ const SubscriptionPlanForm = ({ selected }) => {
                 <FormikSelect
                   name="subscription_tenure"
                   label="Subscription Tenure"
-                  placeholder="Subacription Tenure"
+                  placeholder="Subscription Tenure"
                   options={SUBSCRIPTION_PAGE_TENURE_OPTIONS}
                   required
                 />
@@ -129,7 +129,6 @@ const SubscriptionPlanForm = ({ selected }) => {
                   label="Discounted Price"
                   placeholder="Discounted Price"
                   min={0}
-                  required
                 />
               </div>
             </div>
