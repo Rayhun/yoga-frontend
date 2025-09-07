@@ -5,6 +5,8 @@ import { useInbox } from '@/context/InboxContext';
 import LoadingWrapper from '../common/loader/Wrapper';
 import { FiPaperclip, FiFileText } from 'react-icons/fi';
 import Image from 'next/image';
+import SystemMessage from './SystemMessage';
+import { isSystemMessage, getSystemMessageType } from '@/utils/messagePatterns';
 
 const Attachment = ({ url }) => {
   const isImage = /\.(jpe?g|png|gif|bmp|webp)(\?.*)?$/i.test(url);
@@ -80,17 +82,34 @@ const MessagesList = () => {
     <div className="h-[calc(80vh-180px)] bg-[rgba(239,233,224,0.54)]">
       <LoadingWrapper isLoading={isLoadingMessages}>
         <div className="no-scrollbar max-h-full space-y-3.5 overflow-auto px-6 py-7.5">
-          {[...messages].map(message => (
-            <Message
-              key={message.id}
-              time={message.created_at}
-              senderName={activeConversation.is_group ? message.sender_name : undefined}
-              isMyMessage={message.sender === loggedInUserID}
-              attachments={message?.attachments}
-            >
-              {message.content}
-            </Message>
-          ))}
+          {[...messages].map(message => {
+            const messageContent = message.content || message.message || '';
+            
+            // Check if this should be displayed as a system message
+            if (isSystemMessage(message)) {
+              return (
+                <SystemMessage
+                  key={message.id}
+                  message={messageContent}
+                  time={message.created_at}
+                  type={getSystemMessageType(message)}
+                />
+              );
+            }
+            
+            // Regular user message
+            return (
+              <Message
+                key={message.id}
+                time={message.created_at}
+                senderName={activeConversation.is_group ? message.sender_name : undefined}
+                isMyMessage={message.sender === loggedInUserID}
+                attachments={message?.attachments}
+              >
+                {messageContent}
+              </Message>
+            );
+          })}
           <div id="empty-message" className="!m-0" />
         </div>
       </LoadingWrapper>

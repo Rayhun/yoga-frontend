@@ -65,6 +65,7 @@ const queryKeys = {
   payoutList: 'payoutList',
   aiPromptsList: 'aiPromptsList',
   lookupsByCategory: 'lookupsByCategory',
+  publicChats: 'publicChats',
 };
 
 export default queryKeys;

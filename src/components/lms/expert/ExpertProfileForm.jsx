@@ -61,11 +61,11 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
   const validationSchema = Yup.object({
     first_name: Yup.string().required('Required!'),
-    middle_name: Yup.string(),
+    middle_name: Yup.string(), // Only field that remains optional
     last_name: Yup.string().required('Required!'),
     email: Yup.string().email('Invalid email format').required('Required!'),
     title: Yup.string().required('Required!'),
-    business_name: Yup.string(),
+    business_name: Yup.string().required('Required!'),
     description: Yup.string()
       .required('Required!')
       .test('max_length', 'Your content must be between 25 and 150 words', value => {
@@ -86,12 +86,15 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     //   .of(Yup.string().required('Required!'))
     //   .min(1, 'At least 1 coaching content is required'),
     culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
-    coaching_style: Yup.string().required('Coanching Style is required'),
+    coaching_style: Yup.string().required('Coaching Style is required'),
     experience: Yup.number()
       .required('Experience is required')
       .integer('Experience must be a whole number')
       .min(0, 'Experience cannot be negative'),
     available: Yup.boolean(),
+    intro: Yup.string().required('Required!'),
+    linkedin: Yup.string(),
+    website: Yup.string().required('Required!'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -161,7 +164,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled />
+                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled={isEditMode} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -169,7 +172,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FormikField name="title" label="Title" placeholder="Title" required />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" />
+                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -184,7 +187,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" />
+                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -192,7 +195,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="website" label="Website URL" placeholder="Website URL" />
+                  <FormikField name="website" label="Website URL" placeholder="Website URL" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">

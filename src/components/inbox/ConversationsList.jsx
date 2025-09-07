@@ -42,23 +42,23 @@ const ConversationsList = () => {
   );
 
   return (
-    <div className="flex max-h-full flex-col overflow-auto p-5">
-      <div className="sticky mb-3">
+    <div className="flex max-h-full flex-col overflow-auto p-6">
+      <div className="sticky mb-4">
         <input
           type="text"
-          className="w-full rounded border border-stroke mb-3 bg-gray-2 py-2.5 pl-5 pr-10 text-sm outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark-2"
-          placeholder="Search..."
+          className="w-full rounded-lg border border-stroke mb-4 bg-gray-2 py-3 pl-5 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-strokedark dark:bg-boxdark-2 dark:text-white"
+          placeholder="Search conversations..."
           onChange={e => setSearchText(e.target.value)}
         />
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
           {FILTERS.map(filter => (
             <Chip
               key={filter.label}
               label={filter.label}
-              className={`cursor-pointer ${
+              className={`cursor-pointer transition-all duration-200 ${
                 activeFilter.key === filter.key
-                  ? '!bg-primary !text-white hover:!bg-primary hover:!text-white'
-                  : ''
+                  ? '!bg-primary !text-white hover:!bg-primary/90 shadow-sm'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
               onClick={() => setActiveFilter(filter)}
             />
@@ -67,7 +67,7 @@ const ConversationsList = () => {
       </div>
 
       {/* Conversations List */}
-      <div className="no-scrollbar max-h-full space-y-2.5 overflow-auto">
+      <div className="no-scrollbar max-h-full space-y-3 overflow-auto">
         <LoadingWrapper isLoading={isLoadingConversations}>
           {filteredConversations.map(conversation => {
             const isConversationActive = activeConversation?.id === conversation.id;
@@ -76,12 +76,14 @@ const ConversationsList = () => {
             return (
               <div
                 key={conversation.id}
-                className={`flex cursor-pointer items-center rounded px-4 py-2 ${
-                  isConversationActive ? 'bg-primary/80 text-white' : 'hover:bg-gray-2'
+                className={`flex cursor-pointer items-center rounded-lg px-4 py-3 transition-all duration-200 ${
+                  isConversationActive 
+                    ? 'bg-primary/80 text-white shadow-sm' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => setActiveConversation(conversation)}
                 style={{
-                  fontWeight: !isConversationActive && hasUnreadMessages > 0 ? '800' : 'normal',
+                  fontWeight: !isConversationActive && hasUnreadMessages > 0 ? '600' : 'normal',
                 }}
               >
                 <div className="relative mr-3.5 h-11 w-full max-w-11 rounded-full">
@@ -97,22 +99,26 @@ const ConversationsList = () => {
                     <UserAvatar isGroup={conversation.is_group} />
                   )}
                 </div>
-                <div className="w-full">
-                  <div className="flex items-center justify-between gap-2">
-                    <h5 className="text-sm font-semibold truncate">{conversation.name}</h5>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs line-clamp-1">{conversation.message}</p>
-                    {hasUnreadMessages && !isConversationActive > 0 ? (
-                      <div className="bg-primary w-5 h-5 p-0.5 rounded-full text-white text-[10px] flex items-center justify-center">
+                <div className="w-full min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h5 className="text-sm font-semibold truncate text-left">{conversation.name}</h5>
+                    {hasUnreadMessages && !isConversationActive ? (
+                      <div className="bg-primary w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center flex-shrink-0">
                         {conversation.unread_count}
                       </div>
                     ) : null}
                   </div>
-                  <div className='flex items-center justify-end gap-2'>
+                  <div className="mb-1">
+                    <p className="text-xs line-clamp-1 text-gray-600 dark:text-gray-400">
+                      {conversation.message || 'No messages yet'}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-end">
                     {conversation.time ? (
-                        <p className="text-[10px]">{dayjs(conversation.time).format('hh:mm A')}</p>
-                      ) : null}
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                        {dayjs(conversation.time).format('hh:mm A')}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

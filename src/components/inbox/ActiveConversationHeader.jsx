@@ -8,6 +8,7 @@ const ActiveConversationHeader = () => {
     conversations: { active: activeConversation },
     connection: { isConnected: isSocketConnected, status: connectionStatus },
   } = useInbox();
+
   return (
     <div className="sticky h-[90px] flex items-center justify-between border-b border-stroke px-6 py-4.5 dark:border-strokedark">
       <div className="flex items-center min-w-[200px]">
