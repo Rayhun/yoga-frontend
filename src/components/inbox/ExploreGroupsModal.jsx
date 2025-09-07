@@ -56,7 +56,7 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
           </div>
           <div>
             <div className="font-semibold text-green-800">Joined Successfully!</div>
-            <div className="text-sm text-green-600">{userName} joined "{group_name}"</div>
+            <div className="text-sm text-green-600">{userName} joined &quot;{group_name}&quot;</div>
           </div>
         </div>,
         {
@@ -167,7 +167,7 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
               <div className="mt-3 text-center">
                 <span className="inline-flex items-center gap-2 px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs sm:text-sm">
                   <FiSearch className="w-3 h-3 sm:w-4 sm:h-4" />
-                  Searching: "{debouncedSearchText}"
+                  Searching: &quot;{debouncedSearchText}&quot;
                 </span>
               </div>
             )}

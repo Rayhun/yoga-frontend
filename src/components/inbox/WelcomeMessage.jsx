@@ -106,7 +106,7 @@ const WelcomeMessage = ({ isFromExplore = false, onBackToChat }) => {
             </h2>
             {debouncedSearchText && (
               <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
-                Searching: "{debouncedSearchText}"
+                Searching: &quot;{debouncedSearchText}&quot;
               </span>
             )}
           </div>

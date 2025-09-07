@@ -58,7 +58,7 @@ const SystemMessageDemo = () => {
             <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg">
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  Regular Message: "{messageText}"
+                  Regular Message: &quot;{messageText}&quot;
                 </div>
                 <div className="text-xs text-gray-500">
                   Detected as: <span className="font-medium text-blue-600">{detection?.type || 'Not detected'}</span>
@@ -82,8 +82,8 @@ const SystemMessageDemo = () => {
 
       <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
         <div className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>How it works:</strong> When messages contain join/leave patterns like "Name joined the group" or "Name left the group", 
-          they're automatically detected and displayed as WhatsApp-style system messages instead of regular chat bubbles.
+          <strong>How it works:</strong> When messages contain join/leave patterns like &quot;Name joined the group&quot; or &quot;Name left the group&quot;, 
+          they&apos;re automatically detected and displayed as WhatsApp-style system messages instead of regular chat bubbles.
         </div>
       </div>
     </div>

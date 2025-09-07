@@ -24,7 +24,7 @@ const FormikPhoneField = ({ name, label, className, required = false, placeholde
       const number = field.value.substring(matchedCountry.callingCode.length).trim();
       setPhoneNumber(number);
     }
-  }, []);
+  }, [field.value]);
 
   const handlePhoneNumberChange = e => {
     const newPhoneNumber = e.target.value;

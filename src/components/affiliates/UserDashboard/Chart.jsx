@@ -79,7 +79,7 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
       { name: 'Conversions', data: normalize(conversions) },
       { name: 'Traffic', data: normalize(traffic) },
     ],
-    [conversions, traffic]
+    [conversions, traffic, normalize]
   );
 
   const options = useMemo(
