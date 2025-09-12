@@ -4,7 +4,7 @@ import { getSessionsList } from './session';
 import { MODULE_TYPE } from '@/utils/enums';
 
 export const getModulesList = async () => {
-  return axios.get('/LMS/module/');
+  return axios.get('/LMS/module/list/');
 };
 
 export const getSingleModule = async ({ id }) => {
@@ -21,6 +21,10 @@ export const updateExistingModule = async ({ payload: { id, ...payload } }) => {
 
 export const deleteSingleModule = async ({ id }) => {
   return axios.delete(`/LMS/module/${id}/`);
+};
+
+export const deleteModuleContent = async ({ id }) => {
+  return axios.delete(`/LMS/module/content/${id}/delete/`);
 };
 
 export const getModuleContentOptions = async ({ type }) => {

@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { useSearchParams } from 'next/navigation';
 import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
@@ -17,7 +18,17 @@ const TABS = {
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get('active_tab');
+  
+  const [selectedTab, setSelectedTab] = useState(() => {
+    // Set initial tab based on URL parameter
+    if (activeTab === 'about') return TABS.ABOUT;
+    if (activeTab === 'programs') return TABS.PROGRAMS;
+    if (activeTab === 'group_coaching') return TABS.GROUP_COACHING;
+    if (activeTab === 'consult') return TABS.CONSULT;
+    return TABS.PROGRAMS; // default
+  });
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);

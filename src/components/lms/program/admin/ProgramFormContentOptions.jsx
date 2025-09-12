@@ -9,10 +9,12 @@ const ProgramFormContentOptions = ({ form, name, push, remove }) => {
     <div className="flex flex-col gap-3">
       {form.values?.[name]?.map((_, i) => (
         <ProgramFormContentOption
-          key={i}
+          key={`${name}-${i}`}
           name={`${name}[${i}]`}
           values={form.values?.[name]?.[i]}
           onRemove={() => remove(i)}
+          allValues={form.values}
+          setFieldError={form.setFieldError}
         />
       ))}
       <Button
@@ -20,7 +22,7 @@ const ProgramFormContentOptions = ({ form, name, push, remove }) => {
         size="sm"
         variant="secondary"
         className="self-start"
-        onClick={() => push({ content_id: '', content_type: '' })}
+        onClick={() => push({ content_id: '', content_type: '', drip: '', order: '' })}
       >
         Add Option
       </Button>

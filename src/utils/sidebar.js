@@ -281,6 +281,13 @@ const CUSTOMER = [
     disabled: false,
   },
   {
+    Icon: GrUserExpert,
+    label: 'Experts',
+    href: '/portal/customer/lms/expert',
+    isActive: pathname => pathname.includes('/portal/customer/lms/expert'),
+    disabled: false,
+  },
+  {
     Icon: LuClipboardCheck,
     label: 'Check In',
     disabled: false,

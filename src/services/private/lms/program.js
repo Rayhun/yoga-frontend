@@ -5,7 +5,7 @@ import { getSessionsList } from './session';
 import { PROGRAM_TYPE } from '@/utils/enums';
 
 export const getProgramsList = async () => {
-  return axios.get('/LMS/program/');
+  return axios.get('/LMS/progrm/list/');
 };
 
 export const getSingleProgram = async ({ id }) => {
@@ -22,6 +22,10 @@ export const updateExistingProgram = async ({ payload: { id, ...payload } }) => 
 
 export const deleteSingleProgram = async ({ id }) => {
   return axios.delete(`/LMS/program/${id}/`);
+};
+
+export const deleteProgramContent = async ({ id }) => {
+  return axios.delete(`/LMS/program/content/${id}/delete/`);
 };
 
 export const getProgramContentOptions = async ({ type }) => {

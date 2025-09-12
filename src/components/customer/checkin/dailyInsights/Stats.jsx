@@ -34,7 +34,7 @@ const WellnessStats = ({ wellnessScore, average, latestTrend }) => {
             TRENDING_ICONS[latestTrend]?.class || 'text-gray-500'
           }`}
         >
-          {TRENDING_ICONS[latestTrend].icon || <span className="text-gray-500">N/A</span>}
+          {/* {TRENDING_ICONS[latestTrend].icon || <span className="text-gray-500">N/A</span>} */}
           <span>{latestTrend}</span>
         </div>
       </div>

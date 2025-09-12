@@ -61,9 +61,11 @@ const AudioSession = ({ selected }) => {
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
     description: Yup.string().required('Required!'),
-    duration: Yup.string().required('Required!'),
+    duration: Yup.string()
+      .required('Required!')
+      .matches(/^([0-5]?[0-9]):([0-5][0-9])$/, 'Please enter duration in MM:SS format (e.g., 03:40)'),
     status: Yup.string().required('Required!'),
-    expert: Yup.string().required('Required!'),
+    expert: Yup.string(),
     difficulty: Yup.string().required('Required!'),
     intensity: Yup.string().required('Required!'),
     access_setting: Yup.string().required('Required!'),
@@ -131,7 +133,13 @@ const AudioSession = ({ selected }) => {
                 <FormikField name="title" label="Title" placeholder="Title" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField name="duration" label="Duration" placeholder="Duration" required />
+                <FormikField 
+                  type="text" 
+                  name="duration" 
+                  label="Duration (MM:SS)" 
+                  placeholder="03:40" 
+                  required 
+                />
               </div>
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
@@ -188,7 +196,7 @@ const AudioSession = ({ selected }) => {
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">
-                <ExpertField required />
+                <ExpertField />
               </div>
               <div className="md:w-1/2" />
             </div>

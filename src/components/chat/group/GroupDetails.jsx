@@ -12,6 +12,7 @@ const GroupDetails = ({ data = {} }) => {
     >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Name">{data.group_name}</DetailsRecord>
+        <DetailsRecord label="Visibility">{data.visibility}</DetailsRecord>
         <MultiValueDetailsRecord
           label="Members"
           data={data.members}

@@ -33,10 +33,6 @@ const ImageSessionsList = () => {
         accessorKey: 'title',
       },
       {
-        header: 'Duration',
-        accessorKey: 'duration',
-      },
-      {
         header: 'Status',
         accessorKey: 'status',
       },

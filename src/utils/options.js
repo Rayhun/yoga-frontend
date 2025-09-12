@@ -11,6 +11,7 @@ import {
   SUBSCRIPTION_PAGE_STATUS,
   SUBSCRIPTION_PAGE_TYPE,
   SUBSCRIPTION_PAGE_TENURE,
+  GROUP_VISIBILITY,
 } from './enums';
 
 export const CONTENT_TYPE_OPTIONS = [
@@ -230,5 +231,16 @@ export const SUBSCRIPTION_PAGE_TENURE_OPTIONS = [
   {
     label: 'Yearly',
     value: SUBSCRIPTION_PAGE_TENURE.yearly,
+  },
+];
+
+export const GROUP_VISIBILITY_OPTIONS = [
+  {
+    label: 'Public',
+    value: GROUP_VISIBILITY.public,
+  },
+  {
+    label: 'Private',
+    value: GROUP_VISIBILITY.private,
   },
 ];

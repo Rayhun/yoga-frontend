@@ -24,11 +24,13 @@ import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
 import { ACCESS_SETTING } from '@/utils/enums';
+import useLMSProgramOptions from '@/hooks/useLMSProgramOptions';
 
 const ProgramForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const { options: programOptions } = useLMSProgramOptions();
   const { mutateAsync: addProgram } = useMutation({
     mutationFn: addNewProgram,
   });
@@ -46,11 +48,14 @@ const ProgramForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
-    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }]).map(
-      ({ content_id, content_type, drip }) => ({
+    linked_program: selected?.linked_program || '',
+    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '', order: '' }]).map(
+      ({ content_id, content_type, drip, order, title }) => ({
         content_id,
         content_type,
         drip,
+        order: order || '',
+        title: title || '', // Preserve the title from API response
       })
     ),
     price: selected?.price || 0,
@@ -80,9 +85,16 @@ const ProgramForm = ({ selected }) => {
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
           drip: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
+          order: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
-      .min(1, 'At least 1 option is required.'),
+      .min(1, 'At least 1 option is required.')
+      .test('uniqueOrder', 'Order numbers must be unique', function(value) {
+        if (!value) return true;
+        const orders = value.map(item => item.order).filter(order => order !== '');
+        const uniqueOrders = new Set(orders);
+        return orders.length === uniqueOrders.size;
+      }),
     price: Yup.number().when('access_setting', {
       is: ACCESS_SETTING.buy_now,
       then: schema =>
@@ -144,17 +156,7 @@ const ProgramForm = ({ selected }) => {
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
             <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full md:w-1/2">
-                <FormikDropzone
-                  name="file"
-                  label="File"
-                  fileURLs={selected?.image ? [selected.image] : []}
-                  Icon={FaRegFileImage}
-                  required
-                />
-              </div>
-            </div>
+
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <AccessSettingField required />
@@ -181,6 +183,25 @@ const ProgramForm = ({ selected }) => {
               </div>
               <div className="md:w-1/2">
                 <TagsField required />
+              </div>
+            </div>
+            <div className="w-full xl:w-1/2">
+              <FormikSelect
+                name="linked_program"
+                label="Linked Program"
+                placeholder="Select Linked Program"
+                options={programOptions}
+              />
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full md:w-1/2">
+                <FormikDropzone
+                  name="file"
+                  label="File"
+                  fileURLs={selected?.image ? [selected.image] : []}
+                  Icon={FaRegFileImage}
+                  required
+                />
               </div>
             </div>
 

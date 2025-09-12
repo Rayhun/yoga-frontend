@@ -46,9 +46,11 @@ const ModuleForm = ({ selected }) => {
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
     module_content: (selected?.module || [{ content_id: '', content_type: '' }]).map(
-      ({ content_id, content_type }) => ({
+      ({ content_id, content_type, order, title }) => ({
         content_id,
         content_type,
+        order: order || '',
+        title: title || '', // Preserve the title from API response
       })
     ),
   };
@@ -77,9 +79,16 @@ const ModuleForm = ({ selected }) => {
         Yup.object({
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
+          order: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
-      .min(1, 'At least 1 option is required.'),
+      .min(1, 'At least 1 option is required.')
+      .test('uniqueOrder', 'Order numbers must be unique', function(value) {
+        if (!value) return true;
+        const orders = value.map(item => item.order).filter(order => order !== '');
+        const uniqueOrders = new Set(orders);
+        return orders.length === uniqueOrders.size;
+      }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {

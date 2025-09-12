@@ -25,6 +25,10 @@ const OnboardingQuizList = () => {
         accessorKey: 'title',
       },
       {
+        header: 'Order',
+        accessorKey: 'ordering',
+      },
+      {
         header: 'Is Required?',
         cell: ({ row }) => (row.original.required ? 'Yes' : 'No'),
       },

@@ -11,7 +11,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 // import { TagsField } from '@/components/lms/general/fields';
-import { updateExistingExpert } from '@/services/private/lms/expert';
+import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
@@ -22,11 +22,14 @@ import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
 import CertificationsField from '../general/fields/CertificationsField';
 
-const ExpertProfileForm = ({ selected }) => {
+const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
 
+  const { mutateAsync: addExpert } = useMutation({
+    mutationFn: addNewExpert,
+  });
   const { mutateAsync: updateExpert } = useMutation({
     mutationFn: updateExistingExpert,
   });
@@ -58,11 +61,11 @@ const ExpertProfileForm = ({ selected }) => {
 
   const validationSchema = Yup.object({
     first_name: Yup.string().required('Required!'),
-    middle_name: Yup.string(),
+    middle_name: Yup.string(), // Only field that remains optional
     last_name: Yup.string().required('Required!'),
     email: Yup.string().email('Invalid email format').required('Required!'),
     title: Yup.string().required('Required!'),
-    business_name: Yup.string(),
+    business_name: Yup.string().required('Required!'),
     description: Yup.string()
       .required('Required!')
       .test('max_length', 'Your content must be between 25 and 150 words', value => {
@@ -83,26 +86,44 @@ const ExpertProfileForm = ({ selected }) => {
     //   .of(Yup.string().required('Required!'))
     //   .min(1, 'At least 1 coaching content is required'),
     culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
-    coaching_style: Yup.string().required('Coanching Style is required'),
+    coaching_style: Yup.string().required('Coaching Style is required'),
     experience: Yup.number()
       .required('Experience is required')
       .integer('Experience must be a whole number')
       .min(0, 'Experience cannot be negative'),
     available: Yup.boolean(),
+    intro: Yup.string().required('Required!'),
+    linkedin: Yup.string(),
+    website: Yup.string().required('Required!'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      await updateExpert({ payload: { id: selected.id, ...values } });
-      toast.success('Expert updated successfully');
+      if (isEditMode) {
+        await updateExpert({ payload: { id: selected.id, ...values } });
+        toast.success('Expert updated successfully');
+      } else {
+        await addExpert({ payload: { ...values } });
+        toast.success('Expert created successfully');
+      }
       await queryClient.invalidateQueries([
         {
           queryKey: isEditMode
-            ? [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser]
-            : [queryKeys.teacherProfile],
+            ? isAdminContext 
+              ? [queryKeys.lmsExperts, selected.id]
+              : [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser]
+            : isAdminContext
+              ? [queryKeys.lmsExperts]
+              : [queryKeys.teacherProfile],
         },
       ]);
-      router.push('/portal/teacher/profile??active_tab=about');
+      
+      // Redirect based on context
+      if (isAdminContext) {
+        router.push('/portal/admin/lms/expert');
+      } else {
+        router.push('/portal/teacher/profile?active_tab=about');
+      }
     } catch (error) {
       toastApiError(error);
     } finally {
@@ -143,7 +164,7 @@ const ExpertProfileForm = ({ selected }) => {
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled />
+                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled={isEditMode} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -151,7 +172,7 @@ const ExpertProfileForm = ({ selected }) => {
                   <FormikField name="title" label="Title" placeholder="Title" required />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" />
+                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -166,7 +187,7 @@ const ExpertProfileForm = ({ selected }) => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" />
+                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -174,7 +195,7 @@ const ExpertProfileForm = ({ selected }) => {
                   <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="website" label="Website URL" placeholder="Website URL" />
+                  <FormikField name="website" label="Website URL" placeholder="Website URL" required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -266,7 +287,7 @@ const ExpertProfileForm = ({ selected }) => {
                   Cancel
                 </Button>
                 <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : 'Submit My Profile'}
+                  {isSubmitting ? 'Submitting...' : isEditMode ? 'Update Expert' : 'Create Expert'}
                 </Button>
               </div>
             </Form>

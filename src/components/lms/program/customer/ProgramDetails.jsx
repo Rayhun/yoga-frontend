@@ -17,9 +17,10 @@ import useModal from '@/hooks/useModal';
 import PageLoader from '@/components/common/loader/PageLoader';
 import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
 import ContentCard from './ContentCard';
-import { getSingleProgram, enrollProgram } from '@/services/private/customer/program';
+import { getSingleProgram, enrollProgram, completeProgramContent } from '@/services/private/customer/program';
 import queryKeys from '@/utils/query-keys';
 import Link from 'next/link';
+import useConfirm from '@/hooks/useConfirm';
 
 const TABS = {
   JOURNEY: 'journey',
@@ -45,6 +46,10 @@ const ProgramDetails = () => {
   const { mutateAsync: enroll, isPending: isEnrolling } = useMutation({
     mutationFn: enrollProgram,
   });
+  const { mutateAsync: completeProgram, isPending: isCompleting } = useMutation({
+    mutationFn: completeProgramContent,
+  });
+  const confirm = useConfirm();
 
   useHandleApiResponse(failureReason);
 
@@ -78,7 +83,34 @@ const ProgramDetails = () => {
     setSelectedTab(newValue);
   };
 
+  const handleCompleteProgram = async () => {
+    try {
+      await confirm({ message: 'Are you sure you want to mark this program as completed?' });
+      await completeProgram({
+        id: programID,
+        content_type: 'Program',
+        content_id: programID,
+      });
+      refetch();
+      toast.success('Program completed successfully!');
+      
+      // Check if there's a linked program to redirect to
+      if (programDetails?.linked_program) {
+        toast.info('Redirecting to the next program...');
+        setTimeout(() => {
+          router.push(`/portal/customer/lms/program/${programDetails.linked_program}/details`);
+        }, 1500);
+      }
+    } catch (error) {
+      if (error?.message !== 'User cancelled') {
+        toast.error('Something went wrong in completing the program');
+      }
+    }
+  };
+
   const programDetails = response?.data?.data || {};
+  const isEnrolled = programDetails.is_enroll;
+  const isProgramCompleted = programDetails.status === 'Completed' || programDetails.status === 'Complete';
 
   const programProgress = Math.round(
     (programDetails.content?.filter(i => i.completed).length / programDetails.content?.length) * 100
@@ -122,7 +154,7 @@ const ProgramDetails = () => {
             <p>(27 ratings)</p>
           </div> */}
 
-          {programDetails?.experts.length > 0 ? (
+          {programDetails?.experts && programDetails.experts.length > 0 ? (
             <div
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleViewExperts(programDetails?.experts)}
@@ -144,9 +176,23 @@ const ProgramDetails = () => {
 
           {/* Enrollment */}
           {programDetails?.is_enroll ? (
-            <div className="!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl bg-orange-500 text-white">
-              {programDetails?.status}
-            </div>
+            <>
+              <div className={`!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl text-white ${
+                isProgramCompleted ? 'bg-primary' : 'bg-orange-500'
+              }`}>
+                {programDetails?.status}
+              </div>
+              {/* Completion Button */}
+              {programProgress === 100 && !isProgramCompleted && (
+                <button
+                  className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 rounded-md shadow hover:bg-primary/80"
+                  disabled={isCompleting}
+                  onClick={handleCompleteProgram}
+                >
+                  {isCompleting ? 'Completing...' : 'Mark Program as Complete'}
+                </button>
+              )}
+            </>
           ) : programDetails?.is_paid && programDetails?.price ? (
             <Link href={`/payment/program/${programID}`}>
               <div
@@ -169,7 +215,7 @@ const ProgramDetails = () => {
 
       {/* Program Content */}
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
-        <div className="w-full md:w-3/4">
+        <div className={`w-full ${isEnrolled ? 'md:w-3/4' : 'md:w-full'}`}>
           {/* Tabs */}
           <Tabs value={selectedTab} onChange={handleTabChange}>
             <Tab value={TABS.JOURNEY} label="Journey" />
@@ -181,7 +227,7 @@ const ProgramDetails = () => {
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {programDetails?.content.map(item => (
-                  <ContentCard key={item.id} item={item} />
+                  <ContentCard key={item.id} item={item} isEnrolled={isEnrolled} />
                 ))}
               </div>
             </div>
@@ -204,32 +250,34 @@ const ProgramDetails = () => {
         </div>
 
         {/* Program Details Sidebar */}
-        <div className="w-full md:w-1/4 flex flex-col gap-7">
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Program Progress</h3>
+        {isEnrolled && (
+          <div className="w-full md:w-1/4 flex flex-col gap-7">
             <div className="flex flex-col gap-2">
-              <LinearProgress className="rounded-full !h-2" value={programProgress} />
-              <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
+              <h3 className="text-lg text-primary font-bold">Program Progress</h3>
+              <div className="flex flex-col gap-2">
+                <LinearProgress className="rounded-full !h-2" value={programProgress} />
+                <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg text-primary font-bold">Program Navigation</h3>
+              <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
+                {programDetails?.content.map(item => (
+                  <li key={item.id} className="ms-6 mb-6">
+                    <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
+                      <BiCheck
+                        size={20}
+                        className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white'}`}
+                      />
+                    </div>
+                    <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
-
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-primary font-bold">Program Navigation</h3>
-            <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
-              {programDetails?.content.map(item => (
-                <li key={item.id} className="ms-6 mb-6">
-                  <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
-                    <BiCheck
-                      size={20}
-                      className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white'}`}
-                    />
-                  </div>
-                  <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

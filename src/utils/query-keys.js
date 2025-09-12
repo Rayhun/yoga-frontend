@@ -44,6 +44,7 @@ const queryKeys = {
   expertPersonalConsultationDetails: 'expertPersonalConsultationDetails',
   customerEnrolledConsultations: 'customerEnrolledConsultations',
   customerEnrolledGroupCoachings: 'customerEnrolledGroupCoaching',
+  customerExperts: 'customerExperts',
   journalList: 'journalList',
   goalList: 'goalList',
   concernList: 'concernList',
@@ -64,6 +65,7 @@ const queryKeys = {
   payoutList: 'payoutList',
   aiPromptsList: 'aiPromptsList',
   lookupsByCategory: 'lookupsByCategory',
+  publicChats: 'publicChats',
 };
 
 export default queryKeys;

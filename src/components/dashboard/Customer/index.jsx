@@ -70,11 +70,11 @@ const CustomerDashboard = () => {
         </div>
       </div>
 
-      <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
+      {/* <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         <div className="flex items-center mt-6">
           <WeeklyProgressCard />
-        </div>
-      </div>
+        </div>                                                                 
+      </div> */}
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Content Cards */}
         <section className="space-x-8">

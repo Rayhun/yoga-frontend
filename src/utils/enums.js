@@ -86,6 +86,11 @@ export const SUBSCRIPTION_PAGE_TENURE = {
   yearly: 'Yearly',
 };
 
+export const GROUP_VISIBILITY = {
+  public: 'Public',
+  private: 'Private',
+};
+
 export const PROGRAM_PROGRESS = {
   in_progress: 'InProgress',
   completed: 'Complete',
