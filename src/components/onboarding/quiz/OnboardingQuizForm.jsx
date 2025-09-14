@@ -34,9 +34,11 @@ const OnboardingQuizForm = ({ selected }) => {
     ordering: selected?.ordering || 0,
     description: selected?.description || '',
     is_required: selected?.required || false,
-    options: (selected?.options || [{ text: '', image: null }]).map(i => ({
+    options: (selected?.options || [{ text: '', image: null, tags: [], program: '' }]).map(i => ({
       text: i.text || '',
-      image: i.image || null,
+      image: i.image_url || null,
+      tags: i.tags ? i.tags.map(tag => tag.id) : [],
+      program: i.program_id || '',
     })),
   };
 
@@ -50,6 +52,8 @@ const OnboardingQuizForm = ({ selected }) => {
         Yup.object({
           text: Yup.string().required('Required!'),
           image: Yup.mixed().nullable(),
+          tags: Yup.array().of(Yup.string()),
+          program: Yup.string(),
         })
       )
       .min(2, 'At least 2 options are required.'),
@@ -106,22 +110,22 @@ const OnboardingQuizForm = ({ selected }) => {
                   name="screen_type"
                   label="Type"
                   options={ONBOARDING_QUIZ_CONTENT_TYPE_OPTIONS}
-                  onChange={() => setFieldValue('options', [])}
+                  onChange={() => setFieldValue('options', [{ text: '', image: null, tags: [], program: '' }])}
                   required
                 />
               </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row md:items-center">
               <div className="w-full md:w-1/2">
-              <FormikField
-              name="ordering"
-              label="Order"
-              placeholder="Order"
-              required
-              min={1}
-              max={999}
-              type="number"
-            />
+                <FormikField
+                  name="ordering"
+                  label="Order"
+                  placeholder="Order"
+                  required
+                  min={1}
+                  max={999}
+                  type="number"
+                />
               </div>
               <div className="w-full md:w-1/2">
                 
@@ -129,8 +133,8 @@ const OnboardingQuizForm = ({ selected }) => {
             </div>
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
             <div className="flex">
-                  <FormikCheckbox name="is_required" label="Is Required?" />
-                </div>
+              <FormikCheckbox name="is_required" label="Is Required?" />
+            </div>
             <div className="my-5 flex flex-col gap-3">
               <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
               <FieldArray
