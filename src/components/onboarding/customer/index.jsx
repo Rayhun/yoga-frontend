@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { toast } from 'react-toastify';
@@ -14,6 +14,7 @@ import { toastApiError } from '@/utils/helpers';
 
 const CustomerOnboarding = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
   const {
     isLoading: isLoadingOnboardingQuiz,
@@ -57,12 +58,25 @@ const CustomerOnboarding = () => {
 
   const handleSubmitOnboardingQuiz = async values => {
     try {
-      const answers = Object.entries(values).map(([keyBy, value]) => ({
-        id: keyBy,
-        option: value,
-      }));
+      const answers = Object.entries(values).map(([questionId, selectedOptionText]) => {
+        // Find the question to get the selected option details
+        const question = quizQuestions.find(q => q.id.toString() === questionId);
+        const selectedOption = question?.options?.find(opt => opt.text === selectedOptionText);
+        
+        return {
+          id: questionId,
+          option_text: selectedOptionText,
+          option_id: selectedOption?.id || null,
+        };
+      });
 
       await submitOnboardingQuiz({ payload: { answers } });
+
+      // Refresh user data to update on_boarding_quiz status
+      await queryClient.invalidateQueries([queryKeys.loggedInUser]);
+      
+      // Refetch user data to ensure it's updated
+      await queryClient.refetchQueries([queryKeys.loggedInUser]);
 
       toast.success('Onboarding quiz submitted successfully');
       router.push('/portal');
