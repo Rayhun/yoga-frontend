@@ -26,7 +26,7 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
           : 'shadow-xl shadow-gray-900/10 hover:shadow-2xl hover:shadow-gray-900/20'
         } 
         transition-all duration-300 ease-out hover:transform hover:-translate-y-2 hover:scale-[1.02]
-        backdrop-blur-sm bg-white/95`}
+        backdrop-blur-sm bg-white/95 h-full flex flex-col`}
     >
       {/* Plan Title */}
       <div className="mb-4">
@@ -46,12 +46,12 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
         {planDetails.discounted_price && planDetails.discounted_price !== planDetails.price ? (
           // Show discount pricing (original price strikethrough + discounted price)
           <div className="text-center">
-            <div className="text-sm opacity-75 line-through mb-2">
-              {currencySymbol}{planDetails.price}
+            <div className="text-base opacity-75 line-through mb-2">
+              {currencySymbol}{Math.round(planDetails.price)}
             </div>
             <div className="text-3xl md:text-5xl font-bold tracking-tight">
               <span className="text-lg">{currencySymbol}</span>
-              {planDetails.discounted_price}
+              {Math.round(planDetails.discounted_price)}
               <span className="text-lg font-normal">/{planDetails.subscription_tenure_period}</span>
             </div>
           </div>
@@ -60,14 +60,14 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
           <div className="text-center">
             <div className="text-3xl md:text-5xl font-bold tracking-tight">
               <span className="text-lg">{currencySymbol}</span>
-              {planDetails.price}
+              {Math.round(planDetails.price)}
               <span className="text-lg font-normal">/{planDetails.subscription_tenure_period}</span>
             </div>
           </div>
         )}
       </div>
       {/* Features List */}
-      <div className="px-2 mb-6">
+      <div className="px-2 mb-6 flex-1">
         <ul className="space-y-3">
           {planDetails.features.map((feature, i) => (
             <li key={i} className="flex items-center text-sm text-gray-600">
@@ -82,14 +82,14 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
         </ul>
       </div>
       {/* CTA Button */}
-      <div className="px-4 pb-2">
+      <div className="px-4 pb-2 mt-auto">
         <Link href={checkoutLink}>
           <button className={`w-full py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 ${
             isFeatured 
-              ? 'bg-white text-primary shadow-lg hover:shadow-xl hover:bg-gray-50' 
-              : 'bg-primary text-white shadow-lg hover:shadow-xl hover:bg-primary/90'
+              ? 'bg-green-500 text-white shadow-lg hover:shadow-xl hover:bg-green-600' 
+              : 'bg-green-500 text-white shadow-lg hover:shadow-xl hover:bg-green-600'
           }`}>
-            Get Started
+            Subscribe Now
           </button>
         </Link>
       </div>

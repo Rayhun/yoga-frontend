@@ -43,9 +43,9 @@ const SubscriptionPageDetails = ({ data: pageDetails = {} }) => {
 
       <Grid container spacing={6} justifyContent="center" className="w-full md:w-[80%]">
         {filteredSubscriptionPlans.map((plan, i) => (
-          <Grid key={plan.id} size={{ xs: 12, md: 6, lg: 4 }}>
+          <Grid key={plan.id} size={{ xs: 12, md: 6, lg: 4 }} className="flex">
             <Slide in direction="right" timeout={300 + i * 300}>
-              <div>
+              <div className="w-full">
                 <SubscriptionPlanCard
                   data={plan}
                   currencySymbol={pageDetails?.currency_symbol}
