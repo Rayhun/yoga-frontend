@@ -2,6 +2,7 @@ const queryKeys = {
   users: 'users',
   loggedInUser: 'loggedInUser',
   onboardingQuiz: 'onboardingQuiz',
+  onboardingRecommendations: 'onboardingRecommendations',
   lmsCategories: 'lmsCategories',
   lmsFeaturedCategories: 'lmsFeaturedCategories',
   lmsTags: 'lmsTags',

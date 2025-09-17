@@ -9,6 +9,7 @@ import { FiMail, FiLock } from 'react-icons/fi';
 import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
+import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
 
 const LoginForm = () => {
@@ -53,6 +54,12 @@ const LoginForm = () => {
           router.replace('/portal/affiliate/dashboard');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
+          // Fetch onboarding recommendations after successful login
+          try {
+            await getOnboardingRecommendations();
+          } catch (error) {
+            console.error('Failed to fetch recommendations:', error);
+          }
           router.replace('/');
         } else {
           Cookies.set('token', response?.data?.token);

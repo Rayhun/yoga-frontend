@@ -32,3 +32,7 @@ export const importQuizes = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const getOnboardingRecommendations = async () => {
+  return axios.get('/onboarding/recommendations/');
+};

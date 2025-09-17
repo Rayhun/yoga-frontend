@@ -12,6 +12,7 @@ import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import ProgramLibraryFilter from './ProgramLibraryFilter';
 import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/customer/program';
+import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {
@@ -39,6 +40,11 @@ const ProgramsLibrary = () => {
     queryKey: [queryKeys.customerPrograms, JSON.stringify(filters)],
   });
 
+  const { data: recommendationsResponse } = useQuery({
+    queryFn: getOnboardingRecommendations,
+    queryKey: [queryKeys.onboardingRecommendations],
+  });
+
   const filteredPrograms = useMemo(
     () =>
       (programsResponse?.data?.results?.data?.['all-programs'] || []).filter(program =>
@@ -47,11 +53,20 @@ const ProgramsLibrary = () => {
     [programsResponse?.data?.results?.data, searchText]
   );
 
-  // Extract categories from the API response
-  const categories = useMemo(
-    () => programsResponse?.data?.results?.data?.['all-categories'] || [],
-    [programsResponse?.data?.results?.data]
-  );
+  // Convert user interests to category format
+  const categories = useMemo(() => {
+    const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
+    
+    // Convert user interests to category objects
+    return userInterests.map((interest, index) => ({
+      id: index + 1, // Generate a simple ID
+      name: interest,
+      slug: interest.toLowerCase().replace(/\s+/g, '-'),
+      description: interest,
+      image: null,
+      is_featured: false
+    }));
+  }, [recommendationsResponse?.data?.data?.user_interests]);
 
   const handleApplyFilter = values => {
     setFilters(values);

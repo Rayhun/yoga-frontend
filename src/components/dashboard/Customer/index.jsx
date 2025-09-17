@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import { getProgramsList } from '@/services/private/customer/program';
+import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 import ChatWithAI from '@/components/common/SearchField';
 import WeeklyProgressCard from '../WeeklyProgress/ProgressCard';
@@ -22,6 +23,17 @@ const CustomerDashboard = () => {
     queryFn: () => getProgramsList({ categories: selectedCategory }),
     queryKey: [queryKeys.customerPrograms, selectedCategory],
   });
+
+  const { data: recommendationsResponse } = useQuery({
+    queryFn: getOnboardingRecommendations,
+    queryKey: [queryKeys.onboardingRecommendations],
+  });
+
+  const recommendedProgram = recommendationsResponse?.data?.data?.recommended_programs;
+  const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
+  
+  console.log('Recommendations Response:', recommendationsResponse?.data?.data);
+  console.log('Recommended Program:', recommendedProgram);
 
   const filteredPrograms = useMemo(
     () =>
@@ -41,26 +53,37 @@ const CustomerDashboard = () => {
             <p className="break-words line-clamp-2 dark:text-gray-300">
               Achieve your personal goals with curated wellness plans developed by our expert
             </p>
-            <div className="mt-10 flex justify-between items-center gap-4 pr-3">
-              <Chip
-                className="mt-10 !capitalize w-full"
-                label="Start Journey"
-                color="primary"
-                onClick={() => console.log('See Details')}
-              />
-              <Chip
-                variant="outlined"
-                className="mt-10 !capitalize w-full"
-                label="Resume"
-                color="primary"
-                onClick={() => console.log('Resume')}
-              />
+            <div className="mt-10 flex justify-center items-center">
+              {recommendedProgram ? (
+                recommendedProgram.is_enroll ? (
+                  <button
+                    className="px-6 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors duration-200"
+                    onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
+                  >
+                    Resume
+                  </button>
+                ) : (
+                  <button
+                    className="px-6 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors duration-200"
+                    onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
+                  >
+                    Start Journey
+                  </button>
+                )
+              ) : (
+                <button
+                  className="px-6 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors duration-200"
+                  onClick={() => router.push('/portal/customer/lms/program')}
+                >
+                  Browse Programs
+                </button>
+              )}
             </div>
           </div>
           <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
             <Image
-              src="/images/content/default.png"
-              alt="Hero Image"
+              src={recommendedProgram?.image || "/images/content/default.png"}
+              alt={recommendedProgram?.title || "Hero Image"}
               width={0}
               height={0}
               sizes="100vw"
