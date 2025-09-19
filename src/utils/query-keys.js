@@ -18,6 +18,7 @@ const queryKeys = {
   stripeCheckoutSessions: 'stripeCheckoutSessions',
   customerQuizes: 'customerQuizes',
   customerPrograms: 'customerPrograms',
+  dailyDoseQuickRelief: 'dailyDoseQuickRelief',
   customerEnrolledPrograms: 'customerEnrolledPrograms',
   customerModules: 'customerModules',
   customerImageSessions: 'customerImageSessions',

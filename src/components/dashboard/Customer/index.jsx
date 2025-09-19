@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
-import { getProgramsList } from '@/services/private/customer/program';
+import { getProgramsList, getDailyDoseQuickRelief } from '@/services/private/customer/program';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 import ChatWithAI from '@/components/common/SearchField';
@@ -29,11 +29,20 @@ const CustomerDashboard = () => {
     queryKey: [queryKeys.onboardingRecommendations],
   });
 
+  const { data: dailyDoseQuickReliefResponse } = useQuery({
+    queryFn: getDailyDoseQuickRelief,
+    queryKey: [queryKeys.dailyDoseQuickRelief],
+  });
+
   const recommendedProgram = recommendationsResponse?.data?.data?.recommended_programs;
   const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
   
+  const dailyDoseProgram = dailyDoseQuickReliefResponse?.data?.data?.daily_dose_program;
+  const quickReliefProgram = dailyDoseQuickReliefResponse?.data?.data?.quick_relief_program;
+  
   console.log('Recommendations Response:', recommendationsResponse?.data?.data);
   console.log('Recommended Program:', recommendedProgram);
+  console.log('Daily Dose Quick Relief Response:', dailyDoseQuickReliefResponse?.data?.data);
 
   const filteredPrograms = useMemo(
     () =>
@@ -100,27 +109,19 @@ const CustomerDashboard = () => {
       </div> */}
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Content Cards */}
-        <section className="space-x-8">
-          {isLoadingPrograms ? (
-            <div className="flex justify-center">
-              <Spinner />
-            </div>
-          ) : (
-            <QuickLearningsSection items={filteredPrograms} title={'Daily Dose'} viewAllLink={'/portal'} />
-          )}
-        </section>
+        {dailyDoseProgram && (
+          <section className="space-x-8">
+            <QuickLearningsSection items={[dailyDoseProgram]} title={'Daily Dose'} viewAllLink={'/portal'} />
+          </section>
+        )}
         <div className="flex items-center mt-6">
           <ChatWithAI />
         </div>
-        <section className="mt-10">
-          {isLoadingPrograms ? (
-            <div className="flex justify-center">
-              <Spinner />
-            </div>
-          ) : (
-            <QuickLearningsSection items={filteredPrograms} title={'Quick Relief'} viewAllLink={'/portal'} />
-          )}
-        </section>
+        {quickReliefProgram && (
+          <section className="mt-10">
+            <QuickLearningsSection items={[quickReliefProgram]} title={'Quick Relief'} viewAllLink={'/portal'} />
+          </section>
+        )}
         <section className="mt-10">
           {isLoadingPrograms ? (
             <div className="flex justify-center">

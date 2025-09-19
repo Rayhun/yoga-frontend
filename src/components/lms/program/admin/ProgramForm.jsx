@@ -108,7 +108,12 @@ const ProgramForm = ({ selected }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const { file, ...payload } = values;
+      const { file, linked_program, ...payload } = values;
+
+      // Only include linked_program in payload if it's not empty
+      if (linked_program && linked_program !== '') {
+        payload.linked_program = linked_program;
+      }
 
       const { data: uploadedFile } = await uploadLMSFile({ file });
 

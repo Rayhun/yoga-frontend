@@ -39,3 +39,7 @@ export const completeProgramContent = async ({ id, ...payload }) => {
 export const getExpertProgramsList = async ({ id }) => {
   return axios.get(`/customer/expert/programs/${id}`);
 };
+
+export const getDailyDoseQuickRelief = async () => {
+  return axios.get('/customer/program/daily_dose_quick_relief/');
+};
