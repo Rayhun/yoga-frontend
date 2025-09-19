@@ -6,6 +6,7 @@ import { GoPlus } from 'react-icons/go';
 import LoadingWrapper from '../loader/Wrapper';
 import { useQuery } from '@tanstack/react-query';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const FAQsList = () => {
   const [expanded, setExpanded] = useState(false);
@@ -54,7 +55,7 @@ const FAQsList = () => {
                 }`}
               >
                 <div className="p-4 bg-gray-50">
-                  <p className="text-gray-700 text-sm">{faq?.description}</p>
+                  <ControllableRichText className="text-gray-700 text-sm">{faq?.description || 'No answer provided'}</ControllableRichText>
                 </div>
               </div>
             </div>

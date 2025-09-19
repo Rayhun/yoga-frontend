@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { FaRegFileImage } from 'react-icons/fa6';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import {
@@ -159,7 +160,7 @@ const ProgramForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
             <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
 
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">

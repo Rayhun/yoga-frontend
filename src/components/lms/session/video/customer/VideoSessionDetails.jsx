@@ -5,6 +5,7 @@ import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import VideoPlayer from '@/components/common/player/VideoPlayer';
 import { updateProgramContentProgress } from '@/services/private/customer/program';
 import { SESSION_TYPE } from '@/utils/enums';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const VideoSessionDetails = ({ data: sessionDetails }) => {
   const searchParams = useSearchParamUtils();
@@ -91,7 +92,7 @@ const VideoSessionDetails = ({ data: sessionDetails }) => {
             </div>
           </div>
 
-          <p className="dark:text-white">{sessionDetails?.description}</p>
+          <ControllableRichText className="dark:text-white">{sessionDetails?.description || 'No description provided'}</ControllableRichText>
         </div>
       </div>
     </div>

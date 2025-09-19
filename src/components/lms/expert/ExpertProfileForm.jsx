@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
@@ -69,7 +70,10 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     description: Yup.string()
       .required('Required!')
       .test('max_length', 'Your content must be between 25 and 150 words', value => {
-        const wordsCount = value.split(' ').length;
+        if (!value) return false;
+        // Strip HTML tags for word count
+        const textContent = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
         return wordsCount >= 25 && wordsCount <= 150;
       }),
     coaching_areas: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
@@ -216,7 +220,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   />
                 </div>
               </div>
-              <FormikField name="description" label="About" placeholder="About" rows={5} required />
+              <FormikRichTextEditor name="description" label="About" placeholder="About" rows={5} required />
               <CoachingAreasField
                 name="coaching_areas"
                 label="Coaching Areas"

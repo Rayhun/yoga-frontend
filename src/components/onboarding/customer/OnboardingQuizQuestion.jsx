@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useField, useFormikContext } from 'formik';
 import Button from '@/components/common/Button';
 import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const OnboardingQuizQuestion = ({
   question = {},
@@ -44,7 +45,7 @@ const OnboardingQuizQuestion = ({
           Skip
         </button>
         <h2 className="text-3xl text-center font-bold text-gray-800 dark:text-white">{question.title}</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2 text-center">{question.description}</p>
+        <ControllableRichText className="text-gray-600 dark:text-gray-400 mt-2 text-center">{question.description || 'No description provided'}</ControllableRichText>
       </div>
 
       <div className="flex justify-center items-center flex-wrap gap-4 mt-8">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
@@ -131,7 +132,7 @@ const OnboardingQuizForm = ({ selected }) => {
                 
               </div>
             </div>
-            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
             <div className="flex">
               <FormikCheckbox name="is_required" label="Is Required?" />
             </div>

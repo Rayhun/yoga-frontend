@@ -18,6 +18,7 @@ import LMSExpertsList from '@/components/lms/general/section/LMSExpertsList';
 import ContentCard from './ContentCard';
 import { getSingleModule } from '@/services/private/customer/module';
 import queryKeys from '@/utils/query-keys';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const TABS = {
   JOURNEY: 'journey',
@@ -137,7 +138,7 @@ const ModuleDetails = () => {
 
             {/* Description Tab */}
             <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <p className="dark:text-white">{moduleDetails?.description}</p>
+              <ControllableRichText className="dark:text-white">{moduleDetails?.description || 'No description provided'}</ControllableRichText>
             </div>
 
             {/* Benefits Tab */}

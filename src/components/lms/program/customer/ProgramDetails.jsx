@@ -21,6 +21,7 @@ import { getSingleProgram, enrollProgram, completeProgramContent } from '@/servi
 import queryKeys from '@/utils/query-keys';
 import Link from 'next/link';
 import useConfirm from '@/hooks/useConfirm';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const TABS = {
   JOURNEY: 'journey',
@@ -234,7 +235,7 @@ const ProgramDetails = () => {
 
             {/* Description Tab */}
             <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <p className="dark:text-white">{programDetails?.description}</p>
+              <ControllableRichText className="dark:text-white">{programDetails?.description || 'No description provided'}</ControllableRichText>
             </div>
 
             {/* Benefits Tab */}

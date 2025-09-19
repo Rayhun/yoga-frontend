@@ -1,5 +1,5 @@
 import Chip from '@mui/material/Chip';
-import ControllableText from '@/components/common/details/ControllableText';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 import { LANGUAGES } from '@/utils/constants';
 
 const AboutSection = ({ label, children }) => (
@@ -30,7 +30,7 @@ const ExpertProfileAbout = ({ data }) => {
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="About">
-        <ControllableText>{data?.description || 'No description provided'}</ControllableText>
+        <ControllableRichText>{data?.description || 'No description provided'}</ControllableRichText>
       </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">

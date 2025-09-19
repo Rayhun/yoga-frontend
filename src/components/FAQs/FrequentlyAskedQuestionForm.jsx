@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import { addNewQuestion, updateExistingQuestion } from '@/services/private/faqs';
@@ -71,7 +72,7 @@ const FrequentlyAskedQuestionForm = ({ selected }) => {
         {({ isSubmitting }) => (
           <Form className="flex flex-col gap-3">
             <FormikField name="title" label="Question" placeholder="Question" required />
-            <FormikField
+            <FormikRichTextEditor
               name="description"
               label="Answer"
               rows={4}

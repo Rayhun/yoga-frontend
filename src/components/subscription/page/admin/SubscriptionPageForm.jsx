@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import { getSubscriptionPlansList } from '@/services/private/subscription/plan';
 import { addNewSubscriptionPage, updateExistingSubscriptionPage } from '@/services/private/subscription/page';
@@ -93,7 +94,7 @@ const SubscriptionPageForm = ({ selected }) => {
               placeholder="Plans"
               options={subscriptionPlansOptions}
             />
-            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
