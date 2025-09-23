@@ -60,6 +60,14 @@ const AFFILIATES_USERS_ROUTES = [
   '/portal/admin/affiliates/payout_list'
 ];
 
+const EXPERTS_ROUTES = [
+  '/portal/admin/lms/expert',
+  '/portal/admin/lms/expert/add',
+  '/portal/admin/lms/expert/details',
+  '/portal/admin/lms/expert/edit',
+  '/portal/admin/lms/expert/commission'
+];
+
 
 const ADMIN = [
   {
@@ -83,12 +91,23 @@ const ADMIN = [
     isActive: pathname => pathname.includes('/portal/admin/entities/users'),
     disabled: false,
   },
-    {
+  {
     Icon: GrUserExpert,
     label: 'Experts',
-    href: '/portal/admin/lms/expert',
-    isActive: pathname => pathname.includes('/portal/admin/lms/expert'),
     disabled: false,
+    hasActiveSubMenu: pathname => EXPERTS_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Experts',
+        href: '/portal/admin/lms/expert',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission'),
+      },
+      {
+        label: 'Commission',
+        href: '/portal/admin/lms/expert/commission',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/commission'),
+      }
+    ],
   },
   {
     Icon: FaTv,

@@ -7,6 +7,7 @@ const queryKeys = {
   lmsFeaturedCategories: 'lmsFeaturedCategories',
   lmsTags: 'lmsTags',
   lmsExperts: 'lmsExperts',
+  expertCommissions: 'expertCommissions',
   lmsQuizes: 'lmsQuizes',
   lmsImageSessions: 'lmsImageSessions',
   lmsAudioSessions: 'lmsAudioSessions',
