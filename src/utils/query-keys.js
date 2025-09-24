@@ -70,6 +70,8 @@ const queryKeys = {
   aiPromptsList: 'aiPromptsList',
   lookupsByCategory: 'lookupsByCategory',
   publicChats: 'publicChats',
+  adminExpertDashboard: 'adminExpertDashboard',
+  expertDashboard: 'expertDashboard',
 };
 
 export default queryKeys;

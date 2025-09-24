@@ -65,6 +65,7 @@ const EXPERTS_ROUTES = [
   '/portal/admin/lms/expert/add',
   '/portal/admin/lms/expert/details',
   '/portal/admin/lms/expert/edit',
+  '/portal/admin/lms/expert/dashboard',
   '/portal/admin/lms/expert/commission',
   '/portal/admin/lms/expert/payment'
 ];
@@ -99,9 +100,14 @@ const ADMIN = [
     hasActiveSubMenu: pathname => EXPERTS_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
       {
+        label: 'Dashboard',
+        href: '/portal/admin/lms/expert/dashboard',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/dashboard'),
+      },
+      {
         label: 'Experts',
         href: '/portal/admin/lms/expert',
-        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment'),
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard'),
       },
       {
         label: 'Commission',
@@ -358,15 +364,15 @@ const CUSTOMER = [
   },
 ];
 
-const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult) => {
+const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded) => {
   
   return [
     {
-      Icon: MdHome,
-      label: 'Home',
-      href: '/portal',
-      isActive: pathname => pathname === '/portal',
-      disabled: true,
+      Icon: FiTarget,
+      label: 'Dashboard',
+      href: '/portal/teacher/dashboard',
+      isActive: pathname => pathname.includes('/portal/teacher/dashboard'),
+      disabled: !is_profile_complete || !has_event_or_consult || !stripe_onboarded,
     },
     {
       Icon: FaInbox,

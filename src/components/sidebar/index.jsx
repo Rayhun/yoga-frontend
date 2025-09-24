@@ -8,6 +8,8 @@ import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
+import { HiOutlineInformationCircle } from 'react-icons/hi';
+import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
@@ -15,7 +17,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const activeTab = searchParams.get('active_tab');
   const {
     user: {
-      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult },
+      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult, stripe_onboarded },
       isCustomer
     },
     logout,
@@ -29,6 +31,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+  const [showDashboardInfo, setShowDashboardInfo] = useState(false);
+  const [modalAnimation, setModalAnimation] = useState(false);
 
   // close on click outside
   useEffect(() => {
@@ -62,10 +66,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult);
+    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded);
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult]);
+  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
 
   // const disabledSidebarMenu = useMemo(() => {
   //   return (
@@ -89,6 +93,45 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         })),
     [roleBasedSidebarMenuItems, userSubRole]
   );
+
+  const handleDisabledDashboardClick = (e) => {
+    e.preventDefault();
+    setShowDashboardInfo(true);
+    // Trigger animation after modal is shown
+    setTimeout(() => setModalAnimation(true), 10);
+  };
+
+  const closeModal = () => {
+    setModalAnimation(false);
+    setTimeout(() => setShowDashboardInfo(false), 200);
+  };
+
+  const getMissingRequirements = () => {
+    const missing = [];
+    if (!is_profile_complete) missing.push({ text: 'Complete your profile', icon: FiUser });
+    if (!has_event_or_consult) missing.push({ text: 'Add events or consultations', icon: FiCalendar });
+    if (!stripe_onboarded) missing.push({ text: 'Link your Stripe account', icon: FiCreditCard });
+    return missing;
+  };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && showDashboardInfo) {
+        closeModal();
+      }
+    };
+
+    if (showDashboardInfo) {
+      document.addEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showDashboardInfo]);
 
 
   return (
@@ -205,21 +248,33 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </ul>
                 ) : (
                   <li className="list-none">
-                    <Link
-                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
-                      className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
-                        ${
-                          menuItem.disabled
-                            ? 'cursor-not-allowed opacity-50 text-gray-400'
-                            : 'hover:text-primary'
-                        } 
-                        ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
-                      aria-disabled={menuItem.disabled} // Improves accessibility
-                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
-                    >
-                      {menuItem.Icon && <menuItem.Icon size={24} />}
-                      {menuItem.label}
-                    </Link>
+                    {menuItem.label === 'Dashboard' && menuItem.disabled ? (
+                      <button
+                        onClick={handleDisabledDashboardClick}
+                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out w-full text-left
+                          cursor-pointer opacity-50 text-gray-400 hover:opacity-70`}
+                        aria-disabled={true}
+                      >
+                        {menuItem.Icon && <menuItem.Icon size={24} />}
+                        {menuItem.label}
+                      </button>
+                    ) : (
+                      <Link
+                        href={menuItem.disabled ? '#' : menuItem.href || '#'}
+                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
+                          ${
+                            menuItem.disabled
+                              ? 'cursor-not-allowed opacity-50 text-gray-400'
+                              : 'hover:text-primary'
+                          } 
+                          ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
+                        aria-disabled={menuItem.disabled} // Improves accessibility
+                        tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
+                      >
+                        {menuItem.Icon && <menuItem.Icon size={24} />}
+                        {menuItem.label}
+                      </Link>
+                    )}
                   </li>
                 )}
               </React.Fragment>
@@ -251,6 +306,86 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="pb-4"></div>
         </nav>
       </div>
+
+      {/* Dashboard Info Modal */}
+      {showDashboardInfo && (
+        <div 
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 transition-all duration-300 ${
+            modalAnimation ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={closeModal}
+        >
+          <div 
+            className={`bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-sm sm:max-w-md md:max-w-lg w-full mx-2 sm:mx-4 transform transition-all duration-300 ease-out ${
+              modalAnimation ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <div className="flex items-start justify-between mb-3 gap-3">
+                <div className="flex items-start space-x-3 flex-1 min-w-0">
+                  <div className="p-2 sm:p-3 bg-primary/10 rounded-full flex-shrink-0">
+                    <HiOutlineInformationCircle className="text-primary text-xl sm:text-2xl" />
+                  </div>
+                  
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  Missing Requirements:
+                </h4>
+                <div className="space-y-2 sm:space-y-3">
+                  {getMissingRequirements().map((requirement, index) => {
+                    const IconComponent = requirement.icon;
+                    return (
+                      <div key={index} className="flex items-center space-x-2 sm:space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                          <IconComponent className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 dark:text-red-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">{requirement.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              {/* Progress Indicator */}
+              <div className="mb-4 sm:mb-6">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <span>Setup Progress</span>
+                  <span>{3 - getMissingRequirements().length} of 3 completed</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 sm:h-2">
+                  <div
+                    className="bg-gradient-to-r from-primary to-primary/80 h-1.5 sm:h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((3 - getMissingRequirements().length) / 3) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              {/* Information Footer */}
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Click outside or press ESC to close
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

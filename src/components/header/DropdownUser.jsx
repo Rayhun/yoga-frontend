@@ -84,13 +84,15 @@ const DropdownUser = () => {
           <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span>
         </span>
 
-        <span className="h-12 w-12 rounded-full">
+        <span className="h-12 w-12 rounded-full overflow-hidden">
           <Image
-            width={112}
-            height={112}
+            width={48}
+            height={48}
             src={loggedInUser?.profile?.image || loggedInUser?.profile?.profile_image || '/images/user/placeholder_profile.png'}
             alt="User"
-            className="rounded-full"
+            className="rounded-full object-cover w-full h-full"
+            quality={95}
+            priority
           />
         </span>
 

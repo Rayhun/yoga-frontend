@@ -9,11 +9,13 @@ const ExpertCard = ({ expert, onClick }) => {
     >
       <div className="aspect-[16/9]">
         <Image
-          width={200}
-          height={200}
+          width={400}
+          height={225}
           src={expert.file?.startsWith('http') ? expert.file : '/images/user/placeholder_profile.png'}
           alt={`${expert.first_name} ${expert.last_name ? expert.last_name : ''}`}
           className="w-full h-full object-cover rounded-t-lg"
+          quality={95}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>
 

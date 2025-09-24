@@ -22,16 +22,6 @@ const InfoNote = ({expertData}) => {
     }
   };
 
-  // Calculate step numbers based on conditions
-  const getStepNumber = (baseStep) => {
-    let stepNumber = baseStep;
-    if (!expertData?.is_profile_complete) {
-      stepNumber = baseStep;
-    } else {
-      stepNumber = baseStep - 1;
-    }
-    return stepNumber;
-  };
 
   return (
     <div className="mx-auto my-8">
@@ -55,7 +45,7 @@ const InfoNote = ({expertData}) => {
         {!expertData?.stripe_onboarded && (
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
-              {getStepNumber(2)}
+              {expertData?.is_profile_complete ? 1 : 2}
             </div>
             <div className="flex-1 text-gray-800 font-medium">
               Link your Stripe account to receive payments.
@@ -72,15 +62,18 @@ const InfoNote = ({expertData}) => {
           </div>
         )}
 
-        {/* Final Step */}
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
-            {expertData?.stripe_onboarded ? getStepNumber(2) : getStepNumber(3)}
+        {/* Final Step - Only show when has_event_or_consult is false */}
+        {!expertData?.has_event_or_consult && (
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
+              {expertData?.stripe_onboarded ? (expertData?.is_profile_complete ? 2 : 3) : (expertData?.is_profile_complete ? 1 : 2)}
+            </div>
+            <div className="flex-1 text-gray-800 font-medium">
+              Add a group coaching or consultation to get started.
+            </div>
           </div>
-          <div className="flex-1 text-gray-800 font-medium">
-            Add a group coaching or consultation to get started.
-          </div>
-        </div>
+        )}
+
       </div>
     </div>
   );
