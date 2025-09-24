@@ -65,7 +65,8 @@ const EXPERTS_ROUTES = [
   '/portal/admin/lms/expert/add',
   '/portal/admin/lms/expert/details',
   '/portal/admin/lms/expert/edit',
-  '/portal/admin/lms/expert/commission'
+  '/portal/admin/lms/expert/commission',
+  '/portal/admin/lms/expert/payment'
 ];
 
 
@@ -100,12 +101,17 @@ const ADMIN = [
       {
         label: 'Experts',
         href: '/portal/admin/lms/expert',
-        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission'),
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment'),
       },
       {
         label: 'Commission',
         href: '/portal/admin/lms/expert/commission',
         isActive: pathname => pathname.includes('/portal/admin/lms/expert/commission'),
+      },
+      {
+        label: 'Payments',
+        href: '/portal/admin/lms/expert/payment',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/payment'),
       }
     ],
   },
