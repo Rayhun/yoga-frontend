@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaGear, FaUser } from 'react-icons/fa6';
+import { MdLogout } from 'react-icons/md';
 import Link from 'next/link';
 import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
@@ -15,7 +16,7 @@ const getRoleBaseTitle = (role) => {
 
 
 const DropdownUser = () => {
-  const { user: loggedInUser } = useAuthContext();
+  const { user: loggedInUser, logout } = useAuthContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef();
@@ -59,6 +60,12 @@ const DropdownUser = () => {
       label: 'Settings',
       href: '#',
       Icon: FaGear,
+    },
+    {
+      label: 'Logout',
+      href: '#',
+      Icon: MdLogout,
+      onClick: logout,
     },
   ];
 
@@ -116,13 +123,23 @@ const DropdownUser = () => {
         <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-4 dark:border-strokedark">
           {menu.map(menuItem => (
             <li key={menuItem.label}>
-              <Link
-                href={menuItem.href}
-                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-              >
-                <menuItem.Icon size={20} />
-                {menuItem.label}
-              </Link>
+              {menuItem.onClick ? (
+                <button
+                  onClick={menuItem.onClick}
+                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base w-full text-left"
+                >
+                  <menuItem.Icon size={20} />
+                  {menuItem.label}
+                </button>
+              ) : (
+                <Link
+                  href={menuItem.href}
+                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                >
+                  <menuItem.Icon size={20} />
+                  {menuItem.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
