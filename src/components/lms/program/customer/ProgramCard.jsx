@@ -31,7 +31,7 @@ const ProgramCard = ({ program, onClick, isExpertView = false }) => {
           <p>{program.sessions} sessions</p>
         </div>
         <p className="break-words line-clamp-1 text-sm text-gray-400" title={program.description}>
-          {program.experts.join(', ') || 'No experts'}
+          {program.experts?.join(', ') || 'No experts'}
         </p>
         {program?.is_enroll || program?.status === 'InProgress' || program?.status === 'Complete' || isExpertView ? (
           <button

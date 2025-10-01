@@ -9,6 +9,8 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
+import useAuthContext from '@/hooks/useAuthContext';
 import {
   deleteSingleModule,
   getModulesList,
@@ -19,6 +21,7 @@ import queryKeys from '@/utils/query-keys';
 
 const ModuleList = () => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const { isImporting: isImportingModules, handleImport: handleImportModules } = useImport({
     mutationFn: importModules,
     invalidateQueryKey: [queryKeys.lmsModules],
@@ -53,8 +56,8 @@ const ModuleList = () => {
     []
   );
 
-  const rowActions = useMemo(
-    () => [
+  const rowActions = useMemo(() => {
+    const actions = [
       {
         id: 'edit',
         Icon: MdOutlineEdit,
@@ -70,9 +73,15 @@ const ModuleList = () => {
         Icon: MdDeleteOutline,
         onClick: row => handleDeleteModule({ id: row.original.id }),
       },
-    ],
-    [handleDeleteModule, router]
-  );
+    ];
+
+    // Filter out edit and delete actions for staff users
+    if (user?.isStaff) {
+      return actions.filter(action => action.id === 'view');
+    }
+
+    return actions;
+  }, [handleDeleteModule, router, user?.isStaff]);
 
   const headerQuickActions = useMemo(
     () => [
@@ -110,7 +119,9 @@ const ModuleList = () => {
   return (
     <div>
       <PageHeader title="Module">
-        <PageHeaderQuickActions actions={headerQuickActions} />
+        <StaffPermissionGuard>
+          <PageHeaderQuickActions actions={headerQuickActions} />
+        </StaffPermissionGuard>
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />

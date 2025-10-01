@@ -19,6 +19,11 @@ const ClientPortalPage = () => {
     if (userRole === 'Teacher' && isProfileComplete && hasEventOrConsult && stripeOnboarded) {
       router.replace('/portal/teacher/dashboard');
     }
+    
+    // Redirect staff users to programs page
+    if (userRole === 'Staff') {
+      router.replace('/portal/admin/lms/program');
+    }
   }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, router]);
 
   const renderDashboard = () => {
@@ -32,6 +37,14 @@ const ClientPortalPage = () => {
         }
         // This should redirect to dashboard, but fallback just in case
         return <ExpertQuickSteps />;
+      case 'Staff':
+        // Staff users should be redirected, but show loading as fallback
+        return <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecting to programs...</p>
+          </div>
+        </div>;
       default:
         return <ECommerce />;
     }

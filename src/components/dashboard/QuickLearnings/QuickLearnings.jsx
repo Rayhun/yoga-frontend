@@ -19,13 +19,13 @@ const QuickLearningsSection = ({ title, viewAllLink, items }) => {
       {/* Cards Container */}
       <div className='overflow-x-auto no-scrollbar'>
         <div className="no-scrollbar grid grid-flow-col auto-cols-[300px] gap-4">
-          {items.map(item => (
+          {items?.map(item => (
               <ProgramCard
                 key={item.id} 
                 program={item}
                 onClick={() => router.push(`/portal/customer/lms/program/${item.id}/details`)}
               />
-          ))}
+          )) || <p className="text-gray-500">No items available</p>}
         </div>
       </div>
     </div>

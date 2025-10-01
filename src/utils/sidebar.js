@@ -36,6 +36,7 @@ import { LiaBookSolid } from 'react-icons/lia';
 // import { TbGenderTransgender } from "react-icons/tb";
 import { RiRepeatOneFill } from 'react-icons/ri';
 import { GoGoal } from 'react-icons/go';
+import { FiShield } from 'react-icons/fi';
 
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
@@ -88,14 +89,29 @@ const ADMIN = [
   },
   {
     Icon: FaUsers,
-    label: 'Users',
+    label: 'Customers',
     href: '/portal/admin/entities/users',
     isActive: pathname => pathname.includes('/portal/admin/entities/users'),
     disabled: false,
   },
   {
+    Icon: FaUserFriends,
+    label: 'Staff Users',
+    href: '/portal/admin/staff',
+    isActive: pathname => pathname.includes('/portal/admin/staff'),
+    disabled: false,
+  },
+  {
+    Icon: FiShield,
+    label: 'Permissions',
+    href: '/portal/admin/permissions',
+    isActive: pathname => pathname.includes('/portal/admin/permissions'),
+    disabled: false,
+  },
+  {
     Icon: GrUserExpert,
     label: 'Experts',
+    href: '/portal/admin/lms/expert', // Default to experts list
     disabled: false,
     hasActiveSubMenu: pathname => EXPERTS_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -124,6 +140,7 @@ const ADMIN = [
   {
     Icon: FaTv,
     label: 'Affiliates',
+    href: '/portal/admin/affiliates/dashboard', // Default to affiliates dashboard
     disabled: false,
     hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -187,6 +204,7 @@ const ADMIN = [
   {
     Icon: FaTv,
     label: 'Sessions',
+    href: '/portal/admin/lms/session/video', // Default to video sessions
     disabled: false,
     hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -262,7 +280,7 @@ const ADMIN = [
     href: '/portal/admin/faq',
     isActive: pathname => pathname.includes('/portal/admin/faq'),
     disabled: false,
-  },
+  }
 ];
 
 const CUSTOMER = [
@@ -321,6 +339,7 @@ const CUSTOMER = [
   {
     Icon: LuClipboardCheck,
     label: 'Check In',
+    href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -360,6 +379,47 @@ const CUSTOMER = [
       //   href: '/portal/customer/checkin/menopause',
       //   isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
       // },
+    ],
+  },
+];
+
+const STAFF = [
+  {
+    Icon: FaNewspaper,
+    label: 'Programs',
+    href: '/portal/admin/lms/program',
+    isActive: pathname => pathname.includes('/portal/admin/lms/program'),
+    disabled: false,
+  },
+  {
+    Icon: MdViewModule,
+    label: 'Modules',
+    href: '/portal/admin/lms/module',
+    isActive: pathname => pathname.includes('/portal/admin/lms/module'),
+    disabled: false,
+  },
+  {
+    Icon: FaTv,
+    label: 'Sessions',
+    href: '/portal/admin/lms/session/video', // Default to video sessions
+    disabled: false,
+    hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Video Sessions',
+        href: '/portal/admin/lms/session/video',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
+      },
+      {
+        label: 'Image Sessions',
+        href: '/portal/admin/lms/session/image',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
+      },
+      {
+        label: 'Audio Sessions',
+        href: '/portal/admin/lms/session/audio',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+      },
     ],
   },
 ];
@@ -452,6 +512,6 @@ const AFFILIATE = [
   
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
+const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
 
 export default SIDEBAR;

@@ -10,9 +10,9 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
 
   console.log("refferalCode dajalkj",refferalCode)
 
-  let checkoutLink =  `${pathname}/${planDetails.id}/checkout`
+  let checkoutLink = planDetails.id ? `${pathname}/${planDetails.id}/checkout` : '#'
 
-  if(refferalCode){
+  if(refferalCode && planDetails.id){
     checkoutLink = `${checkoutLink}?ref=${refferalCode}`
   }
 

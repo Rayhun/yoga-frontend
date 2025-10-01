@@ -33,7 +33,7 @@ const TagsList = () => {
       },
       {
         header: 'Categories',
-        cell: ({ row }) => row?.original?.category?.map(i => i.name).join(', '),
+        cell: ({ row }) => row?.original?.category?.map(i => i.name).join(', ') || 'No categories',
       },
     ],
     []

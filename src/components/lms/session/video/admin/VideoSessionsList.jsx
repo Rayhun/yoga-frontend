@@ -9,12 +9,15 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
+import useAuthContext from '@/hooks/useAuthContext';
 import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const VideoSessionsList = () => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const { isImporting, handleImport: handleImportVideoSessions } = useImport({
     mutationFn: importSessions,
     invalidateQueryKey: [queryKeys.lmsVideoSessions],
@@ -44,8 +47,8 @@ const VideoSessionsList = () => {
     []
   );
 
-  const rowActions = useMemo(
-    () => [
+  const rowActions = useMemo(() => {
+    const actions = [
       {
         id: 'edit',
         Icon: MdOutlineEdit,
@@ -61,9 +64,15 @@ const VideoSessionsList = () => {
         Icon: MdDeleteOutline,
         onClick: row => handleDeleteVideoSession({ id: row.original.id }),
       },
-    ],
-    [handleDeleteVideoSession, router]
-  );
+    ];
+
+    // Filter out edit and delete actions for staff users
+    if (user?.isStaff) {
+      return actions.filter(action => action.id === 'view');
+    }
+
+    return actions;
+  }, [handleDeleteVideoSession, router, user?.isStaff]);
 
   const headerQuickActions = useMemo(
     () => [
@@ -94,7 +103,9 @@ const VideoSessionsList = () => {
   return (
     <div>
       <PageHeader title="Video Sessions">
-        <PageHeaderQuickActions actions={headerQuickActions} />
+        <StaffPermissionGuard>
+          <PageHeaderQuickActions actions={headerQuickActions} />
+        </StaffPermissionGuard>
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />

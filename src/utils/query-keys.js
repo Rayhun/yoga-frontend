@@ -1,5 +1,6 @@
 const queryKeys = {
   users: 'users',
+  staffUsers: 'staffUsers',
   loggedInUser: 'loggedInUser',
   onboardingQuiz: 'onboardingQuiz',
   onboardingRecommendations: 'onboardingRecommendations',
@@ -72,6 +73,11 @@ const queryKeys = {
   publicChats: 'publicChats',
   adminExpertDashboard: 'adminExpertDashboard',
   expertDashboard: 'expertDashboard',
+  permissions: 'permissions',
+  roles: 'roles',
+  userRoles: 'userRoles',
+  userPermissions: 'userPermissions',
+  groupPermissions: 'groupPermissions',
 };
 
 export default queryKeys;

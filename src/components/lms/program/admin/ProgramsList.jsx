@@ -9,6 +9,8 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
+import useAuthContext from '@/hooks/useAuthContext';
 import {
   deleteSingleProgram,
   getProgramsList,
@@ -19,6 +21,7 @@ import queryKeys from '@/utils/query-keys';
 
 const ProgramList = () => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const { isImporting: isImportingPrograms, handleImport: handleImportPrograms } = useImport({
     mutationFn: importPrograms,
     invalidateQueryKey: [queryKeys.lmsPrograms],
@@ -53,8 +56,8 @@ const ProgramList = () => {
     []
   );
 
-  const rowActions = useMemo(
-    () => [
+  const rowActions = useMemo(() => {
+    const actions = [
       {
         id: 'edit',
         Icon: MdOutlineEdit,
@@ -70,9 +73,15 @@ const ProgramList = () => {
         Icon: MdDeleteOutline,
         onClick: row => handleDeleteProgram({ id: row.original.id }),
       },
-    ],
-    [handleDeleteProgram, router]
-  );
+    ];
+
+    // Filter out edit and delete actions for staff users
+    if (user?.isStaff) {
+      return actions.filter(action => action.id === 'view');
+    }
+
+    return actions;
+  }, [handleDeleteProgram, router, user?.isStaff]);
 
   const headerQuickActions = useMemo(
     () => [
@@ -116,7 +125,9 @@ const ProgramList = () => {
   return (
     <div>
       <PageHeader title="Program">
-        <PageHeaderQuickActions actions={headerQuickActions} />
+        <StaffPermissionGuard>
+          <PageHeaderQuickActions actions={headerQuickActions} />
+        </StaffPermissionGuard>
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />

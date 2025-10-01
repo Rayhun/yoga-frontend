@@ -45,9 +45,11 @@ const DropdownUser = () => {
   const url = useMemo(() => {
     const { role } = loggedInUser?.profile || {}; 
     if (role === USER_ROLE.ADMIN) return '#';
+    if (role === USER_ROLE.STAFF) return '#'; // Staff users don't have profile page
     if (role === USER_ROLE.TEACHER) return '/portal/teacher/profile?active_tab=about';
     if (role === USER_ROLE.AFFILIATE) return '/portal/affiliate/profle';
     if (role === USER_ROLE.CUSTOMER) return '/portal/customer/profile';
+    return '#'; // Default fallback
   }, [loggedInUser?.profile]);
 
   const menu = [

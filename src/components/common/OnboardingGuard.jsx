@@ -8,8 +8,8 @@ const OnboardingGuard = ({ children }) => {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    // Only check onboarding for customers, not admins
-    if (user?.isCustomer && !user?.isAdmin) {
+    // Only check onboarding for customers, not admins or staff
+    if (user?.isCustomer && !user?.isAdmin && !user?.isStaff) {
       // Check if on_boarding_quiz is false
       if (user?.profile?.on_boarding_quiz === false) {
         router.push('/onboarding');
@@ -17,8 +17,8 @@ const OnboardingGuard = ({ children }) => {
     }
   }, [user, router]);
 
-  // If user is admin or onboarding is completed, render children
-  if (user?.isAdmin || user?.profile?.on_boarding_quiz === true) {
+  // If user is admin, staff, or onboarding is completed, render children
+  if (user?.isAdmin || user?.isStaff || user?.profile?.on_boarding_quiz === true) {
     return children;
   }
 
