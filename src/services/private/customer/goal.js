@@ -18,6 +18,10 @@ export const getTracker = async () => {
   return axios.get('/goal/tracker/user/');
 };
 
+export const getTrackerInfo = async () => {
+  return axios.get('/goal/tracker/info/');
+};
+
 export const createTrackerActivity = async ({ payload }) => {
   return axios.post('/goal/tracker/activity/', payload);
 };

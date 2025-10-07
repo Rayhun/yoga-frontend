@@ -1,13 +1,22 @@
 'use client';
-import Button from '@/components/common/Button';
 
 export default function GlobalError({ error, reset }) {
   return (
     <html>
-      <body className="w-full flex flex-col items-center gap-3 text-center py-10 px-5">
-        <h2 className="text-2xl">Something went wrong!</h2>
-        <p>{error?.message}</p>
-        <Button onClick={() => reset()}>Try again</Button>
+      <body>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong!</h1>
+            <p className="text-gray-600 mb-6">An unexpected error occurred.</p>
+            <button
+              onClick={() => reset()}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       </body>
     </html>
   );

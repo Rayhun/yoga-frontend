@@ -46,6 +46,7 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/journal',
   '/portal/customer/checkin/sleep_tracker',
   '/portal/customer/checkin/daily_insights',
+  '/portal/customer/checkin/tracker',
 ];
 
 const SESSIONS_SUBMENU_ROUTES = [
@@ -366,6 +367,12 @@ const CUSTOMER = [
         label: 'Daily Insights',
         href: '/portal/customer/checkin/daily_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
+      },
+      {
+        Icon: MdTrackChanges,
+        label: 'Tracker',
+        href: '/portal/customer/checkin/tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
       },
       // {
       //   Icon: FiDroplet,
