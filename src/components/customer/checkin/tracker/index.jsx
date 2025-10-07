@@ -104,6 +104,48 @@ const SymptomTag = ({ symptom, isSelected, onClick }) => (
   </button>
 );
 
+const CycleDayCard = () => {
+  const currentDay = 15; // This could be calculated based on cycle data
+  const daysUntilNextPeriod = 13;
+  const currentPhase = "Ovulation";
+  const lastPeriodDate = "March 5, 2025";
+
+  return (
+    <Section>
+      <div className="flex items-center gap-6">
+        {/* Circular Day Indicator */}
+        <div className="flex-shrink-0">
+          <div className="w-20 h-20 border-2 border-green-500 rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50">
+            <span className="text-xs font-medium text-gray-600">Day</span>
+            <span className="text-2xl font-bold text-green-700">{currentDay}</span>
+          </div>
+        </div>
+
+        {/* Cycle Information */}
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Cycle Day {currentDay}</h3>
+          <div className="space-y-1">
+            <p className="text-gray-700">
+              Estimated {daysUntilNextPeriod} days until next period
+            </p>
+            <p className="text-green-600 font-medium">
+              Current phase: {currentPhase}
+            </p>
+            <p className="text-gray-700">
+              Last Period Date: {lastPeriodDate}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Indicator */}
+        <div className="flex-shrink-0">
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    </Section>
+  );
+};
+
 const Tracker = () => {
   const [periodStart, setPeriodStart] = useState(null);
   const [periodEnd, setPeriodEnd] = useState(null);
@@ -249,6 +291,36 @@ const Tracker = () => {
     const isCurrentMonth = !props.outsideCurrentMonth;
     const isOtherMonth = props.outsideCurrentMonth;
     
+    // Determine if this is a start/end date or a mid-day
+    const isStartDate = periodStart && dayFormatted === periodStart;
+    const isEndDate = periodEnd && dayFormatted === periodEnd;
+    const isMidDay = isSelected && !isStartDate && !isEndDate;
+    
+    // Set colors and border radius based on date type
+    let backgroundColor = 'transparent';
+    let textColor = isOtherMonth ? '#d1d5db' : '#374151';
+    let fontWeight = 500;
+    let borderRadius = '50%'; // Default circular
+    
+    if (isSelected && isCurrentMonth) {
+      if (isStartDate) {
+        backgroundColor = '#dc2626'; // Red for start date
+        textColor = '#ffffff';
+        fontWeight = 600;
+        borderRadius = '50% 0 0 50%'; // Rounded left, straight right
+      } else if (isEndDate) {
+        backgroundColor = '#dc2626'; // Red for end date
+        textColor = '#ffffff';
+        fontWeight = 600;
+        borderRadius = '0 50% 50% 0'; // Straight left, rounded right
+      } else if (isMidDay) {
+        backgroundColor = '#fce7f3'; // Light pink for mid-days
+        textColor = '#374151';
+        fontWeight = 500;
+        borderRadius = '0'; // Rectangular
+      }
+    }
+    
     return (
       <div
         {...props}
@@ -259,17 +331,17 @@ const Tracker = () => {
           justifyContent: 'center',
           width: '40px',
           height: '40px',
-          backgroundColor: isSelected && isCurrentMonth ? '#f97316' : 'transparent',
-          borderRadius: '50%',
-          color: isSelected && isCurrentMonth ? '#ffffff' : isOtherMonth ? '#d1d5db' : '#374151',
+          backgroundColor: backgroundColor,
+          borderRadius: borderRadius,
+          color: textColor,
           fontSize: '0.875rem',
-          fontWeight: isSelected && isCurrentMonth ? 600 : 500,
+          fontWeight: fontWeight,
           cursor: isCurrentMonth ? 'pointer' : 'not-allowed',
           border: 'none',
           margin: '2px',
           transition: 'all 0.3s ease',
           opacity: isOtherMonth ? 0.4 : 1,
-          boxShadow: isSelected && isCurrentMonth ? '0 4px 12px rgba(249, 115, 22, 0.3)' : 'none',
+          boxShadow: (isStartDate || isEndDate) && isCurrentMonth ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
           pointerEvents: isCurrentMonth ? 'auto' : 'none',
         }}
         onClick={(e) => {
@@ -281,7 +353,7 @@ const Tracker = () => {
         }}
         onMouseEnter={(e) => {
           if (!isSelected && isCurrentMonth) {
-            e.target.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
+            e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
             e.target.style.transform = 'scale(1.1)';
           }
         }}
@@ -293,9 +365,32 @@ const Tracker = () => {
         }}
       >
         {day.date()}
+        {/* Add icons for start/end dates */}
+        {(isStartDate || isEndDate) && isCurrentMonth && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '1px',
+              right: '1px',
+              width: '14px',
+              height: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '9px',
+              backgroundColor: isStartDate ? '#10b981' : '#ef4444', // Green circle for start, red circle for end
+              color: '#ffffff', // White text for both start and end
+              fontWeight: 'bold',
+              borderRadius: '50%', // Circle for both start and end
+              zIndex: 10,
+            }}
+          >
+            {isStartDate ? 'S' : 'E'}
+          </div>
+        )}
       </div>
     );
-  }, [getSelectedDates, handleDateChange]);
+  }, [getSelectedDates, handleDateChange, periodStart, periodEnd]);
 
   // Loading state
   if (loading) {
@@ -348,33 +443,53 @@ const Tracker = () => {
 
   // Main render with API data
   return (
-    <div className="flex flex-col gap-8 min-h-screen p-6">
-      {/* Header */}
-      <Section>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Track {trackerData?.tracker_name || 'Cycle'}</h2>
-            <p className="text-gray-600 mt-1">Monitor your wellness journey</p>
-          </div>
-        </div>
-      </Section>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calendar Section */}
-        <Section>
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="max-w-7xl mx-auto p-6 min-h-screen">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div className="relative z-10 flex justify-between items-center">
+          <div className="flex items-center text-xl gap-3">
+            <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+            </div>
+            <div>
+              <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || 'Cycle'}</h1>
+              <p className="text-green-100 text-sm">Monitor your wellness journey and track patterns</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="flex items-center gap-2 text-yellow-300 text-lg font-bold">
+              <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Live Tracking</span>
+            </div>
+            <p className="text-green-100 text-sm">Real-time insights</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Cycle Day Card */}
+      <div className="mt-8">
+        <CycleDayCard />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        {/* Calendar Section */}
+        <Section>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
               Calendar
             </h3>
+            <p className="text-gray-600">Select your period dates to track your cycle</p>
           </div>
           <div className="calendar-container" style={{ overflow: 'visible', paddingBottom: '20px', minHeight: '480px' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -507,23 +622,45 @@ const Tracker = () => {
           
           {/* Legend */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full shadow-md"></div>
-              <span className="text-sm font-medium text-gray-700">
-                {trackerData?.tracker_name === 'Cycle' ? 'Periods' : 'Last date of Periods'}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-red-600 rounded-full shadow-md"></div>
+                  <span className="text-sm font-medium text-gray-700">Period Start/End</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-pink-200 rounded-full shadow-md"></div>
+                  <span className="text-sm font-medium text-gray-700">Period Days</span>
+                </div>
+              </div>
+              {(periodStart || periodEnd) && (
+                <button
+                  onClick={() => {
+                    setPeriodStart(null);
+                    setPeriodEnd(null);
+                  }}
+                  className="text-green-500 hover:text-green-600 text-sm font-medium transition-colors"
+                >
+                  Clear Selection
+                </button>
+              )}
             </div>
           </div>
         </Section>
 
         {/* Symptoms Level Section */}
         <Section>
-          <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Symptoms Level
-          </h3>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              Symptoms Level
+            </h3>
+            <p className="text-gray-600">Rate the intensity of your symptoms</p>
+          </div>
           {trackerData?.symptoms_level && Object.entries(trackerData.symptoms_level).map(([symptom, options]) => (
             <SymptomSlider
               key={symptom}
@@ -537,13 +674,18 @@ const Tracker = () => {
       </div>
 
       {/* Log Symptoms Section */}
-      <Section>
-        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-          <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Log Symptoms
-        </h3>
+      <Section className="mt-8">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            Log Symptoms
+          </h3>
+          <p className="text-gray-600">Select any symptoms you're experiencing</p>
+        </div>
         <div className="flex flex-wrap gap-4">
           {trackerData?.log_symptoms?.map((symptom) => (
             <SymptomTag
@@ -564,7 +706,7 @@ const Tracker = () => {
           className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 ${
             saving || !periodStart
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl'
+              : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl'
           }`}
         >
           {saving ? (
@@ -576,6 +718,39 @@ const Tracker = () => {
             'Save Tracker Data'
           )}
         </button>
+      </div>
+
+      {/* Additional Info Section */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 text-lg">📅</span>
+            </div>
+            <h3 className="font-bold text-gray-800">Track Patterns</h3>
+          </div>
+          <p className="text-gray-600 text-sm">Monitor your cycle patterns and identify trends over time for better health insights.</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+              <span className="text-emerald-600 text-lg">📊</span>
+            </div>
+            <h3 className="font-bold text-gray-800">Monitor Symptoms</h3>
+          </div>
+          <p className="text-gray-600 text-sm">Track symptom intensity and frequency to better understand your body's patterns.</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+              <span className="text-teal-600 text-lg">💡</span>
+            </div>
+            <h3 className="font-bold text-gray-800">Get Insights</h3>
+          </div>
+          <p className="text-gray-600 text-sm">Receive personalized insights and recommendations based on your tracking data.</p>
+        </div>
       </div>
 
       {/* Success Message */}
