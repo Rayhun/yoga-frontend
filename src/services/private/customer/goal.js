@@ -64,3 +64,16 @@ export const importGoalsTracker = async ({ file }) => {
 export const adminGetGoalsTrackerDetails = async (id) => {
   return axios.get(`/goal/${id}`);
 };
+
+// Period Goal Tracking APIs
+export const getPeriodGoal = async (month) => {
+  return axios.get(`/goal-tracking/period-goal?month=${month}`);
+};
+
+export const createPeriodGoal = async (payload) => {
+  return axios.post('/goal-tracking/period-goal/', payload);
+};
+
+export const updatePeriodGoal = async (id, payload) => {
+  return axios.put(`/goal-tracking/period-goal/${id}/`, payload);
+};

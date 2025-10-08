@@ -5,8 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { getTrackerInfo } from '@/services/private/customer/goal';
-import axios from 'axios';
+import { getTrackerInfo, getPeriodGoal, createPeriodGoal, updatePeriodGoal } from '@/services/private/customer/goal';
 
 const Section = ({ children, className = "" }) => (
   <div className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
@@ -104,11 +103,25 @@ const SymptomTag = ({ symptom, isSelected, onClick }) => (
   </button>
 );
 
-const CycleDayCard = () => {
-  const currentDay = 15; // This could be calculated based on cycle data
-  const daysUntilNextPeriod = 13;
-  const currentPhase = "Ovulation";
-  const lastPeriodDate = "March 5, 2025";
+const CycleDayCard = ({ cycleInfo }) => {
+  if (!cycleInfo) {
+    return (
+      <Section>
+        <div className="flex items-center gap-6">
+          <div className="flex-shrink-0">
+            <div className="w-20 h-20 border-2 border-gray-300 rounded-full flex flex-col items-center justify-center bg-gray-50">
+              <span className="text-xs font-medium text-gray-500">Day</span>
+              <span className="text-2xl font-bold text-gray-400">--</span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-500 mb-2">No Cycle Data</h3>
+            <p className="text-gray-500">Start tracking your cycle to see insights</p>
+          </div>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section>
@@ -117,22 +130,22 @@ const CycleDayCard = () => {
         <div className="flex-shrink-0">
           <div className="w-20 h-20 border-2 border-green-500 rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50">
             <span className="text-xs font-medium text-gray-600">Day</span>
-            <span className="text-2xl font-bold text-green-700">{currentDay}</span>
+            <span className="text-2xl font-bold text-green-700">{cycleInfo.day}</span>
           </div>
         </div>
 
         {/* Cycle Information */}
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Cycle Day {currentDay}</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{cycleInfo.title}</h3>
           <div className="space-y-1">
             <p className="text-gray-700">
-              Estimated {daysUntilNextPeriod} days until next period
+              {cycleInfo.estimated}
             </p>
             <p className="text-green-600 font-medium">
-              Current phase: {currentPhase}
+              Current phase: {cycleInfo.current_phase}
             </p>
             <p className="text-gray-700">
-              Last Period Date: {lastPeriodDate}
+              Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
             </p>
           </div>
         </div>
@@ -152,41 +165,101 @@ const Tracker = () => {
   const [symptomLevels, setSymptomLevels] = useState({});
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [trackerData, setTrackerData] = useState(null);
+  const [cycleInfo, setCycleInfo] = useState(null);
+  const [existingData, setExistingData] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [notificationTimer, setNotificationTimer] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
-  // Fetch tracker data from API
+  // Show notification function
+  const showNotification = useCallback((message, type = 'success') => {
+    console.log('Showing notification:', { message, type });
+    
+    // Clear any existing timer
+    if (notificationTimer) {
+      clearInterval(notificationTimer);
+    }
+    
+    setNotification({ message, type, progress: 100 });
+    setIsHovered(false);
+    setIsPaused(false);
+    
+    // Start countdown timer
+    let progress = 100;
+    const timer = setInterval(() => {
+      if (!isPaused) {
+        progress -= 2.5; // 4 seconds = 100% / 40 intervals of 100ms
+        setNotification(prev => prev ? { ...prev, progress } : null);
+        
+        if (progress <= 0) {
+          clearInterval(timer);
+          setNotification(null);
+          setNotificationTimer(null);
+        }
+      }
+    }, 100);
+    
+    setNotificationTimer(timer);
+    
+    // Fallback timeout
+    setTimeout(() => {
+      clearInterval(timer);
+      setNotification(null);
+      setNotificationTimer(null);
+    }, 4000);
+  }, [notificationTimer, isPaused]);
+
+  // Fetch tracker data and existing period data
   useEffect(() => {
-    const fetchTrackerData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await getTrackerInfo();
         
-        if (response.data.status === 'success') {
-          const data = response.data.data;
-          setTrackerData(data);
+        // Fetch tracker configuration
+        const trackerResponse = await getTrackerInfo();
+        if (trackerResponse.data.status === 'success') {
+          const data = trackerResponse.data.data;
+          setTrackerData(data.page_info);
+          setCycleInfo(data.cycle_info);
           
           // Initialize symptom levels
           const initialSymptomLevels = {};
-          Object.keys(data.symptoms_level).forEach(symptom => {
+          Object.keys(data.page_info.symptoms_level).forEach(symptom => {
             initialSymptomLevels[symptom] = 0;
           });
           setSymptomLevels(initialSymptomLevels);
-        } else {
-          setError('Failed to load tracker data');
+        }
+
+        // Fetch existing period data for current month
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          const existingPeriod = periodResponse.data.data[0];
+          setExistingData(existingPeriod);
+          
+          // Populate form with existing data
+          setPeriodStart(existingPeriod.period_start);
+          setPeriodEnd(existingPeriod.period_end);
+          setSymptomLevels(existingPeriod.symptom_levels || {});
+          setSelectedSymptoms(existingPeriod.selected_symptoms || []);
+          
+          showNotification('Existing data loaded successfully!', 'success');
         }
       } catch (err) {
-        console.error('Error fetching tracker data:', err);
+        console.error('Error fetching data:', err);
         setError('Failed to load tracker data');
+        showNotification('Failed to load tracker data. Please try again.', 'error');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTrackerData();
-  }, []);
+    fetchData();
+  }, [currentMonth]);
 
   // Handle date selection
   const handleDateChange = useCallback((date) => {
@@ -256,31 +329,60 @@ const Tracker = () => {
 
     try {
       setSaving(true);
-      setSaveSuccess(false);
 
       const payload = {
         period_start: periodStart,
         period_end: periodEnd,
         symptom_levels: symptomLevels,
         selected_symptoms: selectedSymptoms,
-        tracker_name: trackerData?.tracker_name || 'Cycle'
+        tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
 
-      const response = await axios.post('/cycle/tracker/', payload);
+      let response;
+      if (existingData) {
+        // Update existing data
+        response = await updatePeriodGoal(existingData.id, payload);
+      } else {
+        // Create new data
+        response = await createPeriodGoal(payload);
+      }
       
       if (response.data.status === 'success') {
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000); // Hide success message after 3 seconds
+        const action = existingData ? 'updated' : 'saved';
+        console.log('Success response:', response.data);
+        showNotification(`Tracker data ${action} successfully!`, 'success');
+        
+        // Update existing data with the response data
+        if (response.data.data) {
+          setExistingData(response.data.data);
+        }
+        
+        // Refresh data to get updated information
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          setExistingData(periodResponse.data.data[0]);
+        }
       } else {
         throw new Error(response.data.message || 'Failed to save tracker data');
       }
     } catch (err) {
       console.error('Error saving tracker data:', err);
-      alert('Failed to save tracker data. Please try again.');
+      showNotification('Failed to save tracker data. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, symptomLevels, selectedSymptoms, trackerData]);
+  }, [periodStart, periodEnd, symptomLevels, selectedSymptoms, trackerData, existingData, currentMonth]);
+
+  // Handle month navigation
+  const handleMonthChange = useCallback((newMonth) => {
+    setCurrentMonth(newMonth);
+    // Clear current form data when changing months
+    setPeriodStart(null);
+    setPeriodEnd(null);
+    setSymptomLevels({});
+    setSelectedSymptoms([]);
+    setExistingData(null);
+  }, []);
 
   const renderDay = useCallback((day, _value, props) => {
     const selectedDates = getSelectedDates;
@@ -450,14 +552,14 @@ const Tracker = () => {
         <div className="relative z-10 flex justify-between items-center">
           <div className="flex items-center text-xl gap-3">
             <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || 'Cycle'}</h1>
-              <p className="text-green-100 text-sm">Monitor your wellness journey and track patterns</p>
-            </div>
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+             <div>
+               <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'}</h1>
+               <p className="text-green-100 text-sm">Monitor your wellness journey and track patterns</p>
+             </div>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-2 text-yellow-300 text-lg font-bold">
@@ -473,7 +575,7 @@ const Tracker = () => {
 
       {/* Cycle Day Card */}
       <div className="mt-8">
-        <CycleDayCard />
+        <CycleDayCard cycleInfo={cycleInfo} />
       </div>
 
       {/* Main Content Grid */}
@@ -484,8 +586,8 @@ const Tracker = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                 <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
               </div>
               Calendar
             </h3>
@@ -494,12 +596,13 @@ const Tracker = () => {
           <div className="calendar-container" style={{ overflow: 'visible', paddingBottom: '20px', minHeight: '480px' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateCalendar
-              key={`${periodStart}-${periodEnd}`}
-              value={null}
+              key={`${periodStart}-${periodEnd}-${currentMonth}`}
+              value={dayjs(currentMonth)}
               slots={{
                 day: (props) => renderDay(props.day, null, props)
               }}
               onChange={handleDateChange}
+              onMonthChange={(newMonth) => handleMonthChange(newMonth.format('YYYY-MM'))}
               showDaysOutsideCurrentMonth={true}
               fixedWeekNumber={6}
               displayStaticWrapperAs="desktop"
@@ -628,7 +731,7 @@ const Tracker = () => {
                   <div className="w-5 h-5 bg-red-600 rounded-full shadow-md"></div>
                   <span className="text-sm font-medium text-gray-700">Period Start/End</span>
                 </div>
-                <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-pink-200 rounded-full shadow-md"></div>
                   <span className="text-sm font-medium text-gray-700">Period Days</span>
                 </div>
@@ -654,11 +757,11 @@ const Tracker = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
               <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
                 <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
               </div>
-              Symptoms Level
-            </h3>
+            Symptoms Level
+          </h3>
             <p className="text-gray-600">Rate the intensity of your symptoms</p>
           </div>
           {trackerData?.symptoms_level && Object.entries(trackerData.symptoms_level).map(([symptom, options]) => (
@@ -679,11 +782,11 @@ const Tracker = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
             <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
               <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
             </div>
-            Log Symptoms
-          </h3>
+          Log Symptoms
+        </h3>
           <p className="text-gray-600">Select any symptoms you're experiencing</p>
         </div>
         <div className="flex flex-wrap gap-4">
@@ -699,7 +802,7 @@ const Tracker = () => {
       </Section>
 
       {/* Save Button */}
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-center gap-4 mt-6">
         <button
           onClick={handleSave}
           disabled={saving || !periodStart}
@@ -712,10 +815,10 @@ const Tracker = () => {
           {saving ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Saving...
+              {existingData ? 'Updating...' : 'Saving...'}
             </div>
           ) : (
-            'Save Tracker Data'
+            existingData ? 'Update Tracker Data' : 'Save Tracker Data'
           )}
         </button>
       </div>
@@ -753,13 +856,149 @@ const Tracker = () => {
         </div>
       </div>
 
-      {/* Success Message */}
-      {saveSuccess && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      {/* Interactive Notification Toast */}
+      {notification && (
+        <div 
+          className={`fixed top-4 right-4 z-[9999] transform transition-all duration-500 ease-out cursor-pointer group ${
+            isHovered ? 'scale-105 shadow-2xl' : 'scale-100'
+          } ${
+            notification.type === 'success' 
+              ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500' 
+              : 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500'
+          }`}
+          style={{
+            position: 'fixed',
+            top: '16px',
+            right: '16px',
+            zIndex: 9999,
+            minWidth: '320px',
+            maxWidth: '420px',
+            borderRadius: '16px',
+            boxShadow: isHovered ? `
+              0 25px 50px -12px rgba(0, 0, 0, 0.25),
+              0 0 0 1px rgba(255, 255, 255, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            ` : `
+              0 20px 25px -5px rgba(0, 0, 0, 0.1),
+              0 10px 10px -5px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+            `,
+            border: `1px solid ${notification.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+            backdropFilter: 'blur(10px)',
+          }}
+          onMouseEnter={() => {
+            setIsHovered(true);
+            setIsPaused(true);
+          }}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setIsPaused(false);
+          }}
+          onClick={() => {
+            // Click to dismiss
+            if (notificationTimer) {
+              clearInterval(notificationTimer);
+              setNotificationTimer(null);
+            }
+            setNotification(null);
+          }}
+        >
+          {/* Interactive Timer Bar */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-black bg-opacity-20 rounded-t-2xl overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-100 ease-linear ${
+                isPaused ? 'opacity-50' : 'opacity-100'
+              } ${
+                notification.type === 'success' 
+                  ? 'bg-gradient-to-r from-green-300 to-green-400' 
+                  : 'bg-gradient-to-r from-red-300 to-red-400'
+              }`}
+              style={{ width: `${notification.progress}%` }}
+            />
+            {isPaused && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              </div>
+            )}
+          </div>
+          
+          {/* Content */}
+          <div className="px-6 py-4 pt-5 flex items-center gap-4">
+            {/* Animated Icon */}
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
+              isHovered ? 'scale-110 rotate-12' : 'scale-100 rotate-0'
+            } ${
+              notification.type === 'success' 
+                ? 'bg-white bg-opacity-20 shadow-green-200 group-hover:bg-opacity-30' 
+                : 'bg-white bg-opacity-20 shadow-red-200 group-hover:bg-opacity-30'
+            }`}>
+              {notification.type === 'success' ? (
+                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
+                  isHovered ? 'scale-110' : 'scale-100'
+                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
+                  isHovered ? 'scale-110' : 'scale-100'
+                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+            </div>
+            
+            {/* Message with hover effects */}
+            <div className="flex-1">
+              <p className={`text-white font-semibold text-sm leading-tight drop-shadow-sm transition-all duration-300 ${
+                isHovered ? 'text-base' : 'text-sm'
+              }`}>
+                {notification.message}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-white text-xs opacity-80">
+                  {isPaused ? 'Paused' : `${Math.round(notification.progress / 25)}s remaining`}
+                </p>
+                {isPaused && (
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Interactive Close Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (notificationTimer) {
+                  clearInterval(notificationTimer);
+                  setNotificationTimer(null);
+                }
+                setNotification(null);
+              }}
+              className={`w-8 h-8 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 flex items-center justify-center transition-all duration-200 ${
+                isHovered ? 'scale-110 bg-opacity-30' : 'scale-100'
+              } hover:scale-125 hover:rotate-90`}
+            >
+              <svg className="w-4 h-4 text-white transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Tracker data saved successfully!
+            </button>
+          </div>
+          
+          {/* Animated Bottom Glow */}
+          <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl transition-all duration-300 ${
+            notification.type === 'success' 
+              ? 'bg-gradient-to-r from-transparent via-green-300 to-transparent' 
+              : 'bg-gradient-to-r from-transparent via-red-300 to-transparent'
+          } ${isHovered ? 'opacity-80' : 'opacity-50'}`} />
+          
+          {/* Hover Indicator */}
+          {isHovered && (
+            <div className="absolute inset-0 rounded-2xl border-2 border-white border-opacity-30 pointer-events-none animate-pulse" />
+          )}
         </div>
       )}
     </div>
