@@ -23,8 +23,8 @@ const SymptomSlider = ({ label, options, value, onChange }) => {
     const rect = sliderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
-    const newValue = Math.round(percentage * (options.length - 1));
-    onChange(Math.max(0, Math.min(options.length - 1, newValue)));
+    const newValue = Math.round(percentage * (options.length - 1)) + 1; // Convert to 1-based
+    onChange(Math.max(1, Math.min(5, newValue))); // Ensure range is 1-5
   };
 
   const handleMouseDown = (e) => {
@@ -38,8 +38,8 @@ const SymptomSlider = ({ label, options, value, onChange }) => {
     const rect = sliderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
-    const newValue = Math.round(percentage * (options.length - 1));
-    onChange(Math.max(0, Math.min(options.length - 1, newValue)));
+    const newValue = Math.round(percentage * (options.length - 1)) + 1; // Convert to 1-based
+    onChange(Math.max(1, Math.min(5, newValue))); // Ensure range is 1-5
   };
 
   const handleMouseUp = () => {
@@ -68,7 +68,7 @@ const SymptomSlider = ({ label, options, value, onChange }) => {
             <span
               key={index}
               className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 transition-colors font-medium"
-              onClick={() => onChange(index)}
+              onClick={() => onChange(index + 1)}
             >
               {option}
             </span>
@@ -81,7 +81,7 @@ const SymptomSlider = ({ label, options, value, onChange }) => {
         >
           <div
             className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-5 h-5 bg-gradient-to-r from-green-500 to-green-600 rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110 shadow-lg z-10 border-2 border-white"
-            style={{ left: `${(value / (options.length - 1)) * 100}%` }}
+            style={{ left: `${((value - 1) / (options.length - 1)) * 100}%` }}
             onMouseDown={handleMouseDown}
           />
         </div>
@@ -230,7 +230,7 @@ const Tracker = () => {
           // Initialize symptom levels
           const initialSymptomLevels = {};
           Object.keys(data.page_info.symptoms_level).forEach(symptom => {
-            initialSymptomLevels[symptom] = 0;
+            initialSymptomLevels[symptom] = 1;
           });
           setSymptomLevels(initialSymptomLevels);
         }
@@ -339,13 +339,8 @@ const Tracker = () => {
       };
 
       let response;
-      if (existingData) {
-        // Update existing data
-        response = await updatePeriodGoal(existingData.id, payload);
-      } else {
         // Create new data
-        response = await createPeriodGoal(payload);
-      }
+      response = await createPeriodGoal(payload);
       
       if (response.data.status === 'success') {
         const action = existingData ? 'updated' : 'saved';
@@ -760,16 +755,16 @@ const Tracker = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
               </div>
-            Symptoms Level
+              My Daily Check-In
           </h3>
-            <p className="text-gray-600">Rate the intensity of your symptoms</p>
+            <p className="text-gray-600">How noticeable was this experience today?</p>
           </div>
           {trackerData?.symptoms_level && Object.entries(trackerData.symptoms_level).map(([symptom, options]) => (
             <SymptomSlider
               key={symptom}
               label={symptom}
               options={options}
-              value={symptomLevels[symptom] || 0}
+              value={symptomLevels[symptom] || 1}
               onChange={(level) => handleSymptomLevelChange(symptom, level)}
             />
           ))}
@@ -785,9 +780,9 @@ const Tracker = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
             </div>
-          Log Symptoms
+            Mind & Body Signals
         </h3>
-          <p className="text-gray-600">Select any symptoms you're experiencing</p>
+          <p className="text-gray-600">Select anything you noticed or felt today.</p>
         </div>
         <div className="flex flex-wrap gap-4">
           {trackerData?.log_symptoms?.map((symptom) => (

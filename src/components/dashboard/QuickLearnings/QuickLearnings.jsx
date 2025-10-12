@@ -11,9 +11,11 @@ const QuickLearningsSection = ({ title, viewAllLink, items }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        <Link href={viewAllLink} className="text-sm text-primary hover:text-primary hover:underline">
-          View all
-        </Link>
+        {viewAllLink && (
+          <Link href={viewAllLink} className="text-sm text-primary hover:text-primary hover:underline">
+            View all
+          </Link>
+        )}
       </div>
 
       {/* Cards Container */}

@@ -2,38 +2,58 @@ import React from 'react';
 import { PiLightbulb, PiTarget, PiTrendUp, PiHeart, PiChartLine, PiStar } from 'react-icons/pi';
 
 const KeyInsights = ({ insights }) => {
-  const insightCards = [
-    {
-      factor: insights?.factor_1,
-      message: insights?.f1_message,
-      icon: PiLightbulb,
-      bgColor: 'bg-green-100',
-      iconColor: 'text-green-600',
-      borderColor: 'border-green-200',
-      gradientFrom: 'from-green-50',
-      gradientTo: 'to-emerald-50'
-    },
-    {
-      factor: insights?.factor_2,
-      message: insights?.f2_message,
-      icon: PiTarget,
-      bgColor: 'bg-emerald-100',
-      iconColor: 'text-emerald-600',
-      borderColor: 'border-emerald-200',
-      gradientFrom: 'from-emerald-50',
-      gradientTo: 'to-teal-50'
-    },
-    {
-      factor: insights?.factor_3,
-      message: insights?.f3_message,
-      icon: PiTrendUp,
-      bgColor: 'bg-teal-100',
-      iconColor: 'text-teal-600',
-      borderColor: 'border-teal-200',
-      gradientFrom: 'from-teal-50',
-      gradientTo: 'to-cyan-50'
+  // Handle both old and new data structures
+  const getInsightCards = () => {
+    if (Array.isArray(insights)) {
+      // New structure: insights is an array
+      return insights.map((insight, index) => ({
+        factor: insight[`factor_${index + 1}`] || insight.title || `Insight ${index + 1}`,
+        message: insight[`f${index + 1}_message`] || insight.message || insight.description,
+        icon: [PiLightbulb, PiTarget, PiTrendUp][index] || PiLightbulb,
+        bgColor: ['bg-green-100', 'bg-emerald-100', 'bg-teal-100'][index] || 'bg-green-100',
+        iconColor: ['text-green-600', 'text-emerald-600', 'text-teal-600'][index] || 'text-green-600',
+        borderColor: ['border-green-200', 'border-emerald-200', 'border-teal-200'][index] || 'border-green-200',
+        gradientFrom: ['from-green-50', 'from-emerald-50', 'from-teal-50'][index] || 'from-green-50',
+        gradientTo: ['to-emerald-50', 'to-teal-50', 'to-cyan-50'][index] || 'to-emerald-50'
+      }));
+    } else {
+      // Old structure: insights is an object
+      return [
+        {
+          factor: insights?.factor_1,
+          message: insights?.f1_message,
+          icon: PiLightbulb,
+          bgColor: 'bg-green-100',
+          iconColor: 'text-green-600',
+          borderColor: 'border-green-200',
+          gradientFrom: 'from-green-50',
+          gradientTo: 'to-emerald-50'
+        },
+        {
+          factor: insights?.factor_2,
+          message: insights?.f2_message,
+          icon: PiTarget,
+          bgColor: 'bg-emerald-100',
+          iconColor: 'text-emerald-600',
+          borderColor: 'border-emerald-200',
+          gradientFrom: 'from-emerald-50',
+          gradientTo: 'to-teal-50'
+        },
+        {
+          factor: insights?.factor_3,
+          message: insights?.f3_message,
+          icon: PiTrendUp,
+          bgColor: 'bg-teal-100',
+          iconColor: 'text-teal-600',
+          borderColor: 'border-teal-200',
+          gradientFrom: 'from-teal-50',
+          gradientTo: 'to-cyan-50'
+        }
+      ];
     }
-  ];
+  };
+
+  const insightCards = getInsightCards();
 
   return (
     <div className="space-y-6">
@@ -73,7 +93,7 @@ const KeyInsights = ({ insights }) => {
       })}
       
       {/* Empty State */}
-      {(!insights?.factor_1 && !insights?.factor_2 && !insights?.factor_3) && (
+      {insightCards.length === 0 && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <PiStar className="text-gray-400 text-2xl" />

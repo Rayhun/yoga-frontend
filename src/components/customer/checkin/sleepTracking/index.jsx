@@ -6,7 +6,7 @@ import { MdOutlineDateRange } from 'react-icons/md';
 import Button from '@/components/common/Button';
 import dayjs from 'dayjs';
 import Calender from '@/components/common/Calender';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createTrackerActivity, getTracker } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
@@ -24,6 +24,7 @@ const ratings = [
 
 const SleepTracker = () => {
   const [open, setOpen] = useState(false);
+  const buttonRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -111,23 +112,27 @@ const SleepTracker = () => {
                       <h2 className="text-xl font-bold text-gray-800 mb-2">{trackerData?.description}</h2>
                       <p className="text-gray-600">How did you sleep last night?</p>
                     </div>
-                    <button
-                      type="button"
-                      className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
-                      onClick={() => setOpen(true)}
-                    >
-                      <MdOutlineDateRange size={18} /> Change Date
-                    </button>
-                    <Calender
-                      value={values.date}
-                      onChange={date => {
-                        setFieldValue('date', date);
-                        handleClose();
-                      }}
-                      isPopover={true}
-                      open={open}
-                      handleClose={handleClose}
-                    />
+                    <div className="relative">
+                      <button
+                        ref={buttonRef}
+                        type="button"
+                        className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
+                        onClick={() => setOpen(true)}
+                      >
+                        <MdOutlineDateRange size={18} /> Change Date
+                      </button>
+                      <Calender
+                        value={values.date}
+                        onChange={date => {
+                          setFieldValue('date', date);
+                          handleClose();
+                        }}
+                        isPopover={true}
+                        open={open}
+                        handleClose={handleClose}
+                        anchorEl={buttonRef.current}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-green-600 font-semibold">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>

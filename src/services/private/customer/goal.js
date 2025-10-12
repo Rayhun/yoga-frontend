@@ -77,3 +77,8 @@ export const createPeriodGoal = async (payload) => {
 export const updatePeriodGoal = async (id, payload) => {
   return axios.put(`/goal-tracking/period-goal/${id}/`, payload);
 };
+
+// Cycle Insights API
+export const getCycleInsights = async () => {
+  return axios.get('/goal/period/insight/');
+};

@@ -5,10 +5,10 @@ import dayjs from 'dayjs';
 import { MdOutlineDateRange } from 'react-icons/md';
 import { PiChartLine } from 'react-icons/pi';
 import { PiLightningLight } from 'react-icons/pi';
-import WellnessStats from './Stats';
-import MonthlyPatternsChart from './Chart';
-import KeyInsights from './KeyInsights';
-import { getDailyInsights } from '@/services/private/customer/goal';
+import WellnessStats from '../dailyInsights/Stats';
+import MonthlyPatternsChart from '../dailyInsights/Chart';
+import KeyInsights from '../dailyInsights/KeyInsights';
+import { getCycleInsights } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
 import { useQuery } from '@tanstack/react-query';
@@ -19,10 +19,87 @@ const Section = ({ children, className = "" }) => (
   </div>
 );
 
-const DailyInsights = () => {
+const CycleDayInfo = ({ progressDaysMsg }) => {
+  if (!progressDaysMsg) return null;
+  
+  let dayInfo;
+  try {
+    dayInfo = JSON.parse(progressDaysMsg);
+  } catch (e) {
+    return null;
+  }
+
+  return (
+    <Section>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+            <span className="text-purple-600 text-sm">🌙</span>
+          </div>
+          Today's Cycle Insight
+        </h2>
+        <p className="text-gray-600">Your personalized cycle guidance for today.</p>
+      </div>
+      
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex flex-col items-center justify-center text-white">
+            <span className="text-xs font-medium">Day</span>
+            <span className="text-xl font-bold">{dayInfo.Day}</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{dayInfo.Title}</h3>
+            <p className="text-purple-600 font-medium">{dayInfo.Phase} Phase</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Hormone Profile</h4>
+              <p className="text-sm text-gray-600">{dayInfo.HormoneProfile}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Energy Forecast</h4>
+              <p className="text-sm text-gray-600">{dayInfo.EnergyForecast}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Nutrition Focus</h4>
+              <p className="text-sm text-gray-600">{dayInfo.NutritionFocus}</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Movement Suggestion</h4>
+              <p className="text-sm text-gray-600">{dayInfo.MovementSuggestion}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Work Life Strategy</h4>
+              <p className="text-sm text-gray-600">{dayInfo.WorkLifeStrategy}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-1">Self Care Tip</h4>
+              <p className="text-sm text-gray-600">{dayInfo.SelfCareTip}</p>
+            </div>
+          </div>
+        </div>
+        
+        {dayInfo.TomorrowPreview && (
+          <div className="mt-4 p-3 bg-white bg-opacity-50 rounded-lg border border-purple-200">
+            <h4 className="font-semibold text-gray-800 mb-1">Tomorrow Preview</h4>
+            <p className="text-sm text-gray-600">{dayInfo.TomorrowPreview}</p>
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+};
+
+const CycleInsights = () => {
   const { isFetching, data: insights } = useQuery({
-    queryFn: () => getDailyInsights(),
-    queryKey: [queryKeys.dailyInsight],
+    queryFn: () => getCycleInsights(),
+    queryKey: ['cycleInsights'],
   });
 
   const insightsData = insights?.data?.data
@@ -34,7 +111,7 @@ const DailyInsights = () => {
           <span className="text-gray-400 text-2xl">📊</span>
         </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-2">No Data Available</h3>
-        <p className="text-gray-600">Start tracking your wellness to see insights here.</p>
+        <p className="text-gray-600">Start tracking your cycle to see insights here.</p>
       </div>
     </div>
   )
@@ -51,8 +128,8 @@ const DailyInsights = () => {
                 <PiChartLine size={24} />
               </div>
               <div>
-                <h1 className="font-bold text-2xl">Wellness Insights</h1>
-                <p className="text-green-100 text-sm">Your daily wellness analytics and patterns</p>
+                <h1 className="font-bold text-2xl">Cycle Insights</h1>
+                <p className="text-green-100 text-sm">Your cycle analytics and patterns</p>
               </div>
             </div>
             <div className="text-right">
@@ -78,9 +155,9 @@ const DailyInsights = () => {
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                   <span className="text-green-600 text-sm">📊</span>
                 </div>
-                Wellness Statistics
+                Cycle Statistics
               </h2>
-              <p className="text-gray-600">Your current wellness metrics and trends.</p>
+              <p className="text-gray-600">Your current cycle metrics and trends.</p>
             </div>
             <WellnessStats
               wellnessScore={insightsData?.wellness_score}
@@ -89,7 +166,10 @@ const DailyInsights = () => {
             />
           </Section>
           
-          <Section>
+          {/* Today's Cycle Insight */}
+          <CycleDayInfo progressDaysMsg={insightsData?.progress_days_msg} />
+          
+          {/* <Section>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -97,10 +177,10 @@ const DailyInsights = () => {
                 </div>
                 Monthly Patterns
               </h2>
-              <p className="text-gray-600">Track your wellness patterns over time.</p>
+              <p className="text-gray-600">Track your cycle patterns over time.</p>
             </div>
             <MonthlyPatternsChart data={insightsData?.daily_patterns} />
-          </Section>
+          </Section> */}
           
           <Section>
             <div className="mb-6">
@@ -110,11 +190,10 @@ const DailyInsights = () => {
                 </div>
                 Key Insights
               </h2>
-              <p className="text-gray-600">Personalized insights based on your data.</p>
+              <p className="text-gray-600">Personalized insights based on your cycle data.</p>
             </div>
             <KeyInsights insights={insightsData?.insight_data} />
           </Section>
-
         </div>
 
         {/* Additional Info Section */}
@@ -126,7 +205,7 @@ const DailyInsights = () => {
               </div>
               <h3 className="font-bold text-gray-800">Track Progress</h3>
             </div>
-            <p className="text-gray-600 text-sm">Monitor your wellness journey with detailed analytics and visual patterns.</p>
+            <p className="text-gray-600 text-sm">Monitor your cycle journey with detailed analytics and visual patterns.</p>
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
@@ -136,7 +215,7 @@ const DailyInsights = () => {
               </div>
               <h3 className="font-bold text-gray-800">Identify Trends</h3>
             </div>
-            <p className="text-gray-600 text-sm">Discover patterns in your wellness data to make informed decisions.</p>
+            <p className="text-gray-600 text-sm">Discover patterns in your cycle data to make informed decisions.</p>
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
@@ -146,7 +225,7 @@ const DailyInsights = () => {
               </div>
               <h3 className="font-bold text-gray-800">Get Insights</h3>
             </div>
-            <p className="text-gray-600 text-sm">Receive personalized recommendations based on your wellness patterns.</p>
+            <p className="text-gray-600 text-sm">Receive personalized recommendations based on your cycle patterns.</p>
           </div>
         </div>
       </LoadingWrapper>
@@ -154,4 +233,4 @@ const DailyInsights = () => {
   );
 };
 
-export default DailyInsights;
+export default CycleInsights;

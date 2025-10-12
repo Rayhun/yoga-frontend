@@ -4,7 +4,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Popover } from '@mui/material';
 
-const Calender = ({ value, onChnage, isPopover, open, handleClose, ...props }) => {
+const Calender = ({ value, onChnage, isPopover, open, handleClose, anchorEl, ...props }) => {
 
   const calender = (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -12,14 +12,16 @@ const Calender = ({ value, onChnage, isPopover, open, handleClose, ...props }) =
     </LocalizationProvider>
   );
 
-  const anchorEl = null;
-
   return isPopover ? (
     <Popover
       open={open}
       anchorEl={anchorEl}
       onClose={handleClose}
       anchorOrigin={{
+        horizontal: 'center',
+        vertical: 'bottom',
+      }}
+      transformOrigin={{
         horizontal: 'center',
         vertical: 'top',
       }}

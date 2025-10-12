@@ -28,7 +28,7 @@ import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
 import { GiTeacher, GiNightSleep } from 'react-icons/gi';
-import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
+import { PiFilmScriptBold, PiUserSquareFill, PiChartLine } from 'react-icons/pi';
 import { LuClipboardCheck } from 'react-icons/lu';
 import { FiTarget } from 'react-icons/fi';
 import { LiaBookSolid } from 'react-icons/lia';
@@ -47,6 +47,7 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/sleep_tracker',
   '/portal/customer/checkin/daily_insights',
   '/portal/customer/checkin/tracker',
+  '/portal/customer/checkin/cycle_insights',
 ];
 
 const SESSIONS_SUBMENU_ROUTES = [
@@ -373,6 +374,12 @@ const CUSTOMER = [
         label: 'Tracker',
         href: '/portal/customer/checkin/tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
+      },
+      {
+        Icon: PiChartLine,
+        label: 'Cycle Insights',
+        href: '/portal/customer/checkin/cycle_insights',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/cycle_insights'),
       },
       // {
       //   Icon: FiDroplet,
