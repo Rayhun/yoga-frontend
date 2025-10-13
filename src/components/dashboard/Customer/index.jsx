@@ -136,7 +136,7 @@ const CustomerDashboard = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-pink-700 transition-colors">Log Your Cycle</h3>
+                <h3 className="text-xl font-bold text-gray-900 group-hover:text-pink-700 transition-colors">🌸 Cycle Check-In</h3>
                 <p className="text-gray-600 text-sm">1-minute tracking</p>
               </div>
             </div>
@@ -144,7 +144,7 @@ const CustomerDashboard = () => {
               className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-xl font-semibold text-sm hover:from-pink-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/tracker')}
             >
-              Start
+              Let’s Go →
             </button>
           </div>
         </div>
@@ -165,7 +165,7 @@ const CustomerDashboard = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">Log Your Goal Tracker</h3>
+                <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">🌼 Daily Tune-In</h3>
                 <p className="text-gray-600 text-sm">Track your progress</p>
               </div>
             </div>
@@ -173,7 +173,7 @@ const CustomerDashboard = () => {
               className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/sleep_tracker')}
             >
-              Start
+              Let’s Go →
             </button>
           </div>
         </div>
