@@ -23,49 +23,58 @@ const FormikField = ({
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       {label ? (
         <div className="flex items-center gap-2">
-          <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
+          <label className={`text-sm font-semibold text-gray-700 dark:text-gray-300 ${required ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}>
             {label}
           </label>
           {helperIcon}
         </div>
       ) : null}
-      <div className="relative">
+      <div className="relative group">
         {rows > 1 ? (
           <textarea
             {...field}
             {...fieldProps}
             rows={rows}
-            className={`w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${className}`}
-            style={{ border: isErrorField ? '1px solid red' : undefined }}
+            className={`w-full rounded-xl border-2 bg-white/50 backdrop-blur-sm px-4 py-3 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 focus:border-green-500 focus:bg-white focus:shadow-lg focus:shadow-green-100 hover:border-gray-300 disabled:cursor-default disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800/50 dark:text-white dark:focus:border-green-400 dark:focus:bg-gray-800 ${isErrorField ? 'border-red-400 focus:border-red-500 focus:shadow-red-100' : 'border-gray-200'}`}
           />
         ) : (
           <input
             {...field}
             {...fieldProps}
             type={typeState}
-            className={`w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${className}`}
-            style={{ border: isErrorField ? '1px solid red' : undefined }}
+            className={`w-full rounded-xl border-2 bg-white/50 backdrop-blur-sm py-4 pl-12 pr-12 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 focus:border-green-500 focus:bg-white focus:shadow-lg focus:shadow-green-100 hover:border-gray-300 disabled:cursor-default disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800/50 dark:text-white dark:focus:border-green-400 dark:focus:bg-gray-800 ${isErrorField ? 'border-red-400 focus:border-red-500 focus:shadow-red-100' : 'border-gray-200'}`}
           />
         )}
+        
+        {/* Icon on the left */}
+        {Icon && (
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-green-500 transition-colors duration-300">
+            <Icon size={20} />
+          </span>
+        )}
+        
+        {/* Password toggle or right icon */}
         {type === 'password' ? (
-          <span
-            className="cursor-pointer absolute right-4 top-5"
+          <button
+            type="button"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
             onClick={handleTypeChange}
           >
-            {typeState === 'password' ? <FaRegEye size={20} color="#1c2434" /> : <FaRegEyeSlash size={21} color="#1c2434" />}
-          </span>
-        ) : null}
-        {Icon && type !== 'password' ? (
-          <span className="absolute right-4 top-4">
-            <Icon size={20} color="#B5BDC8" />
-          </span>
+            {typeState === 'password' ? <FaRegEye size={20} /> : <FaRegEyeSlash size={20} />}
+          </button>
         ) : null}
       </div>
 
-      {isErrorField ? <small className="text-xs text-red-500">{meta.error}</small> : null}
+      {/* Error message with animation */}
+      {isErrorField ? (
+        <div className="flex items-center gap-2 text-red-500 text-sm animate-fadeIn">
+          <span>⚠️</span>
+          <span>{meta.error}</span>
+        </div>
+      ) : null}
     </div>
   );
 };
