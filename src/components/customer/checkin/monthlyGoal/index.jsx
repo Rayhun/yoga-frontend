@@ -64,7 +64,7 @@ const MonthlyGoal = () => {
               </div>
               Set Your Goal Details
             </h2>
-            <p className="text-gray-600">Define your specific goal and how you'll measure success.</p>
+            <p className="text-gray-600">Define your specific goal and how you&apos;ll measure success.</p>
           </div>
           <MonthlyGoalForm selectedConcern={selectedConcern} />
         </Section>

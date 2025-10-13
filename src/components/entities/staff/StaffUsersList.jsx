@@ -14,26 +14,6 @@ const StaffUsersList = () => {
   const router = useRouter();
   const { user } = useAuthContext();
 
-
-  // Check if user is admin
-  if (!user.isAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Access Denied
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            You need admin permissions to access staff management.
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">
-            Current role: {user.profile?.role || 'Unknown'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const tableColumns = useMemo(
     () => [
       {
@@ -114,6 +94,25 @@ const StaffUsersList = () => {
     rowActions,
     removeActionColumn: false,
   });
+
+  // Check if user is admin
+  if (!user.isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            You need admin permissions to access staff management.
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">
+            Current role: {user.profile?.role || 'Unknown'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

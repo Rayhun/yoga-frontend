@@ -837,7 +837,7 @@ const Tracker = () => {
             </div>
             <h3 className="font-bold text-gray-800">Monitor Symptoms</h3>
           </div>
-          <p className="text-gray-600 text-sm">Track symptom intensity and frequency to better understand your body's patterns.</p>
+          <p className="text-gray-600 text-sm">Track symptom intensity and frequency to better understand your body&apos;s patterns.</p>
         </div>
         
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">

@@ -36,7 +36,7 @@ const CycleDayInfo = ({ progressDaysMsg }) => {
           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
             <span className="text-purple-600 text-sm">🌙</span>
           </div>
-          Today's Cycle Insight
+          Today&apos;s Cycle Insight
         </h2>
         <p className="text-gray-600">Your personalized cycle guidance for today.</p>
       </div>
