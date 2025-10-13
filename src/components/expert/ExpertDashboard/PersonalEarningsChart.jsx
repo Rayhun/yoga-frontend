@@ -62,7 +62,14 @@ const PersonalEarningsChart = ({ earningsData, earningsBySection }) => {
     },
     xaxis: {
       type: 'category',
-      categories: earningsData?.map(item => new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })) || [],
+      categories: earningsData?.map(item => {
+        if (typeof window === 'undefined') {
+          // SSR-safe fallback
+          const date = new Date(item.month);
+          return `${date.getMonth() + 1}/${date.getFullYear()}`;
+        }
+        return new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }) || [],
       axisBorder: {
         show: false,
       },
@@ -79,6 +86,9 @@ const PersonalEarningsChart = ({ earningsData, earningsBySection }) => {
       min: 0,
       labels: {
         formatter: function (val) {
+          if (typeof window === 'undefined') {
+            return '$' + val.toString();
+          }
           return '$' + val.toLocaleString();
         },
       },

@@ -34,7 +34,14 @@ const EnrollmentAnalyticsChart = ({ enrollmentData }) => {
       colors: ['transparent'],
     },
     xaxis: {
-      categories: enrollmentData?.map(item => new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })) || [],
+      categories: enrollmentData?.map(item => {
+        if (typeof window === 'undefined') {
+          // SSR-safe fallback
+          const date = new Date(item.month);
+          return `${date.getMonth() + 1}/${date.getFullYear()}`;
+        }
+        return new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }) || [],
       axisBorder: {
         show: false,
       },

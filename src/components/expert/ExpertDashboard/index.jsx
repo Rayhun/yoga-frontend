@@ -1,6 +1,7 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import CardDataStats from '../../stats/CardDataStats';
 import { FiDollarSign, FiUsers, FiTrendingUp, FiBookOpen } from 'react-icons/fi';
 import { TbChartLine, TbTarget } from 'react-icons/tb';
@@ -10,16 +11,23 @@ import queryKeys from '@/utils/query-keys';
 import { useQuery } from '@tanstack/react-query';
 import PageLoader from '@/components/common/loader/PageLoader';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import PersonalEarningsChart from './PersonalEarningsChart';
-import EnrollmentAnalyticsChart from './EnrollmentAnalyticsChart';
-import StudentEngagementChart from './StudentEngagementChart';
-import PerformanceBenchmark from './PerformanceBenchmark';
 import PeriodFilter from '../AdminDashboard/PeriodFilter';
 
+// Dynamic imports to prevent SSR issues
+const PersonalEarningsChart = dynamic(() => import('./PersonalEarningsChart'), { ssr: false });
+const EnrollmentAnalyticsChart = dynamic(() => import('./EnrollmentAnalyticsChart'), { ssr: false });
+const StudentEngagementChart = dynamic(() => import('./StudentEngagementChart'), { ssr: false });
+const PerformanceBenchmark = dynamic(() => import('./PerformanceBenchmark'), { ssr: false });
+
 const ExpertDashboard = () => {
+  const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
   const startDate = searchParams.get('start_date');
   const endDate = searchParams.get('end_date');
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const {
     data: response,
@@ -109,36 +117,40 @@ const ExpertDashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
-        <div className="col-span-12 xl:col-span-8">
-          <PersonalEarningsChart 
-            earningsData={dashboardData?.earnings_analytics?.monthly_earnings}
-            earningsBySection={dashboardData?.earnings_analytics?.earnings_by_section}
-          />
-        </div>
-        
-        <div className="col-span-12 xl:col-span-4">
-          <EnrollmentAnalyticsChart 
-            enrollmentData={dashboardData?.enrollment_analytics?.enrollment_growth}
-          />
-        </div>
-      </div>
+      {isClient && (
+        <>
+          <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
+            <div className="col-span-12 xl:col-span-8">
+              <PersonalEarningsChart 
+                earningsData={dashboardData?.earnings_analytics?.monthly_earnings}
+                earningsBySection={dashboardData?.earnings_analytics?.earnings_by_section}
+              />
+            </div>
+            
+            <div className="col-span-12 xl:col-span-4">
+              <EnrollmentAnalyticsChart 
+                enrollmentData={dashboardData?.enrollment_analytics?.enrollment_growth}
+              />
+            </div>
+          </div>
 
-      <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
-        <div className="col-span-12 xl:col-span-6">
-          <StudentEngagementChart 
-            studentData={dashboardData?.student_analytics}
-            progressRecords={dashboardData?.student_analytics?.progress_records_count}
-          />
-        </div>
-        
-        <div className="col-span-12 xl:col-span-6">
-          <PerformanceBenchmark 
-            contentData={dashboardData?.content_analytics}
-            enrollmentData={dashboardData?.enrollment_analytics}
-          />
-        </div>
-      </div>
+          <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
+            <div className="col-span-12 xl:col-span-6">
+              <StudentEngagementChart 
+                studentData={dashboardData?.student_analytics}
+                progressRecords={dashboardData?.student_analytics?.progress_records_count}
+              />
+            </div>
+            
+            <div className="col-span-12 xl:col-span-6">
+              <PerformanceBenchmark 
+                contentData={dashboardData?.content_analytics}
+                enrollmentData={dashboardData?.enrollment_analytics}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

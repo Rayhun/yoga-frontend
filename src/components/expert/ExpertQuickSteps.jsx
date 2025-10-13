@@ -23,7 +23,9 @@ const ExpertQuickSteps = () => {
       
       if (response.data.status === 'success' && response.data.data) {
         // Redirect to the Stripe onboarding link
-        window.location.href = response.data.data;
+        if (typeof window !== 'undefined') {
+          window.location.href = response.data.data;
+        }
       }
     } catch (error) {
       console.error('Error creating Stripe onboarding link:', error);
