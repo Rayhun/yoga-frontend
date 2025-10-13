@@ -7,6 +7,7 @@ import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import { getProgramsList, getDailyDoseQuickRelief } from '@/services/private/customer/program';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
+import { getWellnessDashboard } from '@/services/private/customer/wellness';
 import queryKeys from '@/utils/query-keys';
 import ChatWithAI from '@/components/common/SearchField';
 import WeeklyProgressCard from '../WeeklyProgress/ProgressCard';
@@ -36,15 +37,27 @@ const CustomerDashboard = () => {
     queryKey: [queryKeys.dailyDoseQuickRelief],
   });
 
+  const { data: wellnessDashboardResponse, isLoading: isLoadingWellness } = useQuery({
+    queryFn: getWellnessDashboard,
+    queryKey: [queryKeys.wellnessDashboard],
+  });
+
   const recommendedProgram = recommendationsResponse?.data?.data?.recommended_programs;
   const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
   
   const dailyDoseProgram = dailyDoseQuickReliefResponse?.data?.data?.daily_dose_program;
   const quickReliefProgram = dailyDoseQuickReliefResponse?.data?.data?.quick_relief_program;
   
+  const wellnessData = wellnessDashboardResponse?.data?.data;
+  const periodTracking = wellnessData?.period_tracking;
+  const goalTracking = wellnessData?.goal_tracking;
+  
   console.log('Recommendations Response:', recommendationsResponse?.data?.data);
   console.log('Recommended Program:', recommendedProgram);
   console.log('Daily Dose Quick Relief Response:', dailyDoseQuickReliefResponse?.data?.data);
+  console.log('Wellness Dashboard Response:', wellnessDashboardResponse?.data?.data);
+  console.log('Period Tracking:', periodTracking);
+  console.log('Goal Tracking:', goalTracking);
 
   const filteredPrograms = useMemo(
     () =>
@@ -180,18 +193,18 @@ const CustomerDashboard = () => {
       </div>
 
       {/* Enhanced Wellness Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-green-50 to-emerald-50 rounded-2xl shadow-xl border border-green-100 hover-lift transition-smooth mb-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-green-25 to-emerald-25 rounded-2xl shadow-xl border border-green-50 hover-lift transition-smooth mb-8">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-200 via-transparent to-emerald-200"></div>
-          <div className="absolute top-10 right-10 w-32 h-32 bg-green-300 rounded-full blur-3xl opacity-20 animate-float"></div>
-          <div className="absolute bottom-10 left-10 w-32 h-32 bg-emerald-300 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute inset-0 opacity-3">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-100 via-transparent to-emerald-100"></div>
+          <div className="absolute top-10 right-10 w-32 h-32 bg-green-200 rounded-full blur-3xl opacity-10 animate-float"></div>
+          <div className="absolute bottom-10 left-10 w-32 h-32 bg-emerald-200 rounded-full blur-3xl opacity-10 animate-float" style={{ animationDelay: '1s' }}></div>
         </div>
         
         {/* Header */}
         <div className="relative z-10 text-center pt-8 pb-4 animate-slideInUp">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
@@ -206,19 +219,26 @@ const CustomerDashboard = () => {
 
         {/* Charts Container */}
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-16 md:gap-32 p-8">
+          {isLoadingWellness ? (
+            <div className="flex items-center justify-center py-16">
+              <Spinner size="lg" />
+              <span className="ml-3 text-gray-600">Loading wellness data...</span>
+            </div>
+          ) : wellnessData ? (
+            <>
           {/* Cycle Wellness Chart */}
           <div className="relative group animate-scaleIn" style={{ animationDelay: '0.2s' }}>
             <div className="absolute -inset-4 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
             <DonutChart
-              value={78}
+              value={Number(periodTracking?.wellness_score) || 0}
               maxValue={100}
               size={160}
               strokeWidth={18}
               color="#F97316"
               backgroundColor="#FED7AA"
-              title="Cycle Wellness"
-              subtitle="Day 14 of 28"
-              centerSubtext="Day 14"
+              title={periodTracking?.tracker_name || "Cycle Wellness"}
+              subtitle={`Day ${periodTracking?.current_day || 0} of ${(periodTracking?.current_day || 0) + (periodTracking?.remaining_days || 0)}`}
+              centerSubtext={`Day ${periodTracking?.current_day || 0}`}
               onClick={() => router.push('/portal/customer/checkin/cycle_insights')}
               className="relative z-10 interactive-scale"
               animated={true}
@@ -230,18 +250,18 @@ const CustomerDashboard = () => {
           </div>
           
           {/* General Wellness Chart */}
-          <div className="relative group animate-scaleIn" style={{ animationDelay: '0.4s' }}>
+          <div className="relative group animate-scaleIn" style={{ animationDelay: '0.2s' }}>
             <div className="absolute -inset-4 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
             <DonutChart
-              value={82}
+              value={Number(goalTracking?.wellness_score) || 0}
               maxValue={100}
               size={160}
               strokeWidth={18}
               color="#22C55E"
               backgroundColor="#BBF7D0"
-              title="General Wellness"
-              subtitle="Sleep, Focus, Activity"
-              centerSubtext="Overall"
+              title={goalTracking?.tracker_title || "General Wellness"}
+              subtitle={goalTracking?.overall_status || "Good"}
+              centerSubtext='overall'
               onClick={() => router.push('/portal/customer/checkin/daily_insights')}
               className="relative z-10 interactive-scale"
               animated={true}
@@ -251,19 +271,31 @@ const CustomerDashboard = () => {
             <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-green-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
             <div className="absolute top-1/2 -right-6 w-2 h-2 bg-green-200 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Wellness Data Available</h3>
+              <p className="text-gray-500 text-sm">Start tracking your wellness to see your progress here.</p>
+            </div>
+          )}
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="relative z-10 border-t border-green-100 bg-green-50/50 px-8 py-4 rounded-b-2xl animate-slideInUp" style={{ animationDelay: '0.6s' }}>
+        <div className="relative z-10 border-t border-green-50 bg-green-25/30 px-8 py-4 rounded-b-2xl animate-slideInUp" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <div className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
                 <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                <span>Cycle Tracking</span>
+                <span>{periodTracking?.tracker_name || 'Cycle Tracking'} - {periodTracking?.overall_status || 'Good'}</span>
               </div>
               <div className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                <span>Daily Metrics</span>
+                <span>{goalTracking?.tracker_title || 'Daily Metrics'} - {goalTracking?.overall_status || 'Good'}</span>
               </div>
             </div>
           </div>

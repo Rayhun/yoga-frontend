@@ -21,6 +21,10 @@ const DonutChart = ({
   const [animatedValue, setAnimatedValue] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltipState, setShowTooltipState] = useState(false);
+  
+  // Create unique IDs for gradients
+  const bgGradientId = `bg-${title?.replace(/\s+/g, '-').toLowerCase()}-${color.replace('#', '')}`;
+  const progressGradientId = `progress-${title?.replace(/\s+/g, '-').toLowerCase()}-${color.replace('#', '')}`;
 
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -87,11 +91,11 @@ const DonutChart = ({
         >
           {/* Background circle with subtle gradient */}
           <defs>
-            <linearGradient id={`bg-${title}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={bgGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={backgroundColor} stopOpacity="0.3" />
               <stop offset="100%" stopColor={backgroundColor} stopOpacity="0.8" />
             </linearGradient>
-            <linearGradient id={`progress-${title}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={progressGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={color} stopOpacity="0.8" />
               <stop offset="100%" stopColor={color} stopOpacity="1" />
             </linearGradient>
@@ -102,7 +106,7 @@ const DonutChart = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={`url(#bg-${title})`}
+            stroke={`url(#${bgGradientId})`}
             strokeWidth={strokeWidth}
             fill="transparent"
             className="transition-all duration-300"
@@ -113,7 +117,7 @@ const DonutChart = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={`url(#progress-${title})`}
+            stroke={`url(#${progressGradientId})`}
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={strokeDasharray}

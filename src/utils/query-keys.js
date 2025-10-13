@@ -78,6 +78,7 @@ const queryKeys = {
   userRoles: 'userRoles',
   userPermissions: 'userPermissions',
   groupPermissions: 'groupPermissions',
+  wellnessDashboard: 'wellnessDashboard',
 };
 
 export default queryKeys;
