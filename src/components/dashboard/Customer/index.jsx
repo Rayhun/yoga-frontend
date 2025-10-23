@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
+import useAuthContext from '@/hooks/useAuthContext';
 import Spinner from '@/components/common/loader/Spinner';
 import { getProgramsList, getDailyDoseQuickRelief } from '@/services/private/customer/program';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
@@ -20,6 +21,7 @@ import '@/css/animations.css';
 const CustomerDashboard = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
+  const { user } = useAuthContext();
   const selectedCategory = searchParams.get('category');
   const [searchText, setSearchText] = useState('');
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
@@ -69,6 +71,7 @@ const CustomerDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 min-h-screen">
+      
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-10"></div>
@@ -80,10 +83,17 @@ const CustomerDashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold">Your Wellness Journey</h1>
-                <p className="text-green-100 text-sm">Personalized wellness plans for your goals</p>
-              </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold">Your Wellness Journey</h1>
+              <p className="text-green-100 text-sm">
+                {user?.isEmployee 
+                  ? 'Employee wellness access through your business account'
+                  : user?.isBusinessOwner
+                  ? 'Business owner wellness dashboard'
+                  : 'Personalized wellness plans for your goals'
+                }
+              </p>
+            </div>
             </div>
             <p className="text-green-100 text-lg leading-relaxed">
               Achieve your personal goals with curated wellness plans developed by our expert team

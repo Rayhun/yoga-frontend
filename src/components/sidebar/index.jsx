@@ -16,12 +16,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('active_tab');
   const {
-    user: {
-      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult, stripe_onboarded },
-      isCustomer
-    },
+    user,
     logout,
   } = useAuthContext();
+  
+  const userRole = user?.profile?.role ?? '';
+  const userSubRole = user?.profile?.sub_role ?? '';
+  const is_profile_complete = user?.profile?.is_profile_complete ?? false;
+  const has_event_or_consult = user?.profile?.has_event_or_consult ?? false;
+  const stripe_onboarded = user?.profile?.stripe_onboarded ?? false;
+  const isCustomer = user?.isCustomer ?? false;
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -83,7 +87,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       roleBasedSidebarMenuItems
         .filter(item => {
           if (!item.permitted_sub_roles) return true;
-          return item.permitted_sub_roles.includes(userSubRole);
+          if (!item.permitted_sub_roles.includes(userSubRole)) return false;
+          
+          // Check if item is business owner only
+          if (item.isBusinessOwnerOnly) {
+            return user?.isBusinessOwner;
+          }
+          
+          return true;
         })
         .map(item => ({
           ...item,
@@ -92,7 +103,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             return subMenuItem.permitted_sub_roles.includes(userSubRole);
           }),
         })),
-    [roleBasedSidebarMenuItems, userSubRole]
+    [roleBasedSidebarMenuItems, userSubRole, user?.isBusinessOwner]
   );
 
   const handleDisabledDashboardClick = (e) => {

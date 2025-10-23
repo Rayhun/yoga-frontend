@@ -17,12 +17,17 @@ const initialState = {
       last_name: null,
       role: null,
       sub_role: null,
+      profile_type: null,
+      business_owner: null,
+      employee_id: null,
     },
     isAdmin: false,
     isStaff: false,
     isCustomer: false,
     isIndividualCustomer: false,
     isBusinessCustomer: false,
+    isBusinessOwner: false,
+    isEmployee: false,
   },
   logout: () => {},
   hasPermission: () => false,
@@ -60,8 +65,12 @@ function AuthProvider({ children }) {
   const isStaff = userProfile?.role === USER_ROLE.STAFF;
   const isCustomer = userProfile?.role === USER_ROLE.CUSTOMER;
   const isAffiliate = userProfile?.role === USER_ROLE.AFFILIATE;
-  const isIndividualCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.INDIVIDUAL;
-  const isBusinessCustomer = isCustomer && userProfile?.sub_role === USER_SUB_ROLE.BUSINESS;
+  const isIndividualCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.INDIVIDUAL;
+  const isBusinessCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.BUSINESS;
+  
+  // B2B Business User Checks
+  const isBusinessOwner = userProfile?.profile_type === USER_SUB_ROLE.BUSINESS && !userProfile?.business_owner;
+  const isEmployee = userProfile?.profile_type === USER_SUB_ROLE.BUSINESS && !!userProfile?.business_owner;
 
   // Permission checking function
   const hasPermission = (permission) => {
@@ -114,7 +123,17 @@ function AuthProvider({ children }) {
   return (
     <AuthContext.Provider
       value={{
-        user: { ...userDetails, isAdmin, isStaff, isCustomer, isIndividualCustomer, isBusinessCustomer, isAffiliate },
+        user: { 
+          ...userDetails, 
+          isAdmin, 
+          isStaff, 
+          isCustomer, 
+          isIndividualCustomer, 
+          isBusinessCustomer, 
+          isAffiliate,
+          isBusinessOwner,
+          isEmployee
+        },
         logout,
         hasPermission,
       }}

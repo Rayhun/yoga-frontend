@@ -1,6 +1,9 @@
 const queryKeys = {
   users: 'users',
   staffUsers: 'staffUsers',
+  employees: 'employees',
+  businessSubscription: 'businessSubscription',
+  businessSubscriptionHistory: 'businessSubscriptionHistory',
   loggedInUser: 'loggedInUser',
   onboardingQuiz: 'onboardingQuiz',
   onboardingRecommendations: 'onboardingRecommendations',

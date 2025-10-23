@@ -20,7 +20,8 @@ import {
   FaTags,
   FaUser,
   FaChalkboardTeacher,
-  FaQuestion
+  FaQuestion,
+  FaBuilding
 } from 'react-icons/fa';
 import { TbPrompt } from "react-icons/tb";
 
@@ -286,6 +287,15 @@ const ADMIN = [
 ];
 
 const CUSTOMER = [
+  {
+    Icon: FaBuilding,
+    label: 'Dashboard',
+    href: '/portal/business/dashboard',
+    isActive: pathname => pathname.includes('/portal/business/dashboard'),
+    permitted_sub_roles: [USER_SUB_ROLE.BUSINESS],
+    isBusinessOwnerOnly: true,
+    disabled: false,
+  },
   {
     Icon: MdHome,
     label: 'Home',

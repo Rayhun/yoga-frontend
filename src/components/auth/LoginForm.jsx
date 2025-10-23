@@ -54,13 +54,20 @@ const LoginForm = () => {
           router.replace('/portal/affiliate/dashboard');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
-          // Fetch onboarding recommendations after successful login
-          try {
-            await getOnboardingRecommendations();
-          } catch (error) {
-            console.error('Failed to fetch recommendations:', error);
+          
+          // Check if user is a business owner and redirect to business dashboard
+          const userProfile = userDetails?.profile;
+          if (userProfile?.profile_type === 'Business' && !userProfile?.business_owner) {
+            router.replace('/portal/business/dashboard');
+          } else {
+            // Fetch onboarding recommendations after successful login for individual users
+            try {
+              await getOnboardingRecommendations();
+            } catch (error) {
+              console.error('Failed to fetch recommendations:', error);
+            }
+            router.replace('/');
           }
-          router.replace('/');
         } else {
           Cookies.set('token', response?.data?.token);
           router.replace('/onboarding');

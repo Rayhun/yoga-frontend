@@ -24,7 +24,11 @@ const ClientPortalPage = () => {
     if (userRole === 'Staff') {
       router.replace('/portal/admin/lms/program');
     }
-  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, router]);
+    
+    // Business owners and employees can access the regular portal
+    // Business owners can also access the Business Dashboard via sidebar
+    // Business employees have the same experience as individual users
+  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, user?.isBusinessOwner, router]);
 
   const renderDashboard = () => {
     switch (userRole) {
