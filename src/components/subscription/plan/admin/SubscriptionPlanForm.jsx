@@ -18,6 +18,7 @@ import {
 } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 import useLMSProgramOptions from '@/hooks/useLMSProgramOptions';
+import DiscountedVolumeManager from './DiscountedVolumeManager';
 
 const SubscriptionPlanForm = ({ selected }) => {
   const router = useRouter();
@@ -39,6 +40,7 @@ const SubscriptionPlanForm = ({ selected }) => {
     subscription_tenure: selected?.subscription_tenure || '',
     price: selected?.price || '',
     discounted_price: selected?.discounted_price || '',
+    discounted_volume: selected?.discounted_volume || [],
     features: selected?.features?.join('\n') || '',
     programs: selected?.programs?.map(program => program.id) || [],
   };
@@ -49,17 +51,35 @@ const SubscriptionPlanForm = ({ selected }) => {
     subscription_type: Yup.string().required('Required!'),
     subscription_tenure: Yup.string().required('Required!'),
     price: Yup.number().required('Required!').min(0, 'Price must be at least 0'),
-    discounted_price: Yup.number().min(0, 'Discounted Price must be at least 0'),
+    discounted_price: Yup.number().when('subscription_type', {
+      is: 'Individual',
+      then: (schema) => schema.min(0, 'Discounted Price must be at least 0'),
+      otherwise: (schema) => schema.min(0, 'Discounted Price must be at least 0'),
+    }),
+    discounted_volume: Yup.array().when('subscription_type', {
+      is: 'Business',
+      then: (schema) => schema.of(
+        Yup.object({
+          volume: Yup.number().required('Volume is required').min(1, 'Volume must be at least 1'),
+          type: Yup.string().required('Type is required'),
+          discount: Yup.number().required('Discount is required').min(0, 'Discount must be at least 0'),
+        })
+      ),
+      otherwise: (schema) => schema,
+    }),
     features: Yup.string().required('Required!'),
     programs: Yup.array(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      // Filter out empty discounted_price from payload
+      // Filter out empty fields from payload
       const payload = { ...values };
       if (!payload.discounted_price || payload.discounted_price === '') {
         delete payload.discounted_price;
+      }
+      if (!payload.discounted_volume || payload.discounted_volume.length === 0) {
+        delete payload.discounted_volume;
       }
 
       if (isEditMode) {
@@ -88,7 +108,7 @@ const SubscriptionPlanForm = ({ selected }) => {
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, values }) => (
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full xl:w-1/2">
@@ -124,20 +144,43 @@ const SubscriptionPlanForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField type="number" name="price" min={0} label="Price" placeholder="Price" required />
+            
+            {/* Conditional fields based on subscription type */}
+            {values.subscription_type === 'Individual' && (
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <FormikField type="number" name="price" min={0} label="Price" placeholder="Price" required />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <FormikField
+                    type="number"
+                    name="discounted_price"
+                    label="Discounted Price"
+                    placeholder="Discounted Price"
+                    min={0}
+                  />
+                </div>
               </div>
-              <div className="w-full xl:w-1/2">
-                <FormikField
-                  type="number"
-                  name="discounted_price"
-                  label="Discounted Price"
-                  placeholder="Discounted Price"
-                  min={0}
-                />
-              </div>
-            </div>
+            )}
+            
+            {values.subscription_type === 'Business' && (
+              <>
+                <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                  <div className="w-full xl:w-1/2">
+                    <FormikField 
+                      type="number" 
+                      name="price" 
+                      min={0} 
+                      label="Per Volume Price" 
+                      placeholder="Per Volume Price" 
+                      required 
+                    />
+                  </div>
+                </div>
+                <DiscountedVolumeManager />
+              </>
+            )}
+            
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
             <FormikMultiSelect
               name="programs"

@@ -14,6 +14,7 @@ const SubscriptionPageDetails = ({ data = {} }) => {
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
         <DetailsRecord label="Slug">{data.slug}</DetailsRecord>
+        <DetailsRecord label="Type">{data.type}</DetailsRecord>
         <DetailsRecord label="Description">
           <ControllableRichText>{data.description || 'No description provided'}</ControllableRichText>
         </DetailsRecord>

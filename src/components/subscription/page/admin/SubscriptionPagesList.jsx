@@ -26,6 +26,10 @@ const SubscriptionPagesList = () => {
         accessorKey: 'title',
       },
       {
+        header: 'Type',
+        accessorKey: 'type',
+      },
+      {
         header: 'Description',
         accessorKey: 'description',
         cell: ({ getValue }) => {
