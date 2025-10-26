@@ -10,10 +10,22 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
 
   console.log("refferalCode dajalkj",refferalCode)
 
-  let checkoutLink = planDetails.id ? `${pathname}/${planDetails.id}/checkout` : '#'
-
-  if(refferalCode && planDetails.id){
-    checkoutLink = `${checkoutLink}?ref=${refferalCode}`
+  // Determine the correct link based on subscription type
+  let checkoutLink = '#';
+  
+  if (planDetails.id) {
+    if (planDetails.subscription_type === 'Business') {
+      // For business plans, redirect to business subscription form
+      checkoutLink = `${pathname}/${planDetails.id}/business-subscription`;
+    } else {
+      // For individual plans, use the regular checkout
+      checkoutLink = `${pathname}/${planDetails.id}/checkout`;
+    }
+    
+    // Add referral code if present
+    if (refferalCode) {
+      checkoutLink = `${checkoutLink}?ref=${refferalCode}`;
+    }
   }
 
 

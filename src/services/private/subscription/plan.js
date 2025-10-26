@@ -9,7 +9,7 @@ export const getFilteredSubscriptionPlansList = async (subscriptionType) => {
 };
 
 export const getSingleSubscriptionPlan = async ({ id }) => {
-  return axios.get(`/subscription/plan/${id}/`);
+  return axios.get(`/subscription/plan/${id}/detail/`);
 };
 
 export const addNewSubscriptionPlan = async ({ payload }) => {
