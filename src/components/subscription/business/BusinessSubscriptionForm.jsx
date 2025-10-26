@@ -98,7 +98,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
         organizationName: values.organizationName,
         employeeCount: values.employeeLimit,
         selectedDiscount: pricingCalculation.currentDiscount,
-        calculatedPrice: pricingCalculation.total,
+        calculatedPrice: Math.round(pricingCalculation.total),
         referralCode: referralCode
       });
 
