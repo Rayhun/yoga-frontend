@@ -13,12 +13,14 @@ import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import EmployeeList from './EmployeeList';
 import EmployeeForm from './EmployeeForm';
+import EmployeeWellnessDashboard from '../EmployeeWellnessDashboard';
 import Button from '@/components/common/Button';
-import { FiPlus, FiUsers } from 'react-icons/fi';
+import { FiPlus, FiUsers, FiActivity } from 'react-icons/fi';
 
 const EmployeeManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [activeView, setActiveView] = useState('employees'); // 'employees' or 'wellness'
   const queryClient = useQueryClient();
 
   // Fetch employees list
@@ -155,19 +157,49 @@ const EmployeeManagement = () => {
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleAddEmployee}
-            className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-              canAddEmployee 
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-            size="lg"
-            disabled={!canAddEmployee}
-          >
-            <FiPlus className="h-5 w-5" />
-            {canAddEmployee ? 'Add Employee' : 'Limit Reached'}
-          </Button>
+          <div className="flex items-center space-x-4">
+            {/* View Toggle Buttons */}
+            <div className="flex bg-gray-100 rounded-xl p-1">
+              <button
+                onClick={() => setActiveView('employees')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  activeView === 'employees'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <FiUsers className="h-4 w-4" />
+                Employees
+              </button>
+              <button
+                onClick={() => setActiveView('wellness')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  activeView === 'wellness'
+                    ? 'bg-white text-green-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <FiActivity className="h-4 w-4" />
+                Wellness
+              </button>
+            </div>
+            
+            {activeView === 'employees' && (
+              <Button
+                onClick={handleAddEmployee}
+                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                  canAddEmployee 
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                size="lg"
+                disabled={!canAddEmployee}
+              >
+                <FiPlus className="h-5 w-5" />
+                {canAddEmployee ? 'Add Employee' : 'Limit Reached'}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -186,61 +218,69 @@ const EmployeeManagement = () => {
         </div>
       )}
 
-      {/* Employee Limit Status */}
-      {subscription && (
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
-                <FiUsers className="h-5 w-5 text-white" />
+      {/* Content based on active view */}
+      {activeView === 'employees' ? (
+        <>
+          {/* Employee Limit Status */}
+          {subscription && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
+                    <FiUsers className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Employee Usage</h3>
+                    <p className="text-sm text-gray-600">
+                      {currentEmployees} of {employeeLimit} employees used
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {Math.round((currentEmployees / employeeLimit) * 100)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Utilization</div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Employee Usage</h3>
-                <p className="text-sm text-gray-600">
-                  {currentEmployees} of {employeeLimit} employees used
-                </p>
+              
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                <div 
+                  className={`h-3 rounded-full transition-all duration-500 ${
+                    (currentEmployees / employeeLimit) >= 0.9 
+                      ? 'bg-gradient-to-r from-red-500 to-red-600' 
+                      : (currentEmployees / employeeLimit) >= 0.7 
+                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500' 
+                      : 'bg-gradient-to-r from-green-500 to-emerald-600'
+                  }`}
+                  style={{ width: `${Math.min((currentEmployees / employeeLimit) * 100, 100)}%` }}
+                ></div>
               </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-gray-900">
-                {Math.round((currentEmployees / employeeLimit) * 100)}%
-              </div>
-              <div className="text-sm text-gray-600">Utilization</div>
-            </div>
-          </div>
-          
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-            <div 
-              className={`h-3 rounded-full transition-all duration-500 ${
-                (currentEmployees / employeeLimit) >= 0.9 
-                  ? 'bg-gradient-to-r from-red-500 to-red-600' 
-                  : (currentEmployees / employeeLimit) >= 0.7 
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500' 
-                  : 'bg-gradient-to-r from-green-500 to-emerald-600'
-              }`}
-              style={{ width: `${Math.min((currentEmployees / employeeLimit) * 100, 100)}%` }}
-            ></div>
-          </div>
-          
-          {!canAddEmployee && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <p className="text-sm font-medium text-red-700">
-                  Employee limit reached - Update your subscription to add more employees
-                </p>
-              </div>
+              
+              {!canAddEmployee && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <p className="text-sm font-medium text-red-700">
+                      Employee limit reached - Update your subscription to add more employees
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      {/* Employee List */}
-      <EmployeeList
-        employees={employees}
-        onEdit={handleEditEmployee}
-        onDelete={handleDeleteEmployee}
-      />
+          {/* Employee List */}
+          <EmployeeList
+            employees={employees}
+            onEdit={handleEditEmployee}
+            onDelete={handleDeleteEmployee}
+          />
+        </>
+      ) : (
+        /* Wellness Dashboard */
+        <EmployeeWellnessDashboard />
+      )}
     </div>
   );
 };

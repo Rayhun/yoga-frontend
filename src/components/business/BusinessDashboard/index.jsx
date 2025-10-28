@@ -7,11 +7,13 @@ import queryKeys from '@/utils/query-keys';
 import EmployeeManagement from '../EmployeeManagement';
 import BusinessOverview from './BusinessOverview';
 import SubscriptionManagement from '../SubscriptionManagement';
+import CheckInTabs from '../CheckInTabs';
 import { 
   FiUsers, 
   FiSettings,
   FiHome,
-  FiCreditCard
+  FiCreditCard,
+  FiCheckCircle
 } from 'react-icons/fi';
 import { FaBuilding } from 'react-icons/fa';
 import { TbChartLine } from 'react-icons/tb';
@@ -19,6 +21,7 @@ import { TbChartLine } from 'react-icons/tb';
 const TABS = {
   OVERVIEW: 'overview',
   EMPLOYEES: 'employees',
+  CHECKIN: 'checkin',
   SUBSCRIPTION: 'subscription',
   SETTINGS: 'settings',
 };
@@ -49,6 +52,12 @@ const BusinessDashboard = () => {
       description: 'Manage your team members',
     },
     {
+      id: TABS.CHECKIN,
+      name: 'Check-in',
+      icon: FiCheckCircle,
+      description: 'Wellness tracking and daily check-ins',
+    },
+    {
       id: TABS.SUBSCRIPTION,
       name: 'Subscription',
       icon: FiCreditCard,
@@ -68,6 +77,8 @@ const BusinessDashboard = () => {
         return <BusinessOverview employeesCount={employeesCount} />;
       case TABS.EMPLOYEES:
         return <EmployeeManagement />;
+      case TABS.CHECKIN:
+        return <CheckInTabs />;
       case TABS.SUBSCRIPTION:
         return <SubscriptionManagement />;
       case TABS.SETTINGS:

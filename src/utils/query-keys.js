@@ -82,6 +82,7 @@ const queryKeys = {
   userPermissions: 'userPermissions',
   groupPermissions: 'groupPermissions',
   wellnessDashboard: 'wellnessDashboard',
+  businessWellnessDashboard: 'businessWellnessDashboard',
 };
 
 export default queryKeys;

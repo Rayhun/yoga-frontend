@@ -136,7 +136,7 @@ const SubscriptionDetails = ({ subscription, onUpdateEmployeeLimit, isLoading })
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
+            <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl">
               <FiUsers className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -210,21 +210,21 @@ const SubscriptionDetails = ({ subscription, onUpdateEmployeeLimit, isLoading })
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Current Employees */}
-            <div className="group bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-              <div className="p-3 bg-blue-500 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+              <div className="p-3 bg-orange-500 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <FiUsers className="h-8 w-8 text-white" />
               </div>
-              <p className="text-3xl font-bold text-blue-600 mb-2">{currentEmployees}</p>
-              <p className="text-sm font-semibold text-blue-800 uppercase tracking-wide">Current Employees</p>
+              <p className="text-3xl font-bold text-orange-600 mb-2">{currentEmployees}</p>
+              <p className="text-sm font-semibold text-orange-800 uppercase tracking-wide">Current Employees</p>
             </div>
 
             {/* Employee Limit */}
-            <div className="group bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-              <div className="p-3 bg-purple-500 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+              <div className="p-3 bg-green-500 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <FaBuilding className="h-8 w-8 text-white" />
               </div>
-              <p className="text-3xl font-bold text-purple-600 mb-2">{employeeLimit}</p>
-              <p className="text-sm font-semibold text-purple-800 uppercase tracking-wide">Employee Limit</p>
+              <p className="text-3xl font-bold text-green-600 mb-2">{employeeLimit}</p>
+              <p className="text-sm font-semibold text-green-800 uppercase tracking-wide">Employee Limit</p>
             </div>
 
             {/* Remaining Slots */}
@@ -293,7 +293,7 @@ const SubscriptionDetails = ({ subscription, onUpdateEmployeeLimit, isLoading })
       {/* Subscription Details */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-3 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl">
+          <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
             <FiCheckCircle className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900">

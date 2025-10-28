@@ -70,7 +70,7 @@ const CycleDayCard = ({ cycleInfo }) => {
   );
 };
 
-const Tracker = () => {
+const CalendarTracker = () => {
   const router = useRouter();
   const [periodStart, setPeriodStart] = useState(null);
   const [periodEnd, setPeriodEnd] = useState(null);
@@ -124,7 +124,7 @@ const Tracker = () => {
     }, 4000);
   }, [notificationTimer, isPaused]);
 
-  // Fetch tracker data (only once on component mount)
+  // Fetch tracker data and existing period data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -137,6 +137,19 @@ const Tracker = () => {
           setTrackerData(data.page_info);
           setCycleInfo(data.cycle_info);
         }
+
+        // Fetch existing period data for current month
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          const existingPeriod = periodResponse.data.data[0];
+          setExistingData(existingPeriod);
+          
+          // Populate form with existing data
+          setPeriodStart(existingPeriod.period_start);
+          setPeriodEnd(existingPeriod.period_end);
+          
+          showNotification('Existing data loaded successfully!', 'success');
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load tracker data');
@@ -147,7 +160,7 @@ const Tracker = () => {
     };
 
     fetchData();
-  }, []); // Empty dependency array - only run once on mount
+  }, [currentMonth]);
 
   // Handle date selection
   const handleDateChange = useCallback((date) => {
@@ -223,6 +236,12 @@ const Tracker = () => {
         if (response.data.data) {
           setExistingData(response.data.data);
         }
+        
+        // Refresh data to get updated information
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          setExistingData(periodResponse.data.data[0]);
+        }
       } else {
         throw new Error(response.data.message || 'Failed to save tracker data');
       }
@@ -232,7 +251,7 @@ const Tracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, trackerData, existingData]);
+  }, [periodStart, periodEnd, trackerData, existingData, currentMonth]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {
@@ -404,7 +423,7 @@ const Tracker = () => {
             </svg>
           </div>
              <div>
-               <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'}</h1>
+               <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'} - Calendar</h1>
                <p className="text-green-100 text-sm">Monitor your cycle dates and track patterns</p>
              </div>
           </div>
@@ -800,4 +819,4 @@ const Tracker = () => {
   );
 };
 
-export default Tracker;
+export default CalendarTracker;

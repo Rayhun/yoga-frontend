@@ -124,7 +124,7 @@ const SubscriptionManagement = () => {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
         <div className="flex items-center space-x-4">
-          <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
+          <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
             <FiCreditCard className="h-8 w-8 text-white" />
           </div>
           <div>

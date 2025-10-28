@@ -132,14 +132,14 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50">
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Business Subscription
           </h1>
-          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+          <div className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
             {planData?.title}
           </div>
         </div>
@@ -148,8 +148,8 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
           {/* Form Section */}
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
             <div className="flex items-center mb-8">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
@@ -170,7 +170,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                     <FormikField
                       name="organizationName"
                       placeholder="Enter your organization name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
                   
@@ -181,7 +181,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                         Team Size *
                       </label>
                       <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-400 via-orange-500 to-green-500 rounded-full flex items-center justify-center shadow-lg">
                           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                           </svg>
@@ -190,10 +190,10 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                     </div>
                     
-                    <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-100">
+                    <div className="bg-gradient-to-br from-orange-50 via-white to-green-50 rounded-3xl p-8 border-2 border-orange-200 shadow-lg">
                       {/* Current Value Display */}
                       <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-lg">
+                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-orange-400 via-orange-500 to-green-500 rounded-full shadow-xl ring-4 ring-orange-100">
                           <span className="text-3xl font-bold text-white">{employeeCount}</span>
                         </div>
                         <p className="text-sm text-gray-600 mt-2 font-medium">employees</p>
@@ -214,7 +214,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                         <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
                           {/* Progress Fill */}
                           <div 
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full transition-all duration-200"
+                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-400 via-orange-300 to-green-400 rounded-full transition-all duration-300 shadow-inner"
                             style={{ 
                               width: `${((employeeCount - 5) / (1000 - 5)) * 100}%` 
                             }}
@@ -242,22 +242,22 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           
                           {/* Custom Handle */}
                           <div 
-                            className="absolute top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white border-4 border-purple-500 rounded-full shadow-xl cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-2xl z-20"
+                            className="absolute top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white border-4 border-orange-400 rounded-full shadow-xl cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-2xl z-20 ring-2 ring-orange-100"
                             style={{ 
                               left: `calc(${((employeeCount - 5) / (1000 - 5)) * 100}% - 20px)`,
                               pointerEvents: 'none'
                             }}
                           >
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20"></div>
+                            <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-green-500 rounded-full opacity-30"></div>
                             <div className="absolute inset-1 bg-white rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                              <div className="w-2 h-2 bg-gradient-to-br from-orange-400 to-green-500 rounded-full"></div>
                             </div>
                           </div>
                         </div>
                         
                         {/* Value Display on Track */}
                         <div className="mt-2 text-center">
-                          <span className="text-sm font-bold text-purple-600">
+                          <span className="text-sm font-bold text-orange-600">
                             {employeeCount} employees
                           </span>
                         </div>
@@ -269,18 +269,18 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           {planData.discounted_volume
                             .sort((a, b) => a.volume - b.volume)
                             .map((discount, index, array) => {
-                              const colors = [
-                                'from-green-400 to-green-500',
-                                'from-blue-400 to-blue-500', 
-                                'from-purple-400 to-purple-500',
-                                'from-pink-400 to-pink-500',
-                                'from-orange-400 to-orange-500',
-                                'from-red-400 to-red-500',
-                                'from-indigo-400 to-indigo-500',
-                                'from-teal-400 to-teal-500',
-                                'from-cyan-400 to-cyan-500',
-                                'from-emerald-400 to-emerald-500'
-                              ];
+                                   const colors = [
+                                     'from-orange-400 to-orange-500',
+                                     'from-orange-500 to-green-400', 
+                                     'from-green-400 to-green-500',
+                                     'from-orange-300 to-green-500',
+                                     'from-green-500 to-orange-400',
+                                     'from-orange-500 to-green-600',
+                                     'from-green-300 to-orange-500',
+                                     'from-orange-600 to-green-400',
+                                     'from-green-600 to-orange-500',
+                                     'from-orange-400 to-green-600'
+                                   ];
                               
                               const color = colors[index % colors.length];
                               
@@ -305,7 +305,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                                   className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 transform hover:scale-105 ${
                                     isSelected
                                       ? `bg-gradient-to-r ${color} text-white shadow-lg`
-                                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50'
                                   }`}
                                 >
                                   {rangeLabel}
@@ -327,7 +327,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                               💪 Growing team! Consider our volume pricing for {Math.min(...planData.discounted_volume.map(d => d.volume))}+ employees.
                             </span>
                           ) : (
-                            <span className="text-purple-600 font-semibold">
+                            <span className="text-orange-600 font-semibold">
                               🚀 Perfect for getting started!
                             </span>
                           )}
@@ -345,7 +345,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           id="termsOfService"
                           checked={agreements.termsOfService}
                           onChange={(e) => setAgreements(prev => ({ ...prev, termsOfService: e.target.checked }))}
-                          className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="w-5 h-5 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
                         />
                       </div>
                       <div className="flex-1">
@@ -353,7 +353,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           I agree to Terms of Service
                         </label>
                         <p className="text-sm text-gray-600 mt-1">
-                          <a href="/terms" className="text-blue-600 hover:text-blue-800 underline">
+                          <a href="/terms" className="text-orange-600 hover:text-orange-800 underline">
                             Link to Terms of Service
                           </a>
                         </p>
@@ -367,7 +367,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           id="privacyPolicy"
                           checked={agreements.privacyPolicy}
                           onChange={(e) => setAgreements(prev => ({ ...prev, privacyPolicy: e.target.checked }))}
-                          className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="w-5 h-5 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
                         />
                       </div>
                       <div className="flex-1">
@@ -375,7 +375,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           I agree to Privacy Policy
                         </label>
                         <p className="text-sm text-gray-600 mt-1">
-                          <a href="/privacy" className="text-blue-600 hover:text-blue-800 underline">
+                          <a href="/privacy" className="text-orange-600 hover:text-orange-800 underline">
                             Link to your Privacy URL
                           </a>
                         </p>
@@ -389,7 +389,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                           id="recurringCharge"
                           checked={agreements.recurringCharge}
                           onChange={(e) => setAgreements(prev => ({ ...prev, recurringCharge: e.target.checked }))}
-                          className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="w-5 h-5 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
                         />
                       </div>
                       <div className="flex-1">
@@ -406,7 +406,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                   <button
                     type="submit"
                     disabled={isSubmitting || !allAgreementsAccepted}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isSubmitting ? (
                       <div className="flex items-center justify-center">
@@ -486,13 +486,13 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                     {planData?.currency_symbol || '$'}{Math.round(planData?.rate || planData?.price || 0)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 font-medium">Number of Employees</span>
-                  <span className="font-bold text-lg text-blue-600">{employeeCount}</span>
-                </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 font-medium">Number of Employees</span>
+                      <span className="font-bold text-lg text-green-600">{employeeCount}</span>
+                    </div>
               </div>
               
-              <div className="bg-blue-50 rounded-xl p-4">
+              <div className="bg-green-50 rounded-xl p-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700 font-medium">Subtotal</span>
                   <span className="font-bold text-xl">
@@ -528,14 +528,14 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                 </div>
               )}
               
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-lg font-medium">Total Amount</span>
                   <span className="text-3xl font-bold">
                     {planData?.currency_symbol || '$'}{Math.round(pricingCalculation.total)}
                   </span>
                 </div>
-                <div className="text-blue-100 text-sm">
+                <div className="text-green-100 text-sm">
                   Billed {planData?.subscription_tenure_period || 'monthly'}
                 </div>
               </div>
@@ -554,9 +554,9 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
             
             {/* Plan Details */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h4 className="font-bold text-gray-900 mb-4 flex items-center">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2">
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>

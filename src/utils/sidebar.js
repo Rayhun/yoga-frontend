@@ -31,7 +31,7 @@ import { USER_SUB_ROLE } from './authorization';
 import { GiTeacher, GiNightSleep } from 'react-icons/gi';
 import { PiFilmScriptBold, PiUserSquareFill, PiChartLine } from 'react-icons/pi';
 import { LuClipboardCheck } from 'react-icons/lu';
-import { FiTarget } from 'react-icons/fi';
+import { FiTarget, FiActivity } from 'react-icons/fi';
 import { LiaBookSolid } from 'react-icons/lia';
 // import { FiDroplet } from "react-icons/fi";
 // import { TbGenderTransgender } from "react-icons/tb";
@@ -48,6 +48,7 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/sleep_tracker',
   '/portal/customer/checkin/daily_insights',
   '/portal/customer/checkin/tracker',
+  '/portal/customer/checkin/daily-tracker',
   '/portal/customer/checkin/cycle_insights',
 ];
 
@@ -384,6 +385,12 @@ const CUSTOMER = [
         label: 'Tracker',
         href: '/portal/customer/checkin/tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
+      },
+      {
+        Icon: FiActivity,
+        label: 'Daily Check-in',
+        href: '/portal/customer/checkin/daily-tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/daily-tracker'),
       },
       {
         Icon: PiChartLine,
