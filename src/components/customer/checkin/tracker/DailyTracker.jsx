@@ -13,6 +13,96 @@ const Section = ({ children, className = "" }) => (
   </div>
 );
 
+const CycleInfoCard = ({ cycleInfo }) => {
+  if (!cycleInfo) {
+    return (
+      <Section>
+        <div className="flex items-center gap-6">
+          <div className="flex-shrink-0">
+            <div className="w-20 h-20 border-2 border-gray-300 rounded-full flex flex-col items-center justify-center bg-gray-50">
+              <span className="text-xs font-medium text-gray-500">Day</span>
+              <span className="text-2xl font-bold text-gray-400">--</span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-500 mb-2">No Cycle Data</h3>
+            <p className="text-gray-500">Start tracking your cycle to see insights</p>
+          </div>
+        </div>
+      </Section>
+    );
+  }
+
+  const userStatus = cycleInfo.user_status;
+  const recommendations = cycleInfo.recommendations;
+
+  return (
+    <Section>
+      <div className="flex items-center gap-6">
+        {/* Circular Day Indicator */}
+        <div className="flex-shrink-0">
+          <div className="w-20 h-20 border-2 border-emerald-500 rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
+            <span className="text-xs font-medium text-gray-600">Day</span>
+            <span className="text-2xl font-bold text-emerald-700">{cycleInfo.day}</span>
+          </div>
+        </div>
+
+        {/* Cycle Information */}
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{cycleInfo.title}</h3>
+          <div className="space-y-1">
+            <p className="text-gray-700">
+              {cycleInfo.estimated}
+            </p>
+            <p className="text-emerald-600 font-medium">
+              Current phase: {cycleInfo.current_phase}
+            </p>
+            <p className="text-gray-700">
+              Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
+            </p>
+            {userStatus && (
+              <div className="mt-2 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  userStatus.period_status === 'normal' ? 'bg-green-500' : 
+                  userStatus.period_status === 'irregular' ? 'bg-yellow-500' : 'bg-red-500'
+                }`}></div>
+                <span className="text-sm text-gray-600">
+                  {userStatus.period_message}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status Indicator */}
+        <div className="flex-shrink-0">
+          <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+        </div>
+      </div>
+
+      {/* Recommendations Section */}
+      {recommendations && recommendations.next_actions && recommendations.next_actions.length > 0 && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+          <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Daily Check-in Recommendations
+          </h4>
+          <ul className="space-y-1">
+            {recommendations.next_actions.map((action, index) => (
+              <li key={index} className="text-sm text-blue-700 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                {action}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Section>
+  );
+};
+
 
 const SymptomSlider = ({ label, options, value, onChange }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -364,6 +454,18 @@ const DailyTracker = () => {
         setHasUnsavedChanges(false);
         setSaveStatus('saved');
         
+        // Reload tracker data to get updated information
+        try {
+          const trackerResponse = await getTrackerInfo();
+          if (trackerResponse.data.status === 'success') {
+            const data = trackerResponse.data.data;
+            setTrackerData(data.page_info);
+            setCycleInfo(data.cycle_info);
+          }
+        } catch (reloadError) {
+          console.error('Error reloading tracker data:', reloadError);
+        }
+        
         // Reset save status after 3 seconds
         setTimeout(() => setSaveStatus('idle'), 3000);
       } else {
@@ -446,7 +548,12 @@ const DailyTracker = () => {
               </div>
               <div>
                 <h1 className="font-bold text-2xl">Daily Check-In & Mind & Body Signals</h1>
-                <p className="text-green-100 text-sm">Track your daily wellness and body signals</p>
+                <p className="text-green-100 text-sm">
+                  {cycleInfo?.user_status?.action_required === 'resume_tracking' 
+                    ? 'Resume tracking your daily wellness and symptoms'
+                    : 'Track your daily wellness and body signals'
+                  }
+                </p>
               </div>
             </div>
             <div className="text-right">
@@ -463,9 +570,9 @@ const DailyTracker = () => {
         </div>
       </div>
 
-      {/* Cycle Day Card */}
+      {/* Cycle Info Card */}
       <div className="mt-8">
-        <CycleDayCard cycleInfo={cycleInfo} />
+        <CycleInfoCard cycleInfo={cycleInfo} />
       </div>
 
       {/* Date Picker Section */}

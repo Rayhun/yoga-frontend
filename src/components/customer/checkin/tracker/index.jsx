@@ -34,6 +34,9 @@ const CycleDayCard = ({ cycleInfo }) => {
     );
   }
 
+  const userStatus = cycleInfo.user_status;
+  const recommendations = cycleInfo.recommendations;
+
   return (
     <Section>
       <div className="flex items-center gap-6">
@@ -58,6 +61,17 @@ const CycleDayCard = ({ cycleInfo }) => {
             <p className="text-gray-700">
               Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
             </p>
+            {userStatus && (
+              <div className="mt-2 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  userStatus.period_status === 'normal' ? 'bg-green-500' : 
+                  userStatus.period_status === 'irregular' ? 'bg-yellow-500' : 'bg-red-500'
+                }`}></div>
+                <span className="text-sm text-gray-600">
+                  {userStatus.period_message}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -66,6 +80,26 @@ const CycleDayCard = ({ cycleInfo }) => {
           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
         </div>
       </div>
+
+      {/* Recommendations Section */}
+      {recommendations && recommendations.next_actions && recommendations.next_actions.length > 0 && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+          <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Recommendations
+          </h4>
+          <ul className="space-y-1">
+            {recommendations.next_actions.map((action, index) => (
+              <li key={index} className="text-sm text-blue-700 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                {action}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Section>
   );
 };
@@ -77,6 +111,8 @@ const Tracker = () => {
   const [trackerData, setTrackerData] = useState(null);
   const [cycleInfo, setCycleInfo] = useState(null);
   const [existingData, setExistingData] = useState(null);
+  const [allMonthData, setAllMonthData] = useState([]); // Store all period data for the month
+  const [selectedRecordId, setSelectedRecordId] = useState(null); // Track which record is selected for update
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -124,9 +160,9 @@ const Tracker = () => {
     }, 4000);
   }, [notificationTimer, isPaused]);
 
-  // Fetch tracker data (only once on component mount)
+  // Fetch tracker configuration (only once on component mount)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTrackerConfig = async () => {
       try {
         setLoading(true);
         
@@ -138,16 +174,58 @@ const Tracker = () => {
           setCycleInfo(data.cycle_info);
         }
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load tracker data');
-        showNotification('Failed to load tracker data. Please try again.', 'error');
+        console.error('Error fetching tracker config:', err);
+        setError('Failed to load tracker configuration');
+        showNotification('Failed to load tracker configuration. Please try again.', 'error');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchTrackerConfig();
   }, []); // Empty dependency array - only run once on mount
+
+  // Fetch existing period data when month changes
+  useEffect(() => {
+    const fetchMonthData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch existing period data for current month
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          const monthData = periodResponse.data.data;
+          setAllMonthData(monthData);
+          
+          // Clear form for new entry by default
+          setExistingData(null);
+          setSelectedRecordId(null);
+          setPeriodStart(null);
+          setPeriodEnd(null);
+          
+          showNotification(`${monthData.length} existing record(s) found for this month!`, 'success');
+        } else {
+          // No existing data for this month, clear everything
+          setAllMonthData([]);
+          setExistingData(null);
+          setSelectedRecordId(null);
+          setPeriodStart(null);
+          setPeriodEnd(null);
+        }
+      } catch (err) {
+        console.error('Error fetching month data:', err);
+        setError('Failed to load data for this month');
+        showNotification('Failed to load data for this month. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Only fetch month data if tracker config is loaded
+    if (trackerData) {
+      fetchMonthData();
+    }
+  }, [currentMonth, trackerData]); // Depend on currentMonth and trackerData
 
   // Handle date selection
   const handleDateChange = useCallback((date) => {
@@ -211,17 +289,42 @@ const Tracker = () => {
       };
 
       let response;
-      // Create new data
-      response = await createPeriodGoal(payload);
+      if (existingData && selectedRecordId) {
+        // Update existing data
+        response = await updatePeriodGoal(existingData.id, payload);
+      } else {
+        // Create new data
+        response = await createPeriodGoal(payload);
+      }
       
       if (response.data.status === 'success') {
-        const action = existingData ? 'updated' : 'saved';
+        const action = (existingData && selectedRecordId) ? 'updated' : 'saved';
         console.log('Success response:', response.data);
         showNotification(`Calendar data ${action} successfully!`, 'success');
         
         // Update existing data with the response data
         if (response.data.data) {
           setExistingData(response.data.data);
+        }
+        
+        // Refresh data to get updated information for current month
+        const periodResponse = await getPeriodGoal(currentMonth);
+        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          setExistingData(periodResponse.data.data[0]);
+          setPeriodStart(periodResponse.data.data[0].period_start);
+          setPeriodEnd(periodResponse.data.data[0].period_end);
+        }
+        
+        // Reload tracker data to get updated information
+        try {
+          const trackerResponse = await getTrackerInfo();
+          if (trackerResponse.data.status === 'success') {
+            const data = trackerResponse.data.data;
+            setTrackerData(data.page_info);
+            setCycleInfo(data.cycle_info);
+          }
+        } catch (reloadError) {
+          console.error('Error reloading tracker data:', reloadError);
         }
       } else {
         throw new Error(response.data.message || 'Failed to save tracker data');
@@ -232,15 +335,30 @@ const Tracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, trackerData, existingData]);
+  }, [periodStart, periodEnd, trackerData, existingData, currentMonth]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {
     setCurrentMonth(newMonth);
-    // Clear current form data when changing months
+    // The useEffect will handle loading existing data for the new month
+  }, []);
+
+  // Handle record selection for update
+  const handleRecordSelect = useCallback((record) => {
+    setSelectedRecordId(record.id);
+    setExistingData(record);
+    setPeriodStart(record.period_start);
+    setPeriodEnd(record.period_end);
+    showNotification(`Selected record for update: ${record.period_start} to ${record.period_end}`, 'success');
+  }, []);
+
+  // Handle new record creation
+  const handleNewRecord = useCallback(() => {
+    setSelectedRecordId(null);
+    setExistingData(null);
     setPeriodStart(null);
     setPeriodEnd(null);
-    setExistingData(null);
+    showNotification('Creating new record...', 'success');
   }, []);
 
   const renderDay = useCallback((day, _value, props) => {
@@ -405,7 +523,12 @@ const Tracker = () => {
           </div>
              <div>
                <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'}</h1>
-               <p className="text-green-100 text-sm">Monitor your cycle dates and track patterns</p>
+               <p className="text-green-100 text-sm">
+                 {cycleInfo?.user_status?.action_required === 'resume_tracking' 
+                   ? 'Resume tracking your cycle and symptoms'
+                   : 'Monitor your cycle dates and track patterns'
+                 }
+               </p>
              </div>
           </div>
           <div className="text-right">
@@ -425,20 +548,216 @@ const Tracker = () => {
         <CycleDayCard cycleInfo={cycleInfo} />
       </div>
 
+      {/* Existing Records Section */}
+      {allMonthData.length > 0 && (
+        <Section className="mt-8">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Period Records</h3>
+                  <p className="text-gray-600">{dayjs(currentMonth).format('MMMM YYYY')} • {allMonthData.length} record{allMonthData.length !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleNewRecord}
+                className={`group relative overflow-hidden px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 ${
+                  !selectedRecordId
+                    ? 'bg-gradient-to-r from-emerald-500 to-green-600 shadow-xl'
+                    : 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="text-sm">{!selectedRecordId ? '✓ Creating New Record' : 'Create New Record'}</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-500 transform -skew-x-12 -translate-x-full group-hover:translate-x-full"></div>
+              </button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            {allMonthData.map((record, index) => (
+              <div
+                key={record.id}
+                className={`group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 transform hover:scale-105 ${
+                  selectedRecordId === record.id
+                    ? 'ring-4 ring-emerald-200 shadow-2xl scale-105'
+                    : 'shadow-lg hover:shadow-2xl'
+                }`}
+                onClick={() => handleRecordSelect(record)}
+                style={{
+                  background: selectedRecordId === record.id
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
+                }}
+              >
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute top-4 right-4 w-20 h-20 bg-current rounded-full"></div>
+                  <div className="absolute bottom-4 left-4 w-12 h-12 bg-current rounded-full"></div>
+                </div>
+                
+                {/* Content */}
+                <div className="relative p-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      {/* <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        selectedRecordId === record.id
+                          ? 'bg-white bg-opacity-20'
+                          : 'bg-gradient-to-br from-emerald-500 to-green-600'
+                      }`}>
+                        <span className={`text-sm font-bold ${
+                          selectedRecordId === record.id ? 'text-white' : 'text-white'
+                        }`}>
+                          #{record.id}
+                        </span>
+                      </div> */}
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        selectedRecordId === record.id
+                          ? 'bg-white bg-opacity-20 text-white'
+                          : 'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {dayjs(record.period_start).format('MMM DD')}
+                      </div>
+                    </div>
+                    
+                    {selectedRecordId === record.id && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Period Dates */}
+                  <div className="mb-4">
+                    <div className={`text-lg font-bold mb-1 ${
+                      selectedRecordId === record.id ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {dayjs(record.period_start).format('MMM DD')} - {dayjs(record.period_end).format('MMM DD')}
+                    </div>
+                    <div className={`text-sm ${
+                      selectedRecordId === record.id ? 'text-white text-opacity-80' : 'text-gray-600'
+                    }`}>
+                      {dayjs(record.period_end).diff(dayjs(record.period_start), 'days') + 1} day{dayjs(record.period_end).diff(dayjs(record.period_start), 'days') !== 0 ? 's' : ''}
+                    </div>
+                  </div>
+                  
+                  {/* Symptoms */}
+                  {/* <div className="mb-4">
+                    <div className={`text-sm font-medium mb-2 ${
+                      selectedRecordId === record.id ? 'text-white text-opacity-90' : 'text-gray-700'
+                    }`}>
+                      Symptoms
+                    </div>
+                    {record.selected_symptoms?.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {record.selected_symptoms.slice(0, 3).map((symptom, idx) => (
+                          <span
+                            key={idx}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              selectedRecordId === record.id
+                                ? 'bg-white bg-opacity-20 text-white'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {symptom}
+                          </span>
+                        ))}
+                        {record.selected_symptoms.length > 3 && (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              selectedRecordId === record.id
+                                ? 'bg-white bg-opacity-20 text-white'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            +{record.selected_symptoms.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={`text-xs ${
+                        selectedRecordId === record.id ? 'text-white text-opacity-60' : 'text-gray-500'
+                      }`}>
+                        No symptoms recorded
+                      </div>
+                    )}
+                  </div> */}
+                  
+                  {/* Action Indicator */}
+                  <div className={`flex items-center gap-2 text-sm font-medium ${
+                    selectedRecordId === record.id ? 'text-white' : 'text-emerald-600'
+                  }`}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    {selectedRecordId === record.id ? 'Selected for update' : 'Click to update'}
+                  </div>
+                </div>
+                
+                {/* Hover Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-500 transform -skew-x-12 -translate-x-full group-hover:translate-x-full"></div>
+              </div>
+            ))}
+          </div>
+          
+        </Section>
+      )}
+
       {/* Calendar Section */}
       <Section className="mt-8">
         <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">Calendar</h3>
             </div>
-            Calendar
-          </h3>
-          <p className="text-gray-600">Select your period dates to track your cycle</p>
+            {allMonthData.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span>Click to select & update</span>
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600">
+            {selectedRecordId 
+              ? `Update selected record (ID: ${selectedRecordId})` 
+              : 'Select your period dates to create a new record'
+            }
+          </p>
+          {selectedRecordId && (
+            <div className="mt-4 flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-emerald-700 font-semibold text-sm">Ready to update record</span>
+            </div>
+          )}
         </div>
-        <div className="calendar-container" style={{ overflow: 'visible', paddingBottom: '20px', minHeight: '480px' }}>
+        <div className="calendar-container relative" style={{ overflow: 'visible', paddingBottom: '20px', minHeight: '480px' }}>
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+              <div className="flex items-center gap-3 text-emerald-600">
+                <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="font-medium">Loading month data...</span>
+              </div>
+            </div>
+          )}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateCalendar
             key={`${periodStart}-${periodEnd}-${currentMonth}`}
@@ -607,14 +926,14 @@ const Tracker = () => {
               : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl'
           }`}
         >
-          {saving ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Saving...
-            </div>
-          ) : (
-            'Save Calendar Data'
-          )}
+            {saving ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {selectedRecordId ? 'Updating...' : 'Saving...'}
+              </div>
+            ) : (
+              selectedRecordId ? 'Update Record' : 'Save New Record'
+            )}
         </button>
       </div>
 

@@ -242,6 +242,18 @@ const CalendarTracker = () => {
         if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
           setExistingData(periodResponse.data.data[0]);
         }
+        
+        // Reload tracker data to get updated information
+        try {
+          const trackerResponse = await getTrackerInfo();
+          if (trackerResponse.data.status === 'success') {
+            const data = trackerResponse.data.data;
+            setTrackerData(data.page_info);
+            setCycleInfo(data.cycle_info);
+          }
+        } catch (reloadError) {
+          console.error('Error reloading tracker data:', reloadError);
+        }
       } else {
         throw new Error(response.data.message || 'Failed to save tracker data');
       }
