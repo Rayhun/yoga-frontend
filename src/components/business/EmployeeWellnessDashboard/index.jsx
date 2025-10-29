@@ -9,7 +9,7 @@ import {
   FiActivity, 
   FiTarget,
   FiHeart,
-  FiBarChart3,
+  FiBarChart,
   FiAward,
   FiAlertCircle
 } from 'react-icons/fi';
@@ -334,7 +334,7 @@ const EmployeeWellnessDashboard = () => {
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
           <div className="flex items-center space-x-3 mb-6">
             <div className="p-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg">
-              <FiBarChart3 className="h-5 w-5 text-white" />
+              <FiBarChart className="h-5 w-5 text-white" />
             </div>
             <h3 className="text-lg font-bold text-gray-900">Employee Wellness Details</h3>
           </div>

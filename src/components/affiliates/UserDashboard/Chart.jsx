@@ -68,18 +68,20 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
   const categories = baseOptions.xaxis.categories;
 
 
-  const normalize = arr => {
-    const len = categories.length;
-    if (arr.length >= len) return arr.slice(0, len);
-    return [...arr, ...Array(len - arr.length).fill(0)];
-  };
-
   const series = useMemo(
-    () => [
-      { name: 'Conversions', data: normalize(conversions) },
-      { name: 'Traffic', data: normalize(traffic) },
-    ],
-    [conversions, traffic, normalize]
+    () => {
+      const normalize = arr => {
+        const len = categories.length;
+        if (arr.length >= len) return arr.slice(0, len);
+        return [...arr, ...Array(len - arr.length).fill(0)];
+      };
+      
+      return [
+        { name: 'Conversions', data: normalize(conversions) },
+        { name: 'Traffic', data: normalize(traffic) },
+      ];
+    },
+    [conversions, traffic, categories.length]
   );
 
   const options = useMemo(

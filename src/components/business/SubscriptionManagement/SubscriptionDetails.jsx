@@ -34,7 +34,7 @@ const SubscriptionDetails = ({ subscription, onUpdateEmployeeLimit, isLoading })
           No Subscription Found
         </h3>
         <p className="text-gray-600 dark:text-gray-400">
-          You don't have an active business subscription.
+          You don&apos;t have an active business subscription.
         </p>
       </div>
     );

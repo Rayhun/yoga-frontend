@@ -80,7 +80,7 @@ const BusinessDashboard = () => {
               </div>
             </div>
             <p className="text-blue-100 text-lg leading-relaxed">
-              Manage your team's wellness journey with advanced analytics, program management, and organizational insights
+              Manage your team&apos;s wellness journey with advanced analytics, program management, and organizational insights
             </p>
             <div className="mt-8 flex justify-center md:justify-start items-center">
               {recommendedProgram ? (
@@ -326,7 +326,7 @@ const BusinessDashboard = () => {
           </div>
           <div>
             <h3 className="text-2xl font-bold text-gray-900">AI Business Assistant</h3>
-            <p className="text-gray-600">Get strategic insights and recommendations for your organization's wellness program</p>
+            <p className="text-gray-600">Get strategic insights and recommendations for your organization&apos;s wellness program</p>
           </div>
         </div>
         <div className="flex justify-center">

@@ -26,7 +26,7 @@ const SubscriptionHistory = ({ history, isLoading }) => {
           No Subscription History
         </h3>
         <p className="text-gray-600 text-lg">
-          You don't have any subscription history yet.
+          You don&apos;t have any subscription history yet.
         </p>
       </div>
     );
