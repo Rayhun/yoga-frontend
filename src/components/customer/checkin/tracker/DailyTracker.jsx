@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { getTrackerInfo, getPeriodGoal, createPeriodGoal, updatePeriodGoal } from '@/services/private/customer/goal';
+import { getTrackerInfo, createPeriodDailyGoal, updatePeriodDailyGoal } from '@/services/private/customer/goal';
 import { useRouter } from 'next/navigation';
 import { MdOutlineDateRange } from 'react-icons/md';
 import Calender from '@/components/common/Calender';
@@ -346,9 +346,9 @@ const DailyTracker = () => {
     }, 4000);
   }, [notificationTimer, isPaused]);
 
-  // Fetch tracker data and existing period data
+  // Fetch tracker configuration only
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTrackerConfig = async () => {
       try {
         setLoading(true);
         
@@ -366,30 +366,17 @@ const DailyTracker = () => {
           });
           setSymptomLevels(initialSymptomLevels);
         }
-
-        // Fetch existing period data for current month
-        const periodResponse = await getPeriodGoal(currentMonth);
-        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
-          const existingPeriod = periodResponse.data.data[0];
-          setExistingData(existingPeriod);
-          
-          // Populate form with existing data
-          setSymptomLevels(existingPeriod.symptom_levels || {});
-          setSelectedSymptoms(existingPeriod.selected_symptoms || []);
-          
-          showNotification('Existing data loaded successfully!', 'success');
-        }
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load tracker data');
-        showNotification('Failed to load tracker data. Please try again.', 'error');
+        console.error('Error fetching tracker config:', err);
+        setError('Failed to load tracker configuration');
+        showNotification('Failed to load tracker configuration. Please try again.', 'error');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [currentMonth]);
+    fetchTrackerConfig();
+  }, []); // Only run once on mount
 
   // Handle symptom level changes
   const handleSymptomLevelChange = useCallback((symptom, level) => {
@@ -419,8 +406,7 @@ const DailyTracker = () => {
       setError(null);
 
       const payload = {
-        period_start: existingData?.period_start || null,
-        period_end: existingData?.period_end || null,
+        tracker_date: selectedDate.format('YYYY-MM-DD'),
         symptom_levels: symptomLevels,
         selected_symptoms: selectedSymptoms,
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
@@ -428,11 +414,11 @@ const DailyTracker = () => {
 
       let response;
       if (existingData) {
-        // Update existing data
-        response = await updatePeriodGoal(existingData.id, payload);
+        // Update existing daily data
+        response = await updatePeriodDailyGoal(existingData.id, payload);
       } else {
-        // Create new data
-        response = await createPeriodGoal(payload);
+        // Create new daily data
+        response = await createPeriodDailyGoal(payload);
       }
       
       if (response.data.status === 'success') {
@@ -443,12 +429,6 @@ const DailyTracker = () => {
         // Update existing data with the response data
         if (response.data.data) {
           setExistingData(response.data.data);
-        }
-        
-        // Refresh data to get updated information
-        const periodResponse = await getPeriodGoal(currentMonth);
-        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
-          setExistingData(periodResponse.data.data[0]);
         }
         
         setHasUnsavedChanges(false);
@@ -481,7 +461,7 @@ const DailyTracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [symptomLevels, selectedSymptoms, trackerData, existingData, currentMonth, showNotification]);
+  }, [symptomLevels, selectedSymptoms, trackerData, existingData, showNotification, selectedDate]);
 
   // Loading state
   if (loading) {

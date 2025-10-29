@@ -211,6 +211,10 @@ const CalendarTracker = () => {
       alert('Please select at least a start date for your period.');
       return;
     }
+    if (!periodEnd) {
+      alert('Please select an end date for your period.');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -218,8 +222,6 @@ const CalendarTracker = () => {
       const payload = {
         period_start: periodStart,
         period_end: periodEnd,
-        symptom_levels: {},
-        selected_symptoms: [],
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
 
