@@ -25,8 +25,8 @@ const ActiveConversationHeader = () => {
           )}
         </div> */}
         <div>
-          <h5 className="font-medium text-black dark:text-white">{type === 'ai_chat' ? 'AI Coach' : 'Help& Support'}</h5>
-          <p className="text-sm">Whats on your mind?</p>
+          <h5 className="font-medium text-black dark:text-white">{type === 'ai_chat' ? 'AI Coach' : 'Help & Support'}</h5>
+          <p className="text-sm text-gray-600">What’s on your mind today?</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -34,7 +34,7 @@ const ActiveConversationHeader = () => {
           className="w-2 h-2 rounded-full"
           style={{ backgroundColor: isSocketConnected ? 'green' : 'orange' }}
         />
-        <span className="text-sm">{connectionStatus}</span>
+        <span className="text-sm text-gray-600">{connectionStatus}</span>
       </div>
     </div>
   );
