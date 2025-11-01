@@ -24,6 +24,7 @@ const CustomerDashboard = () => {
   const { user } = useAuthContext();
   const selectedCategory = searchParams.get('category');
   const [searchText, setSearchText] = useState('');
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getProgramsList({ categories: selectedCategory }),
     queryKey: [queryKeys.customerPrograms, selectedCategory],
@@ -85,13 +86,13 @@ const CustomerDashboard = () => {
               </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold">Your Wellness Journey</h1>
-              <p className="text-green-100 text-sm">
-                {user?.isEmployee 
+              <p className="text-green-100 text-sm">Personalized wellness plans for your goals
+                {/* {user?.isEmployee 
                   ? 'Employee wellness access through your business account'
                   : user?.isBusinessOwner
                   ? 'Business owner wellness dashboard'
                   : 'Personalized wellness plans for your goals'
-                }
+                } */}
               </p>
             </div>
             </div>
@@ -128,7 +129,7 @@ const CustomerDashboard = () => {
           <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
             <div className="relative">
               <Image
-                src={recommendedProgram?.image || "/images/content/default.png"}
+                src={recommendedProgram?.image || "/images/content/Women_Journey_Start.png"}
                 alt={recommendedProgram?.title || "Hero Image"}
                 width={0}
                 height={0}
@@ -204,6 +205,17 @@ const CustomerDashboard = () => {
 
       {/* Enhanced Wellness Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-white via-green-25 to-emerald-25 rounded-2xl shadow-xl border border-green-50 hover-lift transition-smooth mb-8">
+        {/* Info button */}
+        <button
+          type="button"
+          aria-label="Wellness info"
+          className="absolute top-3 right-3 z-20 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/80 hover:bg-white shadow focus:outline-none focus:ring-2 focus:ring-green-500"
+          onClick={() => setIsInfoOpen(true)}
+        >
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+          </svg>
+        </button>
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-3">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-100 via-transparent to-emerald-100"></div>
@@ -246,7 +258,7 @@ const CustomerDashboard = () => {
               strokeWidth={18}
               color="#F97316"
               backgroundColor="#FED7AA"
-              title={periodTracking?.tracker_name || "Cycle Wellness"}
+              title="Lifestage Wellness"
               subtitle={`Day ${periodTracking?.current_day || 0} of ${(periodTracking?.current_day || 0) + (periodTracking?.remaining_days || 0)}`}
               centerSubtext={`Day ${periodTracking?.current_day || 0}`}
               onClick={() => router.push('/portal/customer/checkin/cycle_insights')}
@@ -269,7 +281,7 @@ const CustomerDashboard = () => {
               strokeWidth={18}
               color="#22C55E"
               backgroundColor="#BBF7D0"
-              title={goalTracking?.tracker_title || "General Wellness"}
+              title="Lifestyle Wellness"
               subtitle={goalTracking?.overall_status || "Good"}
               centerSubtext='overall'
               onClick={() => router.push('/portal/customer/checkin/daily_insights')}
@@ -296,7 +308,7 @@ const CustomerDashboard = () => {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="relative z-10 border-t border-green-50 bg-green-25/30 px-8 py-4 rounded-b-2xl animate-slideInUp" style={{ animationDelay: '0.6s' }}>
+        {/* <div className="relative z-10 border-t border-green-50 bg-green-25/30 px-8 py-4 rounded-b-2xl animate-slideInUp" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <div className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
@@ -309,7 +321,68 @@ const CustomerDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
+
+        {/* Info Popup - Centered within card */}
+        {isInfoOpen && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl">
+            <div className="absolute inset-0 bg-black/40 rounded-2xl" onClick={() => setIsInfoOpen(false)}></div>
+            <div className="relative max-w-md w-[90%] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 z-10">
+            <div className="flex items-start justify-between mb-3">
+              <h4 className="text-lg font-semibold text-gray-900">About Your Wellness Dashboard</h4>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  className="ml-4 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600"
+                  onClick={() => setIsInfoOpen(false)}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-900">Understanding Your Scores</p>
+                  <p className="text-sm text-gray-600">A quick guide to what you’re seeing</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 p-4">
+                <p className="text-sm text-gray-700">
+                  Scores (0–100) use our proprietary formula to reflect your wellbeing—higher means better balance.
+                </p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-700">
+                  <li className="flex gap-2">
+                    <span className="shrink-0">🌙</span>
+                    <span>Lifestage Wellness reflects hormonal and emotional patterns unique to your phase.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="shrink-0">🌸</span>
+                    <span>Lifestyle Balance shows how daily habits like sleep, nutrition, and stress support you.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  onClick={() => setIsInfoOpen(false)}
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* AI Chat Section - Above the grid */}

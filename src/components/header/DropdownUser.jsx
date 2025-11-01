@@ -52,6 +52,12 @@ const DropdownUser = () => {
     return '#'; // Default fallback
   }, [loggedInUser?.profile]);
 
+  const settingsUrl = useMemo(() => {
+    const { role } = loggedInUser?.profile || {};
+    if (role === USER_ROLE.CUSTOMER) return '/portal/customer/subscriptions';
+    return '#';
+  }, [loggedInUser?.profile]);
+
   const menu = [
     {
       label: 'My Profile',
@@ -60,7 +66,7 @@ const DropdownUser = () => {
     },
     {
       label: 'Settings',
-      href: '#',
+      href: settingsUrl,
       Icon: FaGear,
     },
     {

@@ -83,6 +83,8 @@ const queryKeys = {
   groupPermissions: 'groupPermissions',
   wellnessDashboard: 'wellnessDashboard',
   businessWellnessDashboard: 'businessWellnessDashboard',
+  customerSubscriptionStatus: 'customerSubscriptionStatus',
+  customerSubscriptionHistory: 'customerSubscriptionHistory',
 };
 
 export default queryKeys;

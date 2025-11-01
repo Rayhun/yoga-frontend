@@ -60,22 +60,37 @@ const GroupCoachingLibrary = () => {
       </Popup>
 
       {/* Hero Section */}
-      <div className="bg-white rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">Your Journey Starts Here</h1>
-          <p className="break-words line-clamp-2 dark:text-gray-300">
-            Achieve your personal goals with group coaching sessions led by our wellness experts
-          </p>
-        </div>
-        <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
-          <Image
-            src="/images/content/default.png"
-            alt="Hero Image"
-            width={0}
-            height={0}
-            sizes="100vw"
-            className="w-full rounded-lg shadow-lg"
-          />
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold">Group Coaching Sessions</h1>
+                <p className="text-green-100 text-sm">Join group sessions with wellness experts</p>
+              </div>
+            </div>
+            <p className="text-green-100 text-lg leading-relaxed">
+              Achieve your personal goals with group coaching sessions led by our wellness experts
+            </p>
+          </div>
+          <div className="md:w-1/2 mt-6 md:mt-0 flex justify-center items-center">
+            <div className="relative w-full max-w-md aspect-[16/9]">
+              <Image
+                src="/images/content/Wellness_Workshops.png"
+                alt="Hero Image"
+                width={0}
+                height={0}
+                sizes="100vw"
+                className="w-full h-full rounded-lg shadow-lg object-cover"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

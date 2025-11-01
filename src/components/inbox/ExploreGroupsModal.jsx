@@ -124,20 +124,21 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
       <div className="flex min-h-screen items-center justify-center p-2 sm:p-4">
         <div className="relative w-full max-w-6xl bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden mx-2">
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-4 sm:p-6">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white p-4 sm:p-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-black opacity-10"></div>
+            <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <FiUsers className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <FiUsers className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold">Explore Groups</h2>
-                  <p className="text-sm sm:text-base text-white/80">Discover and join amazing communities</p>
+                  <p className="text-sm sm:text-base text-green-100">Discover and join amazing communities</p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
               >
                 <FiX className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
@@ -145,52 +146,59 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Search Bar */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="relative max-w-md mx-auto">
-              <FiSearch className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg flex items-center justify-center">
+                  <FiSearch className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Search Groups</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Find communities that match your interests</p>
+                </div>
+              </div>
+              {debouncedSearchText && (
+                <span className="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-200 rounded-full shadow-sm">
+                  Searching: &quot;{debouncedSearchText}&quot;
+                </span>
+              )}
+            </div>
+            
+            <div className="relative max-w-2xl mx-auto">
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search groups by name..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-base sm:text-lg"
+                className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all dark:bg-gray-700 dark:text-white text-base shadow-sm"
               />
               {searchText !== debouncedSearchText && (
-                <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary"></div>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
                 </div>
               )}
             </div>
-            
-            {/* Search Status */}
-            {debouncedSearchText && (
-              <div className="mt-3 text-center">
-                <span className="inline-flex items-center gap-2 px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs sm:text-sm">
-                  <FiSearch className="w-3 h-3 sm:w-4 sm:h-4" />
-                  Searching: &quot;{debouncedSearchText}&quot;
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Content */}
           <div id="modal-content" className="max-h-[70vh] overflow-y-auto">
             {publicChatsError ? (
-              <div className="text-center py-8 sm:py-12 px-4 sm:px-6">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-12 px-4 sm:px-6">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl font-medium text-red-700 dark:text-red-400 mb-2">
+                <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-3">
                   Failed to Load Groups
                 </h3>
-                <p className="text-sm sm:text-base text-red-600 dark:text-red-300 mb-4">
+                <p className="text-red-600 dark:text-red-300 mb-6 max-w-md mx-auto">
                   {publicChatsError?.message || 'Something went wrong while fetching groups'}
                 </p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg transition-colors font-medium text-sm sm:text-base"
+                  className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                 >
                   Try Again
                 </button>
@@ -203,24 +211,24 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
                       {publicChats.map((chat) => (
                         <div
                           key={chat.chat_id}
-                          className="group bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:-translate-y-1"
+                          className="group relative p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-700 rounded-2xl hover:border-primary dark:hover:border-primary/50 transition-all duration-300 hover:shadow-xl"
                         >
                           {/* Group Header */}
-                          <div className="flex items-start justify-between mb-3 sm:mb-4">
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2 truncate group-hover:text-primary transition-colors">
+                              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors truncate">
                                 {chat.group_name}
                               </h3>
-                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              <div className="flex flex-wrap items-center gap-2">
                                 {chat.group_mode && (
-                                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                                  <span className="px-3 py-1 text-xs font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-200 rounded-full">
                                     {chat.group_mode}
                                   </span>
                                 )}
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                                   chat.visibility === 'public' 
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 dark:from-green-900/30 dark:to-emerald-900/30 dark:text-green-200'
+                                    : 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 dark:from-yellow-900/30 dark:to-amber-900/30 dark:text-yellow-200'
                                 }`}>
                                   {chat.visibility}
                                 </span>
@@ -229,46 +237,54 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
                           </div>
 
                           {/* Group Stats */}
-                          <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
-                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                              <FiUsers className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span>{chat.members_count} members</span>
+                          <div className="flex items-center gap-6 mb-5 text-sm">
+                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                              <span className="font-medium">{chat.members_count} members</span>
                             </div>
-                            {/* <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                              <FiUser className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span>Created by {chat.created_by}</span>
-                            </div> */}
-                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                              <FiCalendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span>{dayjs(chat.created_at).format('MMM DD, YYYY')}</span>
+                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <span className="font-medium">{dayjs(chat.created_at).format('MMM DD, YYYY')}</span>
                             </div>
-                            
                           </div>
 
                           {/* Action Button */}
-                          <div className="pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-600">
+                          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                             {chat.can_join && !chat.is_member ? (
                               <button
                                 onClick={() => handleJoinChat(chat.chat_id)}
                                 disabled={joinChatMutation.isPending}
-                                className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium group-hover:shadow-md text-sm sm:text-base"
+                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] disabled:hover:scale-100"
                               >
                                 {joinChatMutation.isPending ? (
-                                  <Spinner size={16} />
+                                  <>
+                                    <Spinner size={16} />
+                                    <span>Joining...</span>
+                                  </>
                                 ) : (
-                                  <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                                  <>
+                                    <FiPlus className="w-5 h-5" />
+                                    <span>Join Group</span>
+                                  </>
                                 )}
-                                Join Group
                               </button>
                             ) : chat.is_member ? (
-                              <div className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-lg font-medium text-sm sm:text-base">
-                                <FiUsers className="w-4 h-4 sm:w-5 sm:h-5" />
-                                Already Member
+                              <div className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 text-green-800 dark:text-green-200 rounded-xl font-semibold">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Already Member</span>
                               </div>
                             ) : (
-                              <div className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg font-medium text-sm sm:text-base">
-                                <FiX className="w-4 h-4 sm:w-5 sm:h-5" />
-                                Cannot Join
+                              <div className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl font-semibold">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                                <span>Cannot Join</span>
                               </div>
                             )}
                           </div>
@@ -277,18 +293,17 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 sm:py-12 px-4 sm:px-6">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <FiUsers className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                  <div className="text-center py-16 px-4 sm:px-6">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center shadow-lg">
+                      <FiUsers className="w-12 h-12 text-gray-400" />
                     </div>
-                    <h3 className="text-lg sm:text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      No Groups Found
+                    <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+                      {debouncedSearchText ? 'No Groups Found' : 'No Groups Available'}
                     </h3>
-                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                       {debouncedSearchText 
-                        ? `No groups found matching "${debouncedSearchText}"`
-                        : 'No public groups available at the moment'
-                      }
+                        ? `No groups found matching "${debouncedSearchText}". Try a different search term.`
+                        : 'No public groups are available at the moment. Check back later!'}
                     </p>
                   </div>
                 )}
@@ -298,24 +313,27 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
 
           {/* Pagination */}
           {pagination.total_pages > 1 && (
-            <div className="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 bg-gray-50 dark:bg-gray-800/50">
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900/50">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!pagination.has_previous}
-                  className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium text-sm sm:text-base"
+                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 disabled:hover:bg-transparent"
                 >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                   Previous
                 </button>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+                <div className="flex items-center gap-2 flex-wrap justify-center">
                   {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition-colors font-medium text-sm sm:text-base ${
+                      className={`w-10 h-10 rounded-xl border-2 transition-all duration-200 font-semibold text-sm ${
                         page === currentPage
-                          ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white border-transparent shadow-lg'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       {page}
@@ -325,13 +343,18 @@ const ExploreGroupsModal = ({ isOpen, onClose }) => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!pagination.has_next}
-                  className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium text-sm sm:text-base"
+                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 disabled:hover:bg-transparent"
                 >
                   Next
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
-              <div className="text-center mt-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                Page {currentPage} of {pagination.total_pages} • {pagination.total_count} total groups
+              <div className="text-center mt-4">
+                <span className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 text-gray-700 dark:text-gray-300 rounded-xl">
+                  Page {currentPage} of {pagination.total_pages} • {pagination.total_count} total groups
+                </span>
               </div>
             </div>
           )}
