@@ -139,6 +139,7 @@ const CalendarTracker = () => {
         }
 
         // Fetch existing period data for current month
+        // Backend now sorts by period_start (ascending - first dates first), then period_end, then created_at
         const periodResponse = await getPeriodGoal(currentMonth);
         if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
           const existingPeriod = periodResponse.data.data[0];
@@ -211,19 +212,19 @@ const CalendarTracker = () => {
       alert('Please select at least a start date for your period.');
       return;
     }
-    if (!periodEnd) {
-      alert('Please select an end date for your period.');
-      return;
-    }
 
     try {
       setSaving(true);
 
       const payload = {
         period_start: periodStart,
-        period_end: periodEnd,
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
+      
+      // Only include period_end if it's selected
+      if (periodEnd) {
+        payload.period_end = periodEnd;
+      }
 
       let response;
       // Create new data
@@ -240,9 +241,13 @@ const CalendarTracker = () => {
         }
         
         // Refresh data to get updated information
+        // Backend now sorts by period_start (ascending - first dates first), then period_end, then created_at
         const periodResponse = await getPeriodGoal(currentMonth);
         if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
+          // Get the most recent record (first in sorted list by period_start)
           setExistingData(periodResponse.data.data[0]);
+          setPeriodStart(periodResponse.data.data[0].period_start);
+          setPeriodEnd(periodResponse.data.data[0].period_end);
         }
         
         // Reload tracker data to get updated information
@@ -646,7 +651,7 @@ const CalendarTracker = () => {
               Saving...
             </div>
           ) : (
-            'Save Calendar Data'
+            periodEnd ? 'Save Calendar Data' : 'Save Start Date'
           )}
         </button>
       </div>

@@ -192,9 +192,11 @@ const Tracker = () => {
         setLoading(true);
         
         // Fetch existing period data for current month
+        // Backend now sorts by period_start (ascending - first dates first), then period_end, then created_at
         const periodResponse = await getPeriodGoal(currentMonth);
         if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
           const monthData = periodResponse.data.data;
+          // Data is already sorted by backend - first dates first, then second dates
           setAllMonthData(monthData);
           
           // Clear form for new entry by default
@@ -276,19 +278,19 @@ const Tracker = () => {
       alert('Please select at least a start date for your period.');
       return;
     }
-    if (!periodEnd) {
-      alert('Please select an end date for your period.');
-      return;
-    }
 
     try {
       setSaving(true);
 
       const payload = {
         period_start: periodStart,
-        period_end: periodEnd,
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
+      
+      // Only include period_end if it's selected
+      if (periodEnd) {
+        payload.period_end = periodEnd;
+      }
 
       let response;
       if (existingData && selectedRecordId) {
@@ -312,9 +314,25 @@ const Tracker = () => {
         // Refresh data to get updated information for current month
         const periodResponse = await getPeriodGoal(currentMonth);
         if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
-          setExistingData(periodResponse.data.data[0]);
-          setPeriodStart(periodResponse.data.data[0].period_start);
-          setPeriodEnd(periodResponse.data.data[0].period_end);
+          // Reload all month data (sorted by backend - period_start ascending)
+          setAllMonthData(periodResponse.data.data);
+          
+          // If we just created/updated a record, select it
+          if (response.data.data && response.data.data.id) {
+            const updatedRecord = periodResponse.data.data.find(r => r.id === response.data.data.id);
+            if (updatedRecord) {
+              setExistingData(updatedRecord);
+              setSelectedRecordId(updatedRecord.id);
+              setPeriodStart(updatedRecord.period_start);
+              setPeriodEnd(updatedRecord.period_end);
+            } else {
+              // Clear selection if record not found
+              setExistingData(null);
+              setSelectedRecordId(null);
+              setPeriodStart(null);
+              setPeriodEnd(null);
+            }
+          }
         }
         
         // Reload tracker data to get updated information
@@ -643,17 +661,20 @@ const Tracker = () => {
                     )}
                   </div>
                   
-                  {/* Period Dates */}
+                    {/* Period Dates */}
                   <div className="mb-4">
                     <div className={`text-lg font-bold mb-1 ${
                       selectedRecordId === record.id ? 'text-white' : 'text-gray-900'
                     }`}>
-                      {dayjs(record.period_start).format('MMM DD')} - {dayjs(record.period_end).format('MMM DD')}
+                      {dayjs(record.period_start).format('MMM DD')} {record.period_end ? `- ${dayjs(record.period_end).format('MMM DD')}` : '(End date not set)'}
                     </div>
                     <div className={`text-sm ${
                       selectedRecordId === record.id ? 'text-white text-opacity-80' : 'text-gray-600'
                     }`}>
-                      {dayjs(record.period_end).diff(dayjs(record.period_start), 'days') + 1} day{dayjs(record.period_end).diff(dayjs(record.period_start), 'days') !== 0 ? 's' : ''}
+                      {record.period_end 
+                        ? `${dayjs(record.period_end).diff(dayjs(record.period_start), 'days') + 1} day${dayjs(record.period_end).diff(dayjs(record.period_start), 'days') !== 0 ? 's' : ''}`
+                        : 'Start date only'
+                      }
                     </div>
                   </div>
                   
@@ -740,7 +761,7 @@ const Tracker = () => {
           </div>
           <p className="text-gray-600">
             {selectedRecordId 
-              ? `Update selected record (ID: ${selectedRecordId})` 
+              ? `Update selected record` 
               : 'Select your period dates to create a new record'
             }
           </p>
@@ -934,7 +955,9 @@ const Tracker = () => {
                 {selectedRecordId ? 'Updating...' : 'Saving...'}
               </div>
             ) : (
-              selectedRecordId ? 'Update Record' : 'Save New Record'
+              selectedRecordId 
+                ? 'Update Record' 
+                : (periodEnd ? 'Save Record' : 'Save Start Date')
             )}
         </button>
       </div>
