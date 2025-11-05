@@ -104,13 +104,23 @@ function useConfirm() {
 
         const handleCancel = () => {
           closeModal();
-          reject();
+          reject(new Error('User cancelled'));
+        };
+
+        const handleClose = (event, reason) => {
+          // Prevent closing on backdrop click if needed, or allow it
+          if (reason === 'backdropClick') {
+            // Optionally prevent closing on backdrop click
+            // return;
+          }
+          // Reject promise when dialog is closed (X button or backdrop)
+          handleCancel();
         };
 
         modalRoot.render(
           <Dialog
             maxWidth="xs"
-            onClose={closeModal}
+            onClose={handleClose}
             TransitionComponent={Transition}
             sx={{
               zIndex: 9999,
@@ -122,7 +132,7 @@ function useConfirm() {
             open
           >
             <StyledMainWrapper>
-              <StyledIconButton onClick={closeModal}>
+              <StyledIconButton onClick={handleCancel}>
                 <MdClose color="gray" size={20} />
               </StyledIconButton>
               <StyledWrapper>

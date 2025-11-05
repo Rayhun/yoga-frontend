@@ -351,7 +351,7 @@ const CUSTOMER = [
   },
   {
     Icon: LuClipboardCheck,
-    label: 'Check In',
+    label: 'Lifestyle',
     href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
@@ -363,54 +363,51 @@ const CUSTOMER = [
         isActive: pathname => pathname.includes('/portal/customer/checkin/monthly_goal'),
       },
       {
+        Icon: MdTrackChanges,
+        label: 'Habit Tracker',
+        href: '/portal/customer/checkin/sleep_tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
+      },
+      {
         Icon: LiaBookSolid,
         label: 'Journal',
         href: '/portal/customer/checkin/journal',
         isActive: pathname => pathname.includes('/portal/customer/checkin/journal'),
       },
       {
-        Icon: MdTrackChanges,
-        label: 'Goal Tracker',
-        href: '/portal/customer/checkin/sleep_tracker',
-        isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
-      },
-      {
         Icon: RiRepeatOneFill,
-        label: 'Daily Insights',
+        label: 'Insights',
         href: '/portal/customer/checkin/daily_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
       },
+    ],
+  },
+  {
+    Icon: LuClipboardCheck,
+    label: 'Lifestage',
+    href: '/portal/customer/goal-tracking/goals', // Default to goals
+    disabled: false,
+    hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
       {
         Icon: MdTrackChanges,
-        label: 'Tracker',
+        label: 'Cycle Dates',
         href: '/portal/customer/checkin/tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
       },
       {
         Icon: FiActivity,
-        label: 'Daily Check-in',
+        label: 'Symptoms Tracker',
         href: '/portal/customer/checkin/daily-tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/daily-tracker'),
       },
       {
         Icon: PiChartLine,
-        label: 'Cycle Insights',
+        label: 'Insights',
         href: '/portal/customer/checkin/cycle_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/cycle_insights'),
       },
-      // {
-      //   Icon: FiDroplet,
-      //   label: 'Periods Tracker',
-      //   href: '/portal/customer/checkin/periods_tracker',
-      //   isActive: pathname => pathname.includes('/portal/customer/checkin/periods_tracker'),
-      // },
-      // {
-      //   Icon: TbGenderTransgender,
-      //   label: 'Menopause',
-      //   href: '/portal/customer/checkin/menopause',
-      //   isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
-      // },
-    ],
+    ]
   },
 ];
 

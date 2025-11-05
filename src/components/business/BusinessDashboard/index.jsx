@@ -51,12 +51,12 @@ const BusinessDashboard = () => {
       icon: FiUsers,
       description: 'Manage your team members',
     },
-    {
-      id: TABS.CHECKIN,
-      name: 'Check-in',
-      icon: FiCheckCircle,
-      description: 'Wellness tracking and daily check-ins',
-    },
+    // {
+    //   id: TABS.CHECKIN,
+    //   name: 'Check-in',
+    //   icon: FiCheckCircle,
+    //   description: 'Wellness tracking and daily check-ins',
+    // },
     {
       id: TABS.SUBSCRIPTION,
       name: 'Subscription',

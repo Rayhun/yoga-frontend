@@ -86,14 +86,14 @@ function Page() {
               </div>
 
               {/* Additional Info */}
-              <div className="mt-8 text-center">
+              {/* <div className="mt-8 text-center">
                 <p className="text-sm text-gray-500">
                   Need help?{' '}
                   <Link href="/contact" className="text-green-600 hover:text-green-700 font-medium">
                     Contact Support
                 </Link>
-              </p>
-              </div>
+              </p> */}
+              {/* </div> */}
             </div>
           </div>
         </div>

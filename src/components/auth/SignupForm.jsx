@@ -65,79 +65,87 @@ const SignupForm = () => {
   const handleSubmit = async (values, formikBag) => {
     const { setSubmitting, setStatus, setFieldError, setTouched } = formikBag;
 
+    // Prevent form submission until user confirms
+    setSubmitting(true);
+
     try {
+      // Show confirmation popup
       await confirm({
+        heading: 'Confirm Sign Up',
         message:
           'One Time Password (OTP) will be sent to your entered email and phone number to verify your account. Are you sure you have entered your correct email and phone?',
-      }).then(async () => {
-        try {
-          const { email, password, confirm_password, terms, ...rest } = values;
-          const payload = {
-            email,
-            password,
-            profile: {
-              ...rest,
-            },
-          };
+      });
 
-          const { data: createdUserAccount } = await mutateAsync({ payload });
+      // Only proceed if user confirmed (clicked OK)
+      try {
+        const { email, password, confirm_password, terms, ...rest } = values;
+        const payload = {
+          email,
+          password,
+          profile: {
+            ...rest,
+          },
+        };
 
-          toast.success('Account created successfully and OTP sent to your email and phone');
+        const { data: createdUserAccount } = await mutateAsync({ payload });
 
-          const userDetails = createdUserAccount?.user;
-          sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
+        toast.success('Account created successfully and OTP sent to your email and phone');
 
-          router.push(
-            `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}&step=email`
-          );
-        } catch (error) {
-          if (error.response?.data?.message) {
-            const errorMessage = error.response.data.message;
+        const userDetails = createdUserAccount?.user;
+        sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
 
-            let fieldName = null;
+        router.push(
+          `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}&step=email`
+        );
+      } catch (error) {
+        if (error.response?.data?.message) {
+          const errorMessage = error.response.data.message;
 
-            if (
-              errorMessage.toLowerCase().includes('email') ||
-              errorMessage.toLowerCase().includes('expert')
-            ) {
-              fieldName = 'email';
-            } else if (
-              errorMessage.toLowerCase().includes('phone') ||
-              errorMessage.toLowerCase().includes('mobile')
-            ) {
-              fieldName = 'mobile_number';
-            } else if (errorMessage.toLowerCase().includes('password')) {
-              fieldName = 'password';
-            }
+          let fieldName = null;
 
-            if (fieldName) {
-              setFieldError(fieldName, errorMessage);
+          if (
+            errorMessage.toLowerCase().includes('email') ||
+            errorMessage.toLowerCase().includes('expert')
+          ) {
+            fieldName = 'email';
+          } else if (
+            errorMessage.toLowerCase().includes('phone') ||
+            errorMessage.toLowerCase().includes('mobile')
+          ) {
+            fieldName = 'mobile_number';
+          } else if (errorMessage.toLowerCase().includes('password')) {
+            fieldName = 'password';
+          }
 
-              const touchedFields = { ...formikBag.touched, [fieldName]: true };
-              setTouched(touchedFields, false);
-            } else {
-              setStatus({
-                success: false,
-                error: errorMessage,
-              });
-              toastApiError(error);
-            }
+          if (fieldName) {
+            setFieldError(fieldName, errorMessage);
+
+            const touchedFields = { ...formikBag.touched, [fieldName]: true };
+            setTouched(touchedFields, false);
           } else {
-            const generalError = error.message || 'An error occurred during signup';
             setStatus({
               success: false,
-              error: generalError,
+              error: errorMessage,
             });
             toastApiError(error);
           }
-        } finally {
-          setSubmitting(false);
+        } else {
+          const generalError = error.message || 'An error occurred during signup';
+          setStatus({
+            success: false,
+            error: generalError,
+          });
+          toastApiError(error);
         }
-      });
+      } finally {
+        setSubmitting(false);
+      }
     } catch (error) {
-      console.log('User cancelled the confirmation');
-    } finally {
+      // User cancelled or closed the popup - prevent form submission
+      console.log('User cancelled or closed the confirmation popup');
       setSubmitting(false);
+      // Don't submit the form - just return
+      return;
     }
   };
 

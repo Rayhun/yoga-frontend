@@ -6,7 +6,7 @@ import { MdOutlineDateRange } from 'react-icons/md';
 import Button from '@/components/common/Button';
 import dayjs from 'dayjs';
 import Calender from '@/components/common/Calender';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createTrackerActivity, getTracker } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
@@ -74,6 +74,37 @@ const SleepTracker = () => {
     setOpen(false);
   };
 
+  // Component to load existing data when date changes
+  const LoadExistingData = ({ date, setFieldValue, trackerData, tracker }) => {
+    useEffect(() => {
+      if (!date || !trackerData?.id) return;
+
+      try {
+        const dateStr = dayjs(date).format('YYYY-MM-DD');
+        
+        // Use existing tracker query data to find activity for the selected date
+        const activities = tracker?.data?.data?.activities || [];
+        const activityForDate = activities.find(
+          activity => dayjs(activity.date).format('YYYY-MM-DD') === dateStr
+        );
+        
+        if (activityForDate) {
+          // Populate form with existing data
+          setFieldValue('selected_option', activityForDate.selected_option || '');
+        } else {
+          // No existing data, reset to default
+          setFieldValue('selected_option', '');
+        }
+      } catch (error) {
+        console.error('Error loading existing data:', error);
+        // On error, reset to default
+        setFieldValue('selected_option', '');
+      }
+    }, [date, trackerData?.id, setFieldValue, tracker]);
+
+    return null;
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 min-h-screen">
       <LoadingWrapper isLoading={isFetching}>
@@ -104,7 +135,9 @@ const SleepTracker = () => {
         <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
             {({ setFieldValue, isSubmitting, errors, values }) => (
-              <Form className="flex flex-col gap-6">
+              <>
+                <LoadExistingData date={values.date} setFieldValue={setFieldValue} trackerData={trackerData} tracker={tracker} />
+                <Form className="flex flex-col gap-6">
                 {/* Description and Date Section */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
                   <div className="flex justify-between items-start mb-4">
@@ -123,7 +156,7 @@ const SleepTracker = () => {
                       </button>
                       <Calender
                         value={values.date}
-                        onChange={date => {
+                        onChnage={date => {
                           setFieldValue('date', date);
                           handleClose();
                         }}
@@ -214,6 +247,7 @@ const SleepTracker = () => {
                   </div>
                 </Button>
               </Form>
+              </>
             )}
           </Formik>
         </div>

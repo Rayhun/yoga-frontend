@@ -216,7 +216,7 @@ const ExpertQuickSteps = () => {
         )}
 
         {/* Help Section */}
-        <div className="mt-12 bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        {/* <div className="mt-12 bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Need Help Getting Started?
           </h3>
@@ -240,7 +240,7 @@ const ExpertQuickSteps = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

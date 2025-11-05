@@ -119,7 +119,7 @@ const ExpertsList = () => {
         cell: ({row}) => row?.original?.is_profile_complete ? 'Yes' : 'No',
       },
       {
-        header: 'Coaching/Consutation',
+        header: 'Coaching',
         accessorKey: 'is_profile_completed',
         cell: ({row}) => row?.original?.has_event_or_consult ? 'Yes' : 'No',
       },

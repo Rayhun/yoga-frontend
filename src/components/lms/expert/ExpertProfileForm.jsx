@@ -17,7 +17,7 @@ import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
+import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES, TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
@@ -61,12 +61,28 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   };
 
   const validationSchema = Yup.object({
-    first_name: Yup.string().required('Required!'),
-    middle_name: Yup.string(), // Only field that remains optional
-    last_name: Yup.string().required('Required!'),
+    first_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'First name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
+    middle_name: Yup.string()
+      .transform(value => (value ? value.trim() : value)), // Only field that remains optional
+    last_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Last name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
     email: Yup.string().email('Invalid email format').required('Required!'),
     title: Yup.string().required('Required!'),
-    business_name: Yup.string().required('Required!'),
+    business_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Business name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
     description: Yup.string()
       .required('Required!')
       .test('max_length', 'Your content must be between 25 and 150 words', value => {
@@ -96,9 +112,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       .integer('Experience must be a whole number')
       .min(0, 'Experience cannot be negative'),
     available: Yup.boolean(),
-    intro: Yup.string().required('Required!'),
-    linkedin: Yup.string(),
-    website: Yup.string().required('Required!'),
+    intro: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Intro cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
+    linkedin: Yup.string()
+      .transform(value => (value ? value.trim() : value)),
+    website: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Website URL cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -173,7 +200,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="title" label="Title" placeholder="Title" required />
+                  <FormikSelect name="title" label="Title" placeholder="Select Title" options={TITLE_OPTIONS} required />
                 </div>
                 <div className="w-full xl:w-1/2">
                   <FormikField name="business_name" label="Business Name" placeholder="Business Name" required />

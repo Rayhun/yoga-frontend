@@ -30,7 +30,12 @@ const TagForm = ({ selected }) => {
   };
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Required!'),
+    name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { getTrackerInfo, createPeriodDailyGoal, updatePeriodDailyGoal } from '@/services/private/customer/goal';
+import { getTrackerInfo, createPeriodDailyGoal, updatePeriodDailyGoal, listPeriodDailyGoals } from '@/services/private/customer/goal';
 import { useRouter } from 'next/navigation';
 import { MdOutlineDateRange } from 'react-icons/md';
 import Calender from '@/components/common/Calender';
@@ -299,6 +299,8 @@ const DailyTracker = () => {
 
   // Date picker handlers
   const handleDateChange = (date) => {
+    // Simply change the date - the useEffect will load existing data for that date
+    // If there are unsaved changes, they will be lost, but this is expected behavior
     setSelectedDate(date);
     setDatePickerOpen(false);
   };
@@ -377,6 +379,76 @@ const DailyTracker = () => {
 
     fetchTrackerConfig();
   }, []); // Only run once on mount
+
+  // Load existing data when selectedDate changes
+  useEffect(() => {
+    if (!trackerData || !selectedDate) return;
+
+    const loadExistingData = async () => {
+      try {
+        const dateStr = selectedDate.format('YYYY-MM-DD');
+        
+        // Fetch existing data for the selected date
+        const response = await listPeriodDailyGoals({
+          start_date: dateStr,
+          end_date: dateStr
+        });
+
+        if (response.data.status === 'success' && response.data.data && response.data.data.length > 0) {
+          // Found existing data for this date
+          const existing = response.data.data[0];
+          setExistingData(existing);
+          
+          // Populate form with existing data
+          if (existing.symptom_levels) {
+            setSymptomLevels(existing.symptom_levels);
+          } else {
+            // Initialize with default values
+            const initialSymptomLevels = {};
+            Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
+              initialSymptomLevels[symptom] = 1;
+            });
+            setSymptomLevels(initialSymptomLevels);
+          }
+          
+          if (existing.selected_symptoms) {
+            setSelectedSymptoms(existing.selected_symptoms);
+          } else {
+            setSelectedSymptoms([]);
+          }
+          
+          setHasUnsavedChanges(false);
+          setSaveStatus('idle');
+        } else {
+          // No existing data for this date, initialize with defaults
+          setExistingData(null);
+          
+          // Initialize symptom levels with default values
+          const initialSymptomLevels = {};
+          Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
+            initialSymptomLevels[symptom] = 1;
+          });
+          setSymptomLevels(initialSymptomLevels);
+          setSelectedSymptoms([]);
+          
+          setHasUnsavedChanges(false);
+          setSaveStatus('idle');
+        }
+      } catch (err) {
+        console.error('Error loading existing data:', err);
+        // On error, just initialize with defaults
+        const initialSymptomLevels = {};
+        Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
+          initialSymptomLevels[symptom] = 1;
+        });
+        setSymptomLevels(initialSymptomLevels);
+        setSelectedSymptoms([]);
+        setExistingData(null);
+      }
+    };
+
+    loadExistingData();
+  }, [selectedDate, trackerData]); // Load when date or tracker config changes
 
   // Handle symptom level changes
   const handleSymptomLevelChange = useCallback((symptom, level) => {
@@ -575,7 +647,7 @@ const DailyTracker = () => {
                 </button>
                 <Calender
                   value={selectedDate}
-                  onChange={handleDateChange}
+                  onChnage={handleDateChange}
                   isPopover={true}
                   open={datePickerOpen}
                   handleClose={handleCloseDatePicker}
