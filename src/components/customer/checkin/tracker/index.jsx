@@ -108,6 +108,7 @@ const Tracker = () => {
   const router = useRouter();
   const [periodStart, setPeriodStart] = useState(null);
   const [periodEnd, setPeriodEnd] = useState(null);
+  const [periodDates, setPeriodDates] = useState([]); // List of selected period dates
   const [trackerData, setTrackerData] = useState(null);
   const [cycleInfo, setCycleInfo] = useState(null);
   const [existingData, setExistingData] = useState(null);
@@ -121,6 +122,9 @@ const Tracker = () => {
   const [notificationTimer, setNotificationTimer] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
 
   // Show notification function
   const showNotification = useCallback((message, type = 'success') => {
@@ -204,6 +208,7 @@ const Tracker = () => {
           setSelectedRecordId(null);
           setPeriodStart(null);
           setPeriodEnd(null);
+          setPeriodDates([]);
           
           showNotification(`${monthData.length} existing record(s) found for this month!`, 'success');
         } else {
@@ -213,6 +218,7 @@ const Tracker = () => {
           setSelectedRecordId(null);
           setPeriodStart(null);
           setPeriodEnd(null);
+          setPeriodDates([]);
         }
       } catch (err) {
         console.error('Error fetching month data:', err);
@@ -229,34 +235,213 @@ const Tracker = () => {
     }
   }, [currentMonth, trackerData]); // Depend on currentMonth and trackerData
 
-  // Handle date selection
-  const handleDateChange = useCallback((date) => {
-    const formattedDate = date.format('YYYY-MM-DD');
-    const clickedDate = dayjs(formattedDate);
+  // Helper function to check if dates form a consecutive range
+  const checkConsecutiveRange = useCallback((dates) => {
+    if (!dates || !Array.isArray(dates) || dates.length < 2) return null;
+    const sorted = [...dates].sort();
+    const start = dayjs(sorted[0]);
+    const end = dayjs(sorted[sorted.length - 1]);
     
-    if (!periodStart) {
-      setPeriodStart(formattedDate);
-      setPeriodEnd(null);
-    } else if (periodStart && !periodEnd) {
-      const startDate = dayjs(periodStart);
-      
-      if (clickedDate.isSame(startDate, 'day')) {
-        setPeriodStart(null);
-        setPeriodEnd(null);
-      } else if (clickedDate.isBefore(startDate)) {
-        setPeriodStart(formattedDate);
-        setPeriodEnd(periodStart);
-      } else {
-        setPeriodEnd(formattedDate);
+    // Check if all dates between start and end are in the list
+    let current = start;
+    let allPresent = true;
+    while (current.isBefore(end) || current.isSame(end, 'day')) {
+      if (!sorted.includes(current.format('YYYY-MM-DD'))) {
+        allPresent = false;
+        break;
+      }
+      current = current.add(1, 'day');
+    }
+    
+    if (allPresent) {
+      return { start: sorted[0], end: sorted[sorted.length - 1] };
+    }
+    return null;
+  }, []);
+
+  // Handle date selection - show popup instead of directly updating
+  const handleDateChange = useCallback((date, event) => {
+    const formattedDate = date.format('YYYY-MM-DD');
+    
+    // Check if this day is outside the current viewing month
+    if (event?.target?.closest('.MuiPickersDay-dayOutsideMonth')) {
+      return; // Don't show popup for dates outside current month
+    }
+    
+    // Set the selected date and show popup
+    setSelectedDate(formattedDate);
+    
+    // Calculate popup position based on click event (optional, we'll center it anyway)
+    if (event?.nativeEvent?.target) {
+      try {
+        const rect = event.nativeEvent.target.getBoundingClientRect();
+        setPopupPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        });
+      } catch (e) {
+        // Fallback if getBoundingClientRect fails
+        setPopupPosition({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        });
       }
     } else {
-      setPeriodStart(formattedDate);
-      setPeriodEnd(null);
+      // Fallback position - center of screen
+      setPopupPosition({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+      });
     }
-  }, [periodStart, periodEnd]);
+    
+    setPopupOpen(true);
+  }, []);
 
-  // Get selected dates array
+  // Handle popup actions
+  const handlePopupAction = useCallback((action) => {
+    if (!selectedDate) {
+      setPopupOpen(false);
+      return;
+    }
+
+    const clickedDate = dayjs(selectedDate);
+    const dateStr = selectedDate;
+    
+    switch (action) {
+      case 'periodStart':
+        // Period Start - Reset all previous dates and set new start date
+        setPeriodDates([dateStr]);
+        setPeriodStart(dateStr);
+        setPeriodEnd(null); // Clear end date when setting new start
+        showNotification(`Period start set to ${dayjs(selectedDate).format('MMM DD, YYYY')}`, 'success');
+        break;
+        
+      case 'periodEnd':
+        // Period End - Validation: Must have start date first
+        if (!periodStart) {
+          showNotification('Please select a start date first before setting an end date.', 'error');
+          setPopupOpen(false);
+          setSelectedDate(null);
+          return;
+        }
+        
+        // Validation: End date must be after start date
+        const startDate = dayjs(periodStart);
+        if (clickedDate.isBefore(startDate) || clickedDate.isSame(startDate, 'day')) {
+          showNotification(`End date must be after the start date (${dayjs(periodStart).format('MMM DD, YYYY')}).`, 'error');
+          setPopupOpen(false);
+          setSelectedDate(null);
+          return;
+        }
+        
+        // Period End - Add date to list and set as end (creates a range)
+        setPeriodEnd(dateStr);
+        // Generate all dates between start and end
+        const allDates = [];
+        let current = startDate;
+        while (current.isBefore(clickedDate) || current.isSame(clickedDate, 'day')) {
+          allDates.push(current.format('YYYY-MM-DD'));
+          current = current.add(1, 'day');
+        }
+        setPeriodDates(allDates.sort());
+        showNotification(`Period end set to ${dayjs(selectedDate).format('MMM DD, YYYY')}`, 'success');
+        break;
+        
+      case 'periodDays':
+        // Period Days - Validation: Must have start date first
+        if (!periodStart) {
+          showNotification('Please select a start date first before adding period days.', 'error');
+          setPopupOpen(false);
+          setSelectedDate(null);
+          return;
+        }
+        
+        // Period Days - Add individual date to list (does NOT set end date - only Period End does that)
+        setPeriodDates(prev => {
+          const prevArray = prev || [];
+          if (prevArray.includes(dateStr)) {
+            // If date already exists, remove it
+            const newDates = prevArray.filter(d => d !== dateStr);
+            if (newDates.length === 0) {
+              // Clear everything if no dates left
+              setPeriodStart(null);
+              setPeriodEnd(null);
+            } else {
+              const sorted = [...newDates].sort();
+              // Update start to earliest date
+              setPeriodStart(sorted[0]);
+              // Only clear end if the removed date was the end date
+              if (periodEnd === dateStr) {
+                // Check if remaining dates form a consecutive range
+                const range = checkConsecutiveRange(sorted);
+                setPeriodEnd(range ? range.end : null);
+              }
+              // Otherwise, don't touch end date - it should only be set by "Period End" option
+            }
+            showNotification(`Date removed from period`, 'success');
+            return newDates;
+          } else {
+            // Validation: Check if date is sequential (next day after the last selected date)
+            if (prevArray.length > 0) {
+              const sorted = [...prevArray].sort();
+              const lastDate = dayjs(sorted[sorted.length - 1]);
+              const nextExpectedDate = lastDate.add(1, 'day');
+              
+              // Check if the clicked date is the next sequential date
+              if (!clickedDate.isSame(nextExpectedDate, 'day')) {
+                showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error');
+                setPopupOpen(false);
+                setSelectedDate(null);
+                return;
+              }
+            } else {
+              // If no previous dates, check if it's the next day after start date
+              const startDate = dayjs(periodStart);
+              const nextExpectedDate = startDate.add(1, 'day');
+              
+              if (!clickedDate.isSame(nextExpectedDate, 'day')) {
+                showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error');
+                setPopupOpen(false);
+                setSelectedDate(null);
+                return;
+              }
+            }
+            
+            // Add date to list
+            const newDates = [...prevArray, dateStr];
+            const sorted = [...new Set(newDates)].sort();
+            // Update start to earliest date
+            setPeriodStart(sorted[0]);
+            // Don't set end date at all - only "Period End" option should set it
+            // If there's already an end date and dates form a consecutive range, we can update it
+            // But only if this extends an existing consecutive range
+            if (periodEnd) {
+              const range = checkConsecutiveRange(sorted);
+              if (range && dayjs(dateStr).isAfter(dayjs(periodEnd))) {
+                // Only update if this extends an existing consecutive range
+                setPeriodEnd(dateStr);
+              }
+            }
+            // If no end date exists, don't set it - user must explicitly select "Period End"
+            showNotification(`Date added to period`, 'success');
+            return sorted;
+          }
+        });
+        break;
+        
+      default:
+        break;
+    }
+    
+    setPopupOpen(false);
+    setSelectedDate(null);
+  }, [selectedDate, periodStart, periodEnd, showNotification, checkConsecutiveRange]);
+
+  // Get selected dates array - use periodDates if available, otherwise calculate from start/end
   const getSelectedDates = useMemo(() => {
+    if (periodDates && Array.isArray(periodDates) && periodDates.length > 0) {
+      return periodDates;
+    }
     if (!periodStart) return [];
     if (!periodEnd) return [periodStart];
     
@@ -270,12 +455,12 @@ const Tracker = () => {
       current = current.add(1, 'day');
     }
     return dates;
-  }, [periodStart, periodEnd]);
+  }, [periodDates, periodStart, periodEnd]);
 
   // Save tracker data
   const handleSave = useCallback(async () => {
-    if (!periodStart) {
-      alert('Please select at least a start date for your period.');
+    if ((!periodDates || periodDates.length === 0) && !periodStart) {
+      alert('Please select at least one date for your period.');
       return;
     }
 
@@ -283,13 +468,20 @@ const Tracker = () => {
       setSaving(true);
 
       const payload = {
-        period_start: periodStart,
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
       
-      // Only include period_end if it's selected
-      if (periodEnd) {
-        payload.period_end = periodEnd;
+      // Send period_dates if available, otherwise fallback to period_start/period_end
+      if (periodDates && Array.isArray(periodDates) && periodDates.length > 0) {
+        payload.period_dates = periodDates;
+        // Always include period_end if it exists, so backend can use it
+        if (periodEnd) {
+          payload.period_end = periodEnd;
+        }
+      } else {
+        payload.period_start = periodStart;
+        // Always include period_end, even if null, so backend can clear it if needed
+        payload.period_end = periodEnd || null;
       }
 
       let response;
@@ -325,6 +517,7 @@ const Tracker = () => {
               setSelectedRecordId(updatedRecord.id);
               setPeriodStart(updatedRecord.period_start);
               setPeriodEnd(updatedRecord.period_end);
+              setPeriodDates(updatedRecord.period_dates || []);
             } else {
               // Clear selection if record not found
               setExistingData(null);
@@ -355,7 +548,7 @@ const Tracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, trackerData, existingData, currentMonth]);
+  }, [periodStart, periodEnd, periodDates, trackerData, existingData, currentMonth, showNotification]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {
@@ -368,8 +561,10 @@ const Tracker = () => {
     setSelectedRecordId(record.id);
     setExistingData(record);
     setPeriodStart(record.period_start);
-    setPeriodEnd(record.period_end);
-    showNotification(`Selected record for update: ${record.period_start} to ${record.period_end}`, 'success');
+    setPeriodEnd(record.period_end || null);
+    setPeriodDates(record.period_dates || []);
+    const endDateText = record.period_end ? ` to ${record.period_end}` : '';
+    showNotification(`Selected record for update: ${record.period_start}${endDateText}`, 'success');
   }, []);
 
   // Handle new record creation
@@ -378,22 +573,34 @@ const Tracker = () => {
     setExistingData(null);
     setPeriodStart(null);
     setPeriodEnd(null);
+    setPeriodDates([]);
     showNotification('Creating new record...', 'success');
   }, []);
 
   const renderDay = useCallback((day, _value, props) => {
-    const selectedDates = getSelectedDates;
+    const selectedDates = getSelectedDates || [];
     const dayFormatted = day.format('YYYY-MM-DD');
-    const isSelected = selectedDates.includes(dayFormatted);
+    const isSelected = Array.isArray(selectedDates) && selectedDates.includes(dayFormatted);
     
     // Check if this day is outside the current viewing month
     const isCurrentMonth = !props.outsideCurrentMonth;
     const isOtherMonth = props.outsideCurrentMonth;
     
-    // Determine if this is a start/end date or a mid-day
+    // Determine if this is a start/end date, mid-day in range, or individual date
     const isStartDate = periodStart && dayFormatted === periodStart;
     const isEndDate = periodEnd && dayFormatted === periodEnd;
-    const isMidDay = isSelected && !isStartDate && !isEndDate;
+    
+    // Check if this is part of a continuous range (between start and end)
+    const isInRange = periodStart && periodEnd && 
+      dayjs(dayFormatted).isAfter(dayjs(periodStart)) && 
+      dayjs(dayFormatted).isBefore(dayjs(periodEnd));
+    
+    // Check if this is an individual date (in periodDates but not in a range)
+    const isIndividualDate = periodDates && periodDates.length > 0 && 
+      periodDates.includes(dayFormatted) && 
+      !isStartDate && !isEndDate && !isInRange;
+    
+    const isMidDay = isSelected && (isInRange || isIndividualDate);
     
     // Set colors and border radius based on date type
     let backgroundColor = 'transparent';
@@ -406,17 +613,28 @@ const Tracker = () => {
         backgroundColor = '#dc2626'; // Red for start date
         textColor = '#ffffff';
         fontWeight = 600;
-        borderRadius = '50% 0 0 50%'; // Rounded left, straight right
+        // If there's a range, round left; otherwise full circle
+        borderRadius = (periodEnd && dayFormatted !== periodEnd) ? '50% 0 0 50%' : '50%';
       } else if (isEndDate) {
         backgroundColor = '#dc2626'; // Red for end date
         textColor = '#ffffff';
         fontWeight = 600;
-        borderRadius = '0 50% 50% 0'; // Straight left, rounded right
+        // If there's a range, round right; otherwise full circle
+        borderRadius = (periodStart && dayFormatted !== periodStart) ? '0 50% 50% 0' : '50%';
       } else if (isMidDay) {
-        backgroundColor = '#fce7f3'; // Light pink for mid-days
-        textColor = '#374151';
-        fontWeight = 500;
-        borderRadius = '0'; // Rectangular
+        if (isInRange) {
+          // Mid-day in a range - rectangular pink
+          backgroundColor = '#fbcfe8'; // Pink-200 for mid-days in range
+          textColor = '#374151';
+          fontWeight = 500;
+          borderRadius = '0'; // Rectangular
+        } else if (isIndividualDate) {
+          // Individual date - circular pink
+          backgroundColor = '#fbcfe8'; // Pink-200 for individual Period Days
+          textColor = '#374151';
+          fontWeight = 500;
+          borderRadius = '50%'; // Circular
+        }
       }
     }
     
@@ -447,7 +665,7 @@ const Tracker = () => {
           e.preventDefault();
           e.stopPropagation();
           if (isCurrentMonth) {
-            handleDateChange(day);
+            handleDateChange(day, e);
           }
         }}
         onMouseEnter={(e) => {
@@ -489,7 +707,7 @@ const Tracker = () => {
         )}
       </div>
     );
-  }, [getSelectedDates, handleDateChange, periodStart, periodEnd]);
+  }, [getSelectedDates, handleDateChange, periodStart, periodEnd, periodDates]);
 
   // Loading state
   if (loading) {
@@ -666,7 +884,7 @@ const Tracker = () => {
                     <div className={`text-lg font-bold mb-1 ${
                       selectedRecordId === record.id ? 'text-white' : 'text-gray-900'
                     }`}>
-                      {dayjs(record.period_start).format('MMM DD')} {record.period_end ? `- ${dayjs(record.period_end).format('MMM DD')}` : '(End date not set)'}
+                      {dayjs(record.period_start).format('MMM DD')} {record.period_end ? `- ${dayjs(record.period_end).format('MMM DD')}` : ''}
                     </div>
                     <div className={`text-sm ${
                       selectedRecordId === record.id ? 'text-white text-opacity-80' : 'text-gray-600'
@@ -788,7 +1006,10 @@ const Tracker = () => {
             slots={{
               day: (props) => renderDay(props.day, null, props)
             }}
-            onChange={handleDateChange}
+            onChange={(date) => {
+              // Prevent default onChange behavior - we handle it in renderDay onClick
+              // This is just to prevent the calendar from changing value
+            }}
             onMonthChange={(newMonth) => handleMonthChange(newMonth.format('YYYY-MM'))}
             showDaysOutsideCurrentMonth={true}
             fixedWeekNumber={6}
@@ -923,11 +1144,12 @@ const Tracker = () => {
                 <span className="text-sm font-medium text-gray-700">Period Days</span>
               </div>
             </div>
-            {(periodStart || periodEnd) && (
+            {(periodStart || periodEnd || (periodDates && periodDates.length > 0)) && (
               <button
                 onClick={() => {
                   setPeriodStart(null);
                   setPeriodEnd(null);
+                  setPeriodDates([]);
                 }}
                 className="text-green-500 hover:text-green-600 text-sm font-medium transition-colors"
               >
@@ -942,9 +1164,9 @@ const Tracker = () => {
       <div className="flex justify-center items-center mt-8">
         <button
           onClick={handleSave}
-          disabled={saving || !periodStart}
+          disabled={saving || (!periodStart && (!periodDates || periodDates.length === 0))}
           className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 ${
-            saving || !periodStart
+            saving || (!periodStart && (!periodDates || periodDates.length === 0))
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl'
           }`}
@@ -994,6 +1216,84 @@ const Tracker = () => {
           <p className="text-gray-600 text-sm">Navigate between calendar and daily tracking for comprehensive cycle monitoring.</p>
         </div>
       </div>
+
+      {/* Date Selection Popup */}
+      {popupOpen && selectedDate && (
+        <div 
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+          onClick={() => {
+            setPopupOpen(false);
+            setSelectedDate(null);
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-all duration-300 scale-100"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10001,
+            }}
+          >
+            {/* Header */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Select Action</h3>
+              <p className="text-sm text-gray-600">
+                Date: <span className="font-semibold text-gray-900">{dayjs(selectedDate).format('MMMM DD, YYYY')}</span>
+              </p>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-3">
+              {/* Period Start Option */}
+              <button
+                onClick={() => handlePopupAction('periodStart')}
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <div className="w-5 h-5 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+                Period Start
+              </button>
+
+              {/* Period End Option */}
+              <button
+                onClick={() => handlePopupAction('periodEnd')}
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <div className="w-5 h-5 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+                Period End
+              </button>
+
+              {/* Period Days Option - Continue/Extend */}
+              <button
+                onClick={() => handlePopupAction('periodDays')}
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <div className="w-5 h-5 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+                Period Days
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setPopupOpen(false);
+                setSelectedDate(null);
+              }}
+              className="mt-4 w-full px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Interactive Notification Toast */}
       {notification && (
