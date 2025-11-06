@@ -18,11 +18,16 @@ import {
   FiInfo
 } from 'react-icons/fi';
 import Spinner from '@/components/common/loader/Spinner';
+import useAuthContext from '@/hooks/useAuthContext';
 
 const CustomerSubscriptionList = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [selectedReasons, setSelectedReasons] = useState([]);
+  const [otherReason, setOtherReason] = useState('');
+  const [isCancelledConfirmed, setIsCancelledConfirmed] = useState(false);
 
   // Fetch subscription status
   const { 
@@ -65,14 +70,27 @@ const CustomerSubscriptionList = () => {
 
   const handleCancel = () => {
     setShowCancelModal(true);
+    setIsCancelledConfirmed(false);
+    setSelectedReasons([]);
+    setOtherReason('');
   };
 
   const confirmCancel = async () => {
     setShowCancelModal(false);
     try {
+      // TODO: Send cancellation reasons if API supports it
+      // await cancelSubscription({ reasons: selectedReasons, other_reason: otherReason });
       await cancelSubscription();
     } catch (error) {
       // Error is handled by onError callback
+    }
+  };
+
+  const handleReasonToggle = (reason) => {
+    if (selectedReasons.includes(reason)) {
+      setSelectedReasons(selectedReasons.filter(r => r !== reason));
+    } else {
+      setSelectedReasons([...selectedReasons, reason]);
     }
   };
 
@@ -170,7 +188,7 @@ const CustomerSubscriptionList = () => {
               {/* Member Since Badge */}
               {subscription?.start_at && (
                 <div className="mb-6">
-                  <div className="bg-gradient-to-r from-blue-600 to-red-600 rounded-lg px-4 py-2.5 inline-block">
+                  <div className="bg-gradient-to-r from-green-500 to-green-700 rounded-lg px-4 py-2.5 inline-block">
                     <p className="text-white font-semibold text-sm">
                       Member since {new Date(subscription.start_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </p>
@@ -218,7 +236,7 @@ const CustomerSubscriptionList = () => {
                     <button
                       onClick={handleCancel}
                       disabled={isCancelling}
-                      className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+                      className="bg-[#F2F2F2] hover:bg-[#E5E5E5] disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
                     >
                       {isCancelling ? (
                         <Spinner size="sm" />
@@ -266,78 +284,161 @@ const CustomerSubscriptionList = () => {
       {/* Cancel Confirmation Modal */}
       {showCancelModal && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn overflow-y-auto"
           onClick={(e) => {
-            if (e.target === e.currentTarget) {
+            if (e.target === e.currentTarget && !isCancelledConfirmed) {
               setShowCancelModal(false);
             }
           }}
         >
           <div 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full animate-scaleIn relative"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full animate-scaleIn relative my-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              {/* Close Button */}
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
-                aria-label="Close"
-              >
-                <FiXCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </button>
-              {/* Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                  <FiXCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
-                </div>
-              </div>
-              
-              {/* Title */}
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-3">
-                Cancel Membership?
-              </h3>
-              
-              {/* Message */}
-              <div className="mb-6">
-                <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
-                  Are you sure you want to cancel your membership?
-                </p>
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <FiInfo className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-blue-800 dark:text-blue-300">
-                      Your subscription will remain active until <span className="font-semibold">{formatDate(subscription?.expires_at)}</span>. 
-                      You can reactivate it anytime before then.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Actions */}
-              <div className="flex gap-3">
+            {!isCancelledConfirmed ? (
+              // Step 1: Confirmation
+              <div className="p-6">
+                {/* Close Button */}
                 <button
                   onClick={() => setShowCancelModal(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
+                  aria-label="Close"
                 >
-                  Keep Membership
+                  <FiXCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </button>
-                <button
-                  onClick={confirmCancel}
-                  disabled={isCancelling}
-                  className="flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                >
-                  {isCancelling ? (
-                    <>
-                      <Spinner size="sm" />
-                      <span>Cancelling...</span>
-                    </>
-                  ) : (
-                    'Yes, Cancel'
-                  )}
-                </button>
+                
+                {/* Title */}
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-3">
+                  Cancel Membership?
+                </h3>
+                
+                {/* Message */}
+                <div className="mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
+                    Are you sure you want to cancel your membership?
+                  </p>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <FiInfo className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
+                        Your subscription will remain active until <span className="font-semibold">{formatDate(subscription?.expires_at)}</span>. 
+                        You can reactivate it anytime before then.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    Keep Membership
+                  </button>
+                  <button
+                    onClick={() => setIsCancelledConfirmed(true)}
+                    className="flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg"
+                  >
+                    Yes, Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              // Step 2: Cancellation Confirmation & Feedback
+              <div className="p-6">
+                {/* Close Button */}
+                <button
+                  onClick={() => {
+                    setShowCancelModal(false);
+                    setIsCancelledConfirmed(false);
+                  }}
+                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
+                  aria-label="Close"
+                >
+                  <FiXCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
+
+                {/* Confirmation Message */}
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    We've canceled your membership
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-2">
+                    Your email confirmation will be sent to {user?.email || 'your email'}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    You may continue to access all content and features until {formatDate(subscription?.expires_at)}.
+                  </p>
+                </div>
+
+                {/* Feedback Section */}
+                <div className="mb-6">
+                  <p className="text-gray-700 dark:text-gray-300 font-medium mb-4">
+                    We're always improving our service and your feedback matters.
+                  </p>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Why did you cancel your membership with us? (Select all that apply)
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    {[
+                      "Too busy right now — I can’t keep up with the programs.",
+                      "Didn’t find the right expert or topic for me.",
+                      "It feels expensive for what I’m using.",
+                      "I didn’t see enough progress or motivation.",
+                      "I’m focusing on something else for my health right now.",
+                      "Other please specify"
+                    ].map((reason, index) => (
+                      <div key={index} className={reason === "Other please specify" ? "flex flex-col gap-2" : "flex items-start gap-3"}>
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            id={`reason-${index}`}
+                            checked={selectedReasons.includes(reason)}
+                            onChange={() => handleReasonToggle(reason)}
+                            className="mt-1 h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                          />
+                          <label 
+                            htmlFor={`reason-${index}`}
+                            className="flex-1 text-gray-700 dark:text-gray-300 cursor-pointer"
+                          >
+                            {reason}
+                          </label>
+                        </div>
+                        {reason === "Other please specify" && selectedReasons.includes(reason) && (
+                          <input
+                            type="text"
+                            value={otherReason}
+                            onChange={(e) => setOtherReason(e.target.value)}
+                            placeholder="Please specify..."
+                            className="ml-7 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={confirmCancel}
+                    disabled={isCancelling}
+                    className="px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 bg-primary hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-md hover:shadow-lg flex items-center gap-2"
+                  >
+                    {isCancelling ? (
+                      <>
+                        <Spinner size="sm" />
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      'Done'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
