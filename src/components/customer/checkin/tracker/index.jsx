@@ -187,7 +187,6 @@ const Tracker = () => {
     };
 
     fetchTrackerConfig();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only run once on mount
 
   // Fetch existing period data when month changes
@@ -234,7 +233,7 @@ const Tracker = () => {
     if (trackerData) {
       fetchMonthData();
     }
-  }, [currentMonth, trackerData, showNotification]); // Depend on currentMonth and trackerData
+  }, [currentMonth, trackerData]); // Depend on currentMonth and trackerData
 
   // Helper function to check if dates form a consecutive range
   const checkConsecutiveRange = useCallback((dates) => {
@@ -475,10 +474,6 @@ const Tracker = () => {
       // Send period_dates if available, otherwise fallback to period_start/period_end
       if (periodDates && Array.isArray(periodDates) && periodDates.length > 0) {
         payload.period_dates = periodDates;
-        // Always include period_end if it exists, so backend can use it
-        if (periodEnd) {
-          payload.period_end = periodEnd;
-        }
       } else {
         payload.period_start = periodStart;
         // Always include period_end, even if null, so backend can clear it if needed
@@ -549,7 +544,7 @@ const Tracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, periodDates, trackerData, cycleInfo?.tracker_name, existingData, selectedRecordId, currentMonth, showNotification]);
+  }, [periodStart, periodEnd, periodDates, trackerData, existingData, currentMonth, showNotification]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {
@@ -566,7 +561,7 @@ const Tracker = () => {
     setPeriodDates(record.period_dates || []);
     const endDateText = record.period_end ? ` to ${record.period_end}` : '';
     showNotification(`Selected record for update: ${record.period_start}${endDateText}`, 'success');
-  }, [showNotification]);
+  }, []);
 
   // Handle new record creation
   const handleNewRecord = useCallback(() => {
@@ -576,7 +571,7 @@ const Tracker = () => {
     setPeriodEnd(null);
     setPeriodDates([]);
     showNotification('Creating new record...', 'success');
-  }, [showNotification]);
+  }, []);
 
   const renderDay = useCallback((day, _value, props) => {
     const selectedDates = getSelectedDates || [];

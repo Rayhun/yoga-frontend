@@ -378,7 +378,6 @@ const DailyTracker = () => {
     };
 
     fetchTrackerConfig();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
   // Load existing data when selectedDate changes
@@ -534,7 +533,7 @@ const DailyTracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [symptomLevels, selectedSymptoms, trackerData, cycleInfo?.tracker_name, existingData, showNotification, selectedDate]);
+  }, [symptomLevels, selectedSymptoms, trackerData, existingData, showNotification, selectedDate]);
 
   // Loading state
   if (loading) {

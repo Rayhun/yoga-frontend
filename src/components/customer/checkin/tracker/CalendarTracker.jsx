@@ -161,7 +161,6 @@ const CalendarTracker = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMonth]);
 
   // Handle date selection
@@ -271,7 +270,7 @@ const CalendarTracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, trackerData, cycleInfo?.tracker_name, existingData, currentMonth, showNotification]);
+  }, [periodStart, periodEnd, trackerData, existingData, currentMonth]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {
