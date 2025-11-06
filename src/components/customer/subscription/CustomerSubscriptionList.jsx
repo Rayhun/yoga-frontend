@@ -362,7 +362,7 @@ const CustomerSubscriptionList = () => {
                 {/* Confirmation Message */}
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    We've canceled your membership
+                    We&apos;ve canceled your membership
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-2">
                     Your email confirmation will be sent to {user?.email || 'your email'}
@@ -375,7 +375,7 @@ const CustomerSubscriptionList = () => {
                 {/* Feedback Section */}
                 <div className="mb-6">
                   <p className="text-gray-700 dark:text-gray-300 font-medium mb-4">
-                    We're always improving our service and your feedback matters.
+                    We&apos;re always improving our service and your feedback matters.
                   </p>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Why did you cancel your membership with us? (Select all that apply)
@@ -487,7 +487,7 @@ const CustomerSubscriptionList = () => {
                   <div className="flex items-start gap-3">
                     <FiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
                     <p className="text-sm text-green-800 dark:text-green-300">
-                      Your subscription will continue to auto-renew. You'll continue to have access to all features until 
+                      Your subscription will continue to auto-renew. You&apos;ll continue to have access to all features until 
                       <span className="font-semibold"> {formatDate(subscription?.expires_at)}</span>.
                     </p>
                   </div>

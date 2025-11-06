@@ -45,7 +45,7 @@ function Page() {
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Keep your account secure. Enter your email address and we'll send you a link to reset your password
+                  Keep your account secure. Enter your email address and we&apos;ll send you a link to reset your password
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">

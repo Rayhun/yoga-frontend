@@ -60,7 +60,7 @@ const ForgotPasswordForm = () => {
           {/* Info Alert */}
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
             <p className="text-sm text-blue-800 leading-relaxed">
-              <span className="font-semibold">💡 Tip:</span> If you don't receive the email in 10 seconds, please check your spam folder.
+              <span className="font-semibold">💡 Tip:</span> If you don&apos;t receive the email in 10 seconds, please check your spam folder.
             </p>
           </div>
 
