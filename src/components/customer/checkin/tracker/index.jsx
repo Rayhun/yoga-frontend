@@ -127,15 +127,20 @@ const Tracker = () => {
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
 
   // Show notification function
-  const showNotification = useCallback((message, type = 'success') => {
-    console.log('Showing notification:', { message, type });
+  // duration: 'short' (800ms) for calendar actions, 'long' (4000ms) for other notifications
+  const showNotification = useCallback((message, type = 'success', duration = 'long') => {
+    console.log('Showing notification:', { message, type, duration });
     
     // Clear any existing timer
     if (notificationTimer) {
       clearInterval(notificationTimer);
     }
     
-    setNotification({ message, type, progress: 100 });
+    // Set duration: 'short' = 400ms (less than 1 second), 'long' = 4000ms (4 seconds)
+    const durationMs = duration === 'short' ? 800 : 1000;
+    const progressStep = duration === 'short' ? 25 : 12.5; // 400ms: 25% per 100ms (4 intervals), 800ms: 12.5% per 100ms (8 intervals)
+    
+    setNotification({ message, type, progress: 100, duration: durationMs });
     setIsHovered(false);
     setIsPaused(false);
     
@@ -143,7 +148,7 @@ const Tracker = () => {
     let progress = 100;
     const timer = setInterval(() => {
       if (!isPaused) {
-        progress -= 2.5; // 4 seconds = 100% / 40 intervals of 100ms
+        progress -= progressStep;
         setNotification(prev => prev ? { ...prev, progress } : null);
         
         if (progress <= 0) {
@@ -161,7 +166,7 @@ const Tracker = () => {
       clearInterval(timer);
       setNotification(null);
       setNotificationTimer(null);
-    }, 4000);
+    }, durationMs);
   }, [notificationTimer, isPaused]);
 
   // Fetch tracker configuration (only once on component mount)
@@ -307,30 +312,37 @@ const Tracker = () => {
     const clickedDate = dayjs(selectedDate);
     const dateStr = selectedDate;
     
+    // Close popup immediately to allow calendar interactions
+    setPopupOpen(false);
+    setSelectedDate(null);
+    
     switch (action) {
       case 'periodStart':
         // Period Start - Reset all previous dates and set new start date
         setPeriodDates([dateStr]);
         setPeriodStart(dateStr);
         setPeriodEnd(null); // Clear end date when setting new start
-        showNotification(`Period start set to ${dayjs(selectedDate).format('MMM DD, YYYY')}`, 'success');
+        // Show notification after state updates - short duration for calendar actions
+        // setTimeout(() => {
+        //   showNotification(`Period start set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
+        // }, 0);
         break;
         
       case 'periodEnd':
         // Period End - Validation: Must have start date first
         if (!periodStart) {
-          showNotification('Please select a start date first before setting an end date.', 'error');
-          setPopupOpen(false);
-          setSelectedDate(null);
+          setTimeout(() => {
+            showNotification('Please select a start date first before setting an end date.', 'error', 'short');
+          }, 0);
           return;
         }
         
         // Validation: End date must be after start date
         const startDate = dayjs(periodStart);
         if (clickedDate.isBefore(startDate) || clickedDate.isSame(startDate, 'day')) {
-          showNotification(`End date must be after the start date (${dayjs(periodStart).format('MMM DD, YYYY')}).`, 'error');
-          setPopupOpen(false);
-          setSelectedDate(null);
+          setTimeout(() => {
+            showNotification(`End date must be after the start date (${dayjs(periodStart).format('MMM DD, YYYY')}).`, 'error', 'short');
+          }, 0);
           return;
         }
         
@@ -344,15 +356,18 @@ const Tracker = () => {
           current = current.add(1, 'day');
         }
         setPeriodDates(allDates.sort());
-        showNotification(`Period end set to ${dayjs(selectedDate).format('MMM DD, YYYY')}`, 'success');
+        // Show notification after state updates - short duration for calendar actions
+        // setTimeout(() => {
+        //   showNotification(`Period end set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
+        // }, 0);
         break;
         
       case 'periodDays':
         // Period Days - Validation: Must have start date first
         if (!periodStart) {
-          showNotification('Please select a start date first before adding period days.', 'error');
-          setPopupOpen(false);
-          setSelectedDate(null);
+          setTimeout(() => {
+            showNotification('Please select a start date first before adding period days.', 'error', 'short');
+          }, 0);
           return;
         }
         
@@ -378,7 +393,10 @@ const Tracker = () => {
               }
               // Otherwise, don't touch end date - it should only be set by "Period End" option
             }
-            showNotification(`Date removed from period`, 'success');
+            // Show notification after state updates - short duration for calendar actions
+            // setTimeout(() => {
+            //   showNotification(`Date removed from period`, 'success', 'short');
+            // }, 0);
             return newDates;
           } else {
             // Validation: Check if date is sequential (next day after the last selected date)
@@ -389,10 +407,10 @@ const Tracker = () => {
               
               // Check if the clicked date is the next sequential date
               if (!clickedDate.isSame(nextExpectedDate, 'day')) {
-                showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error');
-                setPopupOpen(false);
-                setSelectedDate(null);
-                return;
+                setTimeout(() => {
+                  showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error', 'short');
+                }, 0);
+                return prevArray;
               }
             } else {
               // If no previous dates, check if it's the next day after start date
@@ -400,10 +418,10 @@ const Tracker = () => {
               const nextExpectedDate = startDate.add(1, 'day');
               
               if (!clickedDate.isSame(nextExpectedDate, 'day')) {
-                showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error');
-                setPopupOpen(false);
-                setSelectedDate(null);
-                return;
+                setTimeout(() => {
+                  showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error', 'short');
+                }, 0);
+                return prevArray;
               }
             }
             
@@ -423,7 +441,10 @@ const Tracker = () => {
               }
             }
             // If no end date exists, don't set it - user must explicitly select "Period End"
-            showNotification(`Date added to period`, 'success');
+            // Show notification after state updates - short duration for calendar actions
+            // setTimeout(() => {
+            //   showNotification(`Date added to period`, 'success', 'short');
+            // }, 0);
             return sorted;
           }
         });
@@ -432,9 +453,6 @@ const Tracker = () => {
       default:
         break;
     }
-    
-    setPopupOpen(false);
-    setSelectedDate(null);
   }, [selectedDate, periodStart, periodEnd, showNotification, checkConsecutiveRange]);
 
   // Get selected dates array - use periodDates if available, otherwise calculate from start/end
@@ -471,13 +489,23 @@ const Tracker = () => {
         tracker_name: trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'
       };
       
-      // Send period_dates if available, otherwise fallback to period_start/period_end
+      // Send period_dates if available
       if (periodDates && Array.isArray(periodDates) && periodDates.length > 0) {
         payload.period_dates = periodDates;
-      } else {
+      }
+      
+      // Always include period_start when it's set
+      if (periodStart) {
         payload.period_start = periodStart;
-        // Always include period_end, even if null, so backend can clear it if needed
-        payload.period_end = periodEnd || null;
+      }
+      
+      // Always include period_end when user selects an end date, so backend receives it
+      // This ensures end date is sent even when period_dates is also included
+      if (periodEnd) {
+        payload.period_end = periodEnd;
+      } else {
+        // Include null to clear end date if needed
+        payload.period_end = null;
       }
 
       let response;
@@ -1309,6 +1337,7 @@ const Tracker = () => {
             minWidth: '320px',
             maxWidth: '420px',
             borderRadius: '16px',
+            pointerEvents: 'auto', // Only capture events within notification bounds
             boxShadow: isHovered ? `
               0 25px 50px -12px rgba(0, 0, 0, 0.25),
               0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -1329,8 +1358,9 @@ const Tracker = () => {
             setIsHovered(false);
             setIsPaused(false);
           }}
-          onClick={() => {
-            // Click to dismiss
+          onClick={(e) => {
+            // Click to dismiss - stop propagation to prevent interfering with calendar
+            e.stopPropagation();
             if (notificationTimer) {
               clearInterval(notificationTimer);
               setNotificationTimer(null);
@@ -1391,7 +1421,7 @@ const Tracker = () => {
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-white text-xs opacity-80">
-                  {isPaused ? 'Paused' : `${Math.round(notification.progress / 25)}s remaining`}
+                  {isPaused ? 'Paused' : `${((notification.progress / 100) * (notification.duration || 4000) / 1000).toFixed(1)}s remaining`}
                 </p>
                 {isPaused && (
                   <div className="flex gap-1">

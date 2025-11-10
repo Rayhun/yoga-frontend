@@ -343,7 +343,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
                     : 'text-nav-item hover:text-primary'
                 }`}
-                href={'/portal/ai-chat?type=support'}
+                href={'/portal/help-support'}
               >
                 <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
                   <MdOutlineContactSupport size={24} />

@@ -46,7 +46,7 @@ const MessagesList = () => {
   }, [messages]);
 
   return (
-    <div className="h-[calc(80vh-180px)] bg-gradient-to-b from-[rgba(239,233,224,0.54)] to-[rgba(239,233,224,0.3)]">
+    <div className="h-[calc(80vh-180px)]" style={{ backgroundColor: '#EDE6DE' }}>
       <LoadingWrapper isLoading={isLoadingMessages}>
         <div className="no-scrollbar max-h-full space-y-3.5 overflow-auto px-6 py-7.5 pb-24">
           {[...messages].map((message, index) => (

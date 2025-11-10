@@ -158,10 +158,7 @@ const MessagesList = () => {
     <div 
       className="flex-1 overflow-hidden relative"
       style={{
-        backgroundImage: 'url(/images/bg-whatsapp.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundColor: '#EDE6DE'
       }}
     >
       <LoadingWrapper isLoading={isLoadingMessages}>
