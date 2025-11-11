@@ -46,7 +46,7 @@ const Page = () => {
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Sign up for free to start guiding mid-age women through life's transitions — and turn your passion into profit.
+                  Sign up for free to start guiding mid-age women through life&apos;s transitions — and turn your passion into profit.
                 </p>
 
                 <div className="mt-8 w-full max-w-md mx-auto">

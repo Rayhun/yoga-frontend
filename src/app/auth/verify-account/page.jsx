@@ -45,7 +45,7 @@ function Page() {
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  We've sent verification codes to your email and phone number. Enter them to complete your registration and start your wellness journey.
+                  We&apos;ve sent verification codes to your email and phone number. Enter them to complete your registration and start your wellness journey.
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">
