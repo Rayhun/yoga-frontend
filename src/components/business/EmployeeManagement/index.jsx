@@ -5,7 +5,8 @@ import {
   getEmployeesList, 
   createEmployee, 
   updateEmployee, 
-  deleteEmployee 
+  deleteEmployee,
+  uploadEmployeesCSV
 } from '@/services/private/user/employees';
 import { getBusinessSubscription } from '@/services/private/business/subscription';
 import { toast } from 'react-toastify';
@@ -15,13 +16,19 @@ import EmployeeList from './EmployeeList';
 import EmployeeForm from './EmployeeForm';
 import EmployeeWellnessDashboard from '../EmployeeWellnessDashboard';
 import Button from '@/components/common/Button';
-import { FiPlus, FiUsers, FiActivity } from 'react-icons/fi';
+import { FiPlus, FiUsers, FiActivity, FiUpload } from 'react-icons/fi';
+import useModal from '@/hooks/useModal';
+import FileSelectorForm from '@/components/common/form/FileSelectorForm';
 
 const EmployeeManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [activeView, setActiveView] = useState('employees'); // 'employees' or 'wellness'
+  const [uploadingCSV, setUploadingCSV] = useState(false);
+  const [csvUploadResults, setCsvUploadResults] = useState(null);
+  const [showCsvResults, setShowCsvResults] = useState(false);
   const queryClient = useQueryClient();
+  const { render: modal } = useModal();
 
   // Fetch employees list
   const { 
@@ -123,6 +130,121 @@ const EmployeeManagement = () => {
     setEditingEmployee(null);
   };
 
+  // CSV Upload handler using modal popup
+  const handleCSVUpload = async () => {
+    try {
+      // Show modal popup for file selection
+      const selectedFile = await new Promise(async (resolve) => {
+        await modal({
+          heading: 'Upload Employees CSV',
+          size: 'md',
+          content: (
+            <div className="space-y-6">
+              {/* Instructions Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2">CSV Format Requirements</h4>
+                    <div className="space-y-1 text-xs text-blue-800">
+                      <p><span className="font-semibold">Required columns:</span> email, first_name, mobile_number, employee_id, password</p>
+                      <p><span className="font-semibold">Optional columns:</span> last_name</p>
+                      <p className="mt-2 text-blue-700">Password must be at least 6 characters long</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sample CSV Download */}
+              <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Need a sample file?</span>
+                </div>
+                <button
+                  onClick={() => {
+                    // Create sample CSV content
+                    const sampleCSV = `email,first_name,last_name,mobile_number,employee_id,password
+john.doe@example.com,John,Doe,+1234567890,EMP001,password123
+jane.smith@example.com,Jane,Smith,+1234567891,EMP002,password456`;
+                    const blob = new Blob([sampleCSV], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'employee_sample.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    toast.success('Sample CSV file downloaded');
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Sample CSV
+                </button>
+              </div>
+
+              {/* File Upload Form */}
+              <FileSelectorForm
+                accept={{
+                  'text/csv': ['.csv'],
+                }}
+                validationError="Only CSV files are accepted"
+                validate={value => value && (value.type.includes('csv') || value.name.endsWith('.csv'))}
+                onSubmit={resolve}
+                maxSize={5 * 1024 * 1024} // 5MB
+              />
+            </div>
+          ),
+        });
+      });
+
+      if (!selectedFile) return;
+
+      setUploadingCSV(true);
+      setCsvUploadResults(null);
+      setShowCsvResults(false);
+
+      const response = await uploadEmployeesCSV(selectedFile);
+      
+      if (response.data.status === 'success') {
+        const data = response.data.data;
+        setCsvUploadResults(data);
+        setShowCsvResults(true);
+        
+        // Invalidate employees query to refresh the list
+        queryClient.invalidateQueries([queryKeys.employees]);
+        
+        // Show success message
+        if (data.success_count > 0) {
+          toast.success(response.data.message);
+        } else {
+          toast.error(response.data.message);
+        }
+      } else {
+        toast.error(response.data.message || 'Failed to upload CSV file');
+      }
+    } catch (error) {
+      // User cancelled the modal or error occurred
+      console.error('CSV upload error:', error);
+      if (error?.response) {
+        const errorMessage = error.response?.data?.message || 'Failed to upload CSV file. Please try again.';
+        toast.error(errorMessage);
+      }
+    } finally {
+      setUploadingCSV(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -185,23 +307,161 @@ const EmployeeManagement = () => {
             </div>
             
             {activeView === 'employees' && (
-              <Button
-                onClick={handleAddEmployee}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  canAddEmployee 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                size="lg"
-                disabled={!canAddEmployee}
-              >
-                <FiPlus className="h-5 w-5" />
-                {canAddEmployee ? 'Add Employee' : 'Limit Reached'}
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={handleCSVUpload}
+                  disabled={uploadingCSV || !canAddEmployee}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    (uploadingCSV || !canAddEmployee)
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
+                  }`}
+                  size="lg"
+                >
+                  {uploadingCSV ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <FiUpload className="h-5 w-5" />
+                      Upload CSV
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleAddEmployee}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                    canAddEmployee 
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  size="lg"
+                  disabled={!canAddEmployee}
+                >
+                  <FiPlus className="h-5 w-5" />
+                  {canAddEmployee ? 'Add Employee' : 'Limit Reached'}
+                </Button>
+              </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* CSV Upload Results Modal */}
+      {showCsvResults && csvUploadResults && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[calc(100vh-4rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">CSV Upload Results</h3>
+                <button
+                  onClick={() => setShowCsvResults(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <div className="text-sm text-blue-600 font-medium mb-1">Total Rows</div>
+                  <div className="text-2xl font-bold text-blue-900">{csvUploadResults.total_rows}</div>
+                </div>
+                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                  <div className="text-sm text-green-600 font-medium mb-1">Success</div>
+                  <div className="text-2xl font-bold text-green-900">{csvUploadResults.success_count}</div>
+                </div>
+                <div className="bg-red-50 rounded-xl p-4 border border-red-200">
+                  <div className="text-sm text-red-600 font-medium mb-1">Failed</div>
+                  <div className="text-2xl font-bold text-red-900">{csvUploadResults.failed_count}</div>
+                </div>
+              </div>
+
+              {/* Failed Records */}
+              {csvUploadResults.failed && csvUploadResults.failed.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Failed Records</h4>
+                  <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Row</th>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Email</th>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Error</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {csvUploadResults.failed.map((item, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-4 py-2 text-gray-600">{item.row}</td>
+                            <td className="px-4 py-2 text-gray-600">{item.email}</td>
+                            <td className="px-4 py-2 text-red-600">{item.error}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Success Records */}
+              {csvUploadResults.success && csvUploadResults.success.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Successfully Created</h4>
+                  <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Row</th>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Email</th>
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {csvUploadResults.success.map((item, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-4 py-2 text-gray-600">{item.row}</td>
+                            <td className="px-4 py-2 text-gray-600">{item.email}</td>
+                            <td className="px-4 py-2 text-green-600 font-medium">✓ Created</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* CSV Format Info */}
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">CSV Format</h4>
+                <p className="text-sm text-gray-600 mb-2">
+                  Required columns: <span className="font-semibold">email</span>, <span className="font-semibold">first_name</span>, <span className="font-semibold">mobile_number</span>, <span className="font-semibold">employee_id</span>, <span className="font-semibold">password</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Optional columns: <span className="font-semibold">last_name</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Password must be at least 6 characters long.
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <Button
+                  onClick={() => setShowCsvResults(false)}
+                  className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Employee Form Modal */}
       {showForm && (

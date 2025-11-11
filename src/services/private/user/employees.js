@@ -21,3 +21,13 @@ export const updateEmployee = async ({ id, data }) => {
 export const deleteEmployee = async ({ id }) => {
   return axios.delete(`/auth/employees/${id}/`);
 };
+
+export const uploadEmployeesCSV = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return axios.post('/auth/employees/upload-csv/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

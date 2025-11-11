@@ -3,12 +3,17 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Popover } from '@mui/material';
+import dayjs from 'dayjs';
 
-const Calender = ({ value, onChnage, isPopover, open, handleClose, anchorEl, ...props }) => {
+const Calender = ({ value, onChnage, isPopover, open, handleClose, anchorEl, shouldDisableDate, ...props }) => {
+  // Default shouldDisableDate to disable future dates if not provided
+  const disableFutureDates = shouldDisableDate !== undefined 
+    ? shouldDisableDate 
+    : (date) => dayjs(date).isAfter(dayjs(), 'day');
 
   const calender = (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DateCalendar value={value} onChange={onChnage} {...props} />
+      <DateCalendar value={value} onChange={onChnage} shouldDisableDate={disableFutureDates} {...props} />
     </LocalizationProvider>
   );
 

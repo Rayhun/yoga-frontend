@@ -268,6 +268,11 @@ const Tracker = () => {
   const handleDateChange = useCallback((date, event) => {
     const formattedDate = date.format('YYYY-MM-DD');
     
+    // Check if this is a future date - don't allow selection
+    if (dayjs(formattedDate).isAfter(dayjs(), 'day')) {
+      return; // Don't allow future dates
+    }
+    
     // Check if this day is outside the current viewing month
     if (event?.target?.closest('.MuiPickersDay-dayOutsideMonth')) {
       return; // Don't show popup for dates outside current month
@@ -318,6 +323,14 @@ const Tracker = () => {
     
     switch (action) {
       case 'periodStart':
+        // Period Start - Validation: Cannot select future dates
+        if (clickedDate.isAfter(dayjs(), 'day')) {
+          setTimeout(() => {
+            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
+          }, 0);
+          return;
+        }
+        
         // Period Start - Reset all previous dates and set new start date
         setPeriodDates([dateStr]);
         setPeriodStart(dateStr);
@@ -333,6 +346,14 @@ const Tracker = () => {
         if (!periodStart) {
           setTimeout(() => {
             showNotification('Please select a start date first before setting an end date.', 'error', 'short');
+          }, 0);
+          return;
+        }
+        
+        // Validation: Cannot select future dates
+        if (clickedDate.isAfter(dayjs(), 'day')) {
+          setTimeout(() => {
+            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
           }, 0);
           return;
         }
@@ -363,6 +384,14 @@ const Tracker = () => {
         break;
         
       case 'periodDays':
+        // Period Days - Validation: Cannot select future dates
+        if (clickedDate.isAfter(dayjs(), 'day')) {
+          setTimeout(() => {
+            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
+          }, 0);
+          return;
+        }
+        
         // Period Days - Validation: Must have start date first
         if (!periodStart) {
           setTimeout(() => {
@@ -610,6 +639,9 @@ const Tracker = () => {
     const isCurrentMonth = !props.outsideCurrentMonth;
     const isOtherMonth = props.outsideCurrentMonth;
     
+    // Check if this is a future date - disable future dates
+    const isFutureDate = dayjs(dayFormatted).isAfter(dayjs(), 'day');
+    
     // Determine if this is a start/end date, mid-day in range, or individual date
     const isStartDate = periodStart && dayFormatted === periodStart;
     const isEndDate = periodEnd && dayFormatted === periodEnd;
@@ -677,29 +709,29 @@ const Tracker = () => {
           color: textColor,
           fontSize: '0.875rem',
           fontWeight: fontWeight,
-          cursor: isCurrentMonth ? 'pointer' : 'not-allowed',
+          cursor: (isCurrentMonth && !isFutureDate) ? 'pointer' : 'not-allowed',
           border: 'none',
           margin: '2px',
           transition: 'all 0.3s ease',
-          opacity: isOtherMonth ? 0.4 : 1,
-          boxShadow: (isStartDate || isEndDate) && isCurrentMonth ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
-          pointerEvents: isCurrentMonth ? 'auto' : 'none',
+          opacity: (isOtherMonth || isFutureDate) ? 0.4 : 1,
+          boxShadow: (isStartDate || isEndDate) && isCurrentMonth && !isFutureDate ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
+          pointerEvents: (isCurrentMonth && !isFutureDate) ? 'auto' : 'none',
         }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (isCurrentMonth) {
+          if (isCurrentMonth && !isFutureDate) {
             handleDateChange(day, e);
           }
         }}
         onMouseEnter={(e) => {
-          if (!isSelected && isCurrentMonth) {
+          if (!isSelected && isCurrentMonth && !isFutureDate) {
             e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
             e.target.style.transform = 'scale(1.1)';
           }
         }}
         onMouseLeave={(e) => {
-          if (!isSelected && isCurrentMonth) {
+          if (!isSelected && isCurrentMonth && !isFutureDate) {
             e.target.style.backgroundColor = 'transparent';
             e.target.style.transform = 'scale(1)';
           }
@@ -1035,6 +1067,7 @@ const Tracker = () => {
               // This is just to prevent the calendar from changing value
             }}
             onMonthChange={(newMonth) => handleMonthChange(newMonth.format('YYYY-MM'))}
+            shouldDisableDate={(date) => dayjs(date).isAfter(dayjs(), 'day')}
             showDaysOutsideCurrentMonth={true}
             fixedWeekNumber={6}
             displayStaticWrapperAs="desktop"

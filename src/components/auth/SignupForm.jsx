@@ -13,9 +13,8 @@ import FormikEmailField from '@/components/common/form/formik/FormikEmailField';
 import FormikCheckbox from '../common/form/formik/FormikCheckbox';
 import Button from '@/components/common/Button';
 import { registerNewUser } from '@/services/public/auth';
-import { extractFormFieldError, toastApiError } from '@/utils/helpers';
+import { toastApiError } from '@/utils/helpers';
 import FormikPhoneFieldWithValidation from '@/components/common/form/formik/FormikPhoneFieldWithValidation';
-import SignupStepper from '../common/SignupStepper';
 
 const SignupForm = () => {
   const router = useRouter();
@@ -93,10 +92,11 @@ const SignupForm = () => {
 
         const userDetails = createdUserAccount?.user;
         sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
+        // Store email and phone in sessionStorage for security (not in URL)
+        sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
+        sessionStorage.setItem('pendingVerificationPhone', userDetails?.profile?.mobile_number);
 
-        router.push(
-          `/auth/verify-account?email=${userDetails?.email}&phone=${userDetails?.profile?.mobile_number}&step=email`
-        );
+        router.push('/auth/verify-account?step=email');
       } catch (error) {
         if (error.response?.data?.message) {
           const errorMessage = error.response.data.message;
@@ -150,66 +150,102 @@ const SignupForm = () => {
   };
 
   return (
-    <React.Fragment>
-      <SignupStepper activeStep={1} />
-      <Formik
-        validateOnChange={false}
-        validateOnBlur={true}
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form className="flex flex-col gap-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Formik
+      validateOnChange={false}
+      validateOnBlur={true}
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ isSubmitting }) => (
+        <Form className="space-y-6">
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <FormikField
                 name="first_name"
                 label="First Name"
-                placeholder="First Name"
+                placeholder="Enter your first name"
                 Icon={FiUser}
                 required
               />
-              <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} />
             </div>
-            <FormikEmailField name="email" label="Email" placeholder="Email" required />
+            <div className="space-y-2">
+              <FormikField 
+                name="last_name" 
+                label="Last Name" 
+                placeholder="Enter your last name" 
+                Icon={FiUser} 
+              />
+            </div>
+          </div>
+
+          {/* Email Field */}
+          <div className="space-y-2">
+            <FormikEmailField 
+              name="email" 
+              label="Email Address" 
+              placeholder="Enter your email" 
+              required 
+            />
+          </div>
+
+          {/* Phone Field */}
+          <div className="space-y-2">
             <FormikPhoneFieldWithValidation
               name="mobile_number"
-              label="Phone"
+              label="Phone Number"
               placeholder="Enter your phone number"
               required
             />
+          </div>
+
+          {/* Password Field */}
+          <div className="space-y-2">
             <FormikField
               type="password"
               name="password"
               label="Password"
-              placeholder="Password"
+              placeholder="Enter your password"
               Icon={FiLock}
               required
             />
-            <span className="text-sm text-gray-500 pl-2">
+            <p className="text-xs text-gray-500">
               Min 12 characters with at least 1 uppercase/lowercase letter, number and special character
-            </span>
+            </p>
+          </div>
+
+          {/* Confirm Password Field */}
+          <div className="space-y-2">
             <FormikField
               type="password"
               name="confirm_password"
               label="Confirm Password"
-              placeholder="Confirm Password"
+              placeholder="Confirm your password"
               Icon={FiLock}
               required
             />
+          </div>
+
+          {/* Terms and Privacy */}
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
             <FormikCheckbox
               name="terms"
               label={
-                <p>
+                <p className="text-xs text-gray-600 leading-relaxed">
                   By checking this box, I understand and agree to the{' '}
-                  <Link href="https://www.nourishdoc.com/terms" target="_blank" className="text-primary">
+                  <Link 
+                    href="https://www.nourishdoc.com/terms" 
+                    target="_blank" 
+                    className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                  >
                     Terms of Service
                   </Link>{' '}
                   and{' '}
                   <Link
                     href="https://www.nourishdoc.com/privacy-policy"
                     target="_blank"
-                    className="text-primary"
+                    className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
                   >
                     Privacy Policy
                   </Link>
@@ -218,13 +254,23 @@ const SignupForm = () => {
               }
               required
             />
-            <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
-              {isSubmitting ? 'Creating Account' : 'Sign Up'}
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </React.Fragment>
+          </div>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            size="5xl" 
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" 
+            isLoading={isSubmitting}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span>✨</span>
+              <span>{isSubmitting ? 'Creating Account...' : 'Sign Up'}</span>
+            </div>
+          </Button>
+        </Form>
+      )}
+    </Formik>
   );
 };
 

@@ -168,6 +168,12 @@ const CalendarTracker = () => {
     const formattedDate = date.format('YYYY-MM-DD');
     const clickedDate = dayjs(formattedDate);
     
+    // Validation: Cannot select future dates
+    if (clickedDate.isAfter(dayjs(), 'day')) {
+      showNotification('Cannot select future dates. Please select a date today or in the past.', 'error');
+      return;
+    }
+    
     if (!periodStart) {
       setPeriodStart(formattedDate);
       setPeriodEnd(null);
@@ -187,7 +193,7 @@ const CalendarTracker = () => {
       setPeriodStart(formattedDate);
       setPeriodEnd(null);
     }
-  }, [periodStart, periodEnd]);
+  }, [periodStart, periodEnd, showNotification]);
 
   // Get selected dates array
   const getSelectedDates = useMemo(() => {
@@ -290,6 +296,9 @@ const CalendarTracker = () => {
     const isCurrentMonth = !props.outsideCurrentMonth;
     const isOtherMonth = props.outsideCurrentMonth;
     
+    // Check if this is a future date - disable future dates
+    const isFutureDate = dayjs(dayFormatted).isAfter(dayjs(), 'day');
+    
     // Determine if this is a start/end date or a mid-day
     const isStartDate = periodStart && dayFormatted === periodStart;
     const isEndDate = periodEnd && dayFormatted === periodEnd;
@@ -335,29 +344,29 @@ const CalendarTracker = () => {
           color: textColor,
           fontSize: '0.875rem',
           fontWeight: fontWeight,
-          cursor: isCurrentMonth ? 'pointer' : 'not-allowed',
+          cursor: (isCurrentMonth && !isFutureDate) ? 'pointer' : 'not-allowed',
           border: 'none',
           margin: '2px',
           transition: 'all 0.3s ease',
-          opacity: isOtherMonth ? 0.4 : 1,
-          boxShadow: (isStartDate || isEndDate) && isCurrentMonth ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
-          pointerEvents: isCurrentMonth ? 'auto' : 'none',
+          opacity: (isOtherMonth || isFutureDate) ? 0.4 : 1,
+          boxShadow: (isStartDate || isEndDate) && isCurrentMonth && !isFutureDate ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
+          pointerEvents: (isCurrentMonth && !isFutureDate) ? 'auto' : 'none',
         }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (isCurrentMonth) {
+          if (isCurrentMonth && !isFutureDate) {
             handleDateChange(day);
           }
         }}
         onMouseEnter={(e) => {
-          if (!isSelected && isCurrentMonth) {
+          if (!isSelected && isCurrentMonth && !isFutureDate) {
             e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
             e.target.style.transform = 'scale(1.1)';
           }
         }}
         onMouseLeave={(e) => {
-          if (!isSelected && isCurrentMonth) {
+          if (!isSelected && isCurrentMonth && !isFutureDate) {
             e.target.style.backgroundColor = 'transparent';
             e.target.style.transform = 'scale(1)';
           }
@@ -486,6 +495,7 @@ const CalendarTracker = () => {
             }}
             onChange={handleDateChange}
             onMonthChange={(newMonth) => handleMonthChange(newMonth.format('YYYY-MM'))}
+            shouldDisableDate={(date) => dayjs(date).isAfter(dayjs(), 'day')}
             showDaysOutsideCurrentMonth={true}
             fixedWeekNumber={6}
             displayStaticWrapperAs="desktop"

@@ -6,9 +6,11 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
+import useGeoLocation from '@/hooks/useGeoLocation';
 
 const BusinessSubscriptionForm = ({ planData, referralCode }) => {
   const router = useRouter();
+  const { countryCode, isLoading } = useGeoLocation();
   const [selectedDiscount, setSelectedDiscount] = useState(null);
   const [employeeCount, setEmployeeCount] = useState(5);
   const [selectedRange, setSelectedRange] = useState(null);
@@ -17,6 +19,9 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
     privacyPolicy: false,
     recurringCharge: false,
   });
+
+  // Allowed countries
+  const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
 
   const initialValues = {
     organizationName: '',
@@ -86,6 +91,17 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
     try {
       if (!allAgreementsAccepted) {
         toast.error('Please accept all terms and agreements to continue.');
+        return;
+      }
+
+      // Check country before proceeding
+      if (isLoading) {
+        toast.info('Detecting your location...');
+        return;
+      }
+
+      if (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode)) {
+        toast.error('We currently only support purchases from the United States, Canada, and India.');
         return;
       }
 
@@ -405,7 +421,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                   
                   <button
                     type="submit"
-                    disabled={isSubmitting || !allAgreementsAccepted}
+                    disabled={isSubmitting || !allAgreementsAccepted || isLoading}
                     className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isSubmitting ? (
@@ -416,6 +432,14 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                         </svg>
                         Processing...
                       </div>
+                    ) : isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Detecting location...
+                      </div>
                     ) : (
                       <div className="flex items-center justify-center">
                         <span>Continue to Checkout</span>
@@ -425,6 +449,13 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                     )}
                   </button>
+                  {!isLoading && countryCode && !ALLOWED_COUNTRIES.includes(countryCode) && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-800 text-center">
+                        We currently only support purchases from the United States, Canada, and India.
+                      </p>
+                    </div>
+                  )}
                 </Form>
               )}
             </Formik>

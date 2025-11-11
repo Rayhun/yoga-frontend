@@ -1,14 +1,23 @@
 'use client';
-import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePathname, useSearchParams } from 'next/navigation';
+import useGeoLocation from '@/hooks/useGeoLocation';
+import { toast } from 'react-toastify';
 
 const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', isFeatured = false }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { countryCode, isLoading } = useGeoLocation();
+  const [showCountryMessage, setShowCountryMessage] = useState(false);
  
   const refferalCode = searchParams.get('ref');
 
   console.log("refferalCode dajalkj",refferalCode)
+
+  // Allowed countries
+  const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
 
   // Determine the correct link based on subscription type
   let checkoutLink = '#';
@@ -27,6 +36,26 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
       checkoutLink = `${checkoutLink}?ref=${refferalCode}`;
     }
   }
+
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    
+    // If still loading country, wait
+    if (isLoading) {
+      toast.info('Detecting your location...');
+      return;
+    }
+
+    // Check if country is allowed
+    if (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode)) {
+      setShowCountryMessage(true);
+      toast.error('We currently only support purchases from the United States, Canada, and India.');
+      return;
+    }
+
+    // Country is allowed, proceed to checkout
+    router.push(checkoutLink);
+  };
 
 
   return (
@@ -95,15 +124,23 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
       </div>
       {/* CTA Button */}
       <div className="px-4 pb-2 mt-auto">
-        <Link href={checkoutLink}>
-          <button className={`w-full py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 ${
+        <button 
+          onClick={handleCheckoutClick}
+          disabled={isLoading}
+          className={`w-full py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
             isFeatured 
               ? 'bg-green-500 text-white shadow-lg hover:shadow-xl hover:bg-green-600' 
               : 'bg-green-500 text-white shadow-lg hover:shadow-xl hover:bg-green-600'
           }`}>
-            Subscribe Now
-          </button>
-        </Link>
+          {isLoading ? 'Loading...' : 'Subscribe Now'}
+        </button>
+        {showCountryMessage && (
+          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800 text-center">
+              We currently only support purchases from the United States, Canada, and India.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

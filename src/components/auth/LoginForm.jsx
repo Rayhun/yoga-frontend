@@ -40,11 +40,10 @@ const LoginForm = () => {
         if (role?.toLowerCase() === 'teacher') {
           if (!email_verify || !mobile_number_verify) {
             sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
-            router.replace(
-              `/auth/verify-account?email_verify=${email_verify}&mobile_verify=${mobile_number_verify}&email=${
-                userDetails?.email
-              }&phone=${mobile_number}&step=${email_verify ? 'phone' : 'email'}`
-            );
+            // Store email and phone in sessionStorage for security (not in URL)
+            sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
+            sessionStorage.setItem('pendingVerificationPhone', mobile_number);
+            router.replace(`/auth/verify-account?step=${email_verify ? 'phone' : 'email'}`);
           } else {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');

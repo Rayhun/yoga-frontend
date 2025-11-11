@@ -299,6 +299,12 @@ const DailyTracker = () => {
 
   // Date picker handlers
   const handleDateChange = (date) => {
+    // Validation: Cannot select future dates
+    if (dayjs(date).isAfter(dayjs(), 'day')) {
+      showNotification('Cannot select future dates. Please select a date today or in the past.', 'error');
+      return;
+    }
+    
     // Simply change the date - the useEffect will load existing data for that date
     // If there are unsaved changes, they will be lost, but this is expected behavior
     setSelectedDate(date);
@@ -652,6 +658,7 @@ const DailyTracker = () => {
                   open={datePickerOpen}
                   handleClose={handleCloseDatePicker}
                   anchorEl={dateButtonRef.current}
+                  shouldDisableDate={(date) => dayjs(date).isAfter(dayjs(), 'day')}
                 />
               </div>
             </div>
