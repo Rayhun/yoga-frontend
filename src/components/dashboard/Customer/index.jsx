@@ -195,7 +195,7 @@ const CustomerDashboard = () => {
               className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-sm hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/sleep_tracker')}
             >
-              Let's Go →
+              Let&apos;s Go →
             </button>
           </div>
         </div>
