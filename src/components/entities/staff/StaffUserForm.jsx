@@ -9,6 +9,7 @@ import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import { FiUser, FiMail, FiPhone } from 'react-icons/fi';
 import { createStaffUser, updateStaffUser, getStaffUser } from '@/services/private/user/staff';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -206,6 +207,7 @@ const StaffUserForm = ({ staffUserId }) => {
                   name="first_name" 
                   label="First Name" 
                   placeholder="Enter first name" 
+                  Icon={FiUser}
                   required 
                 />
               </div>
@@ -214,6 +216,7 @@ const StaffUserForm = ({ staffUserId }) => {
                   name="last_name" 
                   label="Last Name" 
                   placeholder="Enter last name" 
+                  Icon={FiUser}
                   required 
                 />
               </div>
@@ -225,7 +228,8 @@ const StaffUserForm = ({ staffUserId }) => {
                   name="email" 
                   label="Email" 
                   type="email"
-                  placeholder="Enter email address" 
+                  placeholder="Enter email" 
+                  Icon={FiMail}
                   required 
                 />
               </div>
@@ -234,6 +238,7 @@ const StaffUserForm = ({ staffUserId }) => {
                   name="mobile_number" 
                   label="Mobile Number" 
                   placeholder="Enter mobile number" 
+                  Icon={FiPhone}
                 />
               </div>
             </div>

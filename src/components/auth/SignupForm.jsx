@@ -39,7 +39,7 @@ const SignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().trim()
     .lowercase()
-    .email('Please enter a valid email address')
+    .email('Please enter a valid email')
     .matches(
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       'Email must be in the format user@example.com'
@@ -165,7 +165,7 @@ const SignupForm = () => {
               <FormikField
                 name="first_name"
                 label="First Name"
-                placeholder="Enter your first name"
+                placeholder="first name"
                 Icon={FiUser}
                 required
               />
@@ -174,7 +174,7 @@ const SignupForm = () => {
               <FormikField 
                 name="last_name" 
                 label="Last Name" 
-                placeholder="Enter your last name" 
+                placeholder="last name" 
                 Icon={FiUser} 
               />
             </div>
@@ -184,7 +184,7 @@ const SignupForm = () => {
           <div className="space-y-2">
             <FormikEmailField 
               name="email" 
-              label="Email Address" 
+              label="Email" 
               placeholder="Enter your email" 
               required 
             />

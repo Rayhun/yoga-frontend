@@ -24,13 +24,17 @@ const DropdownUser = () => {
   // close on click outside
   useEffect(() => {
     const clickHandler = ({ target }) => {
-      if (!dropdown.current) return;
-      if (!dropdownOpen || dropdown.current.contains(target) || trigger.current.contains(target)) return;
-      setDropdownOpen(false);
+      if (!dropdown.current || !trigger.current) return;
+      // If clicking on trigger or dropdown, don't close (let the toggle handle it)
+      if (trigger.current.contains(target) || dropdown.current.contains(target)) return;
+      // Otherwise, close the dropdown
+      if (dropdownOpen) {
+        setDropdownOpen(false);
+      }
     };
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
-  });
+  }, [dropdownOpen]);
 
   // close if the esc key is pressed
   useEffect(() => {
@@ -40,7 +44,7 @@ const DropdownUser = () => {
     };
     document.addEventListener('keydown', keyHandler);
     return () => document.removeEventListener('keydown', keyHandler);
-  });
+  }, [dropdownOpen]);
 
   const url = useMemo(() => {
     const { role } = loggedInUser?.profile || {}; 
@@ -77,11 +81,17 @@ const DropdownUser = () => {
     },
   ];
 
+  const handleToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(prev => !prev);
+  };
+
   return (
     <div className="relative">
       <Link
         ref={trigger}
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        onClick={handleToggle}
         className="flex items-center gap-4"
         href="#"
       >
@@ -124,8 +134,6 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       <div
         ref={dropdown}
-        onFocus={() => setDropdownOpen(true)}
-        onBlur={() => setDropdownOpen(false)}
         className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark ${
           dropdownOpen === true ? 'block' : 'hidden'
         }`}
@@ -135,7 +143,10 @@ const DropdownUser = () => {
             <li key={menuItem.label}>
               {menuItem.onClick ? (
                 <button
-                  onClick={menuItem.onClick}
+                  onClick={(e) => {
+                    setDropdownOpen(false);
+                    menuItem.onClick(e);
+                  }}
                   className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base w-full text-left"
                 >
                   <menuItem.Icon size={20} />
@@ -144,6 +155,7 @@ const DropdownUser = () => {
               ) : (
                 <Link
                   href={menuItem.href}
+                  onClick={() => setDropdownOpen(false)}
                   className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
                 >
                   <menuItem.Icon size={20} />

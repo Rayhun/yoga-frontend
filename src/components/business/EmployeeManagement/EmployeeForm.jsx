@@ -4,7 +4,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
-import { FiX, FiUser } from 'react-icons/fi';
+import { FiX, FiUser, FiMail, FiPhone, FiIdCard, FiLock } from 'react-icons/fi';
 
 const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
   const isEditing = !!employee;
@@ -26,7 +26,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
       .required('Last name is required')
       .min(2, 'Last name must be at least 2 characters'),
     email: Yup.string()
-      .email('Invalid email address')
+      .email('Invalid email')
       .required('Email is required'),
     mobile_number: Yup.string()
       .matches(/^[0-9+\-\s()]+$/, 'Invalid phone number format')
@@ -101,6 +101,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="first_name"
                   type="text"
                   placeholder="Enter first name"
+                  Icon={FiUser}
                   required
                 />
                 <FormikField
@@ -108,6 +109,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="last_name"
                   type="text"
                   placeholder="Enter last name"
+                  Icon={FiUser}
                   required
                 />
               </div>
@@ -121,10 +123,11 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
               </h4>
               <div className="space-y-6">
                 <FormikField
-                  label="Email Address"
+                  label="Email"
                   name="email"
                   type="email"
-                  placeholder="Enter email address"
+                  placeholder="Enter email"
+                  Icon={FiMail}
                   required
                 />
                 <FormikField
@@ -132,6 +135,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="mobile_number"
                   type="tel"
                   placeholder="Enter mobile number"
+                  Icon={FiPhone}
                 />
               </div>
             </div>
@@ -148,6 +152,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="employee_id"
                   type="text"
                   placeholder="Enter unique employee ID"
+                  Icon={FiIdCard}
                   required
                 />
                 <FormikField
@@ -155,6 +160,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="password"
                   type="password"
                   placeholder={isEditing ? "Enter new password" : "Enter password"}
+                  Icon={FiLock}
                   required={!isEditing}
                 />
               </div>

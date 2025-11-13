@@ -124,7 +124,7 @@ const AddUserPage = () => {
                       name="email"
                       type="email"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      placeholder="Enter email address"
+                      placeholder="Enter email"
                     />
                     {errors.email && touched.email && (
                       <p className="mt-1 text-sm text-red-600">{errors.email}</p>

@@ -20,18 +20,31 @@ const FormikMultiSelect = ({
 
   const handleChange = useCallback(
     (_, value) => {
-      setFieldValue(
-        name,
-        value.map(i => i.value)
-      );
+      const arrayValue = Array.isArray(value) ? value.map(i => i.value) : [];
+      setFieldValue(name, arrayValue);
       onChange(value);
     },
     [name, onChange, setFieldValue]
   );
 
+  // Ensure field.value is always treated as an array
+  const fieldValueArray = useMemo(() => {
+    if (!field.value) return [];
+    if (Array.isArray(field.value)) return field.value;
+    if (typeof field.value === 'string') {
+      // If it's a comma-separated string, split it
+      if (field.value.includes(',')) {
+        return field.value.split(',').map(v => v.trim()).filter(v => v);
+      }
+      // If it's a single string value, wrap it in an array
+      return [field.value];
+    }
+    return [];
+  }, [field.value]);
+
   const selectedOptions = useMemo(
-    () => options.filter(option => field.value?.includes(option.value)),
-    [field.value, options]
+    () => options.filter(option => fieldValueArray.includes(option.value)),
+    [fieldValueArray, options]
   );
 
   const isErrorField = Boolean(meta.touched && meta.error);

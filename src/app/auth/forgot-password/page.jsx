@@ -45,7 +45,7 @@ function Page() {
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Keep your account secure. Enter your email address and we&apos;ll send you a link to reset your password
+                  Keep your account secure. Enter your email and we&apos;ll send you a link to reset your password
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">
@@ -53,10 +53,10 @@ function Page() {
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     <span className="text-sm">Secure & Private</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
+                  {/* <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
                     <span className="text-sm">24/7 Support</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -77,7 +77,7 @@ function Page() {
                   Forgot Password?
                 </h2>
                 <p className="text-gray-600">
-                  Enter your email address to receive a password reset link
+                  Enter your email to receive a password reset link
                 </p>
               </div>
 

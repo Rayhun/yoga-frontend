@@ -40,12 +40,12 @@ function Page() {
 
               <div className="space-y-6 animate-slideInLeft">
                 <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                  Welcome to Your
-                  <span className="block text-orange-600 animate-float">Wellness Journey</span>
+                Welcome back
+                  <span className="block text-orange-600 animate-float">Let&apos;s thrive.</span>
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Log in to manage your offerings, track your earnings, and inspire more transformations every day
+                  Your wellness hub is ready when you are. Sign in to continue making moves that matter.
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">
@@ -53,10 +53,10 @@ function Page() {
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     <span className="text-sm">Secure & Private</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
+                  {/* <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
                     <span className="text-sm">24/7 Support</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

@@ -21,7 +21,7 @@ const ForgotPasswordForm = () => {
   const validationSchema = Yup.object({
     email: Yup.string().trim()
     .lowercase()
-    .email('Please enter a valid email address')
+    .email('Please enter a valid email')
     .matches(
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       'Email must be in the format user@example.com'
@@ -50,7 +50,7 @@ const ForgotPasswordForm = () => {
             <FormikField 
               type="email" 
               name="email" 
-              label="Email Address" 
+              label="Email" 
               placeholder="Enter your email" 
               Icon={FiMail} 
               required 

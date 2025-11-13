@@ -9,6 +9,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import { FiType, FiFileText, FiDollarSign } from 'react-icons/fi';
 import {
   AccessSettingField,
   VisibilitySettingField,
@@ -159,7 +160,7 @@ const ProgramForm = ({ selected }) => {
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
-                <FormikField name="title" label="Title" placeholder="Title" required />
+                <FormikField name="title" label="Title" placeholder="Title" Icon={FiType} required />
               </div>
               <div className="w-full md:w-1/2">
                 <FormikSelect
@@ -172,7 +173,7 @@ const ProgramForm = ({ selected }) => {
               </div>
             </div>
             <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
-            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
+            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} Icon={FiFileText} required />
 
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
@@ -186,6 +187,7 @@ const ProgramForm = ({ selected }) => {
                     placeholder="Price"
                     type="number"
                     min={0}
+                    Icon={FiDollarSign}
                     required
                   />
                 </div>

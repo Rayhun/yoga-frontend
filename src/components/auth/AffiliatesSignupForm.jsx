@@ -46,7 +46,7 @@ const AffiliatesSignupForm = () => {
     last_name: Yup.string(),
     email: Yup.string().trim()
     .lowercase()
-    .email('Please enter a valid email address')
+    .email('Please enter a valid email')
     .matches(
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       'Email must be in the format user@example.com'
@@ -54,7 +54,7 @@ const AffiliatesSignupForm = () => {
     .required('Email is required'),
     paypal_email: Yup.string().trim()
     .lowercase()
-    .email('Please enter a valid PayPal email address')
+    .email('Please enter a valid PayPal email')
     .matches(
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       'Email must be in the format user@example.com'

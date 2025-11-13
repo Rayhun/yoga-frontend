@@ -74,19 +74,18 @@ const CustomerDashboard = () => {
     <div className="max-w-7xl mx-auto p-6 min-h-screen">
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
         <div className="relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <div className="w-6 h-6 bg-gray-800 rounded-sm rotate-45 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold">Your Wellness Journey</h1>
-              <p className="text-green-100 text-sm">Personalized wellness plans for your goals
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Your Wellness Journey</h1>
+              <p className="text-gray-600 text-sm">Personalized wellness plans for your goals
                 {/* {user?.isEmployee 
                   ? 'Employee wellness access through your business account'
                   : user?.isBusinessOwner
@@ -96,21 +95,21 @@ const CustomerDashboard = () => {
               </p>
             </div>
             </div>
-            <p className="text-green-100 text-lg leading-relaxed">
+            <p className="text-gray-700 text-lg leading-relaxed">
               Achieve your personal goals with curated wellness plans developed by our expert team
             </p>
             <div className="mt-8 flex justify-center md:justify-start items-center">
               {recommendedProgram ? (
                 recommendedProgram.is_enroll ? (
                   <button
-                    className="px-8 py-3 bg-white text-green-600 rounded-xl font-semibold text-sm hover:bg-green-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                     onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
                   >
                     Continue Journey
                   </button>
                 ) : (
                   <button
-                    className="px-8 py-3 bg-white text-green-600 rounded-xl font-semibold text-sm hover:bg-green-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                     onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
                   >
                     Start Journey
@@ -118,7 +117,7 @@ const CustomerDashboard = () => {
                 )
               ) : (
                 <button
-                  className="px-8 py-3 bg-white text-green-600 rounded-xl font-semibold text-sm hover:bg-green-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                   onClick={() => router.push('/portal/customer/lms/program')}
                 >
                   Browse Programs
@@ -136,7 +135,6 @@ const CustomerDashboard = () => {
                 sizes="100vw"
                 className="w-full rounded-2xl shadow-2xl"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
             </div>
           </div>
         </div>
@@ -183,21 +181,21 @@ const CustomerDashboard = () => {
           
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">🌼 Daily Tune-In</h3>
+                <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">🌼 Daily Tune-In</h3>
                 <p className="text-gray-600 text-sm">Track your progress</p>
               </div>
             </div>
             <button 
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold text-sm hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-sm hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/sleep_tracker')}
             >
-              Let’s Go →
+              Let's Go →
             </button>
           </div>
         </div>

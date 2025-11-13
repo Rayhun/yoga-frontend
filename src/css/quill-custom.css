@@ -1,5 +1,21 @@
 /* Custom styles for React Quill editor to match the app's design system */
 
+/* Make ReactQuill root container flexible for resizing */
+.quill-resizable-wrapper > div {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.quill-resizable-wrapper .ql-container {
+  flex: 1;
+  min-height: 0;
+}
+
+.quill-resizable-wrapper .ql-editor {
+  height: 100%;
+}
+
 .ql-toolbar {
   border-top: 1px solid #d1d5db;
   border-left: 1px solid #d1d5db;

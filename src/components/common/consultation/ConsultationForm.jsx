@@ -17,6 +17,7 @@ import queryKeys from '@/utils/query-keys';
 import { CONSULTATION_TYPES } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikSubmittable from '../form/formik/FormikSubmittable';
+import { FiType, FiFileText, FiClock, FiDollarSign, FiCalendar, FiLink } from 'react-icons/fi';
 
 const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId = null }) => {
   const router = useRouter();
@@ -48,6 +49,21 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     mutationFn: updateExistingConsultation,
   });
 
+  // Helper function to ensure value is always an array
+  const ensureArray = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      // If it's a comma-separated string, split it
+      if (value.includes(',')) {
+        return value.split(',').map(v => v.trim()).filter(v => v);
+      }
+      // If it's a single string value, wrap it in an array
+      return [value];
+    }
+    return [];
+  };
+
   const initialValues = {
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -55,7 +71,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
     price: initialData?.price || 0,
     calender_link: initialData?.calender_link || '',
     consultation_type: initialData?.consultation_type?.split(',') || [],
-    followup_support: initialData?.followup_support || [],
+    followup_support: ensureArray(initialData?.followup_support),
     followup_duration: initialData?.followup_duration || '',
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
@@ -85,25 +101,47 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
       .max(5, 'Maximum 5 consent files allowed')
       .optional(),
     consent_file_urls: Yup.array()
-      .of(Yup.string())
+      .of(Yup.string().url('Please enter a valid URL'))
       .max(5, 'Maximum 5 consent file URLs allowed')
       .optional(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      // Build payload, only include consent_file_urls if it has values
+      const payload = { ...values };
+      
+      // Ensure followup_support is always an array
+      if (!Array.isArray(payload.followup_support)) {
+        payload.followup_support = ensureArray(payload.followup_support);
+      }
+      
+      // Ensure consultation_type is always an array
+      if (!Array.isArray(payload.consultation_type)) {
+        payload.consultation_type = ensureArray(payload.consultation_type);
+      }
+      
+      // Only add consent_file_urls if it has non-empty values
+      if (!payload.consent_file_urls || payload.consent_file_urls.length === 0 || 
+          !payload.consent_file_urls.some(url => url && url.trim() !== '')) {
+        delete payload.consent_file_urls;
+      } else {
+        // Filter out empty strings
+        payload.consent_file_urls = payload.consent_file_urls.filter(url => url && url.trim() !== '');
+      }
+
       if (isEditMode) {
-        await updateConsultation({ payload: { ...values }, id: consultationId });
+        await updateConsultation({ payload, id: consultationId });
         toast.success('Personal Consultation updated successfully');
       } else {
-        await createConsultation({ payload: { ...values } });
+        await createConsultation({ payload });
         toast.success('Personal Consultation added successfully');
       }
 
       await queryClient.invalidateQueries([
         {
           queryKey: isEditMode
-            ? [queryKeys.expertConsultationDetails, selected.id]
+            ? [queryKeys.expertConsultationDetails, consultationId]
             : [queryKeys.expertConsultations],
         },
       ]);
@@ -131,14 +169,14 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
           {({ isSubmitting, values, setFieldValue }) => {
             return (
               <Form className="flex flex-col gap-4">
-                <FormikField name="title" label="Title" required />
-                <FormikField name="description" label="Description" rows={4} required />
+                <FormikField name="title" label="Title" Icon={FiType} required />
+                <FormikField name="description" label="Description" rows={4} Icon={FiFileText} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormikField name="duration" label="Duration (mins)" type="number" min={1} required />
-                  <FormikField name="price" label="Price ($)" type="number" min={0} required />
+                  <FormikField name="duration" label="Duration (mins)" type="number" min={1} Icon={FiClock} required />
+                  <FormikField name="price" label="Price ($)" type="number" min={0} Icon={FiDollarSign} required />
 
-                  <FormikField name="calender_link" label="Calendar Link" required />
+                  <FormikField name="calender_link" label="Calendar Link" Icon={FiCalendar} required />
 
                   <FormikMultiSelect
                     name="consultation_type"
@@ -158,6 +196,7 @@ const ConsultationForm = ({ initialData = {}, isEditMode = false, consultationId
                     label="Followup Duration (mins)"
                     type="number"
                     min={1}
+                    Icon={FiClock}
                     required
                   />
                   <CategoriesField required />

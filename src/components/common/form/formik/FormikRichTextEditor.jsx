@@ -50,7 +50,7 @@ const FormikRichTextEditor = ({
         </label>
       )}
       
-      <div className="border border-gray-300 rounded-lg overflow-hidden">
+      <div className="border border-gray-300 rounded-lg overflow-auto quill-resizable-wrapper" style={{ resize: 'both', minHeight: `${rows * 1.5}rem`, maxWidth: '100%' }}>
         <ReactQuill
           theme="snow"
           value={field.value || ''}
@@ -60,8 +60,8 @@ const FormikRichTextEditor = ({
           modules={modules}
           formats={formats}
           style={{
-            height: `${rows * 1.5}rem`,
-            minHeight: `${rows * 1.5}rem`
+            minHeight: `${rows * 1.5}rem`,
+            height: '100%'
           }}
           {...props}
         />

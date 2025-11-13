@@ -7,6 +7,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
+import { FiMail, FiUser, FiClock, FiPlay, FiGlobe } from 'react-icons/fi';
+import { FaLinkedin } from 'react-icons/fa';
+import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
@@ -182,20 +185,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="first_name" label="First Name" placeholder="First Name" required />
+                  <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" />
+                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" Icon={FiUser} />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="last_name" label="Last Name" placeholder="Last Name" required />
+                  <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} required />
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled={isEditMode} required />
+                  <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} disabled={isEditMode} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -203,7 +206,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FormikSelect name="title" label="Title" placeholder="Select Title" options={TITLE_OPTIONS} required />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" required />
+                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" Icon={LuBriefcaseBusiness} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -214,19 +217,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     label="Experience (Years)"
                     placeholder="Experience in Years"
                     min={0}
+                    Icon={FiClock}
                     required
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" required />
+                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" Icon={FiPlay} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
+                  <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" Icon={FaLinkedin} />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="website" label="Website URL" placeholder="Website URL" required />
+                  <FormikField name="website" label="Website URL" placeholder="Website URL" Icon={FiGlobe} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">

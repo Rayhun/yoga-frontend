@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { createStripeOnboardingLink } from '@/services/private/expert/stripe';
 
 const InfoNote = ({expertData}) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStripeOnboarding = async () => {
@@ -70,6 +72,20 @@ const InfoNote = ({expertData}) => {
             </div>
             <div className="flex-1 text-gray-800 font-medium">
               Add a group coaching or consultation to get started.
+            </div>
+            <div className="flex-shrink-0 flex gap-3">
+              <button
+                onClick={() => router.push('/portal/teacher/group_coaching/add')}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              >
+                Add Coaching
+              </button>
+              <button
+                onClick={() => router.push('/portal/teacher/consultation/add')}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              >
+                Add Consultation
+              </button>
             </div>
           </div>
         )}

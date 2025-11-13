@@ -41,22 +41,20 @@ const Page = () => {
 
               <div className="space-y-6 animate-slideInLeft">
                 <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                  Start Your
-                  <span className="block text-orange-600 animate-float">Wellness Journey</span>
+                  <span className="text-orange-600">Grow Your Practice.</span>{' '}
+                  Empower Her Midlife.
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Sign up for free to start guiding mid-age women through life&apos;s transitions — and turn your passion into profit.
+                  Sign up for free to start guiding mid-age women through life&apos;s transitions – and turn your passion into profit.
                 </p>
 
                 <div className="mt-8 w-full max-w-md mx-auto">
                   <div className="space-y-3">
                     {[
-                      'Unlimited Earning Possibilities',
-                      'Instant Client Access',
-                      'Create on Your Terms',
-                      'Built-In Marketing Power',
-                      'Fast, Reliable Payouts',
+                      'Expand Your Reach',
+                      'Earn & Grow',
+                      'Collaborate & Shine',
                     ].map((item, index) => (
                       <div 
                         key={item} 
@@ -77,10 +75,10 @@ const Page = () => {
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     <span className="text-sm">Secure & Private</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
+                  {/* <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
                     <span className="text-sm">24/7 Support</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

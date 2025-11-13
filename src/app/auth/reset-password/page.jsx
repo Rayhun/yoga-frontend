@@ -53,10 +53,10 @@ function Page() {
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     <span className="text-sm">Secure & Private</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
+                  {/* <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
                     <span className="text-sm">24/7 Support</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

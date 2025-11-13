@@ -118,7 +118,7 @@ const LoginForm = () => {
             <FormikField 
               type="email" 
               name="email" 
-              label="Email Address" 
+              label="Email" 
               placeholder="Enter your email" 
               Icon={FiMail} 
               required 
