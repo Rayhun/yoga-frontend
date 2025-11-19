@@ -48,8 +48,20 @@ const CustomerDashboard = () => {
   const recommendedProgram = recommendationsResponse?.data?.data?.recommended_programs;
   const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
   
-  const dailyDoseProgram = dailyDoseQuickReliefResponse?.data?.data?.daily_dose_program;
-  const quickReliefProgram = dailyDoseQuickReliefResponse?.data?.data?.quick_relief_program;
+  // Set default images for Daily Dose and Quick Relief if they don't have images
+  const dailyDoseProgram = dailyDoseQuickReliefResponse?.data?.data?.daily_dose_program 
+    ? {
+        ...dailyDoseQuickReliefResponse.data.data.daily_dose_program,
+        image: dailyDoseQuickReliefResponse.data.data.daily_dose_program.image || '/images/content/daily_dose.jpg'
+      }
+    : null;
+  
+  const quickReliefProgram = dailyDoseQuickReliefResponse?.data?.data?.quick_relief_program
+    ? {
+        ...dailyDoseQuickReliefResponse.data.data.quick_relief_program,
+        image: dailyDoseQuickReliefResponse.data.data.quick_relief_program.image || '/images/content/quick_tips.jpg'
+      }
+    : null;
   
   const wellnessData = wellnessDashboardResponse?.data?.data;
   const periodTracking = wellnessData?.period_tracking;
@@ -423,7 +435,7 @@ const CustomerDashboard = () => {
               <div className="text-center py-8">
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
                   <Image
-                    src="/images/daily_dose.jpg"
+                    src="/images/content/daily_dose.jpg"
                     alt="Daily Dose"
                     width={400}
                     height={225}
@@ -456,7 +468,7 @@ const CustomerDashboard = () => {
               <div className="text-center py-8">
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
                   <Image
-                    src="/images/quick_tips.jpg"
+                    src="/images/content/quick_tips.jpg"
                     alt="Quick Relief"
                     width={400}
                     height={225}

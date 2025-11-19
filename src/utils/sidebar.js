@@ -384,14 +384,14 @@ const CUSTOMER = [
   },
   {
     Icon: LuClipboardCheck,
-    label: 'Lifestage',
+    label: 'Cycle Tracking',
     href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
       {
         Icon: MdTrackChanges,
-        label: 'Cycle Tracking',
+        label: 'Cycle Dates',
         href: '/portal/customer/checkin/tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
       },

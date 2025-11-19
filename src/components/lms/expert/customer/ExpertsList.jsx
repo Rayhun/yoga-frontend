@@ -163,15 +163,15 @@ const ExpertsList = () => {
               Connect with certified wellness professionals who are here to guide you on your journey to better health
             </p>
           </div>
-          <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
-            <div className="relative">
+          <div className="md:w-1/2 mt-8 md:mt-0">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
               <Image
                 src="/images/content/wellness_experts.jpg"
                 alt="Hero Image"
                 width={0}
                 height={0}
                 sizes="100vw"
-                className="w-full rounded-2xl shadow-2xl"
+                className="w-full h-full object-cover rounded-2xl shadow-2xl"
               />
             </div>
           </div>
