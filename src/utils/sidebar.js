@@ -351,7 +351,7 @@ const CUSTOMER = [
   },
   {
     Icon: LuClipboardCheck,
-    label: 'Lifestyle',
+    label: 'Habits',
     href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
@@ -364,7 +364,7 @@ const CUSTOMER = [
       },
       {
         Icon: MdTrackChanges,
-        label: 'Your Habits',
+        label: 'Habits Tracker',
         href: '/portal/customer/checkin/sleep_tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
       },
@@ -384,7 +384,7 @@ const CUSTOMER = [
   },
   {
     Icon: LuClipboardCheck,
-    label: 'Cycle Tracking',
+    label: 'Cycles',
     href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
