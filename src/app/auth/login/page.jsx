@@ -41,7 +41,7 @@ function Page() {
               <div className="space-y-6 animate-slideInLeft">
                 <h1 className="text-4xl font-bold text-gray-800 leading-tight">
                 Welcome back
-                  <span className="block text-orange-600 animate-float">Let&apos;s thrive.</span>
+                  <span className="block text-orange-600">Let&apos;s thrive.</span>
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
