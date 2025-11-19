@@ -18,6 +18,7 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
 
   // Allowed countries
   const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
+  const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
   // Determine the correct link based on subscription type
   let checkoutLink = '#';
@@ -46,8 +47,8 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
       return;
     }
 
-    // Check if country is allowed
-    if (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode)) {
+    // Check if country is allowed (skip in development)
+    if (!isDevelopmentEnvironment && (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode))) {
       setShowCountryMessage(true);
       toast.error('We currently only support purchases from the United States, Canada, and India.');
       return;
@@ -134,7 +135,7 @@ const SubscriptionPlanCard = ({ data: planDetails = {}, currencySymbol = '$', is
           }`}>
           {isLoading ? 'Loading...' : 'Subscribe Now'}
         </button>
-        {showCountryMessage && (
+        {!isDevelopmentEnvironment && showCountryMessage && (
           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-800 text-center">
               We currently only support purchases from the United States, Canada, and India.

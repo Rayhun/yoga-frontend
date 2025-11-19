@@ -95,11 +95,11 @@ const DropdownUser = () => {
         className="flex items-center gap-4"
         href="#"
       >
-        <span className="hidden text-right lg:block">
+        <span className="hidden text-center lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {loggedInUser?.profile?.first_name} {loggedInUser?.profile?.last_name}
+            Hi {loggedInUser?.profile?.first_name}
           </span>
-          <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span>
+          {/* <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span> */}
         </span>
 
         <span className="h-12 w-12 rounded-full overflow-hidden">

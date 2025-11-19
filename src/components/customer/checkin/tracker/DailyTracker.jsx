@@ -60,7 +60,7 @@ const CycleInfoCard = ({ cycleInfo }) => {
             <p className="text-gray-700">
               Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
             </p>
-            {userStatus && (
+            {/* {userStatus && (
               <div className="mt-2 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${
                   userStatus.period_status === 'normal' ? 'bg-green-500' : 
@@ -70,7 +70,7 @@ const CycleInfoCard = ({ cycleInfo }) => {
                   {userStatus.period_message}
                 </span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

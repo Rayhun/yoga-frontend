@@ -145,34 +145,33 @@ const ExpertsList = () => {
       </Popup>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
         <div className="relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-6 h-6 bg-gray-800 rounded-sm rotate-45 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold">Meet Our Experts</h1>
-                <p className="text-green-100 text-sm">Connect with certified wellness professionals</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Meet Our Experts</h1>
+                <p className="text-gray-600 text-sm">Connect with certified wellness professionals</p>
               </div>
             </div>
-            <p className="text-green-100 text-lg leading-relaxed">
+            <p className="text-gray-700 text-lg leading-relaxed">
               Connect with certified wellness professionals who are here to guide you on your journey to better health
             </p>
           </div>
-          <div className="md:w-1/2 mt-6 md:mt-0 flex justify-center items-center">
-            <div className="relative w-full max-w-md aspect-[16/9]">
+          <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
+            <div className="relative">
               <Image
-                src="/images/content/wellness_experts.png"
+                src="/images/content/wellness_experts.jpg"
                 alt="Hero Image"
                 width={0}
                 height={0}
                 sizes="100vw"
-                className="w-full h-full rounded-lg shadow-lg object-cover"
+                className="w-full rounded-2xl shadow-2xl"
               />
             </div>
           </div>

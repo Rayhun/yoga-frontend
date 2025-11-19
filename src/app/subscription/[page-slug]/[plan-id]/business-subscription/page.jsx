@@ -1,7 +1,7 @@
 'use client';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { getSingleSubscriptionPlan } from '@/services/private/subscription/plan';
+import { getSingleBusinessSubscriptionPlan } from '@/services/private/subscription/plan';
 import BusinessSubscriptionForm from '@/components/subscription/business/BusinessSubscriptionForm';
 import queryKeys from '@/utils/query-keys';
 import { toast } from 'react-toastify';
@@ -13,7 +13,7 @@ const BusinessSubscriptionPage = () => {
   const referralCode = searchParams.get('ref');
 
   const { data: planResponse, isLoading, error } = useQuery({
-    queryFn: () => getSingleSubscriptionPlan({ id: planId }),
+    queryFn: () => getSingleBusinessSubscriptionPlan({ id: planId }),
     queryKey: [queryKeys.subscriptionPlans, planId],
     enabled: !!planId,
   });

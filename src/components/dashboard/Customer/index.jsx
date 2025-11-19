@@ -98,9 +98,9 @@ const CustomerDashboard = () => {
             <p className="text-gray-700 text-lg leading-relaxed">
               Achieve your personal goals with curated wellness plans developed by our expert team
             </p>
-            <div className="mt-8 flex justify-center md:justify-start items-center">
-              {recommendedProgram ? (
-                recommendedProgram.is_enroll ? (
+            {recommendedProgram && Object.keys(recommendedProgram).length > 0 && (
+              <div className="mt-8 flex justify-center md:justify-start items-center">
+                {recommendedProgram.is_enroll ? (
                   <button
                     className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
                     onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
@@ -114,16 +114,9 @@ const CustomerDashboard = () => {
                   >
                     Start Journey
                   </button>
-                )
-              ) : (
-                <button
-                  className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                  onClick={() => router.push('/portal/customer/lms/program')}
-                >
-                  Browse Programs
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
             <div className="relative">
@@ -428,8 +421,14 @@ const CustomerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-gray-400 text-2xl">☀️</span>
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
+                  <Image
+                    src="/images/daily_dose.jpg"
+                    alt="Daily Dose"
+                    width={400}
+                    height={225}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-gray-500">No daily dose available</p>
               </div>
@@ -455,8 +454,14 @@ const CustomerDashboard = () => {
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-gray-400 text-2xl">⚡</span>
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
+                  <Image
+                    src="/images/quick_tips.jpg"
+                    alt="Quick Relief"
+                    width={400}
+                    height={225}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-gray-500">No quick relief available</p>
               </div>

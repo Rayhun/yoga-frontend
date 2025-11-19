@@ -12,6 +12,10 @@ export const getSingleSubscriptionPlan = async ({ id }) => {
   return axios.get(`/subscription/plan/${id}/detail/`);
 };
 
+export const getSingleBusinessSubscriptionPlan = async ({ id }) => {
+  return axios.get(`/subscription/b2b/plan/${id}/detail/`);
+};
+
 export const addNewSubscriptionPlan = async ({ payload }) => {
   return axios.post('/subscription/plan/', payload);
 };

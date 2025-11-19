@@ -20,7 +20,7 @@ const HelpSupportPage = () => {
       hoverColor: 'hover:from-blue-600 hover:to-blue-700',
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-600',
-      link: '/portal/ai-chat?type=support&category=account-billing'
+      link: 'https://www.nourishdoc.com/knowledge'
     },
     {
       id: 'program',
@@ -31,7 +31,7 @@ const HelpSupportPage = () => {
       hoverColor: 'hover:from-green-600 hover:to-green-700',
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
-      link: '/portal/ai-chat?type=support&category=program'
+      link: 'https://www.nourishdoc.com/knowledge'
     },
     {
       id: 'privacy',
@@ -42,7 +42,7 @@ const HelpSupportPage = () => {
       hoverColor: 'hover:from-purple-600 hover:to-purple-700',
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
-      link: '/portal/ai-chat?type=support&category=privacy'
+      link: 'https://www.nourishdoc.com/knowledge'
     },
     {
       id: 'technical',
@@ -53,7 +53,7 @@ const HelpSupportPage = () => {
       hoverColor: 'hover:from-orange-600 hover:to-orange-700',
       bgColor: 'bg-orange-50',
       iconColor: 'text-orange-600',
-      link: '/portal/ai-chat?type=support&category=technical'
+      link: 'https://www.nourishdoc.com/knowledge'
     }
   ];
 
@@ -78,26 +78,26 @@ const HelpSupportPage = () => {
               <Link
                 key={category.id}
                 href={category.link}
-                className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer flex flex-col h-full"
               >
                 {/* Icon Section */}
-                <div className={`${category.bgColor} dark:bg-gray-700 p-6 sm:p-8 flex items-center justify-center`}>
+                <div className={`${category.bgColor} dark:bg-gray-700 p-6 sm:p-8 flex items-center justify-center flex-shrink-0`}>
                   <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <IconComponent className="text-white" size={32} />
                   </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 sm:p-8">
+                <div className="p-6 sm:p-8 flex flex-col flex-1">
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
                     {category.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 flex-1">
                     {category.description}
                   </p>
                   
-                  {/* Arrow Icon */}
-                  <div className="flex items-center text-gray-600 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                  {/* Arrow Icon - Fixed at bottom */}
+                  <div className="flex items-center text-gray-600 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors mt-auto">
                     <span className="text-sm font-medium mr-2">Get Help</span>
                     <FiArrowRight className="group-hover:translate-x-1 transition-transform duration-300" size={18} />
                   </div>

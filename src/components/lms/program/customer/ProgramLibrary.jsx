@@ -90,34 +90,33 @@ const ProgramsLibrary = () => {
       </Popup>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
         <div className="relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-6 h-6 bg-gray-800 rounded-sm rotate-45 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold">Your Journey Starts Here</h1>
-                <p className="text-green-100 text-sm">Curated wellness plans for your goals</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
+                <p className="text-gray-600 text-sm">Curated wellness plans for your goals</p>
               </div>
             </div>
-            <p className="text-green-100 text-lg leading-relaxed">
+            <p className="text-gray-700 text-lg leading-relaxed">
               Achieve your personal goals with curated wellness plans developed by our expert team
             </p>
           </div>
-          <div className="md:w-1/2 mt-6 md:mt-0 flex justify-center items-center">
-            <div className="relative w-full max-w-md aspect-[16/9]">
+          <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
+            <div className="relative">
               <Image
                 src="/images/content/Wellness_program.png"
                 alt="Hero Image"
                 width={0}
                 height={0}
                 sizes="100vw"
-                className="w-full h-full rounded-lg shadow-lg object-cover"
+                className="w-full rounded-2xl shadow-2xl"
               />
             </div>
           </div>

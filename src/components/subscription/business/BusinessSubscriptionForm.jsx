@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
 
   // Allowed countries
   const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
+  const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
   const initialValues = {
     organizationName: '',
@@ -40,6 +41,61 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
   // Check if all agreements are accepted
   const allAgreementsAccepted = agreements.termsOfService && agreements.privacyPolicy && agreements.recurringCharge;
 
+  // Helper function to determine which bubble button should be selected based on employee count
+  // Works dynamically with any number of volume options (3, 4, 5, etc.)
+  // Ranges work as: first volume (10) = 10-19, second (20) = 20-24, third (25) = 25+
+  const getSelectedVolumeForCount = (count) => {
+    if (!planData?.discounted_volume || planData.discounted_volume.length === 0) {
+      return null;
+    }
+    
+    const sortedVolumes = [...planData.discounted_volume]
+      .sort((a, b) => a.volume - b.volume);
+    
+    // If only one option, select it only if count >= that volume
+    if (sortedVolumes.length === 1) {
+      return count >= sortedVolumes[0].volume ? sortedVolumes[0].volume : null;
+    }
+    
+    const firstVolume = sortedVolumes[0].volume;
+    
+    // If count is less than the first volume, don't select anything
+    if (count < firstVolume) {
+      return null;
+    }
+    
+    // Dynamic logic: find the appropriate volume threshold based on ranges
+    // Each volume represents a range: currentVolume to (nextVolume - 1)
+    // Last volume represents: lastVolume+
+    for (let i = 0; i < sortedVolumes.length; i++) {
+      const currentVolume = sortedVolumes[i].volume;
+      const nextVolume = i < sortedVolumes.length - 1 ? sortedVolumes[i + 1].volume : null;
+      
+      // If this is the last volume threshold, select it for all values >= current volume
+      if (nextVolume === null) {
+        if (count >= currentVolume) {
+          return currentVolume;
+        }
+      } else {
+        // Check if count falls within the range: currentVolume to (nextVolume - 1)
+        // Example: currentVolume=10, nextVolume=20 means range is 10-19
+        if (count >= currentVolume && count < nextVolume) {
+          return currentVolume;
+        }
+      }
+    }
+    
+    // Fallback: return null if no range matches (shouldn't happen, but safety check)
+    return null;
+  };
+
+  // Auto-select bubble button on initial load and when employeeCount or planData changes
+  // Also clears selection when count is below the first range (when decreasing)
+  useEffect(() => {
+    const selectedVolume = getSelectedVolumeForCount(employeeCount);
+    setSelectedRange(selectedVolume); // Set to null if no range matches (clears selection)
+  }, [employeeCount, planData?.discounted_volume]);
+
   // Auto-select appropriate discount based on employee count
   const applicableDiscount = useMemo(() => {
     if (!planData?.discounted_volume || planData.discounted_volume.length === 0) {
@@ -56,7 +112,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
 
   // Calculate pricing based on employee limit and applicable discount
   const pricingCalculation = useMemo(() => {
-    const basePrice = planData?.rate || planData?.price || 0;
+    const basePrice = planData?.price || 0;
     const subtotal = basePrice * employeeCount;
     
     let discountAmount = 0;
@@ -100,7 +156,8 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
         return;
       }
 
-      if (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode)) {
+      // Check country restriction (skip in development)
+      if (!isDevelopmentEnvironment && (!countryCode || !ALLOWED_COUNTRIES.includes(countryCode))) {
         toast.error('We currently only support purchases from the United States, Canada, and India.');
         return;
       }
@@ -247,6 +304,11 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                               const value = parseInt(e.target.value);
                               setFieldValue('employeeLimit', value);
                               setEmployeeCount(value);
+                              
+                              // Auto-select bubble button based on slider value
+                              // Also clears selection when value is below first range (when decreasing)
+                              const selectedVolume = getSelectedVolumeForCount(value);
+                              setSelectedRange(selectedVolume); // Set to null if no range matches (clears selection)
                             }}
                             className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10"
                             style={{ 
@@ -300,11 +362,20 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                               
                               const color = colors[index % colors.length];
                               
-                              // Calculate range
-                              const startRange = index === 0 ? 0 : array[index - 1].volume + 1;
-                              const endRange = discount.volume;
+                              // Calculate range label correctly
+                              // Each volume represents a range: currentVolume to (nextVolume - 1)
+                              // Last volume represents: lastVolume+
                               const isLastOption = index === array.length - 1;
-                              const rangeLabel = isLastOption ? `${endRange}+` : `${startRange}-${endRange}`;
+                              let rangeLabel;
+                              
+                              if (isLastOption) {
+                                // Last option shows as "volume+"
+                                rangeLabel = `${discount.volume}+`;
+                              } else {
+                                // Other options show as "volume-(nextVolume-1)"
+                                const nextVolume = array[index + 1].volume;
+                                rangeLabel = `${discount.volume}-${nextVolume - 1}`;
+                              }
                               
                               // Check if this range is manually selected
                               const isSelected = selectedRange === discount.volume;
@@ -314,8 +385,8 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                                   key={discount.volume}
                                   type="button"
                                   onClick={() => {
-                                    setFieldValue('employeeLimit', endRange);
-                                    setEmployeeCount(endRange);
+                                    setFieldValue('employeeLimit', discount.volume);
+                                    setEmployeeCount(discount.volume);
                                     setSelectedRange(discount.volume);
                                   }}
                                   className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 transform hover:scale-105 ${
@@ -366,13 +437,22 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                       <div className="flex-1">
                         <label htmlFor="termsOfService" className="text-sm font-medium text-gray-900 cursor-pointer">
-                          I agree to Terms of Service
-                        </label>
-                        <p className="text-sm text-gray-600 mt-1">
-                          <a href="/terms" className="text-orange-600 hover:text-orange-800 underline">
-                            Link to Terms of Service
+                          I agree to{' '}
+                          <a 
+                            href="https://www.nourishdoc.com/terms" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-orange-600 hover:text-orange-800 underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Terms of Service
                           </a>
-                        </p>
+                        </label>
+                        {/* <p className="text-sm text-gray-600 mt-1">
+                          <a href="https://www.nourishdoc.com/terms" className="text-orange-600 hover:text-orange-800 underline">
+                            Terms of Service
+                          </a>
+                        </p> */}
                       </div>
                     </div>
 
@@ -388,13 +468,22 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                       <div className="flex-1">
                         <label htmlFor="privacyPolicy" className="text-sm font-medium text-gray-900 cursor-pointer">
-                          I agree to Privacy Policy
-                        </label>
-                        <p className="text-sm text-gray-600 mt-1">
-                          <a href="/privacy" className="text-orange-600 hover:text-orange-800 underline">
-                            Link to your Privacy URL
+                          I agree to{' '}
+                          <a 
+                            href="https://www.nourishdoc.com/privacy-policy" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-orange-600 hover:text-orange-800 underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Privacy Policy
                           </a>
-                        </p>
+                        </label>
+                        {/* <p className="text-sm text-gray-600 mt-1">
+                          <a href="https://www.nourishdoc.com/privacy-policy " className="text-orange-600 hover:text-orange-800 underline">
+                            Privacy Policy
+                          </a>
+                        </p> */}
                       </div>
                     </div>
 
@@ -410,7 +499,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                       <div className="flex-1">
                         <label htmlFor="recurringCharge" className="text-sm font-medium text-gray-900 cursor-pointer">
-                          I acknowledge this is a recurring charge
+                        I acknowledge this is a recurring charge until cancelled
                         </label>
                         {/* <p className="text-sm text-gray-600 mt-1">
                           Card network compliance requirement
@@ -449,7 +538,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                       </div>
                     )}
                   </button>
-                  {!isLoading && countryCode && !ALLOWED_COUNTRIES.includes(countryCode) && (
+                  {!isDevelopmentEnvironment && !isLoading && countryCode && !ALLOWED_COUNTRIES.includes(countryCode) && (
                     <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                       <p className="text-sm text-red-800 text-center">
                         We currently only support purchases from the United States, Canada, and India.
@@ -514,7 +603,7 @@ const BusinessSubscriptionForm = ({ planData, referralCode }) => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600 font-medium">Per Employee Price</span>
                   <span className="font-bold text-lg">
-                    {planData?.currency_symbol || '$'}{Math.round(planData?.rate || planData?.price || 0)}
+                    {planData?.currency_symbol || '$'}{Math.round(planData?.price || 0)}
                   </span>
                 </div>
                     <div className="flex justify-between items-center">

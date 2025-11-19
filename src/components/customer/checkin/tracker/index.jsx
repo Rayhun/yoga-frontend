@@ -61,7 +61,7 @@ const CycleDayCard = ({ cycleInfo }) => {
             <p className="text-gray-700">
               Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
             </p>
-            {userStatus && (
+            {/* {userStatus && (
               <div className="mt-2 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${
                   userStatus.period_status === 'normal' ? 'bg-green-500' : 
@@ -71,7 +71,7 @@ const CycleDayCard = ({ cycleInfo }) => {
                   {userStatus.period_message}
                 </span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -816,10 +816,10 @@ const Tracker = () => {
             </svg>
           </div>
              <div>
-               <h1 className="font-bold text-2xl">Track {trackerData?.tracker_name || cycleInfo?.tracker_name || 'Cycle'}</h1>
+               <h1 className="font-bold text-2xl">Track your cycles</h1>
                <p className="text-green-100 text-sm">
                  {cycleInfo?.user_status?.action_required === 'resume_tracking' 
-                   ? 'Resume tracking your cycle and symptoms'
+                   ? 'Resume tracking your cycle'
                    : 'Monitor your cycle dates and track patterns'
                  }
                </p>
@@ -832,7 +832,7 @@ const Tracker = () => {
               </svg>
               <span>Calendar View</span>
             </div>
-            <p className="text-green-100 text-sm">Track your periods</p>
+            <p className="text-green-100 text-sm">Cycle History</p>
           </div>
         </div>
       </div>

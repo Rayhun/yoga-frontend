@@ -364,7 +364,7 @@ const CUSTOMER = [
       },
       {
         Icon: MdTrackChanges,
-        label: 'Habit Tracker',
+        label: 'Your Habits',
         href: '/portal/customer/checkin/sleep_tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
       },
@@ -376,7 +376,7 @@ const CUSTOMER = [
       },
       {
         Icon: RiRepeatOneFill,
-        label: 'Insights',
+        label: 'Habit Insights',
         href: '/portal/customer/checkin/daily_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
       },
@@ -391,7 +391,7 @@ const CUSTOMER = [
     sub_menu: [
       {
         Icon: MdTrackChanges,
-        label: 'Cycle Dates',
+        label: 'Cycle Tracking',
         href: '/portal/customer/checkin/tracker',
         isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
       },
@@ -403,7 +403,7 @@ const CUSTOMER = [
       },
       {
         Icon: PiChartLine,
-        label: 'Insights',
+        label: 'Cycle Insights',
         href: '/portal/customer/checkin/cycle_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/cycle_insights'),
       },

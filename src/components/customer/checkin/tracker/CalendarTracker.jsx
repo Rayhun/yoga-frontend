@@ -462,7 +462,7 @@ const CalendarTracker = () => {
               </svg>
               <span>Calendar View</span>
             </div>
-            <p className="text-green-100 text-sm">Track your periods</p>
+            <p className="text-green-100 text-sm">Cycle History</p>
           </div>
         </div>
       </div>
