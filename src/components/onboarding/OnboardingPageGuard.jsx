@@ -44,8 +44,8 @@ const OnboardingPageGuard = ({ children }) => {
     );
   }
 
-  // If user is customer and hasn't completed onboarding, show the onboarding quiz
-  if (user?.isCustomer && user?.profile?.on_boarding_quiz === false) {
+  // If user is customer and hasn't completed onboarding (false, null, or undefined), show the onboarding quiz
+  if (user?.isCustomer && user?.profile?.on_boarding_quiz !== true) {
     return children;
   }
 

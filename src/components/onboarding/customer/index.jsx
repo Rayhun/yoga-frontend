@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Yup from 'yup';
@@ -56,6 +56,13 @@ const CustomerOnboarding = () => {
   const goToPreviousQuestion = useCallback(() => setSelectedQuestionIndex(prevState => prevState - 1), []);
   const goToNextQuestion = useCallback(() => setSelectedQuestionIndex(prevState => prevState + 1), []);
 
+  // Reset selectedQuestionIndex if it's out of bounds
+  useEffect(() => {
+    if (quizQuestions.length > 0 && selectedQuestionIndex >= quizQuestions.length) {
+      setSelectedQuestionIndex(0);
+    }
+  }, [quizQuestions.length, selectedQuestionIndex]);
+
   const handleSubmitOnboardingQuiz = async values => {
     try {
       const answers = Object.entries(values).map(([questionId, selectedOptionText]) => {
@@ -89,6 +96,19 @@ const CustomerOnboarding = () => {
   const hasNextQuestion = selectedQuestionIndex < quizQuestions.length - 1;
 
   if (isLoadingOnboardingQuiz) return <PageLoader />;
+
+  // If no questions are available, show a message
+  if (!quizQuestions || quizQuestions.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-56px)] dark:bg-boxdark-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md mx-4 text-center">
+          <p className="text-gray-600 dark:text-gray-400">
+            No onboarding questions available at this time. Please contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Formik

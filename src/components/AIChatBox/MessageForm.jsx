@@ -8,6 +8,7 @@ const MessageForm = () => {
   const { get, remove } = useSearchParamUtils();
 
   const [inputText, setInputText] = useState(() => get('message') || '');
+  const type = get('type') || 'ai_chat';
 
   useEffect(() => {
     if (get('message')) remove('message');
@@ -16,6 +17,8 @@ const MessageForm = () => {
   const {
     actions: { sendMessage },
   } = useAIChatInbox();
+
+  const placeholder = type === 'ai_chat' ? 'Ask anything about your practice...' : 'How can I help?';
 
   const handleSendMessage = () => {
     if (inputText) {
@@ -43,7 +46,7 @@ const MessageForm = () => {
             value={inputText}
             onKeyDown={onKeyDown}
             onChange={onInputChange}
-            placeholder="Ask anything about your practice..."
+            placeholder={placeholder}
             className="h-13 w-full rounded-full border border-stroke bg-gray pl-5 pr-19 text-black placeholder-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 dark:border-strokedark dark:bg-boxdark-2 dark:text-white"
           />
         </div>

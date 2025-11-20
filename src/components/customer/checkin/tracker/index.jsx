@@ -15,6 +15,39 @@ const Section = ({ children, className = "" }) => (
 );
 
 const CycleDayCard = ({ cycleInfo }) => {
+  // Helper function to get regularity status styling
+  const getRegularityStatusStyle = (status) => {
+    if (!status) return null;
+    
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'regular') {
+      return {
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-700',
+        dotColor: 'bg-green-500',
+        borderColor: 'border-green-500',
+        phaseColor: 'text-green-600'
+      };
+    } else if (statusLower === 'irregular') {
+      return {
+        bgColor: 'bg-orange-100',
+        textColor: 'text-orange-700',
+        dotColor: 'bg-orange-500',
+        borderColor: 'border-orange-500',
+        phaseColor: 'text-orange-600'
+      };
+    } else if (statusLower === 'very irregular') {
+      return {
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-700',
+        dotColor: 'bg-red-500',
+        borderColor: 'border-red-500',
+        phaseColor: 'text-red-600'
+      };
+    }
+    return null;
+  };
+
   if (!cycleInfo) {
     return (
       <Section>
@@ -36,15 +69,22 @@ const CycleDayCard = ({ cycleInfo }) => {
 
   const userStatus = cycleInfo.user_status;
   const recommendations = cycleInfo.recommendations;
+  const regularityStyle = getRegularityStatusStyle(cycleInfo.regularity_status);
+  const defaultColor = regularityStyle || {
+    borderColor: 'border-gray-500',
+    phaseColor: 'text-gray-600',
+    dotColor: 'bg-gray-500'
+  };
 
   return (
     <Section>
-      <div className="flex items-center gap-6">
+      {/* Top Section - Cycle Overview */}
+      <div className="flex items-start gap-6 relative">
         {/* Circular Day Indicator */}
         <div className="flex-shrink-0">
-          <div className="w-20 h-20 border-2 border-green-500 rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50">
+          <div className={`w-20 h-20 border-2 ${defaultColor.borderColor} rounded-full flex flex-col items-center justify-center bg-white`}>
             <span className="text-xs font-medium text-gray-600">Day</span>
-            <span className="text-2xl font-bold text-green-700">{cycleInfo.day}</span>
+            <span className="text-2xl font-bold text-gray-900">{cycleInfo.day}</span>
           </div>
         </div>
 
@@ -55,29 +95,50 @@ const CycleDayCard = ({ cycleInfo }) => {
             <p className="text-gray-700">
               {cycleInfo.estimated}
             </p>
-            <p className="text-green-600 font-medium">
+            <p className={`${defaultColor.phaseColor} font-medium`}>
               Current phase: {cycleInfo.current_phase}
             </p>
-            <p className="text-gray-700">
-              Last Period: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
-            </p>
-            {/* {userStatus && (
-              <div className="mt-2 flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${
-                  userStatus.period_status === 'normal' ? 'bg-green-500' : 
-                  userStatus.period_status === 'irregular' ? 'bg-yellow-500' : 'bg-red-500'
-                }`}></div>
-                <span className="text-sm text-gray-600">
-                  {userStatus.period_message}
-                </span>
-              </div>
-            )} */}
           </div>
         </div>
 
-        {/* Status Indicator */}
-        <div className="flex-shrink-0">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        {/* Status Indicator - Top Right */}
+        <div className="absolute top-0 right-0">
+          <div className={`w-3 h-3 ${defaultColor.dotColor} rounded-full`}></div>
+        </div>
+      </div>
+
+      {/* Bottom Section - Cycle Pattern Details */}
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="space-y-3">
+          {/* Cycle Pattern with Bubble Icon */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Cycle Pattern:</span>
+            {cycleInfo.regularity_status && regularityStyle && (
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${regularityStyle.bgColor} ${regularityStyle.textColor}`}>
+                <div className={`w-2 h-2 ${regularityStyle.dotColor} rounded-full`}></div>
+                <span className="text-sm font-medium">{cycleInfo.regularity_status}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Pattern Details (if available) */}
+          {cycleInfo.regularity_status && (
+            <p className="text-sm text-gray-600">
+              {cycleInfo.regularity_status.toLowerCase() === 'regular' 
+                ? 'Cycles are consistent'
+                : cycleInfo.regularity_status.toLowerCase() === 'irregular'
+                ? 'Cycles vary by >7 days'
+                : cycleInfo.regularity_status.toLowerCase() === 'very irregular'
+                ? 'Cycles vary significantly'
+                : ''
+              }
+            </p>
+          )}
+          
+          {/* Last Period Date */}
+          <p className="text-sm text-gray-700">
+            Last Period Date: {cycleInfo.last_day ? cycleInfo.last_day : 'Not recorded'}
+          </p>
         </div>
       </div>
 
