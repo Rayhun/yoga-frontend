@@ -4,7 +4,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
-import { FiX, FiUser, FiMail, FiPhone, FiIdCard, FiLock } from 'react-icons/fi';
+import { FiX, FiUser, FiMail, FiPhone, FiCreditCard, FiLock } from 'react-icons/fi';
 
 const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
   const isEditing = !!employee;
@@ -152,7 +152,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
                   name="employee_id"
                   type="text"
                   placeholder="Enter unique employee ID"
-                  Icon={FiIdCard}
+                  Icon={FiCreditCard}
                   required
                 />
                 <FormikField

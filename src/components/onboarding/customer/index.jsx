@@ -131,7 +131,7 @@ const CustomerOnboarding = () => {
             No Quiz Available
           </h3>
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            We're currently preparing your personalized onboarding experience. Please check back soon or contact our support team for assistance.
+            We&apos;re currently preparing your personalized onboarding experience. Please check back soon or contact our support team for assistance.
           </p>
           <button 
             onClick={() => window.location.reload()} 
