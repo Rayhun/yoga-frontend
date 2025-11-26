@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import CardDataStats from '../../stats/CardDataStats';
 import { FiDollarSign, FiUsers, FiTrendingUp, FiBookOpen } from 'react-icons/fi';
@@ -21,6 +21,7 @@ const PerformanceBenchmark = dynamic(() => import('./PerformanceBenchmark'), { s
 
 const ExpertDashboard = () => {
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const startDate = searchParams.get('start_date');
   const endDate = searchParams.get('end_date');
@@ -97,6 +98,7 @@ const ExpertDashboard = () => {
         <CardDataStats 
           title="Total Events" 
           total={dashboardData?.content_analytics?.total_events}
+          onClick={() => router.push('/portal/teacher/profile?active_tab=group_coaching')}
         >
           <TbTarget className="text-primary" size={20} />
         </CardDataStats>
@@ -104,6 +106,7 @@ const ExpertDashboard = () => {
         <CardDataStats 
           title="Total Consultations" 
           total={dashboardData?.content_analytics?.total_consultations}
+          onClick={() => router.push('/portal/teacher/profile?active_tab=consult')}
         >
           <PiHandshake className="text-primary" size={20} />
         </CardDataStats>

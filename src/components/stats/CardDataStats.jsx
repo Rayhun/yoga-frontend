@@ -1,8 +1,13 @@
 import React from 'react';
 
-const CardDataStats = ({ title, total, rate, levelUp, levelDown, highlight = null, children }) => {
+const CardDataStats = ({ title, total, rate, levelUp, levelDown, highlight = null, children, onClick }) => {
   return (
-    <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div 
+      className={`rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark ${
+        onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]' : ''
+      }`}
+      onClick={onClick}
+    >
       <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
         {children}
       </div>

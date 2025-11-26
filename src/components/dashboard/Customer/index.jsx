@@ -146,8 +146,8 @@ const CustomerDashboard = () => {
       </div>
 
       {/* Quick Action Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Log Your Cycle Card */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Cycle Check-In Card */}
         <div className="bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50 rounded-2xl shadow-lg border border-pink-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -155,52 +155,75 @@ const CustomerDashboard = () => {
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-300 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
           </div>
           
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-pink-700 transition-colors">🌸 Cycle Check-In</h3>
-                <p className="text-gray-600 text-sm">1-minute tracking</p>
-              </div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 group-hover:text-pink-700 transition-colors mb-2">Cycle Check-In</h3>
+              <p className="text-gray-600 text-sm">Track your menstrual cycle</p>
             </div>
             <button 
-              className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-xl font-semibold text-sm hover:from-pink-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-xl font-semibold text-sm hover:from-pink-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/tracker')}
             >
-              Let’s Go →
+              Let's Go →
             </button>
           </div>
         </div>
 
-        {/* Log Your Goal Tracker Card */}
-        <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl shadow-lg border border-blue-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden">
+        {/* Symptoms Check-In Card */}
+        <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-indigo-50 rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-300 rounded-full blur-3xl opacity-20 animate-float"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-300 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-300 rounded-full blur-3xl opacity-20 animate-float"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-300 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
           </div>
           
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">🌼 Daily Tune-In</h3>
-                <p className="text-gray-600 text-sm">Track your progress</p>
-              </div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-700 transition-colors mb-2">Symptoms Check-In</h3>
+              <p className="text-gray-600 text-sm">Log your daily symptoms</p>
             </div>
             <button 
-              className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-sm hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl font-semibold text-sm hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              onClick={() => router.push('/portal/customer/checkin/daily-tracker')}
+            >
+              Let's Go →
+            </button>
+          </div>
+        </div>
+
+        {/* Daily Tune-In Card */}
+        <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl shadow-lg border border-green-100 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-green-300 rounded-full blur-3xl opacity-20 animate-float"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-teal-300 rounded-full blur-3xl opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
+          </div>
+          
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors mb-2">Daily Tune-In</h3>
+              <p className="text-gray-600 text-sm">Track your daily wellness</p>
+            </div>
+            <button 
+              className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-sm hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               onClick={() => router.push('/portal/customer/checkin/sleep_tracker')}
             >
-              Let&apos;s Go →
+              Let's Go →
             </button>
           </div>
         </div>
@@ -261,7 +284,7 @@ const CustomerDashboard = () => {
               strokeWidth={18}
               color="#F97316"
               backgroundColor="#FED7AA"
-              title="Lifestage Wellness"
+              title="Cycle Score"
               subtitle={`Day ${periodTracking?.current_day || 0} of ${(periodTracking?.current_day || 0) + (periodTracking?.remaining_days || 0)}`}
               centerSubtext={`Day ${periodTracking?.current_day || 0}`}
               onClick={() => router.push('/portal/customer/checkin/cycle_insights')}
@@ -284,7 +307,7 @@ const CustomerDashboard = () => {
               strokeWidth={18}
               color="#22C55E"
               backgroundColor="#BBF7D0"
-              title="Lifestyle Wellness"
+              title="Habit Score"
               subtitle={goalTracking?.overall_status || "Good"}
               centerSubtext='overall'
               onClick={() => router.push('/portal/customer/checkin/daily_insights')}

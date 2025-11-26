@@ -6,8 +6,15 @@ import { createStripeOnboardingLink } from '@/services/private/expert/stripe';
 const InfoNote = ({expertData}) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const handleStripeOnboarding = async () => {
+    // Check if profile is complete before allowing Stripe onboarding
+    if (!expertData?.is_profile_complete) {
+      setShowProfilePopup(true);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await createStripeOnboardingLink();
@@ -22,6 +29,15 @@ const InfoNote = ({expertData}) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddCoachingOrConsultation = (path) => {
+    // Check if profile is complete before allowing coaching/consultation creation
+    if (!expertData?.is_profile_complete) {
+      setShowProfilePopup(true);
+      return;
+    }
+    router.push(path);
   };
 
 
@@ -75,17 +91,53 @@ const InfoNote = ({expertData}) => {
             </div>
             <div className="flex-shrink-0 flex gap-3">
               <button
-                onClick={() => router.push('/portal/teacher/group_coaching/add')}
+                onClick={() => handleAddCoachingOrConsultation('/portal/teacher/group_coaching/add')}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
                 Add Coaching
               </button>
               <button
-                onClick={() => router.push('/portal/teacher/consultation/add')}
+                onClick={() => handleAddCoachingOrConsultation('/portal/teacher/consultation/add')}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
                 Add Consultation
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Profile Completion Popup */}
+        {showProfilePopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <HiOutlineInformationCircle className="text-primary text-2xl" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Complete Your Profile
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Please complete your profile to get started with this feature.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowProfilePopup(false)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowProfilePopup(false);
+                      router.push('/portal/teacher/editProfile');
+                    }}
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Complete Profile
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

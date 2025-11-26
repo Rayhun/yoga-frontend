@@ -306,7 +306,7 @@ const CUSTOMER = [
   },
   {
     Icon: FaInbox,
-    label: 'Inbox',
+    label: 'Circles',
     href: '/portal/inbox',
     isActive: pathname => pathname === '/portal/inbox',
     disabled: false,

@@ -46,7 +46,7 @@ const SleepTracker = () => {
   };
 
   const validationSchema = Yup.object({
-    selected_option: Yup.string().required('Please select a rating'),
+    selected_option: Yup.string(),
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -118,7 +118,7 @@ const SleepTracker = () => {
               </div>
               <div>
                 <h1 className="font-bold text-2xl">{trackerData?.title}</h1>
-                <p className="text-green-100 text-sm">Track your sleep quality</p>
+                <p className="text-green-100 text-sm">Track your {trackerData?.title}</p>
               </div>
             </div>
             <div className="text-right">
@@ -134,7 +134,7 @@ const SleepTracker = () => {
         {/* Main Content Card */}
         <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-            {({ setFieldValue, isSubmitting, errors, values }) => (
+            {({ setFieldValue, isSubmitting, errors, values, touched }) => (
               <>
                 <LoadExistingData date={values.date} setFieldValue={setFieldValue} trackerData={trackerData} tracker={tracker} />
                 <Form className="flex flex-col gap-6">
@@ -143,7 +143,7 @@ const SleepTracker = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h2 className="text-xl font-bold text-gray-800 mb-2">{trackerData?.description}</h2>
-                      <p className="text-gray-600">How did you sleep last night?</p>
+                      {/* <p className="text-gray-600">How did you sleep last night?</p> */}
                     </div>
                     <div className="relative">
                       <button
@@ -195,7 +195,7 @@ const SleepTracker = () => {
                       }`}>
                         {trackerData[`option_${index + 1}_icon`] || icon}
                       </div>
-                      <span className={`text-xs font-bold text-center leading-tight ${
+                      <span className={`text-sm font-bold text-center leading-tight ${
                         values.selected_option === `option_${index + 1}` ? 'text-white' : 'text-gray-700'
                       }`}>
                         {trackerData[`option_${index + 1}_title`] || label}
@@ -216,34 +216,26 @@ const SleepTracker = () => {
                       <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm">💤</span>
                       </div>
-                      <h3 className="text-lg font-bold text-green-800">Sleep Quality Description</h3>
+                      <h3 className="text-lg font-bold text-green-800">{trackerData?.title}</h3>
                     </div>
                     <p className="text-green-700 font-medium capitalize">
-                      {trackerData[`${values.selected_option}_description`] || 'No description available'}
+                      {trackerData[`${values.selected_option}_description`] || trackerData[`${values.selected_option}_title`]}
                     </p>
                   </div>
                 )}
 
-                {/* Error Message */}
-                {errors.selected_option && (
-                  <div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-4">
-                    <p className="text-red-600 font-medium flex items-center gap-2">
-                      <span>⚠️</span>
-                      {errors.selected_option}
-                    </p>
-                  </div>
-                )}
 
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   size={'4xl'}
                   isLoading={isSubmitting}
+                  disabled={!values.selected_option || isSubmitting}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>💾</span>
-                    {`Save${dayjs(values.date).isSame(dayjs(), 'day') ? " Today's " : ' '}Sleep Rating`}
+                    {`Save${dayjs(values.date).isSame(dayjs(), 'day') ? " Today's " : ' '}${trackerData?.title}`}
                   </div>
                 </Button>
               </Form>
