@@ -55,7 +55,7 @@ const MessagesList = () => {
           {type === 'ai_chat' && (
             <div className="mb-4 flex items-center justify-center">
               <p className="bg-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 text-center leading-relaxed">
-                Your AI Coach is here to support and guide you, but it doesn't replace<br />
+                Your AI Coach is here to support and guide you, but it doesn&apos;t replace<br />
                 personalized care from a qualified professional. Listen to your intuition and reach out for expert support when needed.
               </p>
             </div>
