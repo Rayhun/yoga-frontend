@@ -325,6 +325,21 @@ const Tracker = () => {
     return null;
   }, []);
 
+  // Helper function to check if a date is in the first week of the next month
+  const isFirstWeekOfNextMonth = useCallback((date, currentMonth) => {
+    const dateObj = dayjs(date);
+    const currentMonthObj = dayjs(currentMonth);
+    const nextMonth = currentMonthObj.add(1, 'month');
+    
+    // Check if date is in the next month
+    if (dateObj.month() !== nextMonth.month() || dateObj.year() !== nextMonth.year()) {
+      return false;
+    }
+    
+    // Check if date is in the first week (first 7 days)
+    return dateObj.date() <= 7;
+  }, []);
+
   // Handle date selection - show popup instead of directly updating
   const handleDateChange = useCallback((date, event) => {
     const formattedDate = date.format('YYYY-MM-DD');
@@ -335,8 +350,13 @@ const Tracker = () => {
     }
     
     // Check if this day is outside the current viewing month
-    if (event?.target?.closest('.MuiPickersDay-dayOutsideMonth')) {
-      return; // Don't show popup for dates outside current month
+    const isOutsideMonth = event?.target?.closest('.MuiPickersDay-dayOutsideMonth');
+    
+    if (isOutsideMonth) {
+      // Allow selection if it's in the first week of the next month
+      if (!isFirstWeekOfNextMonth(formattedDate, currentMonth)) {
+        return; // Don't show popup for dates outside first week of next month
+      }
     }
     
     // Set the selected date and show popup
@@ -366,7 +386,7 @@ const Tracker = () => {
     }
     
     setPopupOpen(true);
-  }, []);
+  }, [isFirstWeekOfNextMonth, currentMonth]);
 
   // Handle popup actions
   const handlePopupAction = useCallback((action) => {
@@ -703,6 +723,12 @@ const Tracker = () => {
     // Check if this is a future date - disable future dates
     const isFutureDate = dayjs(dayFormatted).isAfter(dayjs(), 'day');
     
+    // Check if this date is in the first week of the next month (selectable)
+    const isFirstWeekNextMonth = isOtherMonth && isFirstWeekOfNextMonth(dayFormatted, currentMonth);
+    
+    // Date is selectable if it's in current month OR first week of next month, and not a future date
+    const isSelectable = (isCurrentMonth || isFirstWeekNextMonth) && !isFutureDate;
+    
     // Determine if this is a start/end date, mid-day in range, or individual date
     const isStartDate = periodStart && dayFormatted === periodStart;
     const isEndDate = periodEnd && dayFormatted === periodEnd;
@@ -721,11 +747,12 @@ const Tracker = () => {
     
     // Set colors and border radius based on date type
     let backgroundColor = 'transparent';
-    let textColor = isOtherMonth ? '#d1d5db' : '#374151';
+    let textColor = isOtherMonth && !isFirstWeekNextMonth ? '#d1d5db' : '#374151';
     let fontWeight = 500;
     let borderRadius = '50%'; // Default circular
     
-    if (isSelected && isCurrentMonth) {
+    // Apply selection styling if date is selected (whether current month or first week of next month)
+    if (isSelected && isSelectable) {
       if (isStartDate) {
         backgroundColor = '#dc2626'; // Red for start date
         textColor = '#ffffff';
@@ -770,29 +797,29 @@ const Tracker = () => {
           color: textColor,
           fontSize: '0.875rem',
           fontWeight: fontWeight,
-          cursor: (isCurrentMonth && !isFutureDate) ? 'pointer' : 'not-allowed',
+          cursor: isSelectable ? 'pointer' : 'not-allowed',
           border: 'none',
           margin: '2px',
           transition: 'all 0.3s ease',
-          opacity: (isOtherMonth || isFutureDate) ? 0.4 : 1,
-          boxShadow: (isStartDate || isEndDate) && isCurrentMonth && !isFutureDate ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
-          pointerEvents: (isCurrentMonth && !isFutureDate) ? 'auto' : 'none',
+          opacity: (!isSelectable && (isOtherMonth || isFutureDate)) ? 0.4 : 1,
+          boxShadow: (isStartDate || isEndDate) && isSelectable ? '0 4px 12px rgba(220, 38, 38, 0.3)' : 'none',
+          pointerEvents: isSelectable ? 'auto' : 'none',
         }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (isCurrentMonth && !isFutureDate) {
+          if (isSelectable) {
             handleDateChange(day, e);
           }
         }}
         onMouseEnter={(e) => {
-          if (!isSelected && isCurrentMonth && !isFutureDate) {
+          if (!isSelected && isSelectable) {
             e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
             e.target.style.transform = 'scale(1.1)';
           }
         }}
         onMouseLeave={(e) => {
-          if (!isSelected && isCurrentMonth && !isFutureDate) {
+          if (!isSelected && isSelectable) {
             e.target.style.backgroundColor = 'transparent';
             e.target.style.transform = 'scale(1)';
           }
@@ -800,7 +827,7 @@ const Tracker = () => {
       >
         {day.date()}
         {/* Add icons for start/end dates */}
-        {(isStartDate || isEndDate) && isCurrentMonth && (
+        {(isStartDate || isEndDate) && isSelectable && (
           <div
             style={{
               position: 'absolute',
@@ -824,7 +851,7 @@ const Tracker = () => {
         )}
       </div>
     );
-  }, [getSelectedDates, handleDateChange, periodStart, periodEnd, periodDates]);
+  }, [getSelectedDates, handleDateChange, periodStart, periodEnd, periodDates, isFirstWeekOfNextMonth, currentMonth]);
 
   // Loading state
   if (loading) {

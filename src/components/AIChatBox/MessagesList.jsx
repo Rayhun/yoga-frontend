@@ -5,6 +5,7 @@ import useAuthContext from '@/hooks/useAuthContext';
 import LoadingWrapper from '../common/loader/Wrapper';
 import Markdown from '../common/Markdown';
 import { useAIChatInbox } from '@/context/AIChatInboxContext';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 
 const Message = ({ isMyMessage, senderName, time, isAI, children }) => (
   <>
@@ -35,6 +36,8 @@ const MessagesList = () => {
   const {
     messages: { isLoading: isLoadingMessages, data: messages },
   } = useAIChatInbox();
+  const { get } = useSearchParamUtils();
+  const type = get('type') || 'ai_chat';
 
   const lastMessageRef = useRef(null);
 
@@ -49,6 +52,14 @@ const MessagesList = () => {
     <div className="h-[calc(80vh-180px)]" style={{ backgroundColor: '#EDE6DE' }}>
       <LoadingWrapper isLoading={isLoadingMessages}>
         <div className="no-scrollbar max-h-full space-y-3.5 overflow-auto px-6 py-7.5 pb-24">
+          {type === 'ai_chat' && (
+            <div className="mb-4 flex items-center justify-center">
+              <p className="bg-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 text-center leading-relaxed">
+                Your AI Coach is here to support and guide you, but it doesn't replace<br />
+                personalized care from a qualified professional. Listen to your intuition and reach out for expert support when needed.
+              </p>
+            </div>
+          )}
           {[...messages].map((message, index) => (
             <Message
               key={index}

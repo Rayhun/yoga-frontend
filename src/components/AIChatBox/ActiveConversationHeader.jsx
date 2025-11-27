@@ -25,8 +25,8 @@ const ActiveConversationHeader = () => {
           )}
         </div> */}
         <div>
-          <h5 className="font-medium text-black dark:text-white">{type === 'ai_chat' ? 'AI Coach' : 'Help & Support'}</h5>
-          <p className="text-sm text-gray-600">What’s on your mind today?</p>
+          <h5 className="font-medium text-black dark:text-white">{type === 'ai_chat' ? 'Your AI Wellness Guide' : 'Help & Support'}</h5>
+          <p className="text-sm text-gray-600">How can I support you today?</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
