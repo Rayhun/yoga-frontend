@@ -75,9 +75,10 @@ const EarningChart = ({ earnings_over_time = {} }) => {
   const series = useMemo(() => [{ name: 'Earnings', data: dataSeries }], [dataSeries]);
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
-      <div className="w-full">
-        <h4 className="text-xl font-semibold text-black dark:text-white">Earning Over Time</h4>
+    <div className="w-full px-6 pb-6 pt-6">
+      <div className="mb-6">
+        <h4 className="text-xl font-semibold text-black dark:text-white mb-2">Earning Over Time</h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Track your earnings performance across months</p>
       </div>
       <div className="-ml-5">
         <ReactApexChart options={options} series={series} type="area" height={350} />

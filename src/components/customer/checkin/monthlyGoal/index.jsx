@@ -41,6 +41,58 @@ const MonthlyGoal = () => {
         </div>
       </div>
 
+      {/* Process Flow Information */}
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-6">
+        <div className="flex items-center justify-center gap-8 md:gap-12">
+          {/* Step 1 */}
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
+              1
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-gray-800 font-semibold text-sm md:text-base">Choose</p>
+              <p className="text-gray-800 font-semibold text-sm md:text-base">goal</p>
+            </div>
+          </div>
+
+          {/* Arrow 1 */}
+          <div className="hidden md:block">
+            <svg className="w-12 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
+              2
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-gray-800 font-semibold text-sm md:text-base">Choose</p>
+              <p className="text-gray-800 font-semibold text-sm md:text-base">Habit</p>
+            </div>
+          </div>
+
+          {/* Arrow 2 */}
+          <div className="hidden md:block">
+            <svg className="w-12 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center text-black text-2xl font-bold border-4 border-green-500 shadow-lg">
+              3
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-gray-800 font-semibold text-sm md:text-base">Track</p>
+              <p className="text-gray-800 font-semibold text-sm md:text-base">Habit</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="flex flex-col gap-8">
         <Section>

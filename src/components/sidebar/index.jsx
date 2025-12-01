@@ -26,6 +26,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const has_event_or_consult = user?.profile?.has_event_or_consult ?? false;
   const stripe_onboarded = user?.profile?.stripe_onboarded ?? false;
   const isCustomer = user?.isCustomer ?? false;
+  const isAffiliate = userRole === USER_ROLE.AFFILIATE;
+  const shouldUseCustomerStyle = isCustomer || isAffiliate;
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -149,18 +151,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden ${
-        isCustomer 
-          ? 'bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)]' 
-          : 'bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)]'
-      } duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <Link href="/">
-          <div className={`transition-all duration-300 ${isCustomer ? 'hover:scale-105 hover:rotate-1' : ''}`}>
+          <div className={`transition-all duration-300 ${shouldUseCustomerStyle ? 'hover:scale-105 hover:rotate-1' : ''}`}>
             <Image
               src={'/images/logo/logo.png'}
               alt="Logo"
@@ -200,11 +198,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
         {/* Sidebar Menu */}
         <nav className={`mt-3 px-4 py-4 lg:px-6 flex flex-col h-full ${
-          isCustomer ? 'gap-1' : ''
+          shouldUseCustomerStyle ? 'gap-1' : ''
         }`}>
           {/* Menu Group */}
           <ul className={`flex-grow flex flex-col mb-4 ${
-            isCustomer ? 'gap-1' : 'gap-2'
+            shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
           }`}>
             {subRoleBasedSidebarMenuItems.map(menuItem => (
               <React.Fragment key={menuItem.label}>
@@ -216,7 +214,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                           <Link
                             href="#"
                             className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all ${
-                              isCustomer 
+                              shouldUseCustomerStyle 
                                 ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
                                 : 'text-nav-item hover:text-primary'
                             }`}
@@ -226,7 +224,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             }}
                           >
                             {menuItem.Icon ? (
-                              <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
                                 <menuItem.Icon size={24} />
                               </div>
                             ) : null}
@@ -251,7 +249,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                           </Link>
                           <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
                             <ul className={`mb-3 mt-2 flex flex-col pl-4 ${
-                              isCustomer ? 'gap-1' : 'gap-2'
+                              shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
                             }`}>
                               {menuItem.sub_menu.map(childSubMenuItem => (
                                 <li key={childSubMenuItem.label}>
@@ -263,16 +261,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                           ? childSubMenuItem.isActive(pathname, activeTab)
                                           : false
                                       )
-                                        ? isCustomer 
+                                        ? shouldUseCustomerStyle 
                                           ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
                                           : 'text-primary'
-                                        : isCustomer 
+                                        : shouldUseCustomerStyle 
                                           ? 'text-gray-600 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_2px_6px_rgba(34,197,94,0.12)] hover:scale-[1.01] hover:-translate-y-0.5' 
                                           : 'text-nav-item/90 hover:text-primary'
                                     }`}
                                   >
                                     {childSubMenuItem.Icon ? (
-                                      <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
+                                      <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
                                         <childSubMenuItem.Icon size={24} />
                                       </div>
                                     ) : null}
@@ -305,15 +303,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                           ${
                             menuItem.disabled
                               ? 'cursor-not-allowed opacity-50 text-gray-400'
-                              : isCustomer 
+                              : shouldUseCustomerStyle 
                                 ? 'hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
                                 : 'hover:text-primary'
                           } 
                           ${menuItem.isActive?.(pathname, activeTab) 
-                            ? isCustomer 
+                            ? shouldUseCustomerStyle 
                               ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
                               : 'text-primary' 
-                            : isCustomer 
+                            : shouldUseCustomerStyle 
                               ? 'text-gray-700' 
                               : 'text-nav-item'
                           }`}
@@ -321,7 +319,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
                       >
                         {menuItem.Icon && (
-                          <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                          <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
                             <menuItem.Icon size={24} />
                           </div>
                         )}
@@ -355,13 +353,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <li className="list-none mt-auto">
             <span
               className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all ${
-                isCustomer 
+                shouldUseCustomerStyle 
                   ? 'text-gray-700 hover:text-red-600 hover:bg-gradient-to-r hover:from-red-100/60 hover:to-pink-100/60 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
                   : 'text-nav-item hover:text-primary'
               }`}
               onClick={logout}
             >
-              <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
                 <MdLogout size={24} />
               </div>
               Logout

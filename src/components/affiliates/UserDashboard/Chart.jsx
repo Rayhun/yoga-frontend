@@ -96,12 +96,13 @@ const ConversionChart = ({ traffic_conversions = {} }) => {
   );
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
-      <div className="mb-4 justify-between gap-4 sm:flex">
-        <h4 className="text-xl font-semibold text-black dark:text-white">Conversions & Traffic Over Time</h4>
+    <div className="w-full px-6 pb-6 pt-6">
+      <div className="mb-6">
+        <h4 className="text-xl font-semibold text-black dark:text-white mb-2">Conversions & Traffic Over Time</h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Track your conversion rates and traffic patterns</p>
       </div>
 
-      <div id="chartTwo" className="-mb-9 -ml-5">
+      <div id="chartTwo" className="-ml-5">
         <ReactApexChart
           options={options}
           series={series}

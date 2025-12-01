@@ -18,7 +18,7 @@ const MessageForm = () => {
     actions: { sendMessage },
   } = useAIChatInbox();
 
-  const placeholder = type === 'ai_chat' ? 'Ask anything about your practice...' : 'How can I help?';
+  const placeholder = type === 'ai_chat' ? 'How can I support you today...' : 'How can I help?';
 
   const handleSendMessage = () => {
     if (inputText) {
