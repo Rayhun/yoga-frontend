@@ -70,6 +70,7 @@ const queryKeys = {
   referralsDetails: 'referralsDetails',
   affiliatesUsersAdminDashboard: 'affiliatesUsersAdminDashboard',
   affiliatesUsersDashboard: 'affiliatesUsersDashboard',
+  affiliateTransactions: 'affiliateTransactions',
   payoutList: 'payoutList',
   aiPromptsList: 'aiPromptsList',
   lookupsByCategory: 'lookupsByCategory',

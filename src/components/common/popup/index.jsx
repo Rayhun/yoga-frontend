@@ -9,6 +9,11 @@ import { MdClose } from 'react-icons/md';
 export const StyledMainWrapper = styled.div`
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+  overflow: hidden;
 `;
 
 export const StyledIconButton = styled(IconButton)`
@@ -20,6 +25,29 @@ export const StyledIconButton = styled(IconButton)`
 export const StyledWrapper = styled.div`
   width: 100%;
   text-align: center;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(90vh - 120px);
+  padding-right: 8px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
 
   @media (min-width: 768px) {
     padding: 30px;
@@ -70,9 +98,13 @@ const Popup = ({ size, heading = 'Popup', onClose = () => null, children, ...res
         zIndex: 999,
         '& .MuiDialog-container': {
           alignItems: 'flex-start',
+          paddingTop: '5vh',
         },
         '& .MuiDialog-paper': {
-          overflowY: 'visible',
+          maxHeight: '90vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         },
       }}
       fullWidth

@@ -62,7 +62,8 @@ const AFFILIATES_USERS_ROUTES = [
   '/portal/admin/affiliates/dashobaord',
   '/portal/admin/affiliates/users',
   '/portal/admin/affiliates/comission_type',
-  '/portal/admin/affiliates/payout_list'
+  '/portal/admin/affiliates/payout_list',
+  '/portal/admin/affiliates/transactions'
 ];
 
 const EXPERTS_ROUTES = [
@@ -167,6 +168,11 @@ const ADMIN = [
         label: 'Payout List',
         href: '/portal/admin/affiliates/payout_list',
         isActive: pathname => pathname.includes('/portal/admin/affiliates/payout_list'),
+      },
+      {
+        label: 'Transactions',
+        href: '/portal/admin/affiliates/transactions',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/transactions'),
       },
     ],
   },
@@ -537,7 +543,13 @@ const AFFILIATE = [
     isActive: pathname => pathname === '/portal/affiliate/referrals',
     disabled: false,
   },
-  
+  {
+    Icon: MdOutlinePayments,
+    label: 'Transactions',
+    href: '/portal/affiliate/transactions',
+    isActive: pathname => pathname === '/portal/affiliate/transactions',
+    disabled: false,
+  },
 ];
 
 const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };

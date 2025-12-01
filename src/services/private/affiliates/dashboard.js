@@ -7,3 +7,7 @@ export const getAffiliatesUsersAdminDashboard = async () => {
 export const getAffiliatesUsersDashboard = async () => {
   return axios.get(`/affiliate-dashboard/`);
 };
+
+export const getAffiliateTransactions = async (params = {}) => {
+  return axios.get(`/affiliate-transactions/`, { params });
+};

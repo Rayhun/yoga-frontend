@@ -46,7 +46,7 @@ const MonthlyGoal = () => {
         <div className="flex items-center justify-center gap-8 md:gap-12">
           {/* Step 1 */}
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
+            <div className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
               1
             </div>
             <div className="mt-4 text-center">
@@ -56,7 +56,7 @@ const MonthlyGoal = () => {
           </div>
 
           {/* Arrow 1 */}
-          <div className="hidden md:block">
+          <div className="hidden md:block pb-13">
             <svg className="w-12 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -64,7 +64,7 @@ const MonthlyGoal = () => {
 
           {/* Step 2 */}
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
+            <div className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center text-2xl font-bold border-4 border-green-500 shadow-lg">
               2
             </div>
             <div className="mt-4 text-center">
@@ -74,7 +74,7 @@ const MonthlyGoal = () => {
           </div>
 
           {/* Arrow 2 */}
-          <div className="hidden md:block">
+          <div className="hidden md:block pb-13">
             <svg className="w-12 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -82,7 +82,7 @@ const MonthlyGoal = () => {
 
           {/* Step 3 */}
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center text-black text-2xl font-bold border-4 border-green-500 shadow-lg">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black text-2xl font-bold border-4 border-green-500 shadow-lg">
               3
             </div>
             <div className="mt-4 text-center">
@@ -101,7 +101,7 @@ const MonthlyGoal = () => {
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                 <span className="text-green-600 text-sm">🎯</span>
               </div>
-              Choose Your Focus Area
+              Choose Your Goal
             </h2>
             <p className="text-gray-600">Select one primary concern to focus on this month for maximum impact.</p>
           </div>
@@ -114,7 +114,7 @@ const MonthlyGoal = () => {
               <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
                 <span className="text-emerald-600 text-sm">📝</span>
               </div>
-              Set Your Goal Details
+              Set Your Habit
             </h2>
             <p className="text-gray-600">Define your specific goal and how you&apos;ll measure success.</p>
           </div>
