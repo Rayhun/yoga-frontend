@@ -6,8 +6,10 @@ import { toast } from 'react-toastify';
 import { FaRegFileImage } from 'react-icons/fa6';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import { FiType, FiFileText, FiDollarSign } from 'react-icons/fi';
 import {
   AccessSettingField,
   VisibilitySettingField,
@@ -50,12 +52,12 @@ const ProgramForm = ({ selected }) => {
     tags: selected?.tags.map(i => i.id) || [],
     linked_program: selected?.linked_program || '',
     program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '', order: '' }]).map(
-      ({ content_id, content_type, drip, order, title }) => ({
+      ({ content_id, content_type, drip, order, order_by, title }) => ({
         content_id,
         content_type,
         drip,
-        order: order || '',
-        title: title || '', // Preserve the title from API response
+        order: order_by || order || '', // Prioritize order_by from API response (edit mode)
+        title: title || '', // Preserve the title from API response for display
       })
     ),
     price: selected?.price || 0,
@@ -84,7 +86,7 @@ const ProgramForm = ({ selected }) => {
         Yup.object({
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
-          drip: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
+          drip: Yup.number('Must be a number').min(0, 'Must be a non-negative number').required('Required!'),
           order: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
@@ -108,7 +110,23 @@ const ProgramForm = ({ selected }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const { file, ...payload } = values;
+      const { file, linked_program, program_content, ...payload } = values;
+
+      // Transform program_content to remove title and change order to order_by
+      const transformedProgramContent = program_content.map(({ title, order, ...content }) => ({
+        ...content,
+        order_by: order,
+      }));
+
+      payload.program_content = transformedProgramContent;
+      
+      // Debug: Log the transformed payload to confirm order_by is included
+      console.log('Transformed program_content payload:', transformedProgramContent);
+
+      // Only include linked_program in payload if it's not empty
+      if (linked_program && linked_program !== '') {
+        payload.linked_program = linked_program;
+      }
 
       const { data: uploadedFile } = await uploadLMSFile({ file });
 
@@ -142,7 +160,7 @@ const ProgramForm = ({ selected }) => {
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
-                <FormikField name="title" label="Title" placeholder="Title" required />
+                <FormikField name="title" label="Title" placeholder="Title" Icon={FiType} required />
               </div>
               <div className="w-full md:w-1/2">
                 <FormikSelect
@@ -154,8 +172,8 @@ const ProgramForm = ({ selected }) => {
                 />
               </div>
             </div>
-            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
-            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} required />
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikField name="benefits" label="Benefits" placeholder="Benefits" rows={5} Icon={FiFileText} required />
 
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
@@ -169,6 +187,7 @@ const ProgramForm = ({ selected }) => {
                     placeholder="Price"
                     type="number"
                     min={0}
+                    Icon={FiDollarSign}
                     required
                   />
                 </div>

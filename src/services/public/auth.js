@@ -16,6 +16,10 @@ export const forgotPassword = async ({ payload }) => {
   return axios.post('/auth/forgotpassword', payload);
 };
 
+export const validatePasswordResetToken = async ({ payload }) => {
+  return axios.post('/auth/forgotpassword/activate', payload);
+};
+
 export const resetPassword = async ({ payload }) => {
   return axios.patch('/auth/pasword', payload);
 };

@@ -141,20 +141,27 @@ function FormikDropzone({
           <div
             {...getRootProps()}
             role="button"
-            className="cursor-pointer border-2 border-dashed rounded-md p-5 transition min-h-[200px] w-full flex items-center justify-center bg-slate-100 dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className={`cursor-pointer border-2 border-dashed rounded-xl p-8 transition-all duration-300 min-h-[220px] w-full flex items-center justify-center ${
+              isErrorField 
+                ? 'bg-red-50 border-red-300 hover:border-red-400' 
+                : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-300 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50'
+            } dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             style={{ borderColor: isErrorField ? 'red' : undefined }}
           >
             <input {...getInputProps()} />
-            <div className="flex flex-col items-center rounded-md justify-center">
-              <span className="text-8xl mb-3">
-                <Icon size={70} className="text-slate-300" />
-              </span>
-              <p className="text-center m-0">
+            <div className="flex flex-col items-center rounded-md justify-center text-center">
+              <div className="mb-4 p-4 bg-white rounded-full shadow-lg">
+                <Icon size={48} className={isErrorField ? 'text-red-400' : 'text-blue-500'} />
+              </div>
+              <p className="text-base font-semibold text-gray-700 mb-2">
                 {multiple
                   ? 'Drag and drop files here, or click to select files'
                   : 'Drag and drop a file here, or click to select a file'}
               </p>
-              <p className="text-center m-0">{supportedFilesText}</p>
+              <p className="text-sm text-gray-500 mb-3">{supportedFilesText}</p>
+              <div className="mt-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                <p className="text-xs text-gray-600 font-medium">Click to browse or drag file here</p>
+              </div>
             </div>
           </div>
 

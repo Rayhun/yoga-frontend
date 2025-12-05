@@ -9,12 +9,15 @@ import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
+import useAuthContext from '@/hooks/useAuthContext';
 import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const ImageSessionsList = () => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const { isImporting, handleImport: handleImportImageSessions } = useImport({
     mutationFn: importSessions,
     invalidateQueryKey: [queryKeys.lmsImageSessions],
@@ -40,8 +43,8 @@ const ImageSessionsList = () => {
     []
   );
 
-  const rowActions = useMemo(
-    () => [
+  const rowActions = useMemo(() => {
+    const actions = [
       {
         id: 'edit',
         Icon: MdOutlineEdit,
@@ -57,9 +60,15 @@ const ImageSessionsList = () => {
         Icon: MdDeleteOutline,
         onClick: row => handleDeleteImageSession({ id: row.original.id }),
       },
-    ],
-    [handleDeleteImageSession, router]
-  );
+    ];
+
+    // Filter out edit and delete actions for staff users
+    if (user?.isStaff) {
+      return actions.filter(action => action.id === 'view');
+    }
+
+    return actions;
+  }, [handleDeleteImageSession, router, user?.isStaff]);
 
   const headerQuickActions = useMemo(
     () => [
@@ -90,7 +99,9 @@ const ImageSessionsList = () => {
   return (
     <div>
       <PageHeader title="Image Sessions">
-        <PageHeaderQuickActions actions={headerQuickActions} />
+        <StaffPermissionGuard>
+          <PageHeaderQuickActions actions={headerQuickActions} />
+        </StaffPermissionGuard>
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />

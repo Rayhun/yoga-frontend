@@ -9,12 +9,15 @@ import useTable from '@/hooks/useTable';
 import useDelete from '@/hooks/useDelete';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
+import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
+import useAuthContext from '@/hooks/useAuthContext';
 import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
 
 const AudioSessionsList = () => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const { isImporting, handleImport: handleImportAudioSessions } = useImport({
     mutationFn: importSessions,
     invalidateQueryKey: [queryKeys.lmsAudioSessions],
@@ -44,8 +47,8 @@ const AudioSessionsList = () => {
     []
   );
 
-  const rowActions = useMemo(
-    () => [
+  const rowActions = useMemo(() => {
+    const actions = [
       {
         id: 'edit',
         Icon: MdOutlineEdit,
@@ -61,9 +64,15 @@ const AudioSessionsList = () => {
         Icon: MdDeleteOutline,
         onClick: row => handleDeleteAudioSession({ id: row.original.id }),
       },
-    ],
-    [handleDeleteAudioSession, router]
-  );
+    ];
+
+    // Filter out edit and delete actions for staff users
+    if (user?.isStaff) {
+      return actions.filter(action => action.id === 'view');
+    }
+
+    return actions;
+  }, [handleDeleteAudioSession, router, user?.isStaff]);
 
   const headerQuickActions = useMemo(
     () => [
@@ -94,7 +103,9 @@ const AudioSessionsList = () => {
   return (
     <div>
       <PageHeader title="Audio Sessions">
-        <PageHeaderQuickActions actions={headerQuickActions} />
+        <StaffPermissionGuard>
+          <PageHeaderQuickActions actions={headerQuickActions} />
+        </StaffPermissionGuard>
       </PageHeader>
 
       <BasicTable isLoading={isLoading} columns={columns} data={data} />

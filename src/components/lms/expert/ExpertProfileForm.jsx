@@ -7,6 +7,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
+import { FiMail, FiUser, FiClock, FiPlay, FiGlobe } from 'react-icons/fi';
+import { FaLinkedin } from 'react-icons/fa';
+import { LuBriefcaseBusiness } from 'react-icons/lu';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
@@ -16,7 +20,7 @@ import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES } from '@/utils/constants';
+import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES, TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
@@ -60,16 +64,35 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   };
 
   const validationSchema = Yup.object({
-    first_name: Yup.string().required('Required!'),
-    middle_name: Yup.string(), // Only field that remains optional
-    last_name: Yup.string().required('Required!'),
+    first_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'First name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
+    middle_name: Yup.string()
+      .transform(value => (value ? value.trim() : value)), // Only field that remains optional
+    last_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Last name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
     email: Yup.string().email('Invalid email format').required('Required!'),
     title: Yup.string().required('Required!'),
-    business_name: Yup.string().required('Required!'),
+    business_name: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Business name cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
     description: Yup.string()
       .required('Required!')
       .test('max_length', 'Your content must be between 25 and 150 words', value => {
-        const wordsCount = value.split(' ').length;
+        if (!value) return false;
+        // Strip HTML tags for word count
+        const textContent = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
         return wordsCount >= 25 && wordsCount <= 150;
       }),
     coaching_areas: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
@@ -92,9 +115,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       .integer('Experience must be a whole number')
       .min(0, 'Experience cannot be negative'),
     available: Yup.boolean(),
-    intro: Yup.string().required('Required!'),
-    linkedin: Yup.string(),
-    website: Yup.string().required('Required!'),
+    intro: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Intro cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
+    linkedin: Yup.string()
+      .transform(value => (value ? value.trim() : value)),
+    website: Yup.string()
+      .transform(value => (value ? value.trim() : value))
+      .required('Required!')
+      .test('no-whitespace-only', 'Website URL cannot be only spaces', value => {
+        return value && value.length > 0;
+      }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -151,28 +185,28 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="first_name" label="First Name" placeholder="First Name" required />
+                  <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" />
+                  <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" Icon={FiUser} />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="last_name" label="Last Name" placeholder="Last Name" required />
+                  <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} required />
                 </div>
 
                 <div className="w-full xl:w-1/2">
-                  <FormikField type="email" name="email" label="Email" placeholder="Email" disabled={isEditMode} required />
+                  <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} disabled={isEditMode} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="title" label="Title" placeholder="Title" required />
+                  <FormikSelect name="title" label="Title" placeholder="Select Title" options={TITLE_OPTIONS} required />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" required />
+                  <FormikField name="business_name" label="Business Name" placeholder="Business Name" Icon={LuBriefcaseBusiness} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -183,19 +217,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     label="Experience (Years)"
                     placeholder="Experience in Years"
                     min={0}
+                    Icon={FiClock}
                     required
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" required />
+                  <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" Icon={FiPlay} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" />
+                  <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" Icon={FaLinkedin} />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <FormikField name="website" label="Website URL" placeholder="Website URL" required />
+                  <FormikField name="website" label="Website URL" placeholder="Website URL" Icon={FiGlobe} required />
                 </div>
               </div>
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
@@ -216,7 +251,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   />
                 </div>
               </div>
-              <FormikField name="description" label="About" placeholder="About" rows={5} required />
+              <FormikRichTextEditor name="description" label="About" placeholder="About" rows={5} required />
               <CoachingAreasField
                 name="coaching_areas"
                 label="Coaching Areas"

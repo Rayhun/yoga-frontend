@@ -41,11 +41,13 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           <div className="relative drop-shadow-2">
             <Image
               src={userProfileDetails?.file || '/images/user/user-06.png'}
-              width={0}
-              height={0}
-              sizes="100vw"
+              width={176}
+              height={176}
+              sizes="(max-width: 640px) 120px, 176px"
               alt="profile"
-              className="w-full h-full"
+              className="w-full h-full rounded-full object-cover"
+              quality={95}
+              priority
             />
             {/* <label
               htmlFor="profile"

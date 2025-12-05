@@ -8,18 +8,26 @@ import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
+import { HiOutlineInformationCircle } from 'react-icons/hi';
+import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('active_tab');
   const {
-    user: {
-      profile: { role: userRole, sub_role: userSubRole, is_profile_complete, has_event_or_consult },
-      isCustomer
-    },
+    user,
     logout,
   } = useAuthContext();
+  
+  const userRole = user?.profile?.role ?? '';
+  const userSubRole = user?.profile?.sub_role ?? '';
+  const is_profile_complete = user?.profile?.is_profile_complete ?? false;
+  const has_event_or_consult = user?.profile?.has_event_or_consult ?? false;
+  const stripe_onboarded = user?.profile?.stripe_onboarded ?? false;
+  const isCustomer = user?.isCustomer ?? false;
+  const isAffiliate = userRole === USER_ROLE.AFFILIATE;
+  const shouldUseCustomerStyle = isCustomer || isAffiliate;
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -29,6 +37,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+  const [showDashboardInfo, setShowDashboardInfo] = useState(false);
+  const [modalAnimation, setModalAnimation] = useState(false);
 
   // close on click outside
   useEffect(() => {
@@ -62,10 +72,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult);
+    if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
+    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded);
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult]);
+  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
 
   // const disabledSidebarMenu = useMemo(() => {
   //   return (
@@ -78,7 +89,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       roleBasedSidebarMenuItems
         .filter(item => {
           if (!item.permitted_sub_roles) return true;
-          return item.permitted_sub_roles.includes(userSubRole);
+          if (!item.permitted_sub_roles.includes(userSubRole)) return false;
+          
+          // Check if item is business owner only
+          if (item.isBusinessOwnerOnly) {
+            return user?.isBusinessOwner;
+          }
+          
+          return true;
         })
         .map(item => ({
           ...item,
@@ -87,8 +105,47 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             return subMenuItem.permitted_sub_roles.includes(userSubRole);
           }),
         })),
-    [roleBasedSidebarMenuItems, userSubRole]
+    [roleBasedSidebarMenuItems, userSubRole, user?.isBusinessOwner]
   );
+
+  const handleDisabledDashboardClick = (e) => {
+    e.preventDefault();
+    setShowDashboardInfo(true);
+    // Trigger animation after modal is shown
+    setTimeout(() => setModalAnimation(true), 10);
+  };
+
+  const closeModal = () => {
+    setModalAnimation(false);
+    setTimeout(() => setShowDashboardInfo(false), 200);
+  };
+
+  const getMissingRequirements = () => {
+    const missing = [];
+    if (!is_profile_complete) missing.push({ text: 'Complete your profile', icon: FiUser });
+    if (!has_event_or_consult) missing.push({ text: 'Add events or consultations', icon: FiCalendar });
+    if (!stripe_onboarded) missing.push({ text: 'Link your Stripe account', icon: FiCreditCard });
+    return missing;
+  };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && showDashboardInfo) {
+        closeModal();
+      }
+    };
+
+    if (showDashboardInfo) {
+      document.addEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showDashboardInfo]);
 
 
   return (
@@ -101,15 +158,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <Link href="/">
-          <Image
-            src={'/images/logo/logo.png'}
-            alt="Logo"
-            width={0}
-            height={0}
-            sizes="100vw"
-            className="w-[80%] mx-auto"
-            priority
-          />
+          <div className={`transition-all duration-300 ${shouldUseCustomerStyle ? 'hover:scale-105 hover:rotate-1' : ''}`}>
+            <Image
+              src={'/images/logo/logo.png'}
+              alt="Logo"
+              width={0}
+              height={0}
+              sizes="100vw"
+              className="w-[80%] mx-auto"
+              priority
+            />
+          </div>
         </Link>
 
         <button
@@ -138,9 +197,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
         {/* Sidebar Menu */}
-        <nav className="mt-3 px-4 py-4 lg:px-6 flex flex-col h-full">
+        <nav className={`mt-3 px-4 py-4 lg:px-6 flex flex-col h-full ${
+          shouldUseCustomerStyle ? 'gap-1' : ''
+        }`}>
           {/* Menu Group */}
-          <ul className="flex-grow flex flex-col gap-2 mb-4">
+          <ul className={`flex-grow flex flex-col mb-4 ${
+            shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
+          }`}>
             {subRoleBasedSidebarMenuItems.map(menuItem => (
               <React.Fragment key={menuItem.label}>
                 {menuItem.sub_menu ? (
@@ -150,13 +213,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         <>
                           <Link
                             href="#"
-                            className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out hover:text-primary"
+                            className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all ${
+                              shouldUseCustomerStyle 
+                                ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
+                                : 'text-nav-item hover:text-primary'
+                            }`}
                             onClick={e => {
                               e.preventDefault();
                               sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                             }}
                           >
-                            {menuItem.Icon ? <menuItem.Icon size={24} /> : null}
+                            {menuItem.Icon ? (
+                              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                                <menuItem.Icon size={24} />
+                              </div>
+                            ) : null}
                             {menuItem.label}
                             <svg
                               className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
@@ -177,22 +248,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             </svg>
                           </Link>
                           <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
-                            <ul className="mb-3 mt-2 flex flex-col gap-2 pl-4">
+                            <ul className={`mb-3 mt-2 flex flex-col pl-4 ${
+                              shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
+                            }`}>
                               {menuItem.sub_menu.map(childSubMenuItem => (
                                 <li key={childSubMenuItem.label}>
                                   <Link
                                     href={childSubMenuItem.href || '#'}
-                                    className={`group relative flex items-center gap-2.5 rounded-md px-4 py-2 pl-8 font-medium duration-300 ease-in-out hover:text-primary ${
+                                    className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2.5 pl-8 font-medium duration-300 ease-in-out transition-all ${
                                       (
                                         childSubMenuItem.isActive
                                           ? childSubMenuItem.isActive(pathname, activeTab)
                                           : false
                                       )
-                                        ? 'text-primary'
-                                        : 'text-nav-item/90'
+                                        ? shouldUseCustomerStyle 
+                                          ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
+                                          : 'text-primary'
+                                        : shouldUseCustomerStyle 
+                                          ? 'text-gray-600 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_2px_6px_rgba(34,197,94,0.12)] hover:scale-[1.01] hover:-translate-y-0.5' 
+                                          : 'text-nav-item/90 hover:text-primary'
                                     }`}
                                   >
-                                    {childSubMenuItem.Icon ? <childSubMenuItem.Icon size={24} /> : null}
+                                    {childSubMenuItem.Icon ? (
+                                      <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
+                                        <childSubMenuItem.Icon size={24} />
+                                      </div>
+                                    ) : null}
                                     {childSubMenuItem.label}
                                   </Link>
                                 </li>
@@ -205,21 +286,46 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </ul>
                 ) : (
                   <li className="list-none">
-                    <Link
-                      href={menuItem.disabled ? '#' : menuItem.href || '#'}
-                      className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out 
-                        ${
-                          menuItem.disabled
-                            ? 'cursor-not-allowed opacity-50 text-gray-400'
-                            : 'hover:text-primary'
-                        } 
-                        ${menuItem.isActive?.(pathname, activeTab) ? 'text-primary' : 'text-nav-item'}`}
-                      aria-disabled={menuItem.disabled} // Improves accessibility
-                      tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
-                    >
-                      {menuItem.Icon && <menuItem.Icon size={24} />}
-                      {menuItem.label}
-                    </Link>
+                    {menuItem.label === 'Dashboard' && menuItem.disabled ? (
+                      <button
+                        onClick={handleDisabledDashboardClick}
+                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out w-full text-left
+                          cursor-pointer opacity-50 text-gray-400 hover:opacity-70`}
+                        aria-disabled={true}
+                      >
+                        {menuItem.Icon && <menuItem.Icon size={24} />}
+                        {menuItem.label}
+                      </button>
+                    ) : (
+                      <Link
+                        href={menuItem.disabled ? '#' : menuItem.href || '#'}
+                        className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all
+                          ${
+                            menuItem.disabled
+                              ? 'cursor-not-allowed opacity-50 text-gray-400'
+                              : shouldUseCustomerStyle 
+                                ? 'hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
+                                : 'hover:text-primary'
+                          } 
+                          ${menuItem.isActive?.(pathname, activeTab) 
+                            ? shouldUseCustomerStyle 
+                              ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
+                              : 'text-primary' 
+                            : shouldUseCustomerStyle 
+                              ? 'text-gray-700' 
+                              : 'text-nav-item'
+                          }`}
+                        aria-disabled={menuItem.disabled} // Improves accessibility
+                        tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
+                      >
+                        {menuItem.Icon && (
+                          <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                            <menuItem.Icon size={24} />
+                          </div>
+                        )}
+                        {menuItem.label}
+                      </Link>
+                    )}
                   </li>
                 )}
               </React.Fragment>
@@ -230,20 +336,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           {isCustomer && (
             <li className="list-none mt-auto">
               <Link
-                className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
-                href={'/portal/ai-chat?type=support'}
+                className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all ${
+                  isCustomer 
+                    ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
+                    : 'text-nav-item hover:text-primary'
+                }`}
+                href={'/portal/help-support'}
               >
-                <MdOutlineContactSupport size={24} />
+                <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                  <MdOutlineContactSupport size={24} />
+                </div>
                 Help & Support
               </Link>
             </li>
           )}
           <li className="list-none mt-auto">
             <span
-              className="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-nav-item duration-300 ease-in-out cursor-pointer hover:text-primary"
+              className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all ${
+                shouldUseCustomerStyle 
+                  ? 'text-gray-700 hover:text-red-600 hover:bg-gradient-to-r hover:from-red-100/60 hover:to-pink-100/60 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
+                  : 'text-nav-item hover:text-primary'
+              }`}
               onClick={logout}
             >
-              <MdLogout size={24} />
+              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                <MdLogout size={24} />
+              </div>
               Logout
             </span>
           </li>
@@ -251,6 +369,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="pb-4"></div>
         </nav>
       </div>
+
+      {/* Dashboard Info Modal */}
     </aside>
   );
 };

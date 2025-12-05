@@ -4,10 +4,10 @@ import useAuthContext from '@/hooks/useAuthContext';
 
 const Layout = ({ children }) => {
   const {
-    user: { isAdmin },
+    user: { isAdmin, isStaff },
   } = useAuthContext();
 
-  if (!isAdmin) redirect('/portal');
+  if (!isAdmin && !isStaff) redirect('/portal');
 
   return children;
 };

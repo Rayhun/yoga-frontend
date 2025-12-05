@@ -1,6 +1,7 @@
 'use client';
 import { cloneElement, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MuiThemeProvider from '@/context/MuiThemeProvider';
 import UIProvider from '@/context/UIProvider';
 import Popup from '@/components/common/popup';
@@ -54,14 +55,30 @@ function useModal () {
 
         const done = () => close();
 
+        // Create a QueryClient instance for the modal
+        const modalQueryClient = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+              refetchOnWindowFocus: false,
+              staleTime: 1000 * 60,
+            },
+            mutations: {
+              retry: false,
+            },
+          },
+        });
+
         root.render(
-          <MuiThemeProvider>
-            <UIProvider initialLoading={false}>
-              <Popup size={size} heading={heading} onClose={close} open>
-                {cloneElement(content, { done })}
-              </Popup>
-            </UIProvider>
-          </MuiThemeProvider>
+          <QueryClientProvider client={modalQueryClient}>
+            <MuiThemeProvider>
+              <UIProvider initialLoading={false}>
+                <Popup size={size} heading={heading} onClose={close} open>
+                  {cloneElement(content, { done })}
+                </Popup>
+              </UIProvider>
+            </MuiThemeProvider>
+          </QueryClientProvider>
         );
       } catch (error) {
         reject(error);

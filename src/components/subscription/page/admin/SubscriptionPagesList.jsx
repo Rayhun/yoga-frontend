@@ -9,6 +9,7 @@ import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import { getSubscriptionPagesList, deleteSingleSubscriptionPage } from '@/services/private/subscription/page';
 import queryKeys from '@/utils/query-keys';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const SubscriptionPagesList = () => {
   const router = useRouter();
@@ -25,8 +26,22 @@ const SubscriptionPagesList = () => {
         accessorKey: 'title',
       },
       {
+        header: 'Type',
+        accessorKey: 'type',
+      },
+      {
         header: 'Description',
         accessorKey: 'description',
+        cell: ({ getValue }) => {
+          const description = getValue();
+          return (
+            <div className="max-w-xs">
+              <ControllableRichText numberOfWords={10} className="text-sm">
+                {description || 'No description provided'}
+              </ControllableRichText>
+            </div>
+          );
+        },
       },
       {
         header: 'URL',

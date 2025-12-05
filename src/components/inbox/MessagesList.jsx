@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import useAuthContext from '@/hooks/useAuthContext';
 import { useInbox } from '@/context/InboxContext';
@@ -10,7 +11,35 @@ import { isSystemMessage, getSystemMessageType } from '@/utils/messagePatterns';
 
 const Attachment = ({ url }) => {
   const isImage = /\.(jpe?g|png|gif|bmp|webp)(\?.*)?$/i.test(url);
-  const fileName = url.split('/').pop();
+  const isVideo = /\.(mp4|avi|mov|wmv|flv|webm)(\?.*)?$/i.test(url);
+  const fileName = url.split('/').pop().split('?')[0];
+  
+  const getFileIcon = (url) => {
+    const extension = url.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return '📄';
+      case 'doc':
+      case 'docx':
+        return '📝';
+      case 'xls':
+      case 'xlsx':
+        return '📊';
+      case 'ppt':
+      case 'pptx':
+        return '📋';
+      case 'txt':
+        return '📃';
+      case 'zip':
+      case 'rar':
+        return '📦';
+      case 'mp3':
+      case 'wav':
+        return '🎵';
+      default:
+        return '📎';
+    }
+  };
 
   if (isImage) {
     return (
@@ -18,11 +47,25 @@ const Attachment = ({ url }) => {
         <Image
           src={url}
           alt={fileName}
-          width={150}
-          height={150}
-          className="rounded-md object-cover border"
+          width={250}
+          height={250}
+          className="rounded-lg object-cover border border-gray-200 max-w-[250px] max-h-[250px]"
         />
       </a>
+    );
+  }
+
+  if (isVideo) {
+    return (
+      <div className="mb-2">
+        <video
+          src={url}
+          controls
+          className="rounded-lg border border-gray-200 max-w-[250px] max-h-[250px]"
+        >
+          Your browser does not support the video tag.
+        </video>
+      </div>
     );
   }
 
@@ -32,10 +75,14 @@ const Attachment = ({ url }) => {
       download
       target="_blank"
       rel="noreferrer"
-      className="flex items-center space-x-2 p-2 mb-2 bg-gray-100 rounded-md hover:bg-gray-200"
+      className="flex items-center space-x-3 p-3 mb-2 bg-gray-50 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors duration-200"
     >
-      <FiPaperclip size={16} className="text-gray-600" />
-      <span className="text-sm text-gray-800 line-clamp-1 truncate max-w-[150px]">{fileName}</span>
+      <div className="text-2xl">{getFileIcon(url)}</div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-gray-800 truncate">{fileName}</div>
+        <div className="text-xs text-gray-500">Tap to download</div>
+      </div>
+      <FiPaperclip size={16} className="text-gray-400 flex-shrink-0" />
     </a>
   );
 };
@@ -43,24 +90,45 @@ const Attachment = ({ url }) => {
 const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => (
   <>
     {isMyMessage ? (
-      <div className="ml-auto max-w-125 w-fit">
-        <div className="mb-2.5 rounded-2xl rounded-br-none bg-[rgba(208,254,207,0.62)] px-5 py-3 flex flex-col justify-between items-end gap-1">
-          <p className="text-black">{children}</p>
-          {attachments.map(att => (
-            <Attachment key={att.id} url={att.file || att.url} />
-          ))}
-          <p className="text-right text-[10px] text-black/80 min-w-[50px]">{dayjs(time).format('hh:mm A')}</p>
+      <div className="flex justify-end mb-1">
+        <div className="max-w-[70%]">
+          <div className="rounded-lg rounded-br-sm px-3 py-2 shadow-sm max-w-full relative" style={{ backgroundColor: '#DBF8C6' }}>
+            {/* Show attachments first (above text) */}
+            {attachments.map(att => (
+              <Attachment key={att.id} url={att.file || att.url} />
+            ))}
+            {/* Show text message below attachments */}
+            {children && (
+              <p className="text-sm leading-relaxed text-black pr-12 font-medium">{children}</p>
+            )}
+            {/* Timestamp inside bubble at bottom right */}
+            <div className="absolute bottom-2 right-2">
+              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+            </div>
+          </div>
         </div>
       </div>
     ) : (
-      <div className="max-w-125 w-fit">
-        {senderName ? <p className="text-sm mb-1 text-black">{senderName}</p> : null}
-        <div className="mb-2.5 rounded-2xl rounded-tl-none bg-white px-5 py-3 flex flex-col justify-between items-end gap-1">
-          <p className="text-black">{children}</p>
-          {attachments.map(att => (
-            <Attachment key={att.id} url={att.file || att.url} />
-          ))}
-          <p className="text-[10px] text-right text-black/80 min-w-[50px]">{dayjs(time).format('hh:mm A')}</p>
+      <div className="flex justify-start mb-1">
+        <div className="max-w-[70%]">
+          <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2 shadow-sm border border-gray-200 max-w-full relative">
+            {/* Show sender name in group chat */}
+            {senderName && (
+              <p className="text-xs font-semibold text-blue-600 mb-1">{senderName}</p>
+            )}
+            {/* Show attachments first (above text) */}
+            {attachments.map(att => (
+              <Attachment key={att.id} url={att.file || att.url} />
+            ))}
+            {/* Show text message below attachments */}
+            {children && (
+              <p className="text-sm leading-relaxed text-gray-800 pr-12 font-medium">{children}</p>
+            )}
+            {/* Timestamp inside bubble at bottom right */}
+            <div className="absolute bottom-2 right-2">
+              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+            </div>
+          </div>
         </div>
       </div>
     )}
@@ -68,6 +136,7 @@ const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) 
 );
 
 const MessagesList = () => {
+  const messagesEndRef = useRef(null);
   const {
     user: {
       profile: { id: loggedInUserID },
@@ -78,39 +147,58 @@ const MessagesList = () => {
     messages: { isLoading: isLoadingMessages, data: messages },
   } = useInbox();
 
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   return (
-    <div className="h-[calc(80vh-180px)] bg-[rgba(239,233,224,0.54)]">
+    <div 
+      className="flex-1 overflow-hidden relative"
+      style={{
+        backgroundColor: '#EDE6DE'
+      }}
+    >
       <LoadingWrapper isLoading={isLoadingMessages}>
-        <div className="no-scrollbar max-h-full space-y-3.5 overflow-auto px-6 py-7.5">
-          {[...messages].map(message => {
-            const messageContent = message.content || message.message || '';
-            
-            // Check if this should be displayed as a system message
-            if (isSystemMessage(message)) {
+        <div className="h-full overflow-y-auto px-4 py-2 scroll-smooth">
+          <div className="space-y-0.5">
+            {[...messages].map((message, index) => {
+              const messageContent = message.content || message.message || '';
+              
+              // Check if this should be displayed as a system message
+              if (isSystemMessage(message)) {
+                return (
+                  <SystemMessage
+                    key={message.id}
+                    message={messageContent}
+                    time={message.created_at}
+                    type={getSystemMessageType(message)}
+                  />
+                );
+              }
+              
+              // Regular user message
               return (
-                <SystemMessage
+                <div
                   key={message.id}
-                  message={messageContent}
-                  time={message.created_at}
-                  type={getSystemMessageType(message)}
-                />
+                  className="animate-fadeIn"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <Message
+                    time={message.created_at}
+                    senderName={activeConversation.is_group ? message.sender_name : undefined}
+                    isMyMessage={message.sender === loggedInUserID}
+                    attachments={message?.attachments}
+                  >
+                    {messageContent}
+                  </Message>
+                </div>
               );
-            }
-            
-            // Regular user message
-            return (
-              <Message
-                key={message.id}
-                time={message.created_at}
-                senderName={activeConversation.is_group ? message.sender_name : undefined}
-                isMyMessage={message.sender === loggedInUserID}
-                attachments={message?.attachments}
-              >
-                {messageContent}
-              </Message>
-            );
-          })}
-          <div id="empty-message" className="!m-0" />
+            })}
+          </div>
+          <div ref={messagesEndRef} />
         </div>
       </LoadingWrapper>
     </div>

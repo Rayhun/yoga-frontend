@@ -4,8 +4,16 @@ export const getSubscriptionPlansList = async () => {
   return axios.get('/subscription/plan/');
 };
 
+export const getFilteredSubscriptionPlansList = async (subscriptionType) => {
+  return axios.get(`/subscription/plan/list?subscription_type=${subscriptionType}`);
+};
+
 export const getSingleSubscriptionPlan = async ({ id }) => {
-  return axios.get(`/subscription/plan/${id}/`);
+  return axios.get(`/subscription/plan/${id}/detail/`);
+};
+
+export const getSingleBusinessSubscriptionPlan = async ({ id }) => {
+  return axios.get(`/subscription/b2b/plan/${id}/detail/`);
 };
 
 export const addNewSubscriptionPlan = async ({ payload }) => {

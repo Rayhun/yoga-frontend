@@ -20,7 +20,8 @@ import {
   FaTags,
   FaUser,
   FaChalkboardTeacher,
-  FaQuestion
+  FaQuestion,
+  FaBuilding
 } from 'react-icons/fa';
 import { TbPrompt } from "react-icons/tb";
 
@@ -28,14 +29,15 @@ import { GiPapers } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
 import { GiTeacher, GiNightSleep } from 'react-icons/gi';
-import { PiFilmScriptBold, PiUserSquareFill } from 'react-icons/pi';
+import { PiFilmScriptBold, PiUserSquareFill, PiChartLine } from 'react-icons/pi';
 import { LuClipboardCheck } from 'react-icons/lu';
-import { FiTarget } from 'react-icons/fi';
+import { FiTarget, FiActivity } from 'react-icons/fi';
 import { LiaBookSolid } from 'react-icons/lia';
 // import { FiDroplet } from "react-icons/fi";
 // import { TbGenderTransgender } from "react-icons/tb";
 import { RiRepeatOneFill } from 'react-icons/ri';
 import { GoGoal } from 'react-icons/go';
+import { FiShield } from 'react-icons/fi';
 
 
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
@@ -45,6 +47,9 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/journal',
   '/portal/customer/checkin/sleep_tracker',
   '/portal/customer/checkin/daily_insights',
+  '/portal/customer/checkin/tracker',
+  '/portal/customer/checkin/daily-tracker',
+  '/portal/customer/checkin/cycle_insights',
 ];
 
 const SESSIONS_SUBMENU_ROUTES = [
@@ -57,7 +62,18 @@ const AFFILIATES_USERS_ROUTES = [
   '/portal/admin/affiliates/dashobaord',
   '/portal/admin/affiliates/users',
   '/portal/admin/affiliates/comission_type',
-  '/portal/admin/affiliates/payout_list'
+  '/portal/admin/affiliates/payout_list',
+  '/portal/admin/affiliates/transactions'
+];
+
+const EXPERTS_ROUTES = [
+  '/portal/admin/lms/expert',
+  '/portal/admin/lms/expert/add',
+  '/portal/admin/lms/expert/details',
+  '/portal/admin/lms/expert/edit',
+  '/portal/admin/lms/expert/dashboard',
+  '/portal/admin/lms/expert/commission',
+  '/portal/admin/lms/expert/payment'
 ];
 
 
@@ -78,21 +94,58 @@ const ADMIN = [
   },
   {
     Icon: FaUsers,
-    label: 'Users',
+    label: 'Customers',
     href: '/portal/admin/entities/users',
     isActive: pathname => pathname.includes('/portal/admin/entities/users'),
     disabled: false,
   },
-    {
+  {
+    Icon: FaUserFriends,
+    label: 'Staff Users',
+    href: '/portal/admin/staff',
+    isActive: pathname => pathname.includes('/portal/admin/staff'),
+    disabled: false,
+  },
+  {
+    Icon: FiShield,
+    label: 'Permissions',
+    href: '/portal/admin/permissions',
+    isActive: pathname => pathname.includes('/portal/admin/permissions'),
+    disabled: false,
+  },
+  {
     Icon: GrUserExpert,
     label: 'Experts',
-    href: '/portal/admin/lms/expert',
-    isActive: pathname => pathname.includes('/portal/admin/lms/expert'),
+    href: '/portal/admin/lms/expert', // Default to experts list
     disabled: false,
+    hasActiveSubMenu: pathname => EXPERTS_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Dashboard',
+        href: '/portal/admin/lms/expert/dashboard',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/dashboard'),
+      },
+      {
+        label: 'Experts',
+        href: '/portal/admin/lms/expert',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard'),
+      },
+      {
+        label: 'Commission',
+        href: '/portal/admin/lms/expert/commission',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/commission'),
+      },
+      {
+        label: 'Payments',
+        href: '/portal/admin/lms/expert/payment',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/payment'),
+      }
+    ],
   },
   {
     Icon: FaTv,
     label: 'Affiliates',
+    href: '/portal/admin/affiliates/dashboard', // Default to affiliates dashboard
     disabled: false,
     hasActiveSubMenu: pathname => AFFILIATES_USERS_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -115,6 +168,11 @@ const ADMIN = [
         label: 'Payout List',
         href: '/portal/admin/affiliates/payout_list',
         isActive: pathname => pathname.includes('/portal/admin/affiliates/payout_list'),
+      },
+      {
+        label: 'Transactions',
+        href: '/portal/admin/affiliates/transactions',
+        isActive: pathname => pathname.includes('/portal/admin/affiliates/transactions'),
       },
     ],
   },
@@ -156,6 +214,7 @@ const ADMIN = [
   {
     Icon: FaTv,
     label: 'Sessions',
+    href: '/portal/admin/lms/session/video', // Default to video sessions
     disabled: false,
     hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -231,10 +290,19 @@ const ADMIN = [
     href: '/portal/admin/faq',
     isActive: pathname => pathname.includes('/portal/admin/faq'),
     disabled: false,
-  },
+  }
 ];
 
 const CUSTOMER = [
+  {
+    Icon: FaBuilding,
+    label: 'Dashboard',
+    href: '/portal/business/dashboard',
+    isActive: pathname => pathname.includes('/portal/business/dashboard'),
+    permitted_sub_roles: [USER_SUB_ROLE.BUSINESS],
+    isBusinessOwnerOnly: true,
+    disabled: false,
+  },
   {
     Icon: MdHome,
     label: 'Home',
@@ -244,7 +312,7 @@ const CUSTOMER = [
   },
   {
     Icon: FaInbox,
-    label: 'Inbox',
+    label: 'Circles',
     href: '/portal/inbox',
     isActive: pathname => pathname === '/portal/inbox',
     disabled: false,
@@ -289,7 +357,8 @@ const CUSTOMER = [
   },
   {
     Icon: LuClipboardCheck,
-    label: 'Check In',
+    label: 'Habits',
+    href: '/portal/customer/goal-tracking/goals', // Default to goals
     disabled: false,
     hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
@@ -300,48 +369,104 @@ const CUSTOMER = [
         isActive: pathname => pathname.includes('/portal/customer/checkin/monthly_goal'),
       },
       {
+        Icon: MdTrackChanges,
+        label: 'Habits Tracker',
+        href: '/portal/customer/checkin/sleep_tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
+      },
+      {
         Icon: LiaBookSolid,
         label: 'Journal',
         href: '/portal/customer/checkin/journal',
         isActive: pathname => pathname.includes('/portal/customer/checkin/journal'),
       },
       {
-        Icon: MdTrackChanges,
-        label: 'Goal Tracker',
-        href: '/portal/customer/checkin/sleep_tracker',
-        isActive: pathname => pathname.includes('/portal/customer/checkin/sleep_tracker'),
-      },
-      {
         Icon: RiRepeatOneFill,
-        label: 'Daily Insights',
+        label: 'Habit Insights',
         href: '/portal/customer/checkin/daily_insights',
         isActive: pathname => pathname.includes('/portal/customer/checkin/daily_insights'),
       },
-      // {
-      //   Icon: FiDroplet,
-      //   label: 'Periods Tracker',
-      //   href: '/portal/customer/checkin/periods_tracker',
-      //   isActive: pathname => pathname.includes('/portal/customer/checkin/periods_tracker'),
-      // },
-      // {
-      //   Icon: TbGenderTransgender,
-      //   label: 'Menopause',
-      //   href: '/portal/customer/checkin/menopause',
-      //   isActive: pathname => pathname.includes('/portal/customer/checkin/menopause'),
-      // },
+    ],
+  },
+  {
+    Icon: LuClipboardCheck,
+    label: 'Cycles',
+    href: '/portal/customer/goal-tracking/goals', // Default to goals
+    disabled: false,
+    hasActiveSubMenu: pathname => GOALS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        Icon: MdTrackChanges,
+        label: 'Cycle Dates',
+        href: '/portal/customer/checkin/tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/tracker'),
+      },
+      {
+        Icon: FiActivity,
+        label: 'Symptoms Tracker',
+        href: '/portal/customer/checkin/daily-tracker',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/daily-tracker'),
+      },
+      {
+        Icon: PiChartLine,
+        label: 'Cycle Insights',
+        href: '/portal/customer/checkin/cycle_insights',
+        isActive: pathname => pathname.includes('/portal/customer/checkin/cycle_insights'),
+      },
+    ]
+  },
+];
+
+const STAFF = [
+  {
+    Icon: FaNewspaper,
+    label: 'Programs',
+    href: '/portal/admin/lms/program',
+    isActive: pathname => pathname.includes('/portal/admin/lms/program'),
+    disabled: false,
+  },
+  {
+    Icon: MdViewModule,
+    label: 'Modules',
+    href: '/portal/admin/lms/module',
+    isActive: pathname => pathname.includes('/portal/admin/lms/module'),
+    disabled: false,
+  },
+  {
+    Icon: FaTv,
+    label: 'Sessions',
+    href: '/portal/admin/lms/session/video', // Default to video sessions
+    disabled: false,
+    hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Video Sessions',
+        href: '/portal/admin/lms/session/video',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
+      },
+      {
+        label: 'Image Sessions',
+        href: '/portal/admin/lms/session/image',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
+      },
+      {
+        label: 'Audio Sessions',
+        href: '/portal/admin/lms/session/audio',
+        isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+      },
     ],
   },
 ];
 
-const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult) => {
+const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded) => {
   
   return [
     {
-      Icon: MdHome,
-      label: 'Home',
-      href: '/portal',
-      isActive: pathname => pathname === '/portal',
-      disabled: true,
+      Icon: FiTarget,
+      label: 'Dashboard',
+      href: '/portal/teacher/dashboard',
+      isActive: pathname => pathname.includes('/portal/teacher/dashboard'),
+      disabled: !is_profile_complete || !has_event_or_consult || !stripe_onboarded,
     },
     {
       Icon: FaInbox,
@@ -418,9 +543,15 @@ const AFFILIATE = [
     isActive: pathname => pathname === '/portal/affiliate/referrals',
     disabled: false,
   },
-  
+  {
+    Icon: MdOutlinePayments,
+    label: 'Transactions',
+    href: '/portal/affiliate/transactions',
+    isActive: pathname => pathname === '/portal/affiliate/transactions',
+    disabled: false,
+  },
 ];
 
-const SIDEBAR = { ADMIN, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
+const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
 
 export default SIDEBAR;

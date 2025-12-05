@@ -232,7 +232,7 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
           name={`${name}.drip`} 
           label="Drip" 
           placeholder="Drip" 
-          min={1} 
+          min={0} 
           required 
         />
       </div>

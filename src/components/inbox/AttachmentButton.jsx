@@ -3,30 +3,21 @@ import { useMutation } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { FiPaperclip } from 'react-icons/fi';
 
-const AttachmentButton = ({ onComplete }) => {
+const AttachmentButton = ({ onFileSelect }) => {
   const fileInput = useRef(null);
-  const { mutateAsync: getUrl, isPending: isLoadingUrl } = useMutation({
-    mutationFn: getPreSignedUrl,
-  });
 
   const openFileDialog = () => {
     fileInput.current?.click();
   };
 
-  const handleFileChange = async e => {
+  const handleFileChange = e => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const response = await getUrl({file});
-        const { file_link } = response.data;
-        onComplete(file_link);
-      } catch (err) {
-        console.error(`Upload failed for ${file.name}`, err);
-      }
-    }
+    // Convert FileList to Array and pass to parent
+    const fileArray = Array.from(files);
+    onFileSelect(fileArray);
+    
     e.target.value = null;
   };
 
@@ -35,10 +26,10 @@ const AttachmentButton = ({ onComplete }) => {
       <button
         type="button"
         onClick={openFileDialog}
-        disabled={isLoadingUrl}
-        className="h-13 w-13 flex flex-shrink-0 rounded-md justify-center items-center bg-gray-100 text-gray-600 hover:bg-gray-200"
+        className="h-8 w-8 flex flex-shrink-0 rounded-full justify-center items-center text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-all duration-200 transform hover:scale-110 active:scale-95"
+        title="Attach files"
       >
-        {isLoadingUrl ? '...' : <FiPaperclip size={20} />}
+        <FiPaperclip size={18} />
       </button>
       <input ref={fileInput} type="file" multiple className="hidden" onChange={handleFileChange} />
     </>

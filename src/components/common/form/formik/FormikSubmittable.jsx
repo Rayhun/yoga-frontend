@@ -26,13 +26,25 @@ const FormikSubmittable = ({
       if (value !== value.trim()) {
         setFieldError(name, 'Value cannot have leading or trailing spaces');
       } else {
-        setFieldError(name, undefined);
+        // Clear URL validation error when user starts typing
+        if (meta.error && meta.error.includes('valid URL')) {
+          setFieldError(name, undefined);
+        }
       }
   
       setValue(value);
     },
-    [name, setFieldError]
+    [name, setFieldError, meta.error]
   );
+
+  const isValidUrl = useCallback((string) => {
+    try {
+      const url = new URL(string);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  }, []);
 
   const handleKeyDown = useCallback(
     event => {
@@ -43,11 +55,19 @@ const FormikSubmittable = ({
 
         if (!fieldValue || fieldValue.trim() !== fieldValue) return;
 
-        setFieldValue(fieldName, [...field.value, fieldValue]);
+        // Validate URL format
+        const trimmedValue = fieldValue.trim();
+        if (!isValidUrl(trimmedValue)) {
+          setFieldError(name, 'Please enter a valid URL (e.g., https://example.com)');
+          return;
+        }
+
+        setFieldError(name, undefined);
+        setFieldValue(fieldName, [...field.value, trimmedValue]);
         setValue('');
       }
     },
-    [field.value, setFieldValue]
+    [field.value, setFieldValue, name, setFieldError, isValidUrl]
   );
 
   const handleRemove = index => {

@@ -1,6 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const ImageSessionDetails = ({ data: sessionDetails }) => {
   return (
@@ -22,7 +23,7 @@ const ImageSessionDetails = ({ data: sessionDetails }) => {
         {/* Right Section - Details */}
         <div className="w-full flex flex-col gap-5">
           <h3 className="text-2xl font-bold dark:text-white">{sessionDetails.title}</h3>
-          <p className="dark:text-white">{sessionDetails?.description}</p>
+          <ControllableRichText className="dark:text-white">{sessionDetails?.description || 'No description provided'}</ControllableRichText>
         </div>
       </div>
     </div>

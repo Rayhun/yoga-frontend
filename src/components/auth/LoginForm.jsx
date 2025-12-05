@@ -9,6 +9,7 @@ import { FiMail, FiLock } from 'react-icons/fi';
 import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
+import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
 
 const LoginForm = () => {
@@ -39,11 +40,10 @@ const LoginForm = () => {
         if (role?.toLowerCase() === 'teacher') {
           if (!email_verify || !mobile_number_verify) {
             sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
-            router.replace(
-              `/auth/verify-account?email_verify=${email_verify}&mobile_verify=${mobile_number_verify}&email=${
-                userDetails?.email
-              }&phone=${mobile_number}&step=${email_verify ? 'phone' : 'email'}`
-            );
+            // Store email and phone in sessionStorage for security (not in URL)
+            sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
+            sessionStorage.setItem('pendingVerificationPhone', mobile_number);
+            router.replace(`/auth/verify-account?step=${email_verify ? 'phone' : 'email'}`);
           } else {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
@@ -53,7 +53,20 @@ const LoginForm = () => {
           router.replace('/portal/affiliate/dashboard');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
-          router.replace('/');
+          
+          // Check if user is a business owner and redirect to business dashboard
+          const userProfile = userDetails?.profile;
+          if (userProfile?.profile_type === 'Business' && !userProfile?.business_owner) {
+            router.replace('/portal/business/dashboard');
+          } else {
+            // Fetch onboarding recommendations after successful login for individual users
+            try {
+              await getOnboardingRecommendations();
+            } catch (error) {
+              console.error('Failed to fetch recommendations:', error);
+            }
+            router.replace('/');
+          }
         } else {
           Cookies.set('token', response?.data?.token);
           router.replace('/onboarding');
@@ -98,36 +111,76 @@ const LoginForm = () => {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-      {({ isSubmitting }) => (
-        <Form className="flex flex-col gap-3">
-          <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} required />
-          <div className="flex flex-col gap-1">
+      {({ isSubmitting, errors, touched }) => (
+        <Form className="space-y-6">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <FormikField 
+              type="email" 
+              name="email" 
+              label="Email" 
+              placeholder="Enter your email" 
+              Icon={FiMail} 
+              required 
+            />
+          </div>
+
+          {/* Password Field */}
+          <div className="space-y-2">
             <FormikField
               type="password"
               name="password"
               label="Password"
-              placeholder="Password"
+              placeholder="Enter your password"
               Icon={FiLock}
               required
             />
-            <Link href="/auth/forgot-password" className="text-primary text-right">
-              Forgot Password?
-            </Link>
+            <div className="flex justify-end">
+              <Link 
+                href="/auth/forgot-password" 
+                className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
-          <p className="text-sm">
-            By logging in to your account, you are agreeing to the{' '}
-            <Link href="https://www.nourishdoc.com/terms" target="_blank" className="text-primary">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="https://www.nourishdoc.com/privacy-policy" target="_blank" className="text-primary">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-          <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
-            {isSubmitting ? 'Sigining In...' : 'Sign In'}
+
+          {/* Terms and Privacy */}
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <p className="text-xs text-gray-600 leading-relaxed">
+              By logging in to your account, you are agreeing to the{' '}
+              <Link 
+                href="https://www.nourishdoc.com/terms" 
+                target="_blank" 
+                className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+              >
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link 
+                href="https://www.nourishdoc.com/privacy-policy" 
+                target="_blank" 
+                className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            size="5xl" 
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" 
+            isLoading={isSubmitting}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span>🔐</span>
+              <span>{isSubmitting ? 'Signing In...' : 'Sign In'}</span>
+            </div>
           </Button>
+
         </Form>
       )}
     </Formik>

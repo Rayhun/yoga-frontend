@@ -25,6 +25,10 @@ const SubscriptionPlansList = () => {
         accessorKey: 'title',
       },
       {
+        header: 'Subscription Type',
+        accessorKey: 'subscription_type',
+      },
+      {
         header: 'Tenure',
         accessorKey: 'subscription_tenure',
       },

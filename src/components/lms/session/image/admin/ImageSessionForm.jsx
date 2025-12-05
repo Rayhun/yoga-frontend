@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FaRegFileImage } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
@@ -125,7 +126,7 @@ const ImageSession = ({ selected }) => {
                 <ExpertField />
               </div>
             </div>
-            <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <FormikSelect

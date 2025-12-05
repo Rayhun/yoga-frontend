@@ -75,22 +75,36 @@ const EnrolledConsultations = () => {
   return (
     <div className="flex flex-col gap-4 md:gap-7">
       {/* Hero Section */}
-      <div className="bg-white rounded-md py-12 px-6 md:px-12 flex flex-col md:flex-row items-center dark:bg-boxdark dark:text-white">
-        <div className="md:w-1/2 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">Your Consultations</h1>
-          <p className="break-words line-clamp-2 dark:text-gray-300">
-            Access your scheduled consultations and connect with wellness experts for personalized guidance
-          </p>
-        </div>
-        <div className="md:w-1/2 mt-6 md:mt-0 aspect-[16/9]">
-          <Image
-            src="/images/content/default.png"
-            alt="Hero Image"
-            width={0}
-            height={0}
-            sizes="100vw"
-            className="w-full rounded-lg shadow-lg"
-          />
+      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
+        <div className="relative z-10 flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-6 h-6 bg-gray-800 rounded-sm rotate-45 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Your Consultations</h1>
+                <p className="text-gray-600 text-sm">One-on-one sessions with experts</p>
+              </div>
+            </div>
+            <p className="text-gray-700 text-lg leading-relaxed">
+              Access your scheduled consultations and connect with wellness experts for personalized guidance
+            </p>
+          </div>
+          <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
+            <div className="relative">
+              <Image
+                src="/images/content/Wellness_Workshops.png"
+                alt="Hero Image"
+                width={0}
+                height={0}
+                sizes="100vw"
+                className="w-full rounded-2xl shadow-2xl"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

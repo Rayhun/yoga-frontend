@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaGear, FaUser } from 'react-icons/fa6';
+import { MdLogout } from 'react-icons/md';
 import Link from 'next/link';
 import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
@@ -15,7 +16,7 @@ const getRoleBaseTitle = (role) => {
 
 
 const DropdownUser = () => {
-  const { user: loggedInUser } = useAuthContext();
+  const { user: loggedInUser, logout } = useAuthContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef();
@@ -23,13 +24,17 @@ const DropdownUser = () => {
   // close on click outside
   useEffect(() => {
     const clickHandler = ({ target }) => {
-      if (!dropdown.current) return;
-      if (!dropdownOpen || dropdown.current.contains(target) || trigger.current.contains(target)) return;
-      setDropdownOpen(false);
+      if (!dropdown.current || !trigger.current) return;
+      // If clicking on trigger or dropdown, don't close (let the toggle handle it)
+      if (trigger.current.contains(target) || dropdown.current.contains(target)) return;
+      // Otherwise, close the dropdown
+      if (dropdownOpen) {
+        setDropdownOpen(false);
+      }
     };
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
-  });
+  }, [dropdownOpen]);
 
   // close if the esc key is pressed
   useEffect(() => {
@@ -39,14 +44,22 @@ const DropdownUser = () => {
     };
     document.addEventListener('keydown', keyHandler);
     return () => document.removeEventListener('keydown', keyHandler);
-  });
+  }, [dropdownOpen]);
 
   const url = useMemo(() => {
     const { role } = loggedInUser?.profile || {}; 
     if (role === USER_ROLE.ADMIN) return '#';
+    if (role === USER_ROLE.STAFF) return '#'; // Staff users don't have profile page
     if (role === USER_ROLE.TEACHER) return '/portal/teacher/profile?active_tab=about';
     if (role === USER_ROLE.AFFILIATE) return '/portal/affiliate/profle';
     if (role === USER_ROLE.CUSTOMER) return '/portal/customer/profile';
+    return '#'; // Default fallback
+  }, [loggedInUser?.profile]);
+
+  const settingsUrl = useMemo(() => {
+    const { role } = loggedInUser?.profile || {};
+    if (role === USER_ROLE.CUSTOMER) return '/portal/customer/subscriptions';
+    return '#';
   }, [loggedInUser?.profile]);
 
   const menu = [
@@ -57,33 +70,47 @@ const DropdownUser = () => {
     },
     {
       label: 'Settings',
-      href: '#',
+      href: settingsUrl,
       Icon: FaGear,
     },
+    {
+      label: 'Logout',
+      href: '#',
+      Icon: MdLogout,
+      onClick: logout,
+    },
   ];
+
+  const handleToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(prev => !prev);
+  };
 
   return (
     <div className="relative">
       <Link
         ref={trigger}
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        onClick={handleToggle}
         className="flex items-center gap-4"
         href="#"
       >
-        <span className="hidden text-right lg:block">
+        <span className="hidden text-center lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {loggedInUser?.profile?.first_name} {loggedInUser?.profile?.last_name}
+            Hi {loggedInUser?.profile?.first_name}
           </span>
-          <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span>
+          {/* <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span> */}
         </span>
 
-        <span className="h-12 w-12 rounded-full">
+        <span className="h-12 w-12 rounded-full overflow-hidden">
           <Image
-            width={112}
-            height={112}
+            width={48}
+            height={48}
             src={loggedInUser?.profile?.image || loggedInUser?.profile?.profile_image || '/images/user/placeholder_profile.png'}
             alt="User"
-            className="rounded-full"
+            className="rounded-full object-cover w-full h-full"
+            quality={95}
+            priority
           />
         </span>
 
@@ -107,8 +134,6 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       <div
         ref={dropdown}
-        onFocus={() => setDropdownOpen(true)}
-        onBlur={() => setDropdownOpen(false)}
         className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark ${
           dropdownOpen === true ? 'block' : 'hidden'
         }`}
@@ -116,13 +141,27 @@ const DropdownUser = () => {
         <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-4 dark:border-strokedark">
           {menu.map(menuItem => (
             <li key={menuItem.label}>
-              <Link
-                href={menuItem.href}
-                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-              >
-                <menuItem.Icon size={20} />
-                {menuItem.label}
-              </Link>
+              {menuItem.onClick ? (
+                <button
+                  onClick={(e) => {
+                    setDropdownOpen(false);
+                    menuItem.onClick(e);
+                  }}
+                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base w-full text-left"
+                >
+                  <menuItem.Icon size={20} />
+                  {menuItem.label}
+                </button>
+              ) : (
+                <Link
+                  href={menuItem.href}
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                >
+                  <menuItem.Icon size={20} />
+                  {menuItem.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>

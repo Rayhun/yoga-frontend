@@ -8,6 +8,7 @@ const MessageForm = () => {
   const { get, remove } = useSearchParamUtils();
 
   const [inputText, setInputText] = useState(() => get('message') || '');
+  const type = get('type') || 'ai_chat';
 
   useEffect(() => {
     if (get('message')) remove('message');
@@ -17,8 +18,10 @@ const MessageForm = () => {
     actions: { sendMessage },
   } = useAIChatInbox();
 
+  const placeholder = type === 'ai_chat' ? 'How can I support you today...' : 'How can I help?';
+
   const handleSendMessage = () => {
-    if (inputText || attachments.length > 0) {
+    if (inputText) {
       sendMessage(inputText);
       setInputText('');
     }
@@ -43,15 +46,16 @@ const MessageForm = () => {
             value={inputText}
             onKeyDown={onKeyDown}
             onChange={onInputChange}
-            placeholder="Type something here"
-            className="h-13 w-full rounded-md border border-stroke bg-gray pl-5 pr-19 text-black placeholder-body outline-none focus:border-primary dark:border-strokedark dark:bg-boxdark-2 dark:text-white"
+            placeholder={placeholder}
+            className="h-13 w-full rounded-full border border-stroke bg-gray pl-5 pr-19 text-black placeholder-body outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 dark:border-strokedark dark:bg-boxdark-2 dark:text-white"
           />
         </div>
         <button
-          className="flex h-13 w-full max-w-13 items-center justify-center rounded-md bg-primary text-white hover:bg-opacity-90"
+          className={`flex h-13 w-full max-w-13 items-center justify-center rounded-full text-white shadow ${inputText ? 'bg-primary hover:bg-opacity-90' : 'bg-gray-300 cursor-not-allowed'}`}
           onClick={handleSendMessage}
+          disabled={!inputText}
         >
-          <FiSend size={24} />
+          <FiSend size={22} />
         </button>
       </div>
     </div>

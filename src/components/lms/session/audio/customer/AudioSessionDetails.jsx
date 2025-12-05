@@ -5,6 +5,7 @@ import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import AudioPlayer from '@/components/common/player/AudioPlayer';
 import { updateProgramContentProgress } from '@/services/private/customer/program';
 import { SESSION_TYPE } from '@/utils/enums';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const AudioSessionDetails = ({ data: sessionDetails }) => {
   const searchParams = useSearchParamUtils();
@@ -54,7 +55,7 @@ const AudioSessionDetails = ({ data: sessionDetails }) => {
             </div>
           </div>
 
-          <p className="dark:text-white">{sessionDetails?.description}</p>
+          <ControllableRichText className="dark:text-white">{sessionDetails?.description || 'No description provided'}</ControllableRichText>
         </div>
       </div>
     </div>

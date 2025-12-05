@@ -33,6 +33,7 @@ const SimpleNavbar = () => {
               className="hidden sm:block"
               alt="Logo"
               priority
+              quality={95}
             />
           </Link>
           {/* <div className="hidden sm:flex sm:items-center sm:gap-5">
@@ -76,6 +77,7 @@ const SimpleNavbar = () => {
                 className="my-3"
                 alt="Logo"
                 priority
+                quality={95}
               />
             </Link>
             <br />

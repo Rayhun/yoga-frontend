@@ -1,4 +1,5 @@
 import AuthProvider from '@/context/AuthProvider';
+import OnboardingGuard from '@/components/common/OnboardingGuard';
 import { SidebarLayout } from '@/components/layouts';
 
 export const metadata = {
@@ -8,7 +9,9 @@ export const metadata = {
 const Layout = ({ children }) => {
   return (
     <AuthProvider>
-      <SidebarLayout>{children}</SidebarLayout>
+      <OnboardingGuard>
+        <SidebarLayout>{children}</SidebarLayout>
+      </OnboardingGuard>
     </AuthProvider>
   );
 };

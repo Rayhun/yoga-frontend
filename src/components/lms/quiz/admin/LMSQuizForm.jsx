@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import {
@@ -126,7 +127,7 @@ const LMSQuizForm = ({ selected }) => {
                 <FormikField name="quiz_number" label="Quiz Number" placeholder="Quiz Number" required />
               </div>
             </div>
-            <FormikField name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
+            <FormikRichTextEditor name="explanation" label="Explanation" placeholder="Explanation" rows={5} required />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <FormikSelect

@@ -2589,3 +2589,14 @@ export const BUSINESS_MODELS = [
   {label: 'Affiliate Marketer', value: 'affiliate marketer'},
   {label: 'Other', value: 'other'},
 ]
+
+export const TITLE_OPTIONS = [
+  { value: 'Mr.', label: 'Mr.' },
+  { value: 'Mrs.', label: 'Mrs.' },
+  { value: 'Ms.', label: 'Ms.' },
+  // { value: 'Miss', label: 'Miss' },
+  // { value: 'Dr.', label: 'Dr.' },
+  // { value: 'Prof.', label: 'Prof.' },
+  // { value: 'Coach', label: 'Coach' },
+  // { value: 'Master', label: 'Master' },
+];

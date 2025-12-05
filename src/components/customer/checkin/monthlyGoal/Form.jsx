@@ -34,7 +34,7 @@ const MonthlyGoalForm = ({ selectedConcern }) => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       await createTracker({ payload: { ...values } });
-      toast.success('Tracker for specified gaol created successfully.');
+      toast.success('Tracker for specified goal created successfully.');
 
       // resetForm(); Stoped from reseting the form
 

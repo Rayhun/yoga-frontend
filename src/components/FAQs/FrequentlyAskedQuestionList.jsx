@@ -9,6 +9,7 @@ import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 import { deleteSingleQuestion, getFrequentlyAskedQuestionsList } from '@/services/private/faqs';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 
 const FrequentlyAskedQuestions = () => {
   const router = useRouter();
@@ -27,6 +28,16 @@ const FrequentlyAskedQuestions = () => {
       {
         header: 'Answer',
         accessorKey: 'description',
+        cell: ({ getValue }) => {
+          const description = getValue();
+          return (
+            <div className="max-w-xs">
+              <ControllableRichText numberOfWords={10} className="text-sm">
+                {description || 'No answer provided'}
+              </ControllableRichText>
+            </div>
+          );
+        },
       },
       {
         header: 'Order',
