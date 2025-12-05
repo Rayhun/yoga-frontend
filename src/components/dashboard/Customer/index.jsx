@@ -507,7 +507,7 @@ const CustomerDashboard = () => {
       </div>
 
       {/* Quick Links Section - After the grid */}
-      <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl shadow-lg border border-teal-100 p-8 mt-8">
+      {/* <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl shadow-lg border border-teal-100 p-8 mt-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,7 +524,7 @@ const CustomerDashboard = () => {
             <QuickLinks />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Live Sessions Section - Full Width */}
       {/* <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
