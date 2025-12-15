@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import Calender from '@/components/common/Calender';
 import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { createTrackerActivity, getTracker } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
@@ -23,6 +24,7 @@ const ratings = [
 ];
 
 const SleepTracker = () => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef(null);
 
@@ -39,6 +41,7 @@ const SleepTracker = () => {
 
   const trackerData = tracker?.data?.data?.tracker || {};
   const streak = tracker?.data?.data?.streak?.current_streak || 0;
+  const hasTrackerData = trackerData && trackerData.id;
 
   const initialValues = {
     selected_option: '',
@@ -104,6 +107,27 @@ const SleepTracker = () => {
 
     return null;
   };
+
+  // Show message if no tracker data is available
+  if (!isFetching && !hasTrackerData) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 min-h-screen">
+        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-gray-400 text-2xl">🎯</span>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Tracker Selected</h3>
+          <p className="text-gray-600 mb-6">First select your monthly goal, then you can track your habits.</p>
+          <button
+            onClick={() => router.push('/portal/customer/checkin/monthly_goal')}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Go to Monthly Goal
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 min-h-screen">

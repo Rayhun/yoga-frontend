@@ -26,12 +26,14 @@ const UserProfile = () => {
     first_name: loggedInUser?.profile?.first_name || 'John',
     last_name: loggedInUser?.profile?.last_name || 'Doe',
     email: loggedInUser?.email || 'johndoe@example.com',
+    circle_name: loggedInUser?.profile?.circle_name || '',
     profile_image: loggedInUser?.profile?.profile_image || '',
   };
 
   const validationSchema = Yup.object({
     first_name: Yup.string().required('First name is required'),
     last_name: Yup.string().required('Last name is required'),
+    circle_name: Yup.string().required('Circle name is required').max(100, 'Circle name is too long'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -80,15 +82,26 @@ const UserProfile = () => {
                     />
                   </div>
                 </div>
-                <div className="w-full flex flex-col mt-3">
-                  <FormikField
-                    label="Email"
-                    type="email"
-                    name="email"
-                    placeholder="Enter email"
-                    disabled
-                    required
-                  />
+                <div className="flex justify-between gap-4 sm:flex-row flex-col mt-3">
+                  <div className="w-full flex flex-col">
+                    <FormikField
+                      label="Circle Name"
+                      type="text"
+                      name="circle_name"
+                      placeholder="Enter circle name"
+                      required
+                    />
+                  </div>
+                  <div className="w-full flex flex-col">
+                    <FormikField
+                      label="Email"
+                      type="email"
+                      name="email"
+                      placeholder="Enter email"
+                      disabled
+                      required
+                    />
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end">
