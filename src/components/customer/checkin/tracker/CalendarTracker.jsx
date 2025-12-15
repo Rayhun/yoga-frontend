@@ -15,6 +15,7 @@ const Section = ({ children, className = "" }) => (
 );
 
 const CycleDayCard = ({ cycleInfo }) => {
+  const [infoOpen, setInfoOpen] = useState(false);
   // Helper function to get regularity status styling
   const getRegularityStatusStyle = (status) => {
     if (!status) return null;
@@ -51,7 +52,7 @@ const CycleDayCard = ({ cycleInfo }) => {
   if (!cycleInfo) {
     return (
       <Section>
-        <div className="flex items-center gap-6">
+        <div className="relative flex items-center gap-6">
           <div className="flex-shrink-0">
             <div className="w-20 h-20 border-2 border-gray-300 rounded-full flex flex-col items-center justify-center bg-gray-50">
               <span className="text-xs font-medium text-gray-500">Day</span>
@@ -62,6 +63,41 @@ const CycleDayCard = ({ cycleInfo }) => {
             <h3 className="text-xl font-bold text-gray-500 mb-2">No Cycle Data</h3>
             <p className="text-gray-500">Start tracking your cycle to see insights</p>
           </div>
+          <div className="absolute top-0 right-0 flex items-center gap-2">
+            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+            <button
+              type="button"
+              aria-label="Insights info"
+              onClick={() => setInfoOpen((prev) => !prev)}
+              className="w-7 h-7 rounded-full border border-gray-200 bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-gray-100 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              </svg>
+            </button>
+          </div>
+          {infoOpen && (
+            <div className="absolute top-8 right-0 mt-2 w-64 bg-white border border-emerald-100 rounded-xl shadow-xl p-3 z-20">
+              <div className="flex items-start gap-2">
+                <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                  i
+                </div>
+                <div className="text-sm font-semibold text-gray-800 leading-snug">
+                  Log 3 cycles to unlock your insights 💫
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close insight info"
+                  onClick={() => setInfoOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </Section>
     );
@@ -99,10 +135,42 @@ const CycleDayCard = ({ cycleInfo }) => {
           </div>
         </div>
 
-        {/* Status Indicator - Top Right */}
-        <div className="absolute top-0 right-0">
+        {/* Status / Info - Top Right */}
+        <div className="absolute top-0 right-0 flex items-center gap-2">
           <div className={`w-3 h-3 ${defaultColor.dotColor} rounded-full`}></div>
+          <button
+            type="button"
+            aria-label="Insights info"
+            onClick={() => setInfoOpen((prev) => !prev)}
+            className="w-7 h-7 rounded-full border border-gray-200 bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-gray-100 transition-all"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+          </button>
         </div>
+        {infoOpen && (
+          <div className="absolute top-8 right-0 mt-2 w-64 bg-white border border-emerald-100 rounded-xl shadow-xl p-3 z-20">
+            <div className="flex items-start gap-2">
+              <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                i
+              </div>
+              <div className="text-sm font-semibold text-gray-800 leading-snug">
+                Log 3 cycles to unlock your insights 💫
+              </div>
+              <button
+                type="button"
+                aria-label="Close insight info"
+                onClick={() => setInfoOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Section - Cycle Pattern Details */}

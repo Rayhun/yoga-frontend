@@ -387,11 +387,11 @@ const CustomerDashboard = () => {
                 <ul className="mt-3 space-y-2 text-sm text-gray-700">
                   <li className="flex gap-2">
                     <span className="shrink-0">🌙</span>
-                    <span>Lifestage Wellness reflects hormonal and emotional patterns unique to your phase.</span>
+                    <span>Cycle Score reflects hormonal and emotional patterns unique to your phase.</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="shrink-0">🌸</span>
-                    <span>Lifestyle Balance shows how daily habits like sleep, nutrition, and stress support you.</span>
+                    <span>Habit Score shows how daily habits like sleep, nutrition, and stress support you.</span>
                   </li>
                 </ul>
               </div>

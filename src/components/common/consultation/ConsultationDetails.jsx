@@ -81,18 +81,15 @@ export const ConsultationDetails = ({
           {/* Instructor Info */}
           {isCustomerView && (
             <div className="flex items-center gap-3">
-              <span className="h-12 w-12 rounded-full text-dark">
+              <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                 <Image
-                  width={40}
-                  height={40}
                   src={consultationDetails?.instructors?.[0]?.image || '/images/user/user-06.png'}
-                  style={{
-                    width: 'auto',
-                    height: 'auto',
-                  }}
                   alt="Instructor"
+                  fill
+                  className="rounded-full object-cover"
+                  sizes="(max-width: 640px) 40px, 48px"
                 />
-              </span>
+              </div>
               <span className="font-bold">Instructors:</span>
               {consultationDetails?.instructors?.map((instructor, index) => (
                 <span key={index} className="text-gray-600 dark:text-white">

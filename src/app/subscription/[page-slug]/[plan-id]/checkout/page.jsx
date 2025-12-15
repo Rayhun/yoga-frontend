@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
@@ -14,12 +14,12 @@ const Page = ({ params }) => {
   const searchParams = useSearchParams();
   const refferalCode = searchParams.get('ref');
 
-  // Check for existing client secret from business subscription
+  // null = not checked yet, false = not business, true = is business
+  const [isBusinessSubscription, setIsBusinessSubscription] = useState(null);
   const [existingClientSecret, setExistingClientSecret] = useState(null);
-  const [isBusinessSubscription, setIsBusinessSubscription] = useState(false);
 
+  // Check localStorage after mount (client-side only)
   useEffect(() => {
-    // Check if coming from business subscription
     const storedClientSecret = localStorage.getItem('stripe_client_secret');
     const businessData = localStorage.getItem('business_subscription_data');
     
@@ -29,10 +29,13 @@ const Page = ({ params }) => {
       // Clear the stored data after using it
       localStorage.removeItem('stripe_client_secret');
       localStorage.removeItem('business_subscription_data');
+    } else {
+      setIsBusinessSubscription(false);
     }
   }, []);
 
-  // Only fetch new session if not a business subscription
+  // Only fetch new session if confirmed NOT a business subscription
+  // isBusinessSubscription === false means we checked and it's individual
   const {
     data: response,
     isLoading,
@@ -40,13 +43,16 @@ const Page = ({ params }) => {
   } = useQuery({
     queryFn: () => createCheckoutSessionForSubscriptionPlan({ id: planID, refferalCode }),
     queryKey: [queryKeys.stripeCheckoutSessions, planID, refferalCode],
-    enabled: !isBusinessSubscription, // Only run for individual subscriptions
+    enabled: isBusinessSubscription === false, // Only run when confirmed NOT business
   });
 
   useHandleApiResponse(failureReason);
 
   // Use existing client secret for business, or new one for individual
   const clientSecret = existingClientSecret || response?.data?.data?.checkout_session_client_secret;
+
+  // Show loading while checking localStorage or fetching checkout session
+  const isCheckingOrLoading = isBusinessSubscription === null || (isBusinessSubscription === false && isLoading);
 
   return (
     <div className="flex flex-col gap-5">
@@ -55,7 +61,7 @@ const Page = ({ params }) => {
           Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
         </Alert>
       </div>
-      <LoadingWrapper isLoading={isLoading && !existingClientSecret}>
+      <LoadingWrapper isLoading={isCheckingOrLoading}>
         {clientSecret ? (
           <StripeCheckout clientSecret={clientSecret} />
         ) : (
