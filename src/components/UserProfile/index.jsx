@@ -32,7 +32,6 @@ const UserProfile = () => {
 
   const validationSchema = Yup.object({
     first_name: Yup.string().required('First name is required'),
-    last_name: Yup.string().required('Last name is required'),
     circle_name: Yup.string().required('Circle name is required').max(100, 'Circle name is too long'),
   });
 
@@ -78,7 +77,6 @@ const UserProfile = () => {
                       type="text"
                       name="last_name"
                       placeholder="Enter last name"
-                      required
                     />
                   </div>
                 </div>
