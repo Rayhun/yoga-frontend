@@ -207,11 +207,11 @@ const AffiliatesSignupForm = () => {
             <FormikSelect
               name="business_model"
               label="Business Model"
-              placeholder="Business Model"
+              placeholder="Select Business Model"
               options={BUSINESS_MODELS}
               required
             />
-            <FormikCountrySelect name="country" label="Country" required />
+            <FormikCountrySelect name="country" label="Country" placeholder="Select Country" required />
 
             <FormikField
               type="password"

@@ -238,6 +238,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FormikSelect
                     name="coaching_style"
                     label="Coaching Style"
+                    placeholder="Select Coaching Style"
                     options={COACHING_STYLES_OPTIONS}
                     required
                   />
@@ -246,6 +247,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FormikMultiSelect
                     name="culture_experience"
                     label="Culture Experience"
+                    placeholder="Select Culture Experience"
                     options={CULTURE_EXPERIENCE_OPTIONS}
                     required
                   />

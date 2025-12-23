@@ -55,7 +55,12 @@ const FAQsList = () => {
                 }`}
               >
                 <div className="p-4 bg-gray-50">
-                  <ControllableRichText className="text-gray-700 text-sm">{faq?.description || 'No answer provided'}</ControllableRichText>
+                  <ControllableRichText 
+                    className="text-gray-700 text-sm"
+                    showFullText={expanded === `panel${faq?.id}`}
+                  >
+                    {faq?.description || 'No answer provided'}
+                  </ControllableRichText>
                 </div>
               </div>
             </div>

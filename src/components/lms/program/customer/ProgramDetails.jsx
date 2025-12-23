@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
@@ -22,6 +22,7 @@ import queryKeys from '@/utils/query-keys';
 import Link from 'next/link';
 import useConfirm from '@/hooks/useConfirm';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
+import Spinner from '@/components/common/loader/Spinner';
 
 const TABS = {
   JOURNEY: 'journey',
@@ -29,12 +30,18 @@ const TABS = {
   BENEFITS: 'benefits',
 };
 
+const ITEMS_PER_PAGE = 9; // Load 9 items at a time (3x3 grid)
+
 const ProgramDetails = () => {
   const params = useParams();
   const {render: renderModal, closeModal} = useModal();
   const router = useRouter();
   const programID = params.id;
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
+  const [displayedItemsCount, setDisplayedItemsCount] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadingRef = useRef(null);
+  const observerRef = useRef(null);
   const {
     data: response,
     isLoading,
@@ -54,6 +61,76 @@ const ProgramDetails = () => {
 
   useHandleApiResponse(failureReason);
 
+  // Get program details - use empty object if loading to avoid errors
+  const programDetails = response?.data?.data || {};
+  const isEnrolled = programDetails.is_enroll;
+  const isProgramCompleted = programDetails.status === 'Completed' || programDetails.status === 'Complete';
+
+  const programProgress = Math.round(
+    (programDetails.content?.filter(i => i.completed).length / programDetails.content?.length) * 100
+  );
+
+  // Get displayed content items for journey tab
+  const displayedContent = useMemo(() => {
+    if (!programDetails?.content || selectedTab !== TABS.JOURNEY) {
+      return [];
+    }
+    return programDetails.content.slice(0, displayedItemsCount);
+  }, [programDetails?.content, displayedItemsCount, selectedTab]);
+
+  // Check if there are more items to load
+  const hasMoreItems = useMemo(() => {
+    return programDetails?.content?.length > displayedItemsCount;
+  }, [programDetails?.content?.length, displayedItemsCount]);
+
+  // Load more items function
+  const loadMoreItems = useCallback(() => {
+    if (hasMoreItems && !isLoadingMore && programDetails?.content) {
+      setIsLoadingMore(true);
+      // Simulate a small delay for better UX
+      setTimeout(() => {
+        setDisplayedItemsCount(prev => Math.min(prev + ITEMS_PER_PAGE, programDetails.content.length));
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [hasMoreItems, isLoadingMore, programDetails?.content]);
+
+  // Reset displayed items count when tab changes
+  useEffect(() => {
+    if (selectedTab === TABS.JOURNEY) {
+      setDisplayedItemsCount(ITEMS_PER_PAGE);
+    }
+  }, [selectedTab]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (selectedTab !== TABS.JOURNEY || isLoading) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreItems && !isLoadingMore) {
+          loadMoreItems();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMoreItems, isLoadingMore, selectedTab, loadMoreItems, isLoading]);
+
+  // Early return after all hooks are called
   if (isLoading) return <PageLoader />;
 
   const handleExpertClick = expert => {
@@ -68,7 +145,6 @@ const ProgramDetails = () => {
       size: 'md',
     });
   };
-
 
   const handleEnrollProgram = async () => {
     try {
@@ -108,14 +184,6 @@ const ProgramDetails = () => {
       }
     }
   };
-
-  const programDetails = response?.data?.data || {};
-  const isEnrolled = programDetails.is_enroll;
-  const isProgramCompleted = programDetails.status === 'Completed' || programDetails.status === 'Complete';
-
-  const programProgress = Math.round(
-    (programDetails.content?.filter(i => i.completed).length / programDetails.content?.length) * 100
-  );
 
   return (
     <div>
@@ -227,10 +295,29 @@ const ProgramDetails = () => {
             {/* Journey Tab */}
             <div hidden={selectedTab !== TABS.JOURNEY}>
               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {programDetails?.content.map(item => (
+                {displayedContent.map(item => (
                   <ContentCard key={item.id} item={item} isEnrolled={isEnrolled} />
                 ))}
               </div>
+              {/* Loading indicator for infinite scroll */}
+              {hasMoreItems && (
+                <div ref={loadingRef} className="flex justify-center items-center py-8">
+                  {isLoadingMore && (
+                    <div className="flex flex-col items-center gap-2">
+                      <Spinner size={40} />
+                      <p className="text-gray-600 dark:text-gray-400">Loading more content...</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* End of content message */}
+              {!hasMoreItems && displayedContent.length > 0 && (
+                <div className="flex justify-center items-center py-4">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {/* You've reached the end of the journey */}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Description Tab */}
