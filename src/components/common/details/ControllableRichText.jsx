@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 
-const ControllableRichText = ({ numberOfWords = 50, children, ...rest }) => {
+const ControllableRichText = ({ numberOfWords = 50, children, showFullText = false, ...rest }) => {
   const [isFullTextVisible, setIsFullTextVisible] = useState(false);
 
   const toggleTextVisibility = () => setIsFullTextVisible(prevState => !prevState);
@@ -43,6 +43,15 @@ const ControllableRichText = ({ numberOfWords = 50, children, ...rest }) => {
   }, [children, totalWords, numberOfWords]);
 
   const hasTruncableText = totalWords.length > numberOfWords;
+
+  // If showFullText is true, always show full text without "See More" button
+  if (showFullText) {
+    return (
+      <div {...rest}>
+        <div dangerouslySetInnerHTML={{ __html: children }} />
+      </div>
+    );
+  }
 
   return (
     <div {...rest}>

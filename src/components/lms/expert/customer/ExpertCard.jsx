@@ -53,9 +53,11 @@ const ExpertCard = ({ expert, onClick }) => {
         </div>
         
         {/* Bio */}
-        <p className="break-words line-clamp-2 text-sm text-gray-500 dark:text-gray-400" title={expert.bio}>
-          {expert.bio || 'No bio available'}
-        </p>
+        <div 
+          className="bio-content break-words line-clamp-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed [&>p]:mb-0 [&>p]:line-clamp-2 [&>p]:text-sm [&>p]:text-gray-600 [&>p]:dark:text-gray-300 [&>strong]:font-semibold [&>em]:italic [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4"
+          title={expert.bio ? expert.bio.replace(/<[^>]*>/g, '') : 'No bio available'}
+          dangerouslySetInnerHTML={{ __html: expert.bio || '<p class="text-gray-500 dark:text-gray-400">No bio available</p>' }}
+        />
         
         {/* Categories */}
         {expert?.categories && expert.categories.length > 0 && (

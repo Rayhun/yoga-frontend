@@ -125,7 +125,7 @@ const DailyInsights = () => {
             />
           </Section>
           
-          <Section>
+          {/* <Section>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -136,7 +136,7 @@ const DailyInsights = () => {
               <p className="text-gray-600">Track your wellness patterns over time.</p>
             </div>
             <MonthlyPatternsChart data={insightsData?.daily_patterns} />
-          </Section>
+          </Section> */}
           
           <Section>
             <div className="mb-6">
