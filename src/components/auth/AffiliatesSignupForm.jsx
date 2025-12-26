@@ -109,9 +109,11 @@ const AffiliatesSignupForm = () => {
           toast.success('Account created successfully and OTP sent to your email');
 
           const userDetails = createdUserAccount?.user;
+          // Store email and token in sessionStorage for security (not in URL)
           sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
+          sessionStorage.setItem('pendingAffiliateVerificationEmail', userDetails?.email);
 
-          router.push(`/auth/verify-affiliates-account?email=${userDetails?.email}`);
+          router.push('/auth/verify-affiliates-account');
         } catch (error) {
           if (error.response?.data?.message) {
             const errorMessage = error.response.data.message;
@@ -254,8 +256,15 @@ const AffiliatesSignupForm = () => {
               }
               required
             />
-            <Button type="submit" size="5xl" className="mt-3" isLoading={isSubmitting}>
-              {isSubmitting ? 'Creating Account' : 'Sign Up'}
+            <Button 
+              type="submit" 
+              size="5xl" 
+              className="mt-3 w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+              isLoading={isSubmitting}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span>{isSubmitting ? 'Creating Account...' : 'Sign Up'}</span>
+              </div>
             </Button>
           </Form>
         )}
