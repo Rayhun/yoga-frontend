@@ -41,11 +41,11 @@ function Page() {
               <div className="space-y-6 animate-slideInLeft">
                 <h1 className="text-4xl font-bold text-gray-800 leading-tight">
                   Almost There!
-                  <span className="block text-orange-600 animate-float">Verify Your Account</span>
+                  <span className="block text-orange-600">Verify Your Account</span>
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  We&apos;ve sent verification codes to your email and phone number. Enter them to complete your registration and start your wellness journey.
+                  You&apos;re one step away from joining our wellness community. Enter the codes we sent to verify your contact details.
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">
