@@ -8,6 +8,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import CustomTable from './Table';
+import { getDefaultPageSize } from '@/utils/helpers';
 
 const SelectionTable = ({
   isLoading = false,
@@ -18,7 +19,7 @@ const SelectionTable = ({
 }) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: getDefaultPageSize(),
   });
   const table = useReactTable({
     data,

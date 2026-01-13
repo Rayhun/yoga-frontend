@@ -155,7 +155,7 @@ const ExpertsList = () => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Meet Our Experts</h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Meet Our Coaches</h1>
                 <p className="text-gray-600 text-sm">Connect with certified wellness professionals</p>
               </div>
             </div>
