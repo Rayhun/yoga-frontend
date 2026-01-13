@@ -31,6 +31,7 @@ const queryKeys = {
   customerAudioSessions: 'customerAudioSessions',
   customerVideoSessions: 'customerVideoSessions',
   inboxConversations: 'inboxConversations',
+  availableCoaches: 'availableCoaches',
   chatGroups: 'chatGroups',
   teacherProfile: 'teacherProfile',
   checkoutProgram: 'checkoutProgram',

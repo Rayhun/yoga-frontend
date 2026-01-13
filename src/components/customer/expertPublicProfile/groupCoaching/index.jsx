@@ -6,7 +6,7 @@ import queryKeys from '@/utils/query-keys';
 import UserProfileGroupCoaching from '@/components/common/user/profile/groupCoaching';
 import FeaturedTypeFilter from '@/components/common/FeaturedTypeFilter';
 
-const items = ['workshop', 'bootcamp', 'live event'];
+const items = ['workshop', 'bootcamp', 'live event', 'masterclass'];
 
 const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
   const params = useParams();

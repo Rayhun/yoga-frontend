@@ -88,3 +88,39 @@ export const downloadCSV = (data, filename = 'experts-list.csv') => {
   link.remove();
   window.URL.revokeObjectURL(url);
 };
+
+// Table pagination utilities
+const TABLE_PAGE_SIZE_KEY = 'admin_table_default_page_size';
+const DEFAULT_PAGE_SIZE = 5;
+
+export const getDefaultPageSize = () => {
+  if (typeof window === 'undefined') return DEFAULT_PAGE_SIZE;
+  
+  try {
+    const stored = localStorage.getItem(TABLE_PAGE_SIZE_KEY);
+    if (stored) {
+      const pageSize = parseInt(stored, 10);
+      // Validate that the page size is one of the allowed values
+      if ([5, 10, 20, 50, 100].includes(pageSize)) {
+        return pageSize;
+      }
+    }
+  } catch (error) {
+    console.error('Error reading page size from localStorage:', error);
+  }
+  
+  return DEFAULT_PAGE_SIZE;
+};
+
+export const setDefaultPageSize = (pageSize) => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Validate that the page size is one of the allowed values
+    if ([5, 10, 20, 50, 100].includes(pageSize)) {
+      localStorage.setItem(TABLE_PAGE_SIZE_KEY, pageSize.toString());
+    }
+  } catch (error) {
+    console.error('Error saving page size to localStorage:', error);
+  }
+};

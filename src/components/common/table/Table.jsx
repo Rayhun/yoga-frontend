@@ -3,6 +3,7 @@ import { flexRender } from '@tanstack/react-table';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Spinner from '@/components/common/loader/Spinner';
+import { setDefaultPageSize } from '@/utils/helpers';
 
 const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = true, showFooter = true, CustomFilters = null }) => {
   const { getHeaderGroups, getRowModel, getPageCount, getState, setGlobalFilter, setPageSize, setPageIndex } =
@@ -35,7 +36,11 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
           <div className="flex items-center font-medium">
             <select
               value={pageSize}
-              onChange={e => setPageSize(Number(e.target.value))}
+              onChange={e => {
+                const newPageSize = Number(e.target.value);
+                setPageSize(newPageSize);
+                setDefaultPageSize(newPageSize);
+              }}
               className="bg-transparent pl-2"
             >
               {[5, 10, 20, 50, 100].map(page => (

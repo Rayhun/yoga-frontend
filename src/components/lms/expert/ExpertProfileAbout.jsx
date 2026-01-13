@@ -30,7 +30,7 @@ const ExpertProfileAbout = ({ data }) => {
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="About">
-        <ControllableRichText>{data?.description || 'No description provided'}</ControllableRichText>
+        <ControllableRichText showFullText={true}>{data?.description || 'No description provided'}</ControllableRichText>
       </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">

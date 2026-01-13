@@ -322,7 +322,7 @@ const ProgramDetails = () => {
 
             {/* Description Tab */}
             <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <ControllableRichText className="dark:text-white">{programDetails?.description || 'No description provided'}</ControllableRichText>
+              <ControllableRichText className="dark:text-white" showFullText={true}>{programDetails?.description || 'No description provided'}</ControllableRichText>
             </div>
 
             {/* Benefits Tab */}

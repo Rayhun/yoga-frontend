@@ -8,11 +8,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import CustomTable from './Table';
+import { getDefaultPageSize } from '@/utils/helpers';
 
 const BasicTable = ({ isLoading = false, columns = [], data = [], ...restProps }) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: getDefaultPageSize(),
   });
 
   const table = useReactTable({

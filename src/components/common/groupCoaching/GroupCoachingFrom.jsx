@@ -27,6 +27,7 @@ const eventTypeOptions = [
   { label: 'Workshop', value: 'workshop' },
   { label: 'Bootcamp', value: 'bootcamp' },
   { label: 'Live Event', value: 'live event' },
+  { label: 'MasterClass', value: 'masterclass' },
 ];
 
 // const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
