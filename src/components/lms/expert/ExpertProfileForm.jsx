@@ -352,7 +352,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-800/30">
                   <FormikSwitch name="available" label="Available for Coaching" />
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Toggle this option to let students know if you're currently accepting new coaching clients.
+                    Toggle this option to let students know if you&apos;re currently accepting new coaching clients.
                   </p>
                 </div>
               </div>
