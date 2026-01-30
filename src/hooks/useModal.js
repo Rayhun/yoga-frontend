@@ -6,6 +6,22 @@ import MuiThemeProvider from '@/context/MuiThemeProvider';
 import UIProvider from '@/context/UIProvider';
 import Popup from '@/components/common/popup';
 
+// Create a stable QueryClient instance outside the hook
+const createModalQueryClient = () => {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+};
+
 function useModal () {
   const defaultArgs = {
     heading: 'Confirmation!!!',
@@ -56,18 +72,7 @@ function useModal () {
         const done = () => close();
 
         // Create a QueryClient instance for the modal
-        const modalQueryClient = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-              refetchOnWindowFocus: false,
-              staleTime: 1000 * 60,
-            },
-            mutations: {
-              retry: false,
-            },
-          },
-        });
+        const modalQueryClient = createModalQueryClient();
 
         root.render(
           <QueryClientProvider client={modalQueryClient}>
