@@ -86,7 +86,7 @@ const EnrolledGroupCoachings = () => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Your Group Coachings</h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Your Guided Experiences</h1>
                 <p className="text-gray-600 text-sm">Join group sessions with wellness experts</p>
               </div>
             </div>
@@ -121,7 +121,7 @@ const EnrolledGroupCoachings = () => {
         <div className="flex gap-4 items-center justify-end">
           <input
             className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            placeholder="Search Group Coachings"
+            placeholder="Search Guided Experiences"
             onChange={e => setSearchText(e.target.value || '')}
           />
         </div>
@@ -146,7 +146,7 @@ const EnrolledGroupCoachings = () => {
                 </div>
               ) : (
                 <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
-                  {searchText || selectedCategory ? 'No group coachings found matching your criteria' : 'No group coachings found'}
+                  {searchText || selectedCategory ? 'No guided experiences found matching your criteria' : 'No guided experiences found'}
                 </div>
               )}
             </div>

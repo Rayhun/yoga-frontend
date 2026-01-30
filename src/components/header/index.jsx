@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import DarkModeSwitcher from './DarkModeSwitcher';
 import DropdownNotification from './DropdownNotification';
@@ -6,8 +7,12 @@ import Image from 'next/image';
 
 const Header = props => {
   return (
-    <header className="sticky top-0 z-999 flex w-full bg-white shadow-[0px_3px_5px_rgba(0,0,0,0.1)] dark:bg-boxdark dark:drop-shadow-none">
-      <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
+    <header className="sticky top-0 z-999 flex w-full shadow-lg transition-all duration-300 bg-gradient-to-r from-emerald-50/80 via-green-50/50 to-white dark:from-emerald-950/30 dark:via-green-950/20 dark:to-gray-900 border-b border-emerald-200/30 dark:border-emerald-800/20 backdrop-blur-sm">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-emerald-200/20 to-transparent rounded-l-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-64 h-full bg-gradient-to-r from-green-200/15 to-transparent rounded-r-full blur-2xl pointer-events-none"></div>
+      
+      <div className="relative flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11 shadow-none">
         <div className="hidden lg:block" />
 
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
@@ -18,7 +23,7 @@ const Header = props => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+            className="z-99999 block rounded-lg p-1.5 shadow-sm transition-all duration-200 lg:hidden border border-emerald-200/50 bg-white/80 backdrop-blur-sm dark:border-emerald-800/30 dark:bg-gray-800/80 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20 hover:border-emerald-300 dark:hover:border-emerald-700"
           >
             <span className="relative block h-5.5 w-5.5 cursor-pointer">
               <span className="du-block absolute right-0 h-full w-full">

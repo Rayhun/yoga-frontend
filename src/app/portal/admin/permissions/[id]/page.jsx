@@ -1,17 +1,19 @@
 'use client';
 import React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getGroupPermissionDetails } from '@/services/private/permissions';
 import queryKeys from '@/utils/query-keys';
-import { PageHeader } from '@/components/common/page';
-import { FiArrowLeft, FiShield, FiEdit, FiCalendar, FiTag } from 'react-icons/fi';
+import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
+import { FiShield, FiEdit, FiCalendar, FiTag } from 'react-icons/fi';
+import { MdOutlineArrowBack } from 'react-icons/md';
 import Link from 'next/link';
 import Button from '@/components/common/Button';
 import PermissionGuard from '@/components/common/PermissionGuard';
 
 const GroupPermissionDetails = () => {
   const params = useParams();
+  const router = useRouter();
   const permissionId = params.id;
 
   // Fetch permission details
@@ -43,24 +45,22 @@ const GroupPermissionDetails = () => {
     );
   }
 
+  const headerActions = [
+    {
+      id: 'back',
+      variant: 'outlined',
+      onClick: () => router.back(),
+      label: 'Back',
+      Icon: MdOutlineArrowBack,
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/portal/admin/permissions"
-          className="flex items-center text-gray-500 hover:text-gray-700"
-        >
-          <FiArrowLeft className="h-5 w-5 mr-2" />
-          Back to Permissions
-        </Link>
-      </div>
-
       {/* Page Header */}
-      <PageHeader
-        title={permission.group_name}
-        description={`View details for ${permission.group_name} group`}
-      >
+      <PageHeader title={permission.group_name}>
+        <div className="flex gap-2">
+          <PageHeaderQuickActions actions={headerActions} />
         <PermissionGuard permission="edit_group_permissions">
           <Link href={`/portal/admin/permissions/${permissionId}/edit`}>
             <Button variant="primary" size="sm">
@@ -69,6 +69,7 @@ const GroupPermissionDetails = () => {
             </Button>
           </Link>
         </PermissionGuard>
+        </div>
       </PageHeader>
 
       {/* Permission Details */}

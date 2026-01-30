@@ -1,17 +1,28 @@
+'use client';
+import { useRouter } from 'next/navigation';
+import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import StaffUserForm from '@/components/entities/staff/StaffUserForm';
+import { MdOutlineArrowBack } from 'react-icons/md';
 
-export const metadata = {
-  title: 'Edit Staff User',
-};
-
-const Page = async ({ params }) => {
-  const resolvedParams = await params;
-  console.log('Edit page params:', resolvedParams);
-  console.log('Edit page staffUserId:', resolvedParams.id);
+const Page = ({ params }) => {
+  const router = useRouter();
+  
+  const headerActions = [
+    {
+      id: 'back',
+      variant: 'outlined',
+      onClick: () => router.back(),
+      label: 'Back',
+      Icon: MdOutlineArrowBack,
+    },
+  ];
   
   return (
     <div>
-      <StaffUserForm staffUserId={resolvedParams.id} />
+      <PageHeader title="Edit Staff User">
+        <PageHeaderQuickActions actions={headerActions} />
+      </PageHeader>
+      <StaffUserForm staffUserId={params.id} />
     </div>
   );
 };

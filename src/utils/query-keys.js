@@ -77,6 +77,7 @@ const queryKeys = {
   lookupsByCategory: 'lookupsByCategory',
   publicChats: 'publicChats',
   adminExpertDashboard: 'adminExpertDashboard',
+  adminDashboardHome: 'adminDashboardHome',
   expertDashboard: 'expertDashboard',
   permissions: 'permissions',
   roles: 'roles',
@@ -87,6 +88,8 @@ const queryKeys = {
   businessWellnessDashboard: 'businessWellnessDashboard',
   customerSubscriptionStatus: 'customerSubscriptionStatus',
   customerSubscriptionHistory: 'customerSubscriptionHistory',
+  guidedExperiences: 'guidedExperiences',
+  lookupItems: 'lookupItems',
 };
 
 export default queryKeys;

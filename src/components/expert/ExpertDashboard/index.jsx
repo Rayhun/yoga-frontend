@@ -5,7 +5,8 @@ import dynamic from 'next/dynamic';
 import CardDataStats from '../../stats/CardDataStats';
 import { FiDollarSign, FiUsers, FiTrendingUp, FiBookOpen } from 'react-icons/fi';
 import { TbChartLine, TbTarget } from 'react-icons/tb';
-import { PiHandshake } from 'react-icons/pi';
+import { HiOutlineChartBar } from 'react-icons/hi';
+// import { PiHandshake } from 'react-icons/pi';
 import { getExpertDashboard } from '@/services/private/expert/dashboard';
 import queryKeys from '@/utils/query-keys';
 import { useQuery } from '@tanstack/react-query';
@@ -47,114 +48,149 @@ const ExpertDashboard = () => {
   if (isLoading) return <PageLoader />;
 
   return (
-    <>
+    <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header with Filter */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-black dark:text-white">
-          Dashboard Overview
-        </h1>
-        <PeriodFilter />
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black opacity-10"></div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <HiOutlineChartBar className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white">
+                  Dashboard Overview
+                </h1>
+              </div>
+              <p className="text-sm sm:text-base text-white/90 ml-[60px] font-medium">
+                Track your performance and earnings at a glance
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <PeriodFilter />
+            </div>
+          </div>
+        </div>
       </div>
+
       {/* Main Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <CardDataStats 
           title="Total Earnings" 
-          total={`$${dashboardData?.earnings_analytics?.total_earnings}`}
+          total={`$${dashboardData?.earnings_analytics?.total_earnings || 0}`}
+          gradient="from-emerald-500 to-teal-600"
+          iconBg="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30"
         >
-          <FiDollarSign className="text-primary" size={20} />
+          <FiDollarSign className="text-emerald-600 dark:text-emerald-400" />
         </CardDataStats>
         
         <CardDataStats 
           title="Pending Earnings" 
-          total={`$${dashboardData?.earnings_analytics?.pending_earnings}`}
+          total={`$${dashboardData?.earnings_analytics?.pending_earnings || 0}`}
+          gradient="from-amber-500 to-orange-600"
+          iconBg="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30"
         >
-          <FiTrendingUp className="text-primary" size={20} />
+          <FiTrendingUp className="text-amber-600 dark:text-amber-400" />
         </CardDataStats>
         
         <CardDataStats 
           title="Total Enrollments" 
-          total={dashboardData?.enrollment_analytics?.total_enrollments}
+          total={dashboardData?.enrollment_analytics?.total_enrollments || 0}
+          gradient="from-blue-500 to-indigo-600"
+          iconBg="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30"
         >
-          <FiBookOpen className="text-primary" size={20} />
+          <FiBookOpen className="text-blue-600 dark:text-blue-400" />
         </CardDataStats>
         
         <CardDataStats 
           title="Unique Students" 
-          total={dashboardData?.student_analytics?.unique_students}
+          total={dashboardData?.student_analytics?.unique_students || 0}
+          gradient="from-purple-500 to-pink-600"
+          iconBg="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30"
         >
-          <FiUsers className="text-primary" size={20} />
+          <FiUsers className="text-purple-600 dark:text-purple-400" />
         </CardDataStats>
       </div>
 
       {/* Secondary Stats Cards */}
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
         <CardDataStats 
           title="Total Programs" 
-          total={dashboardData?.content_analytics?.total_programs}
+          total={dashboardData?.content_analytics?.total_programs || 0}
+          gradient="from-cyan-500 to-blue-600"
+          iconBg="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30"
         >
-          <TbChartLine className="text-primary" size={20} />
+          <TbChartLine className="text-cyan-600 dark:text-cyan-400" />
         </CardDataStats>
         
         <CardDataStats 
-          title="Total Events" 
-          total={dashboardData?.content_analytics?.total_events}
+          title="Total Guided Experiences" 
+          total={dashboardData?.content_analytics?.total_events || 0}
           onClick={() => router.push('/portal/teacher/profile?active_tab=group_coaching')}
+          gradient="from-violet-500 to-purple-600"
+          iconBg="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30"
         >
-          <TbTarget className="text-primary" size={20} />
-        </CardDataStats>
-        
-        <CardDataStats 
-          title="Total Consultations" 
-          total={dashboardData?.content_analytics?.total_consultations}
-          onClick={() => router.push('/portal/teacher/profile?active_tab=consult')}
-        >
-          <PiHandshake className="text-primary" size={20} />
+          <TbTarget className="text-violet-600 dark:text-violet-400" />
         </CardDataStats>
         
         <CardDataStats 
           title="Completion Rate" 
-          total={`${dashboardData?.content_analytics?.completion_rate}%`}
+          total={`${dashboardData?.content_analytics?.completion_rate || 0}%`}
+          gradient="from-rose-500 to-pink-600"
+          iconBg="bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30"
         >
-          <FiUsers className="text-primary" size={20} />
+          <FiUsers className="text-rose-600 dark:text-rose-400" />
         </CardDataStats>
       </div>
 
       {/* Charts Section */}
       {isClient && (
-        <>
-          <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
-            <div className="col-span-12 xl:col-span-8">
-              <PersonalEarningsChart 
-                earningsData={dashboardData?.earnings_analytics?.monthly_earnings}
-                earningsBySection={dashboardData?.earnings_analytics?.earnings_by_section}
-              />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-8">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-700/50 dark:bg-gray-800/50">
+                <PersonalEarningsChart 
+                  earningsData={dashboardData?.earnings_analytics?.monthly_earnings}
+                  earningsBySection={dashboardData?.earnings_analytics?.earnings_by_section}
+                />
+              </div>
             </div>
             
-            <div className="col-span-12 xl:col-span-4">
-              <EnrollmentAnalyticsChart 
-                enrollmentData={dashboardData?.enrollment_analytics?.enrollment_growth}
-              />
+            <div className="lg:col-span-4">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-700/50 dark:bg-gray-800/50">
+                <EnrollmentAnalyticsChart 
+                  enrollmentData={dashboardData?.enrollment_analytics?.enrollment_growth}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
-            <div className="col-span-12 xl:col-span-6">
-              <StudentEngagementChart 
-                studentData={dashboardData?.student_analytics}
-                progressRecords={dashboardData?.student_analytics?.progress_records_count}
-              />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-6">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-700/50 dark:bg-gray-800/50">
+                <StudentEngagementChart 
+                  studentData={dashboardData?.student_analytics}
+                  progressRecords={dashboardData?.student_analytics?.progress_records_count}
+                />
+              </div>
             </div>
             
-            <div className="col-span-12 xl:col-span-6">
-              <PerformanceBenchmark 
-                contentData={dashboardData?.content_analytics}
-                enrollmentData={dashboardData?.enrollment_analytics}
-              />
+            <div className="lg:col-span-6">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-700/50 dark:bg-gray-800/50">
+                <PerformanceBenchmark 
+                  contentData={dashboardData?.content_analytics}
+                  enrollmentData={dashboardData?.enrollment_analytics}
+                />
+              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
-import { FiMail, FiUser, FiClock, FiPlay, FiGlobe } from 'react-icons/fi';
+import { FiMail, FiUser, FiClock, FiPlay, FiGlobe, FiAward, FiTarget, FiInfo } from 'react-icons/fi';
 import { FaLinkedin } from 'react-icons/fa';
 import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
@@ -170,8 +170,8 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-      <div className="p-6.5">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm overflow-hidden">
+      <div className="p-6 md:p-8">
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -179,38 +179,51 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           enableReinitialize
         >
           {({ isSubmitting, values }) => (
-            <Form className="flex flex-col gap-3">
-              <div className="flex justify-center items-center mb-5">
-                <FormikImageInput name="file" label="Profile Image" />
+            <Form className="flex flex-col gap-6">
+              {/* Profile Image Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Profile Photo
+                </h3>
+                <div className="flex justify-center items-center py-4">
+                  <div className="relative">
+                    <FormikImageInput name="file" label="" />
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Upload a professional photo that represents you. This will be visible to users.
+                </p>
               </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
+              
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+              {/* Personal Information Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormikField name="first_name" label="First Name" placeholder="First Name" Icon={FiUser} required />
-                </div>
-
-                <div className="w-full xl:w-1/2">
                   <FormikField name="middle_name" label="Middle Name" placeholder="Middle Name" Icon={FiUser} />
-                </div>
-              </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
                   <FormikField name="last_name" label="Last Name" placeholder="Last Name" Icon={FiUser} required />
-                </div>
-
-                <div className="w-full xl:w-1/2">
                   <FormikField type="email" name="email" label="Email" placeholder="Email" Icon={FiMail} disabled={isEditMode} required />
                 </div>
               </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Professional Information Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <LuBriefcaseBusiness className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Professional Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormikSelect name="title" label="Title" placeholder="Select Title" options={TITLE_OPTIONS} required />
-                </div>
-                <div className="w-full xl:w-1/2">
                   <FormikField name="business_name" label="Business Name" placeholder="Business Name" Icon={LuBriefcaseBusiness} required />
-                </div>
-              </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
                   <FormikField
                     type="number"
                     name="experience"
@@ -220,21 +233,35 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     Icon={FiClock}
                     required
                   />
-                </div>
-                <div className="w-full xl:w-1/2">
                   <FormikField name="intro" label="Intro Video" placeholder="YouTube or Vimeo URL" Icon={FiPlay} required />
                 </div>
               </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Social & Links Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiGlobe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Social & Links
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormikField name="linkedin" label="LinkedIn Profile" placeholder="LinkedIn Profile URL" Icon={FaLinkedin} />
-                </div>
-                <div className="w-full xl:w-1/2">
                   <FormikField name="website" label="Website URL" placeholder="Website URL" Icon={FiGlobe} required />
                 </div>
               </div>
-              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-                <div className="w-full xl:w-1/2">
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Coaching Details Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Coaching Details
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormikSelect
                     name="coaching_style"
                     label="Coaching Style"
@@ -242,8 +269,6 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     options={COACHING_STYLES_OPTIONS}
                     required
                   />
-                </div>
-                <div className="w-full xl:w-1/2">
                   <FormikMultiSelect
                     name="culture_experience"
                     label="Culture Experience"
@@ -253,78 +278,106 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   />
                 </div>
               </div>
-              <FormikRichTextEditor name="description" label="About" placeholder="About" rows={5} required />
-              <CoachingAreasField
-                name="coaching_areas"
-                label="Coaching Areas"
-                placeholder="Coaching Areas"
-                required
-              />
-              <CertificationsField
-                name="certifications"
-                label="Certifications"
-                placeholder="Certifications"
-                required
-              />
 
-              {/* <FormikSubmittableField
-                name="credentials"
-                label="Certifications"
-                placeholder="Add a certification (e.g. Health Coach). Press return to confirm, max 5."
-                required
-                disabled={values?.credentials?.length >= 5}
-              /> */}
-              <FormikMultiSelect
-                options={LANGUAGES}
-                name="languages"
-                label="Languages"
-                placeholder="Languages"
-                required
-              />
-              {/* <FormikSubmittableField
-                name="coaching_content"
-                label="My Coaching Content"
-                placeholder="My Coaching Content"
-                required
-              /> */}
-              <div className="">
-                {/* <div className="w-full xl:w-1/2"> */}
-                {/* <FormikDropzone
-                  name="file"
-                  label="Profile Image"
-                  fileURLs={selected?.file ? [selected.file] : []}
-                  Icon={FaRegFileImage}
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* About Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiInfo className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  About
+                </h3>
+                <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-150 words)" rows={5} required />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Coaching Areas */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Coaching Areas
+                </h3>
+                <CoachingAreasField
+                  name="coaching_areas"
+                  label=""
+                  placeholder="Select or add coaching areas"
                   required
-                  maxSize={10 * ONE_MB}
-                /> */}
-                {/* </div> */}
+                />
+              </div>
 
-                {/* <div className="w-full xl:w-1/2">
-                  <FormikDropzone
-                    name="program_file"
-                    label="Program File"
-                    fileURLs={selected?.program_file ? [selected.program_file] : []}
-                    Icon={FaFile}
-                    multiple
-                    accept={{
-                      'text/csv': ['.csv'],
-                      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                      'application/vnd.ms-excel': ['.xls'],
-                    }}
-                    supportedFilesText = 'csv, xlsx and xls files files are supported'
-                  />
-                  <div className='text-right mt-5'><a href="" className='text-primary hover:underline text-md'>Download Sample Csv</a></div>
-                </div> */}
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Certifications */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiAward className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Certifications
+                </h3>
+                <CertificationsField
+                  name="certifications"
+                  label=""
+                  placeholder="Select or add certifications (max 5)"
+                  required
+                />
               </div>
-              <div className="my-5">
-                <FormikSwitch name="available" label="Available for Coaching" />
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Languages Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiGlobe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Languages
+                </h3>
+                <FormikMultiSelect
+                  options={LANGUAGES}
+                  name="languages"
+                  label=""
+                  placeholder="Select languages you speak"
+                  required
+                />
               </div>
-              <div className="w-ful flex justify-center sm:justify-end items-center gap-4 flex-wrap-reverse">
-                <Button type="button" variant="secondary" size="2xl" onClick={handleCancel}>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Availability Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Availability</h3>
+                <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-800/30">
+                  <FormikSwitch name="available" label="Available for Coaching" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Toggle this option to let students know if you're currently accepting new coaching clients.
+                  </p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  size="lg" 
+                  onClick={handleCancel}
+                  className="w-full sm:w-auto min-w-[120px]"
+                >
                   Cancel
                 </Button>
-                <Button type="submit" size="2xl" isLoading={isSubmitting}>
-                  {isSubmitting ? 'Submitting...' : isEditMode ? 'Update Expert' : 'Create Expert'}
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  isLoading={isSubmitting}
+                  className="w-full sm:w-auto min-w-[180px] bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  {isSubmitting ? 'Saving...' : isEditMode ? 'Update Profile' : 'Create Profile'}
                 </Button>
               </div>
             </Form>

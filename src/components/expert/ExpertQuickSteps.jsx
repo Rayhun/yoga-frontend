@@ -1,12 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { FiUser, FiCalendar, FiMessageCircle, FiCheckCircle, FiCreditCard } from 'react-icons/fi';
-import { PiUserSquareFill } from 'react-icons/pi';
+import { FiUser, FiCheckCircle, FiCreditCard } from 'react-icons/fi';
 import { MdOutlineEventNote } from 'react-icons/md';
 import useAuthContext from '@/hooks/useAuthContext';
-import { createStripeOnboardingLink } from '@/services/private/expert/stripe';
-
 const ExpertQuickSteps = () => {
   const { user } = useAuthContext();
   const router = useRouter();
@@ -14,24 +11,9 @@ const ExpertQuickSteps = () => {
   const isProfileComplete = user?.profile?.is_profile_complete ?? false;
   const hasEventOrConsult = user?.profile?.has_event_or_consult ?? false;
   const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
-  const [isStripeLoading, setIsStripeLoading] = useState(false);
 
-  const handleStripeOnboarding = async () => {
-    try {
-      setIsStripeLoading(true);
-      const response = await createStripeOnboardingLink();
-      
-      if (response.data.status === 'success' && response.data.data) {
-        // Redirect to the Stripe onboarding link
-        if (typeof window !== 'undefined') {
-          window.location.href = response.data.data;
-        }
-      }
-    } catch (error) {
-      console.error('Error creating Stripe onboarding link:', error);
-    } finally {
-      setIsStripeLoading(false);
-    }
+  const handlePayPalSetup = () => {
+    router.push('/portal/teacher/payments');
   };
 
   const allSteps = [
@@ -47,16 +29,15 @@ const ExpertQuickSteps = () => {
       bgColor: isProfileComplete ? 'bg-green-50' : 'bg-blue-50',
     },
     {
-      id: 'stripe',
-      title: 'Link Stripe Account',
-      description: 'Connect your Stripe account to receive payments from students.',
+      id: 'paypal',
+      title: 'Set Up PayPal',
+      description: 'Set up your PayPal account to receive payments from students.',
       icon: FiCreditCard,
       completed: stripeOnboarded,
-      action: handleStripeOnboarding,
-      buttonText: stripeOnboarded ? 'Account Linked' : (isStripeLoading ? 'Loading...' : 'Link Account'),
+      action: handlePayPalSetup,
+      buttonText: stripeOnboarded ? 'Account Linked' : 'Link Account',
       color: stripeOnboarded ? 'text-green-600' : 'text-orange-600',
       bgColor: stripeOnboarded ? 'bg-green-50' : 'bg-orange-50',
-      disabled: isStripeLoading,
     },
     {
       id: 'events',
@@ -70,18 +51,18 @@ const ExpertQuickSteps = () => {
       bgColor: hasEventOrConsult ? 'bg-green-50' : 'bg-purple-50',
       showWhen: !hasEventOrConsult, // Only show when has_event_or_consult is false
     },
-    {
-      id: 'consultations',
-      title: 'Set Up Consultations',
-      description: 'Offer one-on-one consultations to provide personalized guidance.',
-      icon: PiUserSquareFill,
-      completed: hasEventOrConsult,
-      action: () => router.push('/portal/teacher/profile?active_tab=consult'),
-      buttonText: hasEventOrConsult ? 'Manage Consultations' : 'Set Up Consultations',
-      color: hasEventOrConsult ? 'text-green-600' : 'text-orange-600',
-      bgColor: hasEventOrConsult ? 'bg-green-50' : 'bg-orange-50',
-      showWhen: !hasEventOrConsult, // Only show when has_event_or_consult is false
-    },
+    // {
+    //   id: 'consultations',
+    //   title: 'Set Up Consultations',
+    //   description: 'Offer one-on-one consultations to provide personalized guidance.',
+    //   icon: PiUserSquareFill,
+    //   completed: hasEventOrConsult,
+    //   action: () => router.push('/portal/teacher/profile?active_tab=consult'),
+    //   buttonText: hasEventOrConsult ? 'Manage Consultations' : 'Set Up Consultations',
+    //   color: hasEventOrConsult ? 'text-green-600' : 'text-orange-600',
+    //   bgColor: hasEventOrConsult ? 'bg-green-50' : 'bg-orange-50',
+    //   showWhen: !hasEventOrConsult, // Only show when has_event_or_consult is false
+    // },
   ];
 
   // Filter steps based on showWhen condition

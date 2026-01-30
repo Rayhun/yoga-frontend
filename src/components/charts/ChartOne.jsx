@@ -1,124 +1,165 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { useUI } from '@/context/UIProvider';
 
-const options = {
-  legend: {
-    show: false,
-    position: 'top',
-    horizontalAlign: 'left',
-  },
-  chart: {
-    fontFamily: 'Satoshi, sans-serif',
-    height: 335,
-    type: 'area',
-    dropShadow: {
-      enabled: true,
-      color: '#623CEA14',
-      top: 10,
-      blur: 4,
-      left: 0,
-      opacity: 0.1,
-    },
+const ChartOne = ({ monthlyRevenue, enrollmentGrowth }) => {
+  const { theme } = useUI();
 
-    toolbar: {
+  // Transform API data for the chart
+  const chartData = useMemo(() => {
+    // Process monthly revenue data
+    const revenueData = monthlyRevenue || [];
+    const revenueCategories = revenueData.map(item => {
+      const date = new Date(item.month);
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    });
+    const revenueValues = revenueData.map(item => parseFloat(item.total) || 0);
+
+    // Process enrollment growth data
+    const enrollmentData = enrollmentGrowth || [];
+    const enrollmentCategories = enrollmentData.map(item => {
+      const date = new Date(item.month);
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    });
+    const enrollmentValues = enrollmentData.map(item => item.count || 0);
+
+    // Combine categories (use revenue categories as base, add enrollment if different)
+    const allCategories = [...new Set([...revenueCategories, ...enrollmentCategories])].sort();
+    
+    // Map values to categories
+    const revenueMap = new Map(revenueData.map((item, idx) => {
+      const date = new Date(item.month);
+      const key = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      return [key, parseFloat(item.total) || 0];
+    }));
+
+    const enrollmentMap = new Map(enrollmentData.map((item, idx) => {
+      const date = new Date(item.month);
+      const key = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      return [key, item.count || 0];
+    }));
+
+    const revenueSeries = allCategories.map(cat => revenueMap.get(cat) || 0);
+    const enrollmentSeries = allCategories.map(cat => enrollmentMap.get(cat) || 0);
+
+    return {
+      categories: allCategories.length > 0 ? allCategories : ['No Data'],
+      series: [
+        {
+          name: 'Revenue',
+          data: revenueSeries.length > 0 ? revenueSeries : [0],
+        },
+        {
+          name: 'Enrollments',
+          data: enrollmentSeries.length > 0 ? enrollmentSeries : [0],
+        },
+      ],
+    };
+  }, [monthlyRevenue, enrollmentGrowth]);
+
+  const options = {
+    legend: {
       show: false,
+      position: 'top',
+      horizontalAlign: 'left',
     },
-  },
-  responsive: [
-    {
-      breakpoint: 1024,
-      options: {
-        chart: {
-          height: 300,
+    chart: {
+      fontFamily: 'Satoshi, sans-serif',
+      height: 335,
+      type: 'area',
+      dropShadow: {
+        enabled: true,
+        color: '#623CEA14',
+        top: 10,
+        blur: 4,
+        left: 0,
+        opacity: 0.1,
+      },
+      toolbar: {
+        show: false,
+      },
+    },
+    responsive: [
+      {
+        breakpoint: 1024,
+        options: {
+          chart: {
+            height: 300,
+          },
+        },
+      },
+      {
+        breakpoint: 1366,
+        options: {
+          chart: {
+            height: 350,
+          },
+        },
+      },
+    ],
+    stroke: {
+      width: [2, 2],
+      curve: 'straight',
+    },
+    grid: {
+      xaxis: {
+        lines: {
+          show: true,
+        },
+      },
+      yaxis: {
+        lines: {
+          show: true,
         },
       },
     },
-    {
-      breakpoint: 1366,
-      options: {
-        chart: {
-          height: 350,
-        },
+    dataLabels: {
+      enabled: false,
+    },
+    markers: {
+      size: 4,
+      colors: '#fff',
+      strokeWidth: 3,
+      strokeOpacity: 0.9,
+      strokeDashArray: 0,
+      fillOpacity: 1,
+      discrete: [],
+      hover: {
+        size: undefined,
+        sizeOffset: 5,
       },
     },
-  ],
-  stroke: {
-    width: [2, 2],
-    curve: 'straight',
-  },
-  grid: {
     xaxis: {
-      lines: {
-        show: true,
+      type: 'category',
+      categories: chartData.categories,
+      axisBorder: {
+        show: false,
+      },
+      axisTicks: {
+        show: false,
       },
     },
     yaxis: {
-      lines: {
-        show: true,
+      title: {
+        style: {
+          fontSize: '0px',
+        },
       },
+      min: 0,
     },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  markers: {
-    size: 4,
-    colors: '#fff',
-    strokeWidth: 3,
-    strokeOpacity: 0.9,
-    strokeDashArray: 0,
-    fillOpacity: 1,
-    discrete: [],
-    hover: {
-      size: undefined,
-      sizeOffset: 5,
-    },
-  },
-  xaxis: {
-    type: 'category',
-    categories: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-    axisBorder: {
-      show: false,
-    },
-    axisTicks: {
-      show: false,
-    },
-  },
-  yaxis: {
-    title: {
-      style: {
-        fontSize: '0px',
-      },
-    },
-    min: 0,
-    max: 100,
-  },
-};
-
-const ChartOne = () => {
-  const { theme } = useUI();
-  const [state, setState] = useState({
-    series: [
-      {
-        name: 'Product One',
-        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
-      },
-
-      {
-        name: 'Product Two',
-        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
-      },
-    ],
-  });
-
-  const handleReset = () => {
-    setState(prevState => ({
-      ...prevState,
-    }));
   };
-  handleReset;
+
+  // Get date range for display
+  const getDateRange = () => {
+    if (monthlyRevenue && monthlyRevenue.length > 0) {
+      const dates = monthlyRevenue.map(item => new Date(item.month));
+      const start = dates[0];
+      const end = dates[dates.length - 1];
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    }
+    return 'No data available';
+  };
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -130,7 +171,7 @@ const ChartOne = () => {
             </span>
             <div className="w-full">
               <p className="font-semibold text-primary">Total Revenue</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="text-sm font-medium">{getDateRange()}</p>
             </div>
           </div>
           <div className="flex min-w-47.5">
@@ -138,22 +179,9 @@ const ChartOne = () => {
               <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-secondary">Total Sales</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="font-semibold text-secondary">Enrollments</p>
+              <p className="text-sm font-medium">{getDateRange()}</p>
             </div>
-          </div>
-        </div>
-        <div className="flex w-full max-w-45 justify-end">
-          <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded bg-white px-3 py-1 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark">
-              Day
-            </button>
-            <button className="rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Week
-            </button>
-            <button className="rounded px-3 py-1 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Month
-            </button>
           </div>
         </div>
       </div>
@@ -168,7 +196,7 @@ const ChartOne = () => {
                 strokeColors: [theme.colors.primary, theme.colors.secondary],
               },
             }}
-            series={state.series}
+            series={chartData.series}
             type="area"
             height={350}
           />

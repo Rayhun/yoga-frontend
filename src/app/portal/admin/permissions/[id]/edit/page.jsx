@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { getGroupPermissionDetails, updateGroupPermission } from '@/services/private/permissions';
 import queryKeys from '@/utils/query-keys';
-import { PageHeader } from '@/components/common/page';
-import { FiArrowLeft } from 'react-icons/fi';
+import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
+import { MdOutlineArrowBack } from 'react-icons/md';
 import Link from 'next/link';
 import GroupPermissionForm from '@/components/permissions/GroupPermissionForm';
 
@@ -68,24 +68,22 @@ const EditGroupPermissionPage = () => {
     );
   }
 
+  const headerActions = [
+    {
+      id: 'back',
+      variant: 'outlined',
+      onClick: () => router.back(),
+      label: 'Back',
+      Icon: MdOutlineArrowBack,
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href={`/portal/admin/permissions/${permissionId}`}
-          className="flex items-center text-gray-500 hover:text-gray-700"
-        >
-          <FiArrowLeft className="h-5 w-5 mr-2" />
-          Back to Permission Details
-        </Link>
-      </div>
-
       {/* Page Header */}
-      <PageHeader
-        title={`Edit ${permission.group_name}`}
-        description={`Update the details for ${permission.group_name} group`}
-      />
+      <PageHeader title={`Edit ${permission.group_name}`}>
+        <PageHeaderQuickActions actions={headerActions} />
+      </PageHeader>
 
       {/* Permission Form */}
       <div className="bg-white shadow rounded-lg">

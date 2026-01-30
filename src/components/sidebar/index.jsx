@@ -78,6 +78,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     return SIDEBAR.CUSTOMER;
   }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
 
+  // Remove unused isTeacher variable - design is now universal
+
   // const disabledSidebarMenu = useMemo(() => {
   //   return (
   //     userRole === USER_ROLE.TEACHER && (!is_profile_complete || !has_event_or_consult)
@@ -123,8 +125,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const getMissingRequirements = () => {
     const missing = [];
     if (!is_profile_complete) missing.push({ text: 'Complete your profile', icon: FiUser });
-    if (!has_event_or_consult) missing.push({ text: 'Add events or consultations', icon: FiCalendar });
-    if (!stripe_onboarded) missing.push({ text: 'Link your Stripe account', icon: FiCreditCard });
+    if (!has_event_or_consult) missing.push({ text: 'Add guided experiences', icon: FiCalendar });
+    if (!stripe_onboarded) missing.push({ text: 'Set up your PayPal account', icon: FiCreditCard });
     return missing;
   };
 
@@ -151,12 +153,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden bg-white shadow-[3px_0_5px_rgba(0,0,0,0.1)] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden duration-300 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+      } bg-gradient-to-b from-emerald-50/50 via-white to-white dark:from-emerald-950/20 dark:via-gray-900 dark:to-gray-900 border-r border-emerald-200/30 dark:border-emerald-800/20 shadow-[4px_0_12px_rgba(16,185,129,0.08)]`}
     >
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-200/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-emerald-100/30 via-green-100/15 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="relative flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 border-b border-emerald-200/30 dark:border-emerald-800/20">
         <Link href="/">
           <div className={`transition-all duration-300 ${shouldUseCustomerStyle ? 'hover:scale-105 hover:rotate-1' : ''}`}>
             <Image
@@ -215,8 +221,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             href="#"
                             className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all ${
                               shouldUseCustomerStyle 
-                                ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
-                                : 'text-nav-item hover:text-primary'
+                                ? 'text-gray-700 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400' 
+                                : 'text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400'
                             }`}
                             onClick={e => {
                               e.preventDefault();
@@ -253,29 +259,103 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             }`}>
                               {menuItem.sub_menu.map(childSubMenuItem => (
                                 <li key={childSubMenuItem.label}>
-                                  <Link
-                                    href={childSubMenuItem.href || '#'}
-                                    className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2.5 pl-8 font-medium duration-300 ease-in-out transition-all ${
-                                      (
-                                        childSubMenuItem.isActive
-                                          ? childSubMenuItem.isActive(pathname, activeTab)
-                                          : false
-                                      )
-                                        ? shouldUseCustomerStyle 
-                                          ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
-                                          : 'text-primary'
-                                        : shouldUseCustomerStyle 
-                                          ? 'text-gray-600 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_2px_6px_rgba(34,197,94,0.12)] hover:scale-[1.01] hover:-translate-y-0.5' 
-                                          : 'text-nav-item/90 hover:text-primary'
-                                    }`}
-                                  >
-                                    {childSubMenuItem.Icon ? (
-                                      <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
-                                        <childSubMenuItem.Icon size={24} />
-                                      </div>
-                                    ) : null}
-                                    {childSubMenuItem.label}
-                                  </Link>
+                                  {childSubMenuItem.sub_menu ? (
+                                    <SidebarLinkGroup activeCondition={childSubMenuItem?.hasActiveSubMenu ? childSubMenuItem.hasActiveSubMenu(pathname) : false}>
+                                      {(handleClick, isNestedOpen) => (
+                                        <>
+                                          <Link
+                                            href="#"
+                                            className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2.5 pl-8 font-medium duration-300 ease-in-out transition-all ${
+                                              (
+                                                childSubMenuItem.isActive
+                                                  ? childSubMenuItem.isActive(pathname, activeTab)
+                                                  : false
+                                              )
+                                                ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                                                : 'text-gray-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/60 hover:to-green-50/60 hover:shadow-[0_2px_6px_rgba(16,185,129,0.12)] hover:scale-[1.01] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400/50'
+                                            }`}
+                                            onClick={e => {
+                                              e.preventDefault();
+                                              handleClick();
+                                            }}
+                                          >
+                                            {childSubMenuItem.Icon ? (
+                                              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
+                                                <childSubMenuItem.Icon size={20} />
+                                              </div>
+                                            ) : null}
+                                            {childSubMenuItem.label}
+                                            <svg
+                                              className={`ml-auto fill-current ${
+                                                isNestedOpen && 'rotate-180'
+                                              }`}
+                                              width="16"
+                                              height="16"
+                                              viewBox="0 0 20 20"
+                                              fill="none"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                fillRule="evenodd"
+                                                clipRule="evenodd"
+                                                d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
+                                                fill=""
+                                              />
+                                            </svg>
+                                          </Link>
+                                          <div className={`translate transform overflow-hidden ${!isNestedOpen && 'hidden'}`}>
+                                            <ul className={`mb-2 mt-1 flex flex-col pl-4 ${
+                                              shouldUseCustomerStyle ? 'gap-1' : 'gap-1'
+                                            }`}>
+                                              {childSubMenuItem.sub_menu.map(nestedItem => (
+                                                <li key={nestedItem.label}>
+                                                  <Link
+                                                    href={nestedItem.href || '#'}
+                                                    className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2 pl-12 font-medium duration-300 ease-in-out transition-all ${
+                                                      (
+                                                        nestedItem.isActive
+                                                          ? nestedItem.isActive(pathname, activeTab)
+                                                          : false
+                                                      )
+                                                        ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                                                        : 'text-gray-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/60 hover:to-green-50/60 hover:shadow-[0_2px_6px_rgba(16,185,129,0.12)] hover:scale-[1.01] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400/50'
+                                                    }`}
+                                                  >
+                                                    {nestedItem.Icon ? (
+                                                      <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
+                                                        <nestedItem.Icon size={18} />
+                                                      </div>
+                                                    ) : null}
+                                                    {nestedItem.label}
+                                                  </Link>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        </>
+                                      )}
+                                    </SidebarLinkGroup>
+                                  ) : (
+                                    <Link
+                                      href={childSubMenuItem.href || '#'}
+                                      className={`group relative flex items-center gap-2.5 rounded-lg px-4 py-2.5 pl-8 font-medium duration-300 ease-in-out transition-all ${
+                                        (
+                                          childSubMenuItem.isActive
+                                            ? childSubMenuItem.isActive(pathname, activeTab)
+                                            : false
+                                        )
+                                          ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                                          : 'text-gray-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/60 hover:to-green-50/60 hover:shadow-[0_2px_6px_rgba(16,185,129,0.12)] hover:scale-[1.01] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400/50'
+                                      }`}
+                                    >
+                                      {childSubMenuItem.Icon ? (
+                                        <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-2' : ''}`}>
+                                          <childSubMenuItem.Icon size={24} />
+                                        </div>
+                                      ) : null}
+                                      {childSubMenuItem.label}
+                                    </Link>
+                                  )}
                                 </li>
                               ))}
                             </ul>
@@ -303,17 +383,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                           ${
                             menuItem.disabled
                               ? 'cursor-not-allowed opacity-50 text-gray-400'
-                              : shouldUseCustomerStyle 
-                                ? 'hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
-                                : 'hover:text-primary'
+                              : 'hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400'
                           } 
                           ${menuItem.isActive?.(pathname, activeTab) 
-                            ? shouldUseCustomerStyle 
-                              ? 'text-green-700 bg-gradient-to-r from-green-100/80 to-emerald-100/80 shadow-[0_2px_8px_rgba(34,197,94,0.2)] scale-[1.01]' 
-                              : 'text-primary' 
-                            : shouldUseCustomerStyle 
-                              ? 'text-gray-700' 
-                              : 'text-nav-item'
+                            ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                            : 'text-gray-700 dark:text-gray-300'
                           }`}
                         aria-disabled={menuItem.disabled} // Improves accessibility
                         tabIndex={menuItem.disabled ? -1 : 0} // Prevents focus when disabled
@@ -336,14 +410,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           {isCustomer && (
             <li className="list-none mt-auto">
               <Link
-                className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all ${
-                  isCustomer 
-                    ? 'text-gray-700 hover:text-green-700 hover:bg-gradient-to-r hover:from-green-100/60 hover:to-emerald-100/60 hover:shadow-[0_4px_12px_rgba(34,197,94,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
-                    : 'text-nav-item hover:text-primary'
-                }`}
+                className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400"
                 href={'/portal/help-support'}
               >
-                <div className={`transition-transform duration-300 ${isCustomer ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+                <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   <MdOutlineContactSupport size={24} />
                 </div>
                 Help & Support
@@ -352,14 +422,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           )}
           <li className="list-none mt-auto">
             <span
-              className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all ${
-                shouldUseCustomerStyle 
-                  ? 'text-gray-700 hover:text-red-600 hover:bg-gradient-to-r hover:from-red-100/60 hover:to-pink-100/60 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-y-0.5' 
-                  : 'text-nav-item hover:text-primary'
-              }`}
+              className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gradient-to-r hover:from-red-50/80 hover:to-pink-50/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-red-400"
               onClick={logout}
             >
-              <div className={`transition-transform duration-300 ${shouldUseCustomerStyle ? 'group-hover:scale-110 group-hover:rotate-3' : ''}`}>
+              <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <MdLogout size={24} />
               </div>
               Logout

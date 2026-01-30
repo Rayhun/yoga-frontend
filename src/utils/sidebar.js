@@ -8,7 +8,8 @@ import {
   MdOutlineEventNote,
   MdOutlinePayments,
   MdTrackChanges,
-  MdGroupAdd
+  MdGroupAdd,
+  MdList
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -73,7 +74,8 @@ const EXPERTS_ROUTES = [
   '/portal/admin/lms/expert/edit',
   '/portal/admin/lms/expert/dashboard',
   '/portal/admin/lms/expert/commission',
-  '/portal/admin/lms/expert/payment'
+  '/portal/admin/lms/expert/payment',
+  '/portal/admin/lms/expert/guided-experiences'
 ];
 
 
@@ -128,7 +130,13 @@ const ADMIN = [
       {
         label: 'Experts',
         href: '/portal/admin/lms/expert',
-        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard'),
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard') && !pathname.includes('/guided-experiences'),
+      },
+      {
+        label: 'Guided Experiences',
+        href: '/portal/admin/lms/expert/guided-experiences',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/guided-experiences'),
+        disabled: false,
       },
       {
         label: 'Commission',
@@ -257,6 +265,13 @@ const ADMIN = [
     disabled: false,
   },
   {
+    Icon: MdList,
+    label: 'Lookup',
+    href: '/portal/admin/lookup',
+    isActive: pathname => pathname.includes('/portal/admin/lookup'),
+    disabled: false,
+  },
+  {
     Icon: MdSubscriptions,
     label: 'Subscription Plans',
     href: '/portal/admin/subscription/plan',
@@ -334,23 +349,23 @@ const CUSTOMER = [
   },
   {
     Icon: GiTeacher,
-    label: 'Group Coachings',
+    label: 'Guided Experiences',
     href: '/portal/customer/lms/group_coaching',
     isActive: pathname =>
       pathname.includes('/portal/customer/lms/group_coaching') ||
       pathname.includes('/portal/customer/group_coaching'),
     disabled: false,
   },
-  {
-    Icon: FaChalkboardTeacher,
-    label: 'Consultations',
-    href: '/portal/customer/lms/consultation',
-    isActive: pathname => pathname.includes('/portal/customer/lms/consultation'),
-    disabled: false,
-  },
+  // {
+  //   Icon: FaChalkboardTeacher,
+  //   label: 'Consultations',
+  //   href: '/portal/customer/lms/consultation',
+  //   isActive: pathname => pathname.includes('/portal/customer/lms/consultation'),
+  //   disabled: false,
+  // },
   {
     Icon: GrUserExpert,
-    label: 'Experts',
+    label: 'Coaches',
     href: '/portal/customer/lms/expert',
     isActive: pathname => pathname.includes('/portal/customer/lms/expert'),
     disabled: false,
@@ -495,22 +510,22 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
     // },
     {
       Icon: MdOutlineEventNote,
-      label: 'Events',
+      label: 'Guided Experiences',
       href: '/portal/teacher/profile?active_tab=group_coaching',
       isActive: (pathname, tab) =>
         `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') ||
         pathname.includes('/portal/teacher/group_coaching'),
       disabled: !is_profile_complete,
     },
-    {
-      Icon: PiUserSquareFill,
-      label: 'Consult',
-      href: '/portal/teacher/profile?active_tab=consult',
-      isActive: (pathname, tab) =>
-        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult') ||
-        pathname.includes('/portal/teacher/consultation/'),
-      disabled: !is_profile_complete,
-    },
+    // {
+    //   Icon: PiUserSquareFill,
+    //   label: 'Consult',
+    //   href: '/portal/teacher/profile?active_tab=consult',
+    //   isActive: (pathname, tab) =>
+    //     `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=consult') ||
+    //     pathname.includes('/portal/teacher/consultation/'),
+    //   disabled: !is_profile_complete,
+    // },
     // {
     //   Icon: FaChalkboardTeacher,
     //   label: 'Personal Consultations',

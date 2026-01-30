@@ -21,16 +21,13 @@ const Page = () => {
       {(!expertData?.is_profile_complete || !expertData?.has_event_or_consult || !expertData?.stripe_onboarded) && <InfoNote expertData={expertData} />}
       <div className='relative'>
         <button
-          className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
+          className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 justify-center bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-xl text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-800/30"
           onClick={onEdit}
         >
-          <RiEdit2Line />
+          <RiEdit2Line className="w-4 h-4" />
           Edit Profile
         </button>
-        {/* <PageHeader title="Expert Profile" /> */}
-        {/* <DetailsLayoutWrapper title="Expert Profile Details" onEdit={() => router.push('/portal/teacher/editProfile')}> */}
         <UserProfileDetails data={expertData} />
-        {/* </DetailsLayoutWrapper> */}
       </div>
     </React.Fragment>
   );

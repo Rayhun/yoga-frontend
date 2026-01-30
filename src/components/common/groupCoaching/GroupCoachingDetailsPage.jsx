@@ -114,22 +114,40 @@ export const GroupCoachingDetails = ({
             </div>
             {isCustomerView && (
               <div className="flex items-center gap-3">
-                <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
-                  <Image
-                    src={eventDetails?.instructors?.[0]?.image || '/images/user/user-06.png'}
-                    alt="Instructor"
-                    fill
-                    className="rounded-full object-cover"
-                    sizes="(max-width: 640px) 40px, 48px"
-                  />
-                </div>
-                <span className="font-bold">Instructors:</span>
-                {eventDetails?.instructors?.map((instructor, index) => (
-                  <span key={index} className="text-gray-600 dark:text-white">
-                    {instructor.name}
-                    {index < eventDetails?.instructors?.length - 1 && ', '}
-                  </span>
-                ))}
+                {eventDetails?.guest_name ? (
+                  <>
+                    <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                      <Image
+                        src="/images/user/user-06.png"
+                        alt="Guest"
+                        fill
+                        className="rounded-full object-cover"
+                        sizes="(max-width: 640px) 40px, 48px"
+                      />
+                    </div>
+                    <span className="font-bold">Guest:</span>
+                    <span className="text-gray-600 dark:text-white">{eventDetails.guest_name}</span>
+                  </>
+                ) : eventDetails?.instructors && eventDetails.instructors.length > 0 ? (
+                  <>
+                    <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                      <Image
+                        src={eventDetails?.instructors?.[0]?.image || '/images/user/user-06.png'}
+                        alt="Instructor"
+                        fill
+                        className="rounded-full object-cover"
+                        sizes="(max-width: 640px) 40px, 48px"
+                      />
+                    </div>
+                    <span className="font-bold">Instructors:</span>
+                    {eventDetails?.instructors?.map((instructor, index) => (
+                      <span key={index} className="text-gray-600 dark:text-white">
+                        {instructor.name}
+                        {index < eventDetails?.instructors?.length - 1 && ', '}
+                      </span>
+                    ))}
+                  </>
+                ) : null}
               </div>
             )}
             <div className={`${isCustomerView ? 'pl-1' : 'pl-6'}`}>

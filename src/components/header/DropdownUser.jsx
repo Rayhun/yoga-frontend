@@ -96,13 +96,13 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="hidden text-center lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">
+          <span className="block text-sm font-medium text-gray-800 dark:text-gray-200">
             Hi {loggedInUser?.profile?.first_name}
           </span>
           {/* <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span> */}
         </span>
 
-        <span className="h-12 w-12 rounded-full overflow-hidden">
+        <span className="h-12 w-12 rounded-full overflow-hidden transition-all duration-300 ring-2 ring-emerald-200/50 dark:ring-emerald-800/30 hover:ring-emerald-400/60 dark:hover:ring-emerald-600/50 shadow-md shadow-emerald-200/20 dark:shadow-emerald-900/20">
           <Image
             width={48}
             height={48}
@@ -134,11 +134,11 @@ const DropdownUser = () => {
       {/* <!-- Dropdown Start --> */}
       <div
         ref={dropdown}
-        className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark ${
-          dropdownOpen === true ? 'block' : 'hidden'
-        }`}
+        className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-xl border shadow-xl transition-all duration-200 ${
+          dropdownOpen === true ? 'block animate-in fade-in slide-in-from-top-2' : 'hidden'
+        } border-emerald-200/50 bg-white/95 backdrop-blur-sm dark:border-emerald-800/30 dark:bg-gray-800/95 shadow-emerald-200/20 dark:shadow-emerald-900/20`}
       >
-        <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-4 dark:border-strokedark">
+        <ul className="flex flex-col gap-5 border-b border-emerald-200/30 dark:border-emerald-800/20 px-6 py-4">
           {menu.map(menuItem => (
             <li key={menuItem.label}>
               {menuItem.onClick ? (
@@ -147,7 +147,11 @@ const DropdownUser = () => {
                     setDropdownOpen(false);
                     menuItem.onClick(e);
                   }}
-                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base w-full text-left"
+                  className={`flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base w-full text-left rounded-lg px-2 py-1.5 transition-all ${
+                    menuItem.label === 'Logout'
+                      ? 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-900/20'
+                      : 'hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20'
+                  }`}
                 >
                   <menuItem.Icon size={20} />
                   {menuItem.label}
@@ -156,7 +160,7 @@ const DropdownUser = () => {
                 <Link
                   href={menuItem.href}
                   onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                  className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base rounded-lg px-2 py-1.5 transition-all hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20"
                 >
                   <menuItem.Icon size={20} />
                   {menuItem.label}

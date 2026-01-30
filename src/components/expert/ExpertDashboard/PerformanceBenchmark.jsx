@@ -14,15 +14,15 @@ const PerformanceBenchmark = ({ contentData, enrollmentData }) => {
       color: 'bg-green-500',
     },
     {
-      label: 'Total Events',
+      label: 'Total Guided Experiences',
       value: contentData?.total_events || 0,
       color: 'bg-blue-500',
     },
-    {
-      label: 'Total Consultations',
-      value: contentData?.total_consultations || 0,
-      color: 'bg-purple-500',
-    },
+    // {
+    //   label: 'Total Consultations',
+    //   value: contentData?.total_consultations || 0,
+    //   color: 'bg-purple-500',
+    // },
   ];
 
   return (
@@ -65,17 +65,17 @@ const PerformanceBenchmark = ({ contentData, enrollmentData }) => {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Event Enrollments:</span>
+              <span className="text-gray-600 dark:text-gray-400">Guided Experience Enrollments:</span>
               <span className="text-green-600 font-medium">
                 {enrollmentData?.event_enrollments || 0}
               </span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Consultation Enrollments:</span>
               <span className="text-purple-600 font-medium">
                 {enrollmentData?.consultation_enrollments || 0}
               </span>
-            </div>
+            </div> */}
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Total Enrollments:</span>
               <span className="text-primary font-medium">
