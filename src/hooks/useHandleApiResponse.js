@@ -13,7 +13,7 @@ function useHandleApiResponse(failureReason, isSuccess, { onSuccess } = { onSucc
     if (isSuccess) {
       onSuccess();
     }
-  }, [isSuccess, onSuccess, failureReason]);
+  }, [isSuccess, onSuccess]);
 
   return null;
 }

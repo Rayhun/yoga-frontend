@@ -39,8 +39,24 @@ export const getFileFromURL = async url => {
 export const getSearchParamsFromObject = obj => {
   const params = new URLSearchParams();
 
-  Object.entries(obj).forEach(([key, value]) => {
+  // Filter out React Query internal properties (signal, queryKey, etc.)
+  const filteredObj = { ...obj };
+  delete filteredObj.signal;
+  delete filteredObj.queryKey;
+  delete filteredObj.pageParam;
+
+  Object.entries(filteredObj).forEach(([key, value]) => {
     if (value === null || value === undefined || value === '') return;
+
+    // Skip objects that can't be serialized (like AbortSignal)
+    if (typeof value === 'object' && !Array.isArray(value) && value.toString() === '[object Object]') {
+      // Only serialize plain objects, skip special objects
+      try {
+        JSON.stringify(value);
+      } catch {
+        return; // Skip non-serializable objects
+      }
+    }
 
     if (Array.isArray(value)) {
       const filteredValues = value.filter(v => v !== null && v !== undefined);

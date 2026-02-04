@@ -1,9 +1,17 @@
 import axios from '@/lib/axios';
 import { getSearchParamsFromObject } from '@/utils/helpers';
 
-export const getExpertGroupCoachingList = async params => {
-  const searchParams = getSearchParamsFromObject(params);
-  return axios.get(`/LMS/events?${searchParams}`);
+export const getExpertGroupCoachingList = async (params = {}) => {
+  // Filter out React Query internal properties before creating search params
+  const cleanParams = { ...params };
+  delete cleanParams.signal;
+  delete cleanParams.queryKey;
+  delete cleanParams.pageParam;
+  
+  const searchParams = getSearchParamsFromObject(cleanParams);
+  // Always use trailing slash, only append query string if there are actual parameters
+  const url = searchParams ? `/LMS/events/?${searchParams}` : `/LMS/events/`;
+  return axios.get(url);
 };
 
 export const getExpertGroupCoachingDetails = async ({ id }) => {

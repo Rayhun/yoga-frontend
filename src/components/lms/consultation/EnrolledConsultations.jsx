@@ -16,32 +16,22 @@ const EnrolledConsultations = () => {
   const nextSearchParams = useSearchParams();
   const selectedStatus = searchParams.get('status') || '';
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState({});
 
   // Get selected category from URL params using Next.js useSearchParams for stability
   const selectedCategory = nextSearchParams.get('categories') || '';
 
-  // Update filters when URL params change
-  useEffect(() => {
+  // Create stable filters object using useMemo to prevent unnecessary re-renders
+  const filters = useMemo(() => {
+    const baseFilters = {};
     if (selectedCategory) {
-      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
-    } else {
-      setFilters(prev => ({ ...prev, categories: [] }));
+      baseFilters.categories = [parseInt(selectedCategory)];
     }
+    return baseFilters;
   }, [selectedCategory]);
 
-  // Debug: Log filters and selected category
-  useEffect(() => {
-    console.log('Selected Category:', selectedCategory);
-    console.log('Filters:', filters);
-  }, [selectedCategory, filters]);
-
   const { isLoading: isLoadingPrograms, data: consultationResponse } = useQuery({
-    queryFn: () => {
-      console.log('API Call with filters:', filters);
-      return getEnrolledConsultations(filters);
-    },
-    queryKey: [queryKeys.customerEnrolledConsultations, selectedStatus, JSON.stringify(filters)],
+    queryFn: () => getEnrolledConsultations(filters),
+    queryKey: [queryKeys.customerEnrolledConsultations, selectedStatus, selectedCategory],
   });
 
   // Extract categories from the API response

@@ -26,14 +26,17 @@ const ExpertsList = () => {
   // Get selected category from URL params
   const selectedCategory = searchParams.get('categories') || '';
 
-  // Update filters when URL params change
-  useEffect(() => {
+  // Create stable filters object that combines URL params and filter modal values
+  const stableFilters = useMemo(() => {
+    const combinedFilters = { ...filters };
     if (selectedCategory) {
-      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
-    } else {
-      setFilters(prev => ({ ...prev, categories: [] }));
+      combinedFilters.categories = [parseInt(selectedCategory)];
+    } else if (!filters.categories) {
+      // Only clear categories if not set by filter modal
+      combinedFilters.categories = [];
     }
-  }, [selectedCategory]);
+    return combinedFilters;
+  }, [selectedCategory, filters]);
 
   const {
     data,
@@ -42,9 +45,9 @@ const ExpertsList = () => {
     isFetchingNextPage,
     isLoading: isLoadingExperts,
   } = useInfiniteQuery({
-    queryKey: [queryKeys.customerExperts, JSON.stringify(filters)],
+    queryKey: [queryKeys.customerExperts, selectedCategory, JSON.stringify(filters)],
     queryFn: ({ pageParam = 0 }) => getCustomerExpertsList({
-      ...filters,
+      ...stableFilters,
       limit: 10,
       offset: pageParam 
     }),

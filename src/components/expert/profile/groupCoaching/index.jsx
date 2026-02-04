@@ -14,7 +14,7 @@ const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
   const router = useRouter();
 
   const { isFetching: isLoadingCoachings, data: coachingResponse } = useQuery({
-    queryFn: getExpertGroupCoachingList,
+    queryFn: () => getExpertGroupCoachingList(),
     queryKey: [queryKeys.expertGroupCoaching],
     enabled: tabEnabled,
   });

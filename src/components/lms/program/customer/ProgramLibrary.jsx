@@ -26,18 +26,21 @@ const ProgramsLibrary = () => {
   // Get selected category from URL params
   const selectedCategory = searchParams.get('categories') || '';
 
-  // Update filters when URL params change
-  useEffect(() => {
+  // Create stable filters object that combines URL params and filter modal values
+  const stableFilters = useMemo(() => {
+    const combinedFilters = { ...filters };
     if (selectedCategory) {
-      setFilters(prev => ({ ...prev, categories: [parseInt(selectedCategory)] }));
-    } else {
-      setFilters(prev => ({ ...prev, categories: [] }));
+      combinedFilters.categories = [parseInt(selectedCategory)];
+    } else if (!filters.categories) {
+      // Only clear categories if not set by filter modal
+      combinedFilters.categories = [];
     }
-  }, [selectedCategory]);
+    return combinedFilters;
+  }, [selectedCategory, filters]);
 
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
-    queryFn: () => getProgramsList(filters),
-    queryKey: [queryKeys.customerPrograms, JSON.stringify(filters)],
+    queryFn: () => getProgramsList(stableFilters),
+    queryKey: [queryKeys.customerPrograms, selectedCategory, JSON.stringify(filters)],
   });
 
   const { data: recommendationsResponse } = useQuery({

@@ -27,9 +27,11 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const router = useRouter();
   const [selectedEventType, setSelectedEventType] = useState(propEventType || EVENT_TYPES.WORKSHOP);
   const eventType = propEventType || selectedEventType;
-  const [filters, setFilters] = useState({ event_type: eventType });
   const confirm = useConfirm();
   const queryClient = useQueryClient();
+
+  // Create stable filters object using useMemo to prevent unnecessary re-renders
+  const filters = useMemo(() => ({ event_type: eventType }), [eventType]);
 
   const { handleDelete: handleDeleteExperience } = useDelete({
     mutationFn: deleteGuidedExperience,
@@ -53,7 +55,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
           await toggleStatus({ id: selected?.id });
           toast.success('Guided experience status updated successfully');
 
-          await queryClient.invalidateQueries([queryKeys.guidedExperiences, eventType, JSON.stringify(filters)]);
+          await queryClient.invalidateQueries([queryKeys.guidedExperiences, eventType]);
         })
         .catch(error => {
           toastApiError(error);
@@ -163,7 +165,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         data: response?.data?.data || [],
       };
     },
-    queryKey: [queryKeys.guidedExperiences, eventType, JSON.stringify(filters)],
+    queryKey: [queryKeys.guidedExperiences, eventType],
     rowActions,
   });
 
@@ -186,19 +188,11 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedEventType(newValue);
-    setFilters({ event_type: newValue });
   };
 
   const getEventTypePath = (type) => {
     return type === 'live event' ? 'live-event' : type;
   };
-
-  // Update filters when eventType changes
-  useEffect(() => {
-    if (!propEventType) {
-      setFilters({ event_type: selectedEventType });
-    }
-  }, [selectedEventType, propEventType]);
 
   return (
     <div>

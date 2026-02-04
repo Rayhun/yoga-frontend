@@ -538,7 +538,7 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
       label: 'Payments',
       href: '/portal/teacher/payments',
       isActive: pathname => pathname.includes('/portal/teacher/payments'),
-      disabled: !is_profile_complete || !has_event_or_consult,
+      disabled: !is_profile_complete || !stripe_onboarded,
     },
   ];
 }

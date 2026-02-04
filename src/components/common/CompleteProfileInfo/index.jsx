@@ -71,14 +71,14 @@ const InfoNote = ({expertData}) => {
               {expertData?.stripe_onboarded ? (expertData?.is_profile_complete ? 2 : 3) : (expertData?.is_profile_complete ? 1 : 2)}
             </div>
             <div className="flex-1 text-gray-800 font-medium">
-              Add a group coaching to get started.
+              Add a guided experiences to get started.
             </div>
             <div className="flex-shrink-0 flex gap-3">
               <button
                 onClick={() => handleAddCoachingOrConsultation('/portal/teacher/group_coaching/add')}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
-                Add Coaching
+                Add Guided Experiences
               </button>
               {/* <button
                 onClick={() => handleAddCoachingOrConsultation('/portal/teacher/consultation/add')}
