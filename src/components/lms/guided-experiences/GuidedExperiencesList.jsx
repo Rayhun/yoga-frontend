@@ -61,7 +61,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
           toastApiError(error);
         });
     },
-    [confirm, toggleStatus, queryClient, filters, eventType]
+    [confirm, toggleStatus, queryClient, eventType]
   );
 
   const tableColumns = useMemo(
@@ -165,7 +165,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         data: response?.data?.data || [],
       };
     },
-    queryKey: [queryKeys.guidedExperiences, eventType],
+    queryKey: [queryKeys.guidedExperiences, eventType, JSON.stringify(filters)],
     rowActions,
   });
 

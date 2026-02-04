@@ -17,12 +17,18 @@ const ExpertProfileConsultations = ({ tabEnabled = false }) => {
     enabled: !!id && tabEnabled,
   });
 
+  const responseData = consultationResponse?.data?.results?.data;
+  const consultations = useMemo(
+    () => responseData?.['all-events'] || [],
+    [responseData]
+  );
+
   const filteredConsultations = useMemo(
     () =>
-      (consultationResponse?.data?.results?.data?.['all-events'] || []).filter(consult =>
+      consultations.filter(consult =>
         consult.title.includes(searchText)
       ),
-    [consultationResponse?.data?.results?.data?.['all-events'], searchText]
+    [consultations, searchText]
   );
 
   return (

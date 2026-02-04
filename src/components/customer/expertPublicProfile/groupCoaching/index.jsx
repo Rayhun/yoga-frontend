@@ -22,14 +22,20 @@ const ExpertProfileGroupCoaching = ({ tabEnabled = false }) => {
     enabled: !!id && tabEnabled,
   });
 
+  const responseData = coachingResponse?.data?.results?.data;
+  const coachings = useMemo(
+    () => responseData?.['all-events'] || [],
+    [responseData]
+  );
+
   const filteredCoachings = useMemo(
     () =>
-      (coachingResponse?.data?.results?.data?.['all-events'] || []).filter(
+      coachings.filter(
         event =>
           event.title.toLowerCase().includes(searchText.toLowerCase()) &&
           (selectedType.length === 0 || selectedType.includes(event.event_type))
       ),
-    [coachingResponse?.data?.results?.data?.['all-events'], searchText, selectedType]
+    [coachings, searchText, selectedType]
   );
 
   return (

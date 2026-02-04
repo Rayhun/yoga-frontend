@@ -32,16 +32,21 @@ const EnrolledGroupCoachings = () => {
 
   const { isLoading: isLoadingCoachings, data: coachingsResponse } = useQuery({
     queryFn: () => getEnrolledGroupCoachings(filters),
-    queryKey: [queryKeys.customerEnrolledGroupCoachings, selectedStatus, selectedCategory],
+    queryKey: [queryKeys.customerEnrolledGroupCoachings, selectedStatus, JSON.stringify(filters)],
   });
 
-  // Extract categories from the API response
+  // Extract categories and coachings from the API response
+  const responseData = coachingsResponse?.data?.results?.data;
+  
   const categories = useMemo(
-    () => coachingsResponse?.data?.results?.data?.['all-categories'] || [],
-    [coachingsResponse?.data?.results?.data]
+    () => responseData?.['all-categories'] || [],
+    [responseData]
   );
 
-  const coachings = coachingsResponse?.data?.results?.data?.['all-events'] || [];
+  const coachings = useMemo(
+    () => responseData?.['all-events'] || [],
+    [responseData]
+  );
 
   // Filter coachings based on search text only (category filtering is now handled by API)
   const filteredCoachings = useMemo(() => {

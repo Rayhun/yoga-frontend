@@ -31,16 +31,21 @@ const EnrolledConsultations = () => {
 
   const { isLoading: isLoadingPrograms, data: consultationResponse } = useQuery({
     queryFn: () => getEnrolledConsultations(filters),
-    queryKey: [queryKeys.customerEnrolledConsultations, selectedStatus, selectedCategory],
+    queryKey: [queryKeys.customerEnrolledConsultations, selectedStatus, JSON.stringify(filters)],
   });
 
-  // Extract categories from the API response
+  // Extract categories and consultations from the API response
+  const responseData = consultationResponse?.data?.results?.data;
+  
   const categories = useMemo(
-    () => consultationResponse?.data?.results?.data?.['all-categories'] || [],
-    [consultationResponse?.data?.results?.data]
+    () => responseData?.['all-categories'] || [],
+    [responseData]
   );
 
-  const consultations = consultationResponse?.data?.results?.data?.['all-events'] || [];
+  const consultations = useMemo(
+    () => responseData?.['all-events'] || [],
+    [responseData]
+  );
 
   // Filter consultations based on search text only (category filtering is now handled by API)
   const filteredConsultations = useMemo(() => {
