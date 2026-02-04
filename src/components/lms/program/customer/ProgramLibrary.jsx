@@ -40,7 +40,7 @@ const ProgramsLibrary = () => {
 
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getProgramsList(stableFilters),
-    queryKey: [queryKeys.customerPrograms, selectedCategory, JSON.stringify(filters)],
+    queryKey: [queryKeys.customerPrograms, JSON.stringify(stableFilters)],
   });
 
   const { data: recommendationsResponse } = useQuery({

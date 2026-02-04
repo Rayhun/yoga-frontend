@@ -45,7 +45,7 @@ const ExpertsList = () => {
     isFetchingNextPage,
     isLoading: isLoadingExperts,
   } = useInfiniteQuery({
-    queryKey: [queryKeys.customerExperts, selectedCategory, JSON.stringify(filters)],
+    queryKey: [queryKeys.customerExperts, JSON.stringify(stableFilters)],
     queryFn: ({ pageParam = 0 }) => getCustomerExpertsList({
       ...stableFilters,
       limit: 10,
