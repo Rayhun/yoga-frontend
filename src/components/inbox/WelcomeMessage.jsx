@@ -1,5 +1,19 @@
 'use client';
-import { FiUsers, FiMessageCircle } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
+import Image from 'next/image';
+
+// Coaches Icon Component - Uses woman icon image (no matching icon found)
+const CoachesIcon = ({ className = "w-8 h-8 md:w-10 md:h-10" }) => {
+  return (
+    <Image
+      src="/images/icon/woman.png"
+      alt="Coaches"
+      width={40}
+      height={40}
+      className={className}
+    />
+  );
+};
 
 const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach }) => {
 
@@ -12,7 +26,7 @@ const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach }
           {activeTab === 'circles' ? (
             <FiUsers className="w-8 h-8 md:w-10 md:h-10 text-gray-400" />
           ) : (
-            <FiMessageCircle className="w-8 h-8 md:w-10 md:h-10 text-gray-400" />
+            <CoachesIcon className="w-8 h-8 md:w-10 md:h-10 text-gray-400" />
           )}
         </div>
 

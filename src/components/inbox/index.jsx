@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { FiUsers, FiMessageCircle } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
+import Image from 'next/image';
 import { useInbox } from '@/context/InboxContext';
 import CirclesList from './CirclesList';
 import CoachesList from './CoachesList';
@@ -8,6 +9,19 @@ import ActiveConversationHeader from './ActiveConversationHeader';
 import MessagesList from './MessagesList';
 import MessageForm from './MessageForm';
 import WelcomeMessage from './WelcomeMessage';
+
+// Coaches Icon Component - Uses woman icon image (no matching icon found)
+const CoachesIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }) => {
+  return (
+    <Image
+      src="/images/icon/woman.png"
+      alt="Coaches"
+      width={20}
+      height={20}
+      className={className}
+    />
+  );
+};
 
 const Inbox = () => {
   const {
@@ -49,7 +63,8 @@ const Inbox = () => {
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <FiMessageCircle className="w-4 h-4 md:w-5 md:h-5" />
+              {/* Prefer icon, fallback to image */}
+              <CoachesIcon className="w-4 h-4 md:w-5 md:h-5" />
               <span>Coaches</span>
             </button>
           </div>
