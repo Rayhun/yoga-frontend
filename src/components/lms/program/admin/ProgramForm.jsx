@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { Formik, Form, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
@@ -32,6 +33,7 @@ const ProgramForm = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const [isFileChanged, setIsFileChanged] = useState(false);
   const { options: programOptions } = useLMSProgramOptions();
   const { mutateAsync: addProgram } = useMutation({
     mutationFn: addNewProgram,
@@ -46,7 +48,8 @@ const ProgramForm = ({ selected }) => {
     benefits: selected?.benefits || '',
     file: null,
     status: selected?.status || '',
-    access_setting: selected?.access_setting || '',
+    // Map "open" from backend to "free" in the form
+    access_setting: selected?.access_setting === ACCESS_SETTING.open ? ACCESS_SETTING.free : (selected?.access_setting || ''),
     visibility_setting: selected?.visibility_setting || '',
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
@@ -71,7 +74,7 @@ const ProgramForm = ({ selected }) => {
       .test(
         'fileType',
         'Unsupported file format. Only images are allowed.',
-        value => value && value.type.includes('image')
+        value => value && value.type && value.type.includes('image')
       )
       .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
     status: Yup.string().required('Required!'),
@@ -128,13 +131,23 @@ const ProgramForm = ({ selected }) => {
         payload.linked_program = linked_program;
       }
 
-      const { data: uploadedFile } = await uploadLMSFile({ file });
+      let fileUrl = null;
+
+      // Only upload file if user actually selected a new file
+      if (isEditMode && !isFileChanged) {
+        // Edit mode and file was NOT changed by user - keep existing image URL
+        fileUrl = selected?.image || null;
+      } else if (file) {
+        // New file was selected (create mode, or edit mode with file changed)
+        const { data: uploadedFile } = await uploadLMSFile({ file });
+        fileUrl = uploadedFile?.file_link;
+      }
 
       if (isEditMode) {
-        await updateProgram({ payload: { id: selected.id, ...payload, file: uploadedFile?.file_link } });
+        await updateProgram({ payload: { id: selected.id, ...payload, file: fileUrl } });
         toast.success('Program updated successfully');
       } else {
-        await addProgram({ payload: { ...payload, file: uploadedFile?.file_link } });
+        await addProgram({ payload: { ...payload, file: fileUrl } });
         toast.success('Program added successfully');
       }
       await queryClient.invalidateQueries([
@@ -220,6 +233,7 @@ const ProgramForm = ({ selected }) => {
                   fileURLs={selected?.image ? [selected.image] : []}
                   Icon={FaRegFileImage}
                   required
+                  onDrop={() => setIsFileChanged(true)}
                 />
               </div>
             </div>
