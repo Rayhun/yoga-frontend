@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { IoVideocamOutline } from 'react-icons/io5';
 import { LuClock } from 'react-icons/lu';
 import Button from '../Button';
+import { getUserTimeAndTimezone } from '@/utils/helpers';
 
 const DetailSection = ({ label, children }) => (
   <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm">
@@ -98,12 +99,45 @@ export const GroupCoachingDetails = ({
             <div className="flex items-start gap-3">
               <LuClock size={24} className="text-gray-400" />
               <div className="text-dark">
-                <div className="font-bold">{startDate.format('dddd, MMMM D, YYYY')}</div>
-                <div className="font-bold">{`${startDate.format('h:mm A')} to ${endDate.format('h:mm A')} ${
-                  eventDetails?.time_zone || ''
-                }`}</div>
+                {(() => {
+                  if (!eventDetails?.start_date || !eventDetails?.time_zone) {
+                    return (
+                      <>
+                        <div className="font-bold">{startDate.format('dddd, MMMM D, YYYY')}</div>
+                        <div className="font-bold">{`${startDate.format('h:mm A')} to ${endDate.format('h:mm A')} ${
+                          eventDetails?.time_zone || ''
+                        }`}</div>
+                      </>
+                    );
+                  }
+                  const result = getUserTimeAndTimezone(eventDetails.start_date, eventDetails.time_zone);
+                  const userStart = result.userTime;
+                  const userEnd = userStart.add(eventDetails?.duration || 0, 'minute');
+                  const originalDate = startDate.format('dddd, MMMM D, YYYY');
+                  const originalTime = startDate.format('h:mm A');
+                  const userDate = userStart.format('dddd, MMMM D, YYYY');
+                  const userStartTime = userStart.format('h:mm A');
+                  const userEndTime = userEnd.format('h:mm A');
+                  const isChanged = originalDate !== userDate || originalTime !== userStartTime;
+
+                  if (isChanged) {
+                    return (
+                      <>
+                        <div className="font-bold">{userDate}</div>
+                        <div className="font-bold">{`${userStartTime} to ${userEndTime}`}</div>
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      <div className="font-bold">{originalDate}</div>
+                      <div className="font-bold">{`${originalTime} to ${endDate.format('h:mm A')} ${
+                        eventDetails?.time_zone || ''
+                      }`}</div>
+                    </>
+                  );
+                })()}
               </div>
-              {/* <span>{eventDetails?.duration || '30'} min</span> */}
             </div>
             <div className="flex items-start gap-3">
               <IoVideocamOutline size={24} className="text-gray-400" />

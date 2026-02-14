@@ -4,13 +4,36 @@ import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import { getUserTimeAndTimezone } from '@/utils/helpers';
+
+dayjs.extend(utc);
 
 const GuidedExperienceDetails = ({ data = {}, eventType }) => {
   const router = useRouter();
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return dayjs(dateString).format('MMMM DD, YYYY [at] hh:mm A');
+    return dayjs.utc(dateString).format('MMMM DD, YYYY [at] hh:mm A');
+  };
+
+  const formatUserDate = (dateString, timeZone) => {
+    if (!dateString) return 'N/A';
+    
+    // If timezone is available, convert to user's timezone (Calendly-style)
+    if (timeZone) {
+      try {
+        const result = getUserTimeAndTimezone(dateString, timeZone);
+        return result.formattedTimeDisplay;
+      } catch (error) {
+        console.error('Error converting time to user timezone:', error);
+        // Fallback to UTC formatting
+        return dayjs.utc(dateString).format('MMMM DD, YYYY [at] hh:mm A');
+      }
+    }
+    
+    // Fallback to UTC if no timezone
+    return dayjs.utc(dateString).format('MMMM DD, YYYY [at] hh:mm A');
   };
 
   const getEventTypeLabel = (type) => {
@@ -80,7 +103,20 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
         </DetailsRecord>
 
         <DetailsRecord label="Start Date & Time">
-          {formatDate(data.start_date)}
+          {(() => {
+            const originalTime = formatDate(data.start_date);
+            const userTime = formatUserDate(data.start_date, data.time_zone || 'N/A');
+            const isSame = originalTime === userTime;
+            
+            return (
+              <>
+                {originalTime}
+                {!isSame && (
+                  <span className="text-gray-500 text-sm"> ({userTime} in your timezone)</span>
+                )}
+              </>
+            );
+          })()}
         </DetailsRecord>
 
         <DetailsRecord label="Duration">

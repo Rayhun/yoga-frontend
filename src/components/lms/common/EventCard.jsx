@@ -1,8 +1,12 @@
 'use client';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import Image from 'next/image';
 import { FaPlay, FaCalendarAlt, FaTag } from 'react-icons/fa';
+import { getUserTimeAndTimezone } from '@/utils/helpers';
+
+dayjs.extend(utc);
 
 const EventCard = ({ event, onClick, isExpertView = false }) => {
   const isEnrolled = event?.is_enroll || isExpertView;
@@ -26,11 +30,11 @@ const EventCard = ({ event, onClick, isExpertView = false }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
         {/* Play Button Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {/* <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform duration-300">
             <FaPlay className="text-white ml-1" size={18} />
           </div>
-        </div>
+        </div> */}
         
         {/* Status Badge - Only show for enrolled events, not in expert view */}
         {event?.is_enroll && !isExpertView && (
@@ -58,7 +62,14 @@ const EventCard = ({ event, onClick, isExpertView = false }) => {
           {event.start_date && (
             <div className="flex items-center gap-1.5">
               <FaCalendarAlt size={12} className="text-emerald-600 dark:text-emerald-400" />
-              <span>{dayjs(event.start_date).format('DD MMM, YYYY')}</span>
+              {(() => {
+                const originalDate = dayjs.utc(event.start_date).format('DD MMM, YYYY');
+                if (!event.time_zone) return <span>{originalDate}</span>;
+                const result = getUserTimeAndTimezone(event.start_date, event.time_zone);
+                const userDate = result.userTime.format('DD MMM, YYYY');
+                // If date changed due to timezone, show user's date only
+                return <span>{userDate !== originalDate ? userDate : originalDate}</span>;
+              })()}
             </div>
           )}
         </div>

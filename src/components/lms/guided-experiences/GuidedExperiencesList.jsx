@@ -15,6 +15,10 @@ import queryKeys from '@/utils/query-keys';
 import { toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const EVENT_TYPES = {
   WORKSHOP: 'workshop',
@@ -94,7 +98,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         accessorKey: 'start_date',
         cell: ({ row }) => {
           const date = row?.original?.start_date;
-          return date ? new Date(date).toLocaleDateString() : 'N/A';
+          return date ? dayjs.utc(date).format('MMMM DD, YYYY [at] hh:mm A') : 'N/A';
         },
       },
       {

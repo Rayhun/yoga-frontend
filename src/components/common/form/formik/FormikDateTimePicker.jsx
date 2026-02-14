@@ -6,6 +6,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { styled } from '@mui/material/styles';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const StyledDateTimePicker = styled(DateTimePicker)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
@@ -46,10 +49,10 @@ const FormikDateTimePicker = ({ label, required, Icon, ...props }) => {
 
   const handleDateChange = date => {
     setTouched(true);
-    setValue(date ? dayjs(date).format('YYYY-MM-DDTHH:mm:ss') : null);
+    setValue(date ? dayjs.utc(date).format('YYYY-MM-DDTHH:mm:ss[Z]') : null);
   };
 
-  const value = field.value ? (typeof field.value === 'string' ? dayjs(field.value) : field.value) : null;
+  const value = field.value ? (typeof field.value === 'string' ? dayjs.utc(field.value) : field.value) : null;
 
   const isErrorField = meta.touched && meta.error;
 

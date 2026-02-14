@@ -15,8 +15,12 @@ export const addNewExpert = async ({ payload: { categories, tags, ...payload } }
   Object.entries(payload).forEach(([key, value]) => {
     if (value) formData.set(key, value);
   });
-  formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  if (categories && categories.length > 0) {
+    formData.set('categories', categories.join(','));
+  }
+  if (tags && tags.length > 0) {
+    formData.set('tags', tags.join(','));
+  }
 
   return axios.post('/LMS/experts/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
@@ -25,10 +29,13 @@ export const updateExistingExpert = async ({ payload: { id, categories, tags, ..
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (key==='available' || value) formData.set(key, value);
-
   });
-  // formData.set('categories', categories.join(','));
-  // formData.set('tags', tags.join(','));
+  if (categories && categories.length > 0) {
+    formData.set('categories', categories.join(','));
+  }
+  if (tags && tags.length > 0) {
+    formData.set('tags', tags.join(','));
+  }
 
   return axios.put(`/LMS/experts/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };

@@ -86,11 +86,21 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
       ? Yup.string() // Optional in edit mode
       : Yup.string().required('Guest name is required'), // Required when creating
     image: isEditMode
-      ? Yup.mixed().test('fileSize', 'File size must be less than 10 MB', value => {
-          if (!value) return true; // Image is optional in edit mode
-          if (typeof value === 'string') return true; // Existing image URL
-          return value.size <= 10 * ONE_MB;
-        })
+      ? Yup.mixed()
+          .nullable()
+          .test('hasImage', 'Image is required', function(value) {
+            // In edit mode, image is valid if:
+            // 1. There's an existing image (selected?.image exists), OR
+            // 2. A new image file is uploaded
+            const hasExistingImage = selected?.image;
+            const hasNewImage = value && value !== null;
+            return hasExistingImage || hasNewImage;
+          })
+          .test('fileSize', 'File size must be less than 10 MB', function(value) {
+            if (!value || value === null) return true; // No new image uploaded, existing image will be used
+            if (typeof value === 'string') return true; // Existing image URL
+            return value.size <= 10 * ONE_MB;
+          })
       : Yup.mixed()
           .required('Event image is required')
           .test('fileSize', 'File size must be less than 10 MB', value => {
@@ -233,7 +243,7 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
                   name="image"
                   label="Event Image"
                   fileURLs={[]}
-                  required={!isEditMode}
+                  required={!isEditMode && !selected?.image}
                   maxSize={10 * ONE_MB}
                 />
                 {isEditMode && selected?.image && (

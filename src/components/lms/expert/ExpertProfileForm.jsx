@@ -14,7 +14,7 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-// import { TagsField } from '@/components/lms/general/fields';
+import { CategoriesField, TagsField } from '@/components/lms/general/fields';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -50,6 +50,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     business_name: selected?.business_name || '',
     description: selected?.description || '',
     categories: selected?.categories?.map(i => i.id) || [],
+    tags: selected?.tags?.map(i => i.id) || [],
     coaching_areas: selected?.coaching_areas?.map(i => i.id) || [],
     certifications: selected?.certifications?.map(i => i.id) || [],
     languages: selected?.languages?.[0]?.split(',') || [],
@@ -95,6 +96,12 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
         return wordsCount >= 25 && wordsCount <= 150;
       }),
+    categories: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one category is required'),
+    tags: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one tag is required'),
     coaching_areas: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
     certifications: Yup.array()
       .of(Yup.string().required('Required!'))
@@ -289,6 +296,40 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   About
                 </h3>
                 <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-150 words)" rows={5} required />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Categories Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Categories
+                </h3>
+                <CategoriesField
+                  name="categories"
+                  label=""
+                  placeholder="Select categories"
+                  required
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Tags Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Tags
+                </h3>
+                <TagsField
+                  name="tags"
+                  label=""
+                  placeholder="Select tags"
+                  required
+                />
               </div>
 
               {/* Divider */}
