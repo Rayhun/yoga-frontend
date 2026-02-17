@@ -32,3 +32,7 @@ export const importCategories = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportCategories = async () => {
+  return axios.get('/LMS/category/export/', { responseType: 'blob' });
+};

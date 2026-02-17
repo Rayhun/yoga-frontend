@@ -28,3 +28,7 @@ export const importQuizes = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportQuizes = async () => {
+  return axios.get('/LMS/quiz/export/', { responseType: 'blob' });
+};

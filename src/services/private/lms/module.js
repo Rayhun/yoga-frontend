@@ -49,3 +49,11 @@ export const importModuleContents = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportModules = async () => {
+  return axios.get('/LMS/module/export/', { responseType: 'blob' });
+};
+
+export const exportModuleContent = async () => {
+  return axios.get('/LMS/module/content/export/', { responseType: 'blob' });
+};

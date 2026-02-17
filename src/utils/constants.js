@@ -2595,7 +2595,7 @@ export const TITLE_OPTIONS = [
   { value: 'Mrs.', label: 'Mrs.' },
   { value: 'Ms.', label: 'Ms.' },
   // { value: 'Miss', label: 'Miss' },
-  // { value: 'Dr.', label: 'Dr.' },
+  { value: 'Dr.', label: 'Dr.' },
   // { value: 'Prof.', label: 'Prof.' },
   // { value: 'Coach', label: 'Coach' },
   // { value: 'Master', label: 'Master' },

@@ -1,19 +1,23 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
+import { BiImport, BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useDelete from '@/hooks/useDelete';
 import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getTagsList, deleteSingleTag, importTags } from '@/services/private/lms/tag';
+import { getTagsList, deleteSingleTag, importTags, exportTags } from '@/services/private/lms/tag';
 import queryKeys from '@/utils/query-keys';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const TagsList = () => {
   const router = useRouter();
+  const confirm = useConfirm();
   const { isImporting, handleImport: handleImportTags } = useImport({
     mutationFn: importTags,
     invalidateQueryKey: [queryKeys.lmsTags],
@@ -24,6 +28,18 @@ const TagsList = () => {
     invalidateQueryKey: [queryKeys.lmsTags],
     onSuccess: () => toast.success('Tag deleted successfully'),
   });
+
+  const { mutateAsync: exportTagsFn, isPending: isExporting } = useMutation({ mutationFn: exportTags });
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export tags?' });
+      const response = await exportTagsFn();
+      downloadBlobAsCsv(response, 'tags_export.csv');
+      toast.success('Tags exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportTagsFn]);
 
   const tableColumns = useMemo(
     () => [
@@ -70,13 +86,20 @@ const TagsList = () => {
         onClick: handleImportTags,
       },
       {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Tag',
         onClick: () => router.push('/portal/admin/lms/tag/add'),
       },
     ],
-    [handleImportTags, isImporting, router]
+    [handleImportTags, handleExport, isImporting, isExporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

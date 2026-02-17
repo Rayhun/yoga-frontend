@@ -1,19 +1,23 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
+import { BiImport, BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useDelete from '@/hooks/useDelete';
 import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getCategoriesList, deleteSingleCategory, importCategories } from '@/services/private/lms/category';
+import { getCategoriesList, deleteSingleCategory, importCategories, exportCategories } from '@/services/private/lms/category';
 import queryKeys from '@/utils/query-keys';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const CategoriesList = () => {
   const router = useRouter();
+  const confirm = useConfirm();
   const { isImporting, handleImport: handleImportCategories } = useImport({
     mutationFn: importCategories,
     invalidateQueryKey: [queryKeys.lmsCategories],
@@ -24,6 +28,20 @@ const CategoriesList = () => {
     invalidateQueryKey: [queryKeys.lmsCategories],
     onSuccess: () => toast.success('Category deleted successfully'),
   });
+
+  const { mutateAsync: exportCategoriesFn, isPending: isExporting } = useMutation({
+    mutationFn: exportCategories,
+  });
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export categories?' });
+      const response = await exportCategoriesFn();
+      downloadBlobAsCsv(response, 'categories_export.csv');
+      toast.success('Categories exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportCategoriesFn]);
 
   const tableColumns = useMemo(
     () => [
@@ -70,13 +88,20 @@ const CategoriesList = () => {
         onClick: handleImportCategories,
       },
       {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Category',
         onClick: () => router.push('/portal/admin/lms/category/add'),
       },
     ],
-    [handleImportCategories, isImporting, router]
+    [handleImportCategories, handleExport, isImporting, isExporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

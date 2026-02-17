@@ -1,23 +1,27 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
+import { BiImport, BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useImport from '@/hooks/useImport';
 import useTable from '@/hooks/useTable';
 import useDelete from '@/hooks/useDelete';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
 import useAuthContext from '@/hooks/useAuthContext';
-import { deleteSingleSession, getSessionsList, importSessions } from '@/services/private/lms/session';
+import { deleteSingleSession, getSessionsList, importSessions, exportSessions } from '@/services/private/lms/session';
 import { SESSION_TYPE } from '@/utils/enums';
 import queryKeys from '@/utils/query-keys';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const AudioSessionsList = () => {
   const router = useRouter();
   const { user } = useAuthContext();
+  const confirm = useConfirm();
   const { isImporting, handleImport: handleImportAudioSessions } = useImport({
     mutationFn: importSessions,
     invalidateQueryKey: [queryKeys.lmsAudioSessions],
@@ -28,6 +32,20 @@ const AudioSessionsList = () => {
     invalidateQueryKey: [queryKeys.lmsAudioSessions],
     onSuccess: () => toast.success('Audio Session deleted successfully'),
   });
+
+  const { mutateAsync: exportSessionsFn, isPending: isExporting } = useMutation({
+    mutationFn: exportSessions,
+  });
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export audio sessions?' });
+      const response = await exportSessionsFn({ content_type: 'audio' });
+      downloadBlobAsCsv(response, 'audio_sessions_export.csv');
+      toast.success('Audio sessions exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportSessionsFn]);
 
   const tableColumns = useMemo(
     () => [
@@ -84,13 +102,20 @@ const AudioSessionsList = () => {
         onClick: () => handleImportAudioSessions({ type: SESSION_TYPE.audio }),
       },
       {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Audio Session',
         onClick: () => router.push('/portal/admin/lms/session/audio/add'),
       },
     ],
-    [handleImportAudioSessions, isImporting, router]
+    [handleImportAudioSessions, handleExport, isImporting, isExporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

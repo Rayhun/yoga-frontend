@@ -47,3 +47,7 @@ export const importSessions = async ({ file, type }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportSessions = async (params = {}) => {
+  return axios.get('/LMS/session/export/', { params, responseType: 'blob' });
+};

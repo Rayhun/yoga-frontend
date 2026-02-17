@@ -1,12 +1,14 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
+import { BiImport, BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useTable from '@/hooks/useTable';
 import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import StaffPermissionGuard from '@/components/common/StaffPermissionGuard';
@@ -16,12 +18,16 @@ import {
   getModulesList,
   importModules,
   importModuleContents,
+  exportModules,
+  exportModuleContent,
 } from '@/services/private/lms/module';
 import queryKeys from '@/utils/query-keys';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const ModuleList = () => {
   const router = useRouter();
   const { user } = useAuthContext();
+  const confirm = useConfirm();
   const { isImporting: isImportingModules, handleImport: handleImportModules } = useImport({
     mutationFn: importModules,
     invalidateQueryKey: [queryKeys.lmsModules],
@@ -37,6 +43,33 @@ const ModuleList = () => {
     invalidateQueryKey: [queryKeys.lmsModules],
     onSuccess: () => toast.success('Module deleted successfully'),
   });
+
+  const { mutateAsync: exportModulesFn, isPending: isExporting } = useMutation({ mutationFn: exportModules });
+  const { mutateAsync: exportModuleContentFn, isPending: isExportingContent } = useMutation({
+    mutationFn: exportModuleContent,
+  });
+
+  const handleExportModules = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export module data?' });
+      const response = await exportModulesFn();
+      downloadBlobAsCsv(response, 'modules_export.csv', 'Modules exported successfully');
+      toast.success('Modules exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportModulesFn]);
+
+  const handleExportModuleContent = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export module content?' });
+      const response = await exportModuleContentFn();
+      downloadBlobAsCsv(response, 'module_content_export.csv', 'Module content exported successfully');
+      toast.success('Module content exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportModuleContentFn]);
 
   const tableColumns = useMemo(
     () => [
@@ -100,13 +133,37 @@ const ModuleList = () => {
         onClick: handleImportModuleContents,
       },
       {
+        id: 'export-module',
+        Icon: BiExport,
+        label: 'Export Module',
+        isLoading: isExporting,
+        onClick: handleExportModules,
+      },
+      {
+        id: 'export-module-content',
+        Icon: BiExport,
+        label: 'Export Module Content',
+        isLoading: isExportingContent,
+        onClick: handleExportModuleContent,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Module',
         onClick: () => router.push('/portal/admin/lms/module/add'),
       },
     ],
-    [handleImportModuleContents, handleImportModules, isImportingModuleContents, isImportingModules, router]
+    [
+      handleImportModuleContents,
+      handleImportModules,
+      handleExportModules,
+      handleExportModuleContent,
+      isImportingModuleContents,
+      isImportingModules,
+      isExporting,
+      isExportingContent,
+      router,
+    ]
   );
 
   const { isLoading, columns, data } = useTable({

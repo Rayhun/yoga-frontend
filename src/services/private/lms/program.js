@@ -51,3 +51,11 @@ export const importProgramContents = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportProgramData = async () => {
+  return axios.get('/LMS/program/export/', { responseType: 'blob' });
+};
+
+export const exportProgramContent = async () => {
+  return axios.get('/LMS/program/content/export/', { responseType: 'blob' });
+};

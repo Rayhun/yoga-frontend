@@ -1,19 +1,23 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiImport } from 'react-icons/bi';
+import { BiImport, BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useTable from '@/hooks/useTable';
 import useImport from '@/hooks/useImport';
 import useDelete from '@/hooks/useDelete';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { deleteSingleQuiz, getQuizesList, importQuizes } from '@/services/private/lms/quiz';
+import { deleteSingleQuiz, getQuizesList, importQuizes, exportQuizes } from '@/services/private/lms/quiz';
 import queryKeys from '@/utils/query-keys';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const LMSQuizList = () => {
   const router = useRouter();
+  const confirm = useConfirm();
   const { isImporting, handleImport: handleImportQuizes } = useImport({
     mutationFn: importQuizes,
     invalidateQueryKey: [queryKeys.lmsQuizes],
@@ -24,6 +28,18 @@ const LMSQuizList = () => {
     invalidateQueryKey: [queryKeys.lmsQuizes],
     onSuccess: () => toast.success('Quiz deleted successfully'),
   });
+
+  const { mutateAsync: exportQuizesFn, isPending: isExporting } = useMutation({ mutationFn: exportQuizes });
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({ message: 'Export quizzes?' });
+      const response = await exportQuizesFn();
+      downloadBlobAsCsv(response, 'quizzes_export.csv');
+      toast.success('Quizzes exported successfully');
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportQuizesFn]);
 
   const tableColumns = useMemo(
     () => [
@@ -74,13 +90,20 @@ const LMSQuizList = () => {
         onClick: handleImportQuizes,
       },
       {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Quiz',
         onClick: () => router.push('/portal/admin/lms/quiz/add'),
       },
     ],
-    [handleImportQuizes, isImporting, router]
+    [handleImportQuizes, handleExport, isImporting, isExporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

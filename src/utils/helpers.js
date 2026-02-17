@@ -112,6 +112,45 @@ export const downloadCSV = (data, filename = 'experts-list.csv') => {
   window.URL.revokeObjectURL(url);
 };
 
+/**
+ * Download a blob response (e.g. CSV export) as a file
+ * @param {Object} response - Axios response with data (blob) and headers
+ * @param {string} defaultFilename - Fallback filename
+ * @param {string} successMessage - Toast success message
+ */
+export const downloadBlobAsCsv = (response, defaultFilename, successMessage) => {
+  const { data: blobData, headers } = response;
+  const contentType = headers['content-type'] || 'text/csv';
+  const blob = new Blob([blobData], { type: contentType });
+  const url = window.URL.createObjectURL(blob);
+  let filename = defaultFilename;
+  const disposition = headers['content-disposition'] || '';
+  const filenameMatch =
+    disposition.match(/filename\*\s*=\s*([^;]+)/i) ||
+    disposition.match(/filename\s*=\s*"([^"]+)"/i) ||
+    disposition.match(/filename\s*=\s*([^;]+)/i);
+  if (filenameMatch) {
+    let rawName = filenameMatch[1].trim();
+    if (rawName.includes("''")) {
+      const parts = rawName.split("''");
+      rawName = decodeURIComponent(parts[1]);
+    }
+    filename = rawName.replace(/(^"|"$)/g, '');
+  }
+  filename = filename.replace(/[_\s]+$/g, '');
+  if (!filename.includes('.') && contentType) {
+    const ext = contentType.split('/')[1]?.split(';')[0];
+    if (ext) filename = `${filename}.${ext}`;
+  }
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 // Table pagination utilities
 const TABLE_PAGE_SIZE_KEY = 'admin_table_default_page_size';
 const DEFAULT_PAGE_SIZE = 5;

@@ -28,3 +28,7 @@ export const importTags = async ({ file }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const exportTags = async () => {
+  return axios.get('/LMS/tag/export/', { responseType: 'blob' });
+};
