@@ -215,7 +215,7 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
                 <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40 px-3 py-2.5 flex gap-2.5">
                   <MdOutlineLightbulb className="w-5 h-5 flex-shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
                   <p className="text-sm text-amber-900 dark:text-amber-200">
-                    Have a Guided Experience you'd price above $100? Break it into smaller, bite-size sessions — your clients will love the flexibility, and you'll reach more of them.
+                    Have a Guided Experience you&apos;d price above $100? Break it into smaller, bite-size sessions — your clients will love the flexibility, and you&apos;ll reach more of them.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
