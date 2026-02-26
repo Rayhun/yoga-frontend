@@ -1,15 +1,19 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Tab, Tabs } from '@mui/material';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
+import { BiExport } from 'react-icons/bi';
+import { useMutation } from '@tanstack/react-query';
 import useDelete from '@/hooks/useDelete';
 import useTable from '@/hooks/useTable';
+import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
-import { deleteSingleLookupItem, getLookupItemsList } from '@/services/private/lms/lookup-item';
+import { deleteSingleLookupItem, getLookupItemsList, exportLookupItems } from '@/services/private/lms/lookup-item';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const CATEGORIES = {
   CERTIFICATIONS: 'Certifications',
@@ -18,6 +22,7 @@ const CATEGORIES = {
 
 const LookupItemsList = () => {
   const router = useRouter();
+  const confirm = useConfirm();
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIES.CERTIFICATIONS);
 
   const { handleDelete: handleDeleteLookupItem } = useDelete({
@@ -25,6 +30,22 @@ const LookupItemsList = () => {
     invalidateQueryKey: [queryKeys.lookupItems],
     onSuccess: () => toast.success('Lookup item deleted successfully'),
   });
+
+  const { mutateAsync: exportLookupItemsFn, isPending: isExporting } = useMutation({
+    mutationFn: exportLookupItems,
+  });
+  const handleExport = useCallback(async () => {
+    try {
+      const categoryLabel = selectedCategory === CATEGORIES.CERTIFICATIONS ? 'Certifications' : 'Coaching Areas';
+      await confirm({ message: `Export ${categoryLabel} only?` });
+      const response = await exportLookupItemsFn({ category: selectedCategory });
+      const slug = selectedCategory === CATEGORIES.CERTIFICATIONS ? 'certifications' : 'coaching_areas';
+      downloadBlobAsCsv(response, `lookup_${slug}_export.csv`);
+      toast.success(`${categoryLabel} exported successfully`);
+    } catch (e) {
+      if (e?.message !== 'cancel') toastApiError(e);
+    }
+  }, [confirm, exportLookupItemsFn, selectedCategory]);
 
   const tableColumns = useMemo(
     () => [
@@ -60,13 +81,20 @@ const LookupItemsList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         Icon: MdOutlineAdd,
         label: 'Add New Lookup Item',
         onClick: () => router.push('/portal/admin/lookup/add'),
       },
     ],
-    [router]
+    [handleExport, isExporting, router]
   );
 
   const { isLoading, columns, data } = useTable({

@@ -20,12 +20,23 @@ import useUserTimeZone from '@/hooks/useUserTimeZone';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
+import { MdOutlineLightbulb } from 'react-icons/md';
 
 const eventTypeOptions = [
   { label: 'Workshop', value: 'workshop' },
   { label: 'Bootcamp', value: 'bootcamp' },
   { label: 'Live Event', value: 'live event' },
   { label: 'MasterClass', value: 'masterclass' },
+];
+
+const PRICE_OPTIONS = [
+  { label: 'Free', value: 0 },
+  { label: '$5', value: 5 },
+  { label: '$10', value: 10 },
+  { label: '$25', value: 25 },
+  { label: '$50', value: 50 },
+  { label: '$75', value: 75 },
+  { label: '$100', value: 100 },
 ];
 
 const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
@@ -49,7 +60,7 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
     duration: selected?.duration || 0,
     time_zone: selected?.time_zone || mappedTimeZone?.value || userTimeZone,
     event_type: selected?.event_type || eventType || '',
-    price: selected?.price || 0,
+    price: PRICE_OPTIONS.some(opt => opt.value === Number(selected?.price)) ? Number(selected.price) : 0,
     is_online: selected?.is_online ?? true,
     image: null,
     meeting_link: selected?.meeting_link || '',
@@ -173,17 +184,18 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ isSubmitting, values, setFieldValue }) => {
+        {({ isSubmitting, values, setFieldValue, errors, touched, setFieldTouched }) => {
           return (
-            <Form className="flex flex-col gap-4">
+            <Form className="flex flex-col gap-4" noValidate>
               <FormikField name="title" label="Title" required />
               {!isEditMode && (
                 <FormikField name="guest_name" label="Guest Name" required placeholder="Enter guest name" />
               )}
               <FormikField name="description" label="Description" rows={4} required />
+              <DateTimePicker name="start_date" label="Start Date & Time" required />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DateTimePicker name="start_date" label="Start Date & Time" required />
                 <FormikSelect name="time_zone" label="Time Zone" options={TIME_ZONES} required />
+                <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormikMultiSelect
@@ -192,11 +204,47 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
                   options={CONSULTATION_TYPES}
                   required
                 />
-                <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />
-                <FormikField name="price" label="Price ($)" type="number" min={0} required />
+              </div>
+
+              {/* PRICING */}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  Pricing
+                </h3>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40 px-3 py-2.5 flex gap-2.5">
+                  <MdOutlineLightbulb className="w-5 h-5 flex-shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
+                  <p className="text-sm text-amber-900 dark:text-amber-200">
+                    Have a Guided Experience you'd price above $100? Break it into smaller, bite-size sessions — your clients will love the flexibility, and you'll reach more of them.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 after:content-['*'] after:text-red-500 after:ml-1">
+                    Select your price
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {PRICE_OPTIONS.map((opt) => {
+                      const isSelected = Number(values.price) === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => { setFieldValue('price', opt.value); setFieldTouched('price', true); }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all border shadow-sm ${
+                            isSelected
+                              ? 'bg-green-600 border-green-600 text-white shadow-md ring-2 ring-green-600/20'
+                              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:border-gray-400 dark:hover:border-gray-500'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {touched?.price && errors?.price && (
+                    <p className="text-sm text-red-500">{errors.price}</p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <CategoriesField required />
@@ -228,15 +276,30 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
                 </ToggleButtonGroup>
               </div>
 
-              {values?.is_online && (
-                <FormikField
-                  disabled={values?.is_zoom_event}
-                  name="meeting_link"
-                  label="Meeting URL"
-                  placeholder="Enter your meeting url eg. Zoom, Google Meet, etc."
-                  required={!values?.is_zoom_event}
-                />
-              )}
+              {values?.is_online ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <FormikField
+                      disabled={values?.is_zoom_event}
+                      name="meeting_link"
+                      label="Meeting URL"
+                      placeholder="Enter your meeting url eg. Zoom, Google Meet, etc."
+                      required
+                    />
+                    {/* {isDevelopmentEnvironment ? (
+                      isZoomConnected ? (
+                        <FormikSwitch name="is_zoom_event" label="Zoom Meeting" />
+                      ) : (
+                        <div className="mt-4">
+                          <ZoomMeetingConnectionButton />
+                        </div>
+                      )
+                    ) : null} */}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <FormikField disabled={values?.venue_location} name="venue_location" label="Venue Location" placeholder="Enter your venue location" required />
+                  </div>
+                )}
 
               <div className="flex flex-col gap-2">
                 <FormikDropzone

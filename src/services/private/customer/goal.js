@@ -14,8 +14,10 @@ export const createGoalTracker = async ({ payload }) => {
   return axios.post('/goal/tracker/', payload);
 };
 
-export const getTracker = async () => {
-  return axios.get('/goal/tracker/user/');
+export const getTracker = async (params = {}) => {
+  const searchParams = getSearchParamsFromObject(params);
+  const qs = searchParams ? `?${searchParams}` : '';
+  return axios.get(`/goal/tracker/user/${qs}`);
 };
 
 export const getTrackerInfo = async () => {

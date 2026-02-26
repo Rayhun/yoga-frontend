@@ -20,3 +20,7 @@ export const deleteSingleLookupItem = async ({ id }) => {
   return axios.delete(`/LMS/lookup-items/${id}/`);
 };
 
+export const exportLookupItems = async (params = {}) => {
+  return axios.get('/LMS/lookup/export/', { params, responseType: 'blob' });
+};
+

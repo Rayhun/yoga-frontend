@@ -34,7 +34,7 @@ const ExpertProfileAbout = ({ data }) => {
       </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
-          {data?.caoching_areas?.map(item => (
+          {data?.coaching_areas?.map(item => (
             <ProfileChip key={item.id} label={item?.title} />
           ))}
         </div>

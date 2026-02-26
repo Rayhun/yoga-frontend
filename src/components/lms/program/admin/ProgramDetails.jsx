@@ -157,7 +157,7 @@ const ProgramDetails = ({ data = {} }) => {
     >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
-        <DetailsRecord label="Description">{data.description}</DetailsRecord>
+        <DetailsRecord label="Description"><div dangerouslySetInnerHTML={{ __html: data.description }} /></DetailsRecord>
         <DetailsRecord label="Benefits">
           <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
             {data?.benefits?.map(benefit => (

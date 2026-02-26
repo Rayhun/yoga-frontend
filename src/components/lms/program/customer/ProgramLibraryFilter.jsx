@@ -1,15 +1,18 @@
 'use client';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import useLMSCategoryOptions from '@/hooks/useLMSCategoryOptions';
-import useLMSTagOptions from '@/hooks/useLMSTagOptions';
 import Button from '@/components/common/Button';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import { toastApiError } from '@/utils/helpers';
 
-const ProgramLibraryFilter = ({ filters = {}, onApplyFilter = () => null }) => {
-  const { options: categoriesOptions } = useLMSCategoryOptions();
-  const { options: tagsOptions } = useLMSTagOptions();
+const ProgramLibraryFilter = ({
+  filters = {},
+  onApplyFilter = () => null,
+  categoryOptions = [],
+  tagOptions = [],
+}) => {
+  const categoriesOptions = categoryOptions;
+  const tagsOptions = tagOptions;
 
   const initialValues = {
     categories: filters.categories || [],

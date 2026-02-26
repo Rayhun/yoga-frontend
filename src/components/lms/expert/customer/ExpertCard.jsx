@@ -38,26 +38,38 @@ const ExpertCard = ({ expert, onClick }) => {
           </div>
         )} */}
         
-        {/* Specialization */}
-        {expert?.specialization && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 min-h-[1.25rem]">
-            <FaAward size={12} className="text-purple-500" />
-            <span className="line-clamp-1">{expert.specialization}</span>
-          </div>
-        )}
         
         {/* Experience */}
         <div className="flex items-center gap-2 text-sm text-gray-600 min-h-[1.25rem]">
           <FaUser size={12} className="text-green-500" />
           <span>{expert?.experience_years || 0} years experience</span>
         </div>
+
+        {/* Specialization */}
+        {expert?.specialization && (() => {
+          const raw = expert.specialization;
+          const str = Array.isArray(raw) ? raw.join(' ') : String(raw ?? '');
+          const words = str.trim().split(/\s+/).filter(Boolean);
+          const firstTwo = words.slice(0, 2).join(' ');
+          const total = Array.isArray(expert.specialization) ? expert.specialization.length : 1;
+          const suffix = total > 1 ? `(+${total - 1})` : null;
+          if (!firstTwo) return null;
+          return (
+            <div className="flex items-center gap-2 text-sm text-gray-600 min-h-[1.25rem]">
+              <span className="line-clamp-1">
+                {firstTwo}
+                {suffix && <span className="text-gray-500"> {suffix}</span>}
+              </span>
+            </div>
+          );
+        })()}
         
         {/* Bio */}
-        <div 
+        {/* <div 
           className="bio-content break-words line-clamp-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed [&>p]:mb-0 [&>p]:line-clamp-2 [&>p]:text-sm [&>p]:text-gray-600 [&>p]:dark:text-gray-300 [&>strong]:font-semibold [&>em]:italic [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4"
           title={expert.bio ? expert.bio.replace(/<[^>]*>/g, '') : 'No bio available'}
           dangerouslySetInnerHTML={{ __html: expert.bio || '<p class="text-gray-500 dark:text-gray-400">No bio available</p>' }}
-        />
+        /> */}
         
         {/* Categories */}
         {expert?.categories && expert.categories.length > 0 && (

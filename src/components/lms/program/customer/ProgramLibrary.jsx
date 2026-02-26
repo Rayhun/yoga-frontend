@@ -12,7 +12,6 @@ import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import ProgramLibraryFilter from './ProgramLibraryFilter';
 import ProgramCard from './ProgramCard';
 import { getProgramsList } from '@/services/private/customer/program';
-import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import queryKeys from '@/utils/query-keys';
 
 const ProgramsLibrary = () => {
@@ -23,29 +22,24 @@ const ProgramsLibrary = () => {
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState({});
 
-  // Get selected category from URL params
-  const selectedCategory = searchParams.get('categories') || '';
+  // Get selected tag from URL params (tag name)
+  const selectedTag = searchParams.get('tags') || '';
 
-  // Create stable filters object that combines URL params and filter modal values
+  // Create stable filters object that combines URL params and filter modal values (names for API)
   const stableFilters = useMemo(() => {
     const combinedFilters = { ...filters };
-    if (selectedCategory) {
-      combinedFilters.categories = [parseInt(selectedCategory)];
-    } else if (!filters.categories) {
-      // Only clear categories if not set by filter modal
-      combinedFilters.categories = [];
+    if (selectedTag) {
+      combinedFilters.tags = [selectedTag];
+    }
+    if (!combinedFilters.tags?.length && !filters.tags?.length) {
+      combinedFilters.tags = [];
     }
     return combinedFilters;
-  }, [selectedCategory, filters]);
+  }, [selectedTag, filters]);
 
   const { isFetching: isLoadingPrograms, data: programsResponse } = useQuery({
     queryFn: () => getProgramsList(stableFilters),
     queryKey: [queryKeys.customerPrograms, JSON.stringify(stableFilters)],
-  });
-
-  const { data: recommendationsResponse } = useQuery({
-    queryFn: getOnboardingRecommendations,
-    queryKey: [queryKeys.onboardingRecommendations],
   });
 
   const filteredPrograms = useMemo(
@@ -56,40 +50,44 @@ const ProgramsLibrary = () => {
     [programsResponse?.data?.results?.data, searchText]
   );
 
-  // Convert user interests to category format
-  const categories = useMemo(() => {
-    const userInterests = recommendationsResponse?.data?.data?.user_interests || [];
-    
-    // Convert user interests to category objects
-    return userInterests.map((interest, index) => ({
-      id: index + 1, // Generate a simple ID
-      name: interest,
-      slug: interest.toLowerCase().replace(/\s+/g, '-'),
-      description: interest,
-      image: null,
-      is_featured: false
-    }));
-  }, [recommendationsResponse?.data?.data?.user_interests]);
+  // Categories and tags from program list API (static lists for filters)
+  const apiCategories = programsResponse?.data?.results?.data?.categories ?? [];
+  const apiTags = programsResponse?.data?.results?.data?.tags ?? [];
+
+  // Format tags for FeaturedCategories: [{ id, name }] (use name as id for name-based API)
+  const tags = useMemo(
+    () =>
+      apiTags.map(name => ({
+        id: name,
+        name,
+      })),
+    [apiTags]
+  );
 
   const handleApplyFilter = values => {
     setFilters(values);
     toggleFilterModal(false);
   };
 
-  const handleSelectFeaturedCategory = selected => {
-    // If clicking the same category, remove it from URL
-    if (selectedCategory === selected.id?.toString()) {
-      searchParams.remove('categories');
+  const handleSelectFeaturedTag = selected => {
+    // If clicking the same tag, remove it from URL
+    if (selectedTag === (selected?.name ?? selected?.id)) {
+      searchParams.remove('tags');
     } else {
-      // Otherwise, set the new category in URL
-      searchParams.set('categories', selected.id);
+      // Otherwise, set the new tag name in URL
+      searchParams.set('tags', selected?.name ?? selected?.id ?? '');
     }
   };
 
   return (
     <div className="flex flex-col gap-4 md:gap-7">
       <Popup heading="Program Filters" open={isFilterModalOpen} onClose={() => toggleFilterModal()}>
-        <ProgramLibraryFilter filters={filters} onApplyFilter={handleApplyFilter} />
+        <ProgramLibraryFilter
+          filters={filters}
+          onApplyFilter={handleApplyFilter}
+          categoryOptions={apiCategories.map(name => ({ label: name, value: name }))}
+          tagOptions={apiTags.map(name => ({ label: name, value: name }))}
+        />
       </Popup>
 
       {/* Hero Section */}
@@ -127,11 +125,11 @@ const ProgramsLibrary = () => {
       </div>
 
       <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
-        {/* Categories */}
-        <FeaturedCategories 
-          categories={categories}
-          selected={selectedCategory ? [parseInt(selectedCategory)] : []} 
-          onSelect={handleSelectFeaturedCategory} 
+        {/* Tags */}
+        <FeaturedCategories
+          categories={tags}
+          selected={selectedTag ? [selectedTag] : []}
+          onSelect={handleSelectFeaturedTag}
         />
 
         <div className="flex gap-4 items-center justify-end">
@@ -163,7 +161,7 @@ const ProgramsLibrary = () => {
                 </div>
               ) : (
                 <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
-                  {searchText || selectedCategory ? 'No programs found matching your criteria' : 'No programs found'}
+                  {searchText || selectedTag ? 'No programs found matching your criteria' : 'No programs found'}
                 </div>
               )}
             </div>

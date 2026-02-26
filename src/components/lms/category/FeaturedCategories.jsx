@@ -2,8 +2,11 @@
 import Spinner from '@/components/common/loader/Spinner';
 
 const FeaturedCategories = ({ categories = [], selected = [], onSelect = () => null }) => {
+  const isFew = categories.length >= 1 && categories.length <= 3;
   return (
-    <div className="w-full flex gap-3 justify-center overflow-auto no-scrollbar">
+    <div
+      className={`w-full flex gap-3 overflow-x-auto overflow-y-hidden no-scrollbar pl-4 pr-4 py-1 ${isFew ? 'justify-center' : 'justify-start'}`}
+    >
       {categories.map(category => (
         <div
           key={category.id}

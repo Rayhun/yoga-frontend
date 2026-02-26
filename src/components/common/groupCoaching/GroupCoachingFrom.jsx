@@ -21,6 +21,7 @@ import FormikMultiSelect from '../form/formik/FormikMultiSelect';
 // import ZoomMeetingConnectionButton from '../ZoomMeetingConnectionButton';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { MdOutlineLightbulb } from 'react-icons/md';
 // import { createEvent } from '@/services/private/lms/events';
 
 const eventTypeOptions = [
@@ -28,6 +29,16 @@ const eventTypeOptions = [
   { label: 'Bootcamp', value: 'bootcamp' },
   { label: 'Live Event', value: 'live event' },
   { label: 'MasterClass', value: 'masterclass' },
+];
+
+const PRICE_OPTIONS = [
+  { label: 'Free', value: 0 },
+  { label: '$5', value: 5 },
+  { label: '$10', value: 10 },
+  { label: '$25', value: 25 },
+  { label: '$50', value: 50 },
+  { label: '$75', value: 75 },
+  { label: '$100', value: 100 },
 ];
 
 // const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
@@ -56,13 +67,17 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     duration: initialData?.duration || 0,
     time_zone: initialData?.time_zone || mappedTimeZone?.value || userTimeZone,
     event_type: initialData?.event_type || '',
-    price: initialData?.price || 0,
+    price: PRICE_OPTIONS.some(opt => opt.value === Number(initialData?.price)) ? Number(initialData.price) : 0,
     is_online: initialData?.is_online ?? true,
-    image: null,
+    image: isEditMode && initialData?.image ? initialData.image : null,
     meeting_link: initialData?.meeting_link || '',
     categories: initialData?.categories?.map(i => i.id) || [],
     tags: initialData?.tags?.map(i => i.id) || [],
-    followup_support: initialData?.followup_support || '',
+    followup_support: initialData?.followup_support
+      ? (Array.isArray(initialData.followup_support)
+          ? initialData.followup_support
+          : initialData.followup_support.split(','))
+      : [],
     is_zoom_event: initialData?.is_zoom_event || false,
   };
 
@@ -89,18 +104,32 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
-    image: Yup.mixed()
-      .required('Required!')
-      .test('fileSize', 'File size must be less than 10 MB', value => value && value.size <= 10 * ONE_MB),
+    image: isEditMode
+      ? Yup.mixed()
+          .nullable()
+          .test('hasImage', 'Image is required', function(value) {
+            const hasExistingImage = initialData?.image;
+            const hasNewImage = value && value !== null && typeof value !== 'string';
+            return hasExistingImage || hasNewImage;
+          })
+          .test('fileSize', 'File size must be less than 10 MB', function(value) {
+            if (!value || value === null || typeof value === 'string') return true;
+            return value.size <= 10 * ONE_MB;
+          })
+      : Yup.mixed()
+          .required('Event image is required')
+          .test('fileSize', 'File size must be less than 10 MB', value => value && value.size <= 10 * ONE_MB),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const payload = { ...values };
       if (isEditMode) {
-        await update({ payload: { ...values }, id: eventId });
+        if (typeof payload.image === 'string') delete payload.image;
+        await update({ payload, id: eventId });
         toast.success('Group Coaching updated successfully');
       } else {
-        await createGroupCoaching({ payload: { ...values } });
+        await createGroupCoaching({ payload });
         toast.success('Group Coaching added successfully');
       }
       await queryClient.invalidateQueries([
@@ -131,14 +160,15 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ isSubmitting, values, setFieldValue }) => {
+          {({ isSubmitting, values, setFieldValue, errors, touched, setFieldTouched }) => {
             return (
-              <Form className="flex flex-col gap-4">
+              <Form className="flex flex-col gap-4" noValidate>
                 <FormikField name="title" label="Title" required />
                 <FormikField name="description" label="Description" rows={4} required />
+                <DateTimePicker name="start_date" label="Start Date & Time" required />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <DateTimePicker name="start_date" label="Start Date & Time" required />
                   <FormikSelect name="time_zone" label="Time Zone" options={TIME_ZONES} required />
+                  <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikMultiSelect
@@ -147,11 +177,47 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                     options={CONSULTATION_TYPES}
                     required
                   />
-                  <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="event_type" label="Type" options={eventTypeOptions} required />
-                  <FormikField name="price" label="Price ($)" type="number" min={0} required />
+                </div>
+
+                {/* PRICING */}
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Pricing
+                  </h3>
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40 px-3 py-2.5 flex gap-2.5">
+                    <MdOutlineLightbulb className="w-5 h-5 flex-shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
+                    <p className="text-sm text-amber-900 dark:text-amber-200">
+                      Have a Guided Experience you'd price above $100? Break it into smaller, bite-size sessions — your clients will love the flexibility, and you'll reach more of them.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 after:content-['*'] after:text-red-500 after:ml-1">
+                      Select your price
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {PRICE_OPTIONS.map((opt) => {
+                        const isSelected = Number(values.price) === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => { setFieldValue('price', opt.value); setFieldTouched('price', true); }}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border shadow-sm ${
+                              isSelected
+                                ? 'bg-green-600 border-green-600 text-white shadow-md ring-2 ring-green-600/20'
+                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:border-gray-400 dark:hover:border-gray-500'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {touched?.price && errors?.price && (
+                      <p className="text-sm text-red-500">{errors.price}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CategoriesField required />
@@ -210,7 +276,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                    <FormikField disabled={values?.venue_location} name="venue_location" label="Venue Location" required />
+                    <FormikField disabled={values?.venue_location} name="venue_location" label="Venue Location" placeholder="Enter your venue location" required />
                   </div>
                 )}
                 <FormikDropzone
@@ -230,8 +296,8 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                         ? 'Updating...'
                         : 'Submitting...'
                       : isEditMode
-                      ? 'Update Group Coaching'
-                      : 'Submit My Group Coaching'}
+                      ? 'Update Guided Experience'
+                      : 'Submit Guided Experience'}
                   </Button>
                 </div>
               </Form>

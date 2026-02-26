@@ -26,13 +26,15 @@ const ratings = [
 const SleepTracker = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => dayjs());
   const buttonRef = useRef(null);
 
   const queryClient = useQueryClient();
+  const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
 
   const { isFetching, data: tracker } = useQuery({
-    queryFn: getTracker,
-    queryKey: [queryKeys.getTracker],
+    queryFn: () => getTracker({ date: dateStr }),
+    queryKey: [queryKeys.getTracker, dateStr],
   });
 
   const { mutateAsync: createActivity } = useMutation({
@@ -45,7 +47,7 @@ const SleepTracker = () => {
 
   const initialValues = {
     selected_option: '',
-    date: dayjs(),
+    date: selectedDate,
   };
 
   const validationSchema = Yup.object({
@@ -63,7 +65,7 @@ const SleepTracker = () => {
 
       await queryClient.invalidateQueries([
         {
-          queryKey: [queryKeys.getTracker],
+          queryKey: [queryKeys.getTracker, dayjs(values.date).format('YYYY-MM-DD')],
         },
       ]);
     } catch (error) {
@@ -77,33 +79,13 @@ const SleepTracker = () => {
     setOpen(false);
   };
 
-  // Component to load existing data when date changes
-  const LoadExistingData = ({ date, setFieldValue, trackerData, tracker }) => {
+  // Sync selected_option from API (tracker.selected_option for the requested date) into the form
+  const SyncSelectedOptionFromApi = ({ setFieldValue, trackerData }) => {
     useEffect(() => {
-      if (!date || !trackerData?.id) return;
-
-      try {
-        const dateStr = dayjs(date).format('YYYY-MM-DD');
-        
-        // Use existing tracker query data to find activity for the selected date
-        const activities = tracker?.data?.data?.activities || [];
-        const activityForDate = activities.find(
-          activity => dayjs(activity.date).format('YYYY-MM-DD') === dateStr
-        );
-        
-        if (activityForDate) {
-          // Populate form with existing data
-          setFieldValue('selected_option', activityForDate.selected_option || '');
-        } else {
-          // No existing data, reset to default
-          setFieldValue('selected_option', '');
-        }
-      } catch (error) {
-        console.error('Error loading existing data:', error);
-        // On error, reset to default
-        setFieldValue('selected_option', '');
-      }
-    }, [date, trackerData?.id, setFieldValue, tracker]);
+      if (!trackerData?.id) return;
+      const option = trackerData.selected_option ?? '';
+      setFieldValue('selected_option', option);
+    }, [trackerData?.id, trackerData?.selected_option, setFieldValue]);
 
     return null;
   };
@@ -160,7 +142,7 @@ const SleepTracker = () => {
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
             {({ setFieldValue, isSubmitting, errors, values, touched }) => (
               <>
-                <LoadExistingData date={values.date} setFieldValue={setFieldValue} trackerData={trackerData} tracker={tracker} />
+                <SyncSelectedOptionFromApi setFieldValue={setFieldValue} trackerData={trackerData} />
                 <Form className="flex flex-col gap-6">
                 {/* Description and Date Section */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
@@ -181,6 +163,7 @@ const SleepTracker = () => {
                       <Calender
                         value={values.date}
                         onChnage={date => {
+                          setSelectedDate(date);
                           setFieldValue('date', date);
                           handleClose();
                         }}

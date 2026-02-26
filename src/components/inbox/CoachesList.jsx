@@ -255,7 +255,10 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
                         <h4 className="text-xs md:text-sm font-semibold text-gray-900">{coach.name}</h4>
                         <p className="text-xs text-green-600 mb-1">{coach.title}</p>
                         {coach.description && (
-                          <p className="text-xs text-gray-600 mb-2 line-clamp-2">{coach.description}</p>
+                          <div
+                            className="text-xs text-gray-600 mb-2 line-clamp-2 leading-relaxed [&_p]:mb-0 [&_p]:last:mb-0 [&_strong]:font-semibold [&_a]:text-green-600 [&_a]:underline [&_a]:break-all"
+                            dangerouslySetInnerHTML={{ __html: coach.description }}
+                          />
                         )}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                           <button
