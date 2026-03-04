@@ -60,10 +60,9 @@ export const GroupCoachingDetails = ({
   if (isLoading) return <PageLoader />;
 
   // Use user_datetime (user-local start) so end time matches the displayed start time; fallback to start_date
-  const startDate = dayjs(eventDetails?.start_date);
-  const durationMins = Number(eventDetails?.duration) || 0;
-  const endDate = startDate.add(durationMins, 'minute');
-  console.log(startDate, durationMins, endDate, 'event data', eventDetails?.duration, eventDetails?.start_date);
+  // 1. Use parseZone to lock the time to +02:00
+  const startDate = dayjs.parseZone(eventDetails?.start_date);
+  const endDate = dayjs.parseZone(eventDetails?.end_date);
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
