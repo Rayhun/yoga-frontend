@@ -60,9 +60,10 @@ export const GroupCoachingDetails = ({
   if (isLoading) return <PageLoader />;
 
   // Use user_datetime (user-local start) so end time matches the displayed start time; fallback to start_date
-  const startDate = dayjs(eventDetails?.user_datetime || eventDetails?.start_date);
+  const startDate = dayjs(eventDetails?.start_date);
   const durationMins = Number(eventDetails?.duration) || 0;
   const endDate = startDate.add(durationMins, 'minute');
+  console.log(startDate, durationMins, endDate, 'event data', eventDetails?.duration, eventDetails?.start_date);
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
