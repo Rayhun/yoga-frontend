@@ -102,7 +102,10 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     tags: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one tag is required'),
-    coaching_areas: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 tag is required'),
+    coaching_areas: Yup.array()
+      .of(Yup.string().required('Required!'))
+      .min(1, 'At least 1 coaching area is required')
+      .max(10, 'Maximum 10 coaching areas are allowed'),
     certifications: Yup.array()
       .of(Yup.string().required('Required!'))
       .min(1, 'At least 1 certification is required')
@@ -344,7 +347,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 <CoachingAreasField
                   name="coaching_areas"
                   label=""
-                  placeholder="Select or add coaching areas"
+                  placeholder="Select or add coaching areas (max 10)"
                   required
                 />
               </div>

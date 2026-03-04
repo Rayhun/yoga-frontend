@@ -76,6 +76,33 @@ const LoginForm = () => {
       if (error.response?.data?.message) {
         const errorMessage = error.response.data.message;
 
+        // Handle verification-required errors: redirect to verify-account with email stored
+        if (errorMessage.includes('Email not verify') || errorMessage.includes('email verify first')) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('pendingVerificationEmail', values.email);
+            sessionStorage.removeItem('pendingVerificationPhone');
+          }
+          toastApiError(error);
+          router.replace('/auth/verify-account?step=email');
+          setSubmitting(false);
+          return;
+        }
+        if (errorMessage.includes('Mobile number not verify') || errorMessage.includes('number verify first')) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('pendingVerificationEmail', values.email);
+            const mobileNumber = error.response?.data?.data?.mobile_number;
+            if (mobileNumber) {
+              sessionStorage.setItem('pendingVerificationPhone', mobileNumber);
+            } else {
+              sessionStorage.removeItem('pendingVerificationPhone');
+            }
+          }
+          toastApiError(error);
+          router.replace('/auth/verify-account?step=phone');
+          setSubmitting(false);
+          return;
+        }
+
         let fieldName = null;
 
         if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('expert')) {

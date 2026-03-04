@@ -12,6 +12,7 @@ const FormikMultiSelect = ({
   placeholder,
   Icon,
   required,
+  max,
   onChange = () => null,
   ...rest
 }) => {
@@ -20,9 +21,12 @@ const FormikMultiSelect = ({
 
   const handleChange = useCallback(
     (_, value) => {
-      const arrayValue = Array.isArray(value) ? value.map(i => i.value) : [];
+      const raw = Array.isArray(value) ? value : [];
+      const arrayValue = raw
+        .map(i => i.value)
+        .filter(v => v != null && v !== '');
       setFieldValue(name, arrayValue);
-      onChange(value);
+      onChange(raw);
     },
     [name, onChange, setFieldValue]
   );
@@ -43,11 +47,15 @@ const FormikMultiSelect = ({
   }, [field.value]);
 
   const selectedOptions = useMemo(
-    () => options.filter(option => fieldValueArray.includes(option.value)),
+    () =>
+      fieldValueArray
+        .map(fv => options.find(opt => opt.value != null && opt.value !== '' && fv == opt.value))
+        .filter(Boolean),
     [fieldValueArray, options]
   );
 
-  const isErrorField = Boolean(meta.touched && meta.error);
+  // Show error whenever validation fails (e.g. over max) so user sees it without blurring
+  const isErrorField = Boolean(meta.error);
 
   return (
     <div className="flex flex-col gap-1">
@@ -62,7 +70,11 @@ const FormikMultiSelect = ({
           id={name}
           options={options}
           getOptionLabel={option => option.label}
-          getOptionKey={option => option.value}
+          getOptionKey={(option, index) =>
+            option?.value != null && option?.value !== ''
+              ? option.value
+              : `option-${option?.label ?? index}`
+          }
           value={selectedOptions || []}
           onChange={handleChange}
           renderInput={params => <TextField {...params} placeholder={placeholder} error={isErrorField} />}

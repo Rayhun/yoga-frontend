@@ -11,7 +11,7 @@ const TABS = {
 };
 
 const Programs = () => {
-  const [selectedTab, setSelectedTab] = useState(TABS.LIBRARY);
+  const [selectedTab, setSelectedTab] = useState(TABS.MY_PROGRAMS);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -21,8 +21,8 @@ const Programs = () => {
     <div>
       {/* Tabs */}
       <Tabs value={selectedTab} onChange={handleTabChange}>
-        <Tab value={TABS.LIBRARY} label="Library" />
         <Tab value={TABS.MY_PROGRAMS} label="My Programs" />
+        <Tab value={TABS.LIBRARY} label="Library" />
       </Tabs>
       <div className="py-5">
         {/* Tabs Content */}

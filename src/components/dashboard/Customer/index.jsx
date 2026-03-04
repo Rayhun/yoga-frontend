@@ -112,17 +112,18 @@ const CustomerDashboard = () => {
             </p>
             {recommendedProgram && Object.keys(recommendedProgram).length > 0 && (
               <div className="mt-8 flex justify-center md:justify-start items-center">
+                {/* onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)} */}
                 {recommendedProgram.is_enroll ? (
                   <button
                     className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                    onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
+                    onClick={() => router.push(`/portal/customer/lms/program`)}
                   >
                     Continue Journey
                   </button>
                 ) : (
                   <button
                     className="px-8 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                    onClick={() => router.push(`/portal/customer/lms/program/${recommendedProgram.id}/details`)}
+                    onClick={() => router.push(`/portal/customer/lms/program`)}
                   >
                     Start Journey
                   </button>

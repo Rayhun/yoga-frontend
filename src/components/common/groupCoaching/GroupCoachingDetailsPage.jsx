@@ -13,8 +13,6 @@ import { HiOutlineStatusOnline, HiOutlineTag } from 'react-icons/hi';
 import { MdOutlineDescription, MdOutlineCategory } from 'react-icons/md';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../Button';
-import { getUserTimeAndTimezone } from '@/utils/helpers';
-
 const DetailSection = ({ label, children, icon: Icon }) => (
   <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-strokedark hover:shadow-md transition-shadow duration-200">
     <div className="flex items-center gap-3">
@@ -47,25 +45,22 @@ export const GroupCoachingDetails = ({
   const router = useRouter();
 
   const { isBeforeStartDate, isAfterStartDate } = useMemo(() => {
-    if (!eventDetails?.start_date) {
+    const dateToCheck = eventDetails?.start_date_utc ?? eventDetails?.start_date;
+    if (!dateToCheck) {
       return { isBeforeStartDate: false, isAfterStartDate: false };
     }
-
     const now = dayjs();
-    const dateToCheck = dayjs(eventDetails.start_date);
-
-    const comparison = now.valueOf() - dateToCheck.valueOf();
-
+    const comparison = now.valueOf() - dayjs(dateToCheck).valueOf();
     return {
       isBeforeStartDate: comparison < 0,
       isAfterStartDate: comparison > 0,
     };
-  }, [eventDetails?.start_date]);
+  }, [eventDetails?.start_date_utc, eventDetails?.start_date]);
 
   if (isLoading) return <PageLoader />;
 
   const startDate = dayjs(eventDetails?.start_date);
-  const endDate = startDate.add(eventDetails?.duration, 'minute');
+  const endDate = startDate.add(eventDetails?.duration ?? 0, 'minute');
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
@@ -125,56 +120,21 @@ export const GroupCoachingDetails = ({
                 <LuClock size={18} className="text-primary dark:text-primary" />
               </div>
               <div className="flex-1 text-gray-700 dark:text-bodydark min-w-0">
-                {(() => {
-                  if (!eventDetails?.start_date || !eventDetails?.time_zone) {
-                    return (
-                      <>
-                        <div className="font-bold text-base text-gray-900 dark:text-white mb-0.5">
-                          {startDate.format('dddd, MMMM D, YYYY')}
-                        </div>
-                        <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">
-                          {`${startDate.format('h:mm A')} - ${endDate.format('h:mm A')} ${
-                            eventDetails?.time_zone || ''
-                          }`}
-                        </div>
-                      </>
-                    );
-                  }
-                  const result = getUserTimeAndTimezone(eventDetails.start_date, eventDetails.time_zone);
-                  const userStart = result.userTime;
-                  const userEnd = userStart.add(eventDetails?.duration || 0, 'minute');
-                  const originalDate = startDate.format('dddd, MMMM D, YYYY');
-                  const originalTime = startDate.format('h:mm A');
-                  const userDate = userStart.format('dddd, MMMM D, YYYY');
-                  const userStartTime = userStart.format('h:mm A');
-                  const userEndTime = userEnd.format('h:mm A');
-                  const isChanged = originalDate !== userDate || originalTime !== userStartTime;
-
-                  if (isChanged) {
-                    return (
-                      <>
-                        <div className="font-bold text-base text-gray-900 dark:text-white mb-0.5">
-                          {userDate}
-                        </div>
-                        <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">
-                          {`${userStartTime} - ${userEndTime}`}
-                        </div>
-                      </>
-                    );
-                  }
-                  return (
-                    <>
-                      <div className="font-bold text-base text-gray-900 dark:text-white mb-0.5">
-                        {originalDate}
-                      </div>
-                      <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">
-                        {`${originalTime} - ${endDate.format('h:mm A')} ${
-                          eventDetails?.time_zone || ''
-                        }`}
-                      </div>
-                    </>
-                  );
-                })()}
+                {eventDetails?.start_date ? (
+                  <>
+                    <div className="font-bold text-base text-gray-900 dark:text-white mb-0.5">
+                      {eventDetails?.user_date ?? startDate.format('dddd, MMMM D, YYYY')}
+                    </div>
+                    <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">
+                      {`${eventDetails?.user_time ?? startDate.format('h:mm A')} - ${endDate.format('h:mm A')}`}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="font-bold text-base text-gray-900 dark:text-white mb-0.5">—</div>
+                    <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">—</div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -245,9 +205,11 @@ export const GroupCoachingDetails = ({
             {/* Price */}
             <div className="p-3 bg-gradient-to-r from-primary/10 to-green-50 dark:from-primary/20 dark:to-green-900/20 rounded-lg border border-primary/20 dark:border-primary/30 mt-auto">
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-gray-600 dark:text-bodydark font-medium">Price</span>
+                {Number(eventDetails?.price) !== 0 && (
+                  <span className="text-xs text-gray-600 dark:text-bodydark font-medium">Price</span>
+                )}
                 <span className="font-bold text-2xl text-primary dark:text-primary">
-                  {`${eventDetails?.currency_symbol || '$'}${eventDetails?.price || '0'}`}
+                  {Number(eventDetails?.price) === 0 ? 'Free' : `${eventDetails?.currency_symbol || '$'}${eventDetails?.price ?? '0'}`}
                 </span>
               </div>
             </div>

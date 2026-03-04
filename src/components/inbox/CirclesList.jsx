@@ -263,7 +263,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
                         >
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{chat.group_name}</h3>
-                            <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">{chat.description || 'A supportive space to share experiences and advice'}</p>
+                            <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">{chat.description || ''}</p>
                             <p className="text-xs text-gray-500">{chat.members_count || 0} members</p>
                           </div>
                           <button

@@ -12,10 +12,11 @@ function useLookUpsByCategory(category = 'Coaching Areas') {
 
   const categoriesOptions = useMemo(
     () =>
-      lookupsResponse?.data?.data?.map(option => ({
-        label: option.title,
-        value: option.id,
-      })),
+      lookupsResponse?.data?.data?.map((option, index) => ({
+        label: option?.title ?? '',
+        // Ensure unique value: backend may use id or uuid; fallback to label+index so Autocomplete can distinguish options
+        value: option?.id ?? option?.uuid ?? `${option?.title ?? 'item'}-${index}`,
+      })) ?? [],
     [lookupsResponse?.data?.data]
   );
 

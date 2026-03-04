@@ -43,13 +43,13 @@ const AccountVerificationForm = () => {
     return mobile_verify || phoneVerfied;
   }, [phoneVerfied, mobile_verify]);
 
-  // Redirect to signup if email/phone are missing (security check)
+  // Redirect to signup only if email is missing (e.g. direct URL access).
+  // When coming from login with "email/mobile not verify", we have email but may not have phone.
   useEffect(() => {
-    if (typeof window !== 'undefined' && step && (!email || !phone)) {
-      // Only redirect if we're on verification page but missing required data
+    if (typeof window !== 'undefined' && step && !email) {
       router.replace('/auth/signup');
     }
-  }, [email, phone, step, router]);
+  }, [email, step, router]);
 
   useEffect(() => {
     if (isEmailVerified && isPhoneVerified) {

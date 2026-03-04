@@ -186,7 +186,16 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
                               {coach.name}
                             </h5>
                             <p className="text-xs text-green-600 truncate">
-                              {coach.coach_title || 'Coach'}
+                              {coach?.specialization && (() => {
+                                const raw = coach.specialization;
+                                const str = Array.isArray(raw) ? raw.join(' ') : String(raw ?? '');
+                                const words = str.trim().split(/\s+/).filter(Boolean);
+                                const firstTwo = words.slice(0, 2).join(' ');
+                                const total = Array.isArray(coach.specialization) ? coach.specialization.length : (words.length || 1);
+                                const suffix = total > 1 ? ` (+${total - 1})` : null;
+                                if (!firstTwo) return 'Coach';
+                                return <>{firstTwo}{suffix}</>;
+                              })() || 'Coach'}
                             </p>
                           </div>
                           {hasUnreadMessages && (
@@ -253,13 +262,46 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs md:text-sm font-semibold text-gray-900">{coach.name}</h4>
-                        <p className="text-xs text-green-600 mb-1">{coach.title}</p>
-                        {coach.description && (
+                        <div className="mb-1">
+                          {coach?.specialization && (() => {
+                            const raw = coach.specialization;
+                            const list = Array.isArray(raw)
+                              ? raw.filter(Boolean)
+                              : String(raw ?? '')
+                                  .split(',')
+                                  .map(item => item.trim())
+                                  .filter(Boolean);
+
+                            if (!list.length) return <span className="text-xs text-green-600">Coach</span>;
+
+                            const primary = list[0];
+                            const secondary = list[1] || null;
+                            const extraCount = list.length > 2 ? list.length - 2 : 0;
+
+                            return (
+                              <div className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs text-gray-700">
+                                <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-[10px] text-green-600">
+                                  ★
+                                </span>
+                                <span>
+                                  <span className="font-medium">{primary}</span>
+                                  {secondary && <span className="text-gray-500"> ({secondary})</span>}
+                                </span>
+                                {extraCount > 0 && (
+                                  <span className="ml-2 inline-flex flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-gray-700">
+                                    +{extraCount}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })() || <span className="text-xs text-green-600">Coach</span>}
+                        </div>
+                        {/* {coach.description && (
                           <div
                             className="text-xs text-gray-600 mb-2 line-clamp-2 leading-relaxed [&_p]:mb-0 [&_p]:last:mb-0 [&_strong]:font-semibold [&_a]:text-green-600 [&_a]:underline [&_a]:break-all"
                             dangerouslySetInnerHTML={{ __html: coach.description }}
                           />
-                        )}
+                        )} */}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                           <button
                             onClick={async () => {

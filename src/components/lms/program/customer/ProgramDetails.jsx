@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
+import { FiLock } from 'react-icons/fi';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -353,13 +354,20 @@ const ProgramDetails = () => {
               <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
                 {programDetails?.content.map(item => (
                   <li key={item.id} className="ms-6 mb-6">
-                    <div className="absolute -start-4 bg-white rounded-full p-1 shadow-lg">
-                      <BiCheck
-                        size={20}
-                        className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white'}`}
-                      />
+                    <div className="absolute -start-4 bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg">
+                      {item.locked ? (
+                        <FiLock size={20} className="text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <BiCheck
+                          size={20}
+                          className={`rounded-full text-white ${item.completed ? 'bg-secondary' : 'bg-white dark:bg-gray-600'}`}
+                        />
+                      )}
                     </div>
-                    <h5 className="mb-1 text-md font-semibold text-gray-900 dark:text-white">{item.title}</h5>
+                    <h5 className={`mb-1 text-md font-semibold ${item.locked ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                      {item.title}
+                      {item.locked && <span className="ml-1 text-xs font-normal">(Locked)</span>}
+                    </h5>
                   </li>
                 ))}
               </ol>

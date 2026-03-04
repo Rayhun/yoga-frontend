@@ -7,6 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { BiCheck } from 'react-icons/bi';
 import { FaTv, FaImage, FaHeadphones, FaPlayCircle } from 'react-icons/fa';
 import { MdCheckBox } from 'react-icons/md';
+import { FiLock } from 'react-icons/fi';
 
 const getContentRef = item => {
   let label = 'Item';
@@ -79,13 +80,18 @@ const ContentCard = ({ item, isEnrolled = false }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const contentRef = getContentRef(item);
+  const isLocked = Boolean(item?.locked);
 
   const handleNavigate = () => {
     if (!isEnrolled) {
       toast.error('Please enroll in this program to access the content');
       return;
     }
-    
+    if (isLocked) {
+      toast.info('This content is not yet available. It will unlock as you progress through the program.');
+      return;
+    }
+
     const newParams = new URLSearchParams(searchParams);
     newParams.set('program', params.id);
     router.push(`${contentRef.href}?${newParams.toString()}`);
@@ -95,7 +101,9 @@ const ContentCard = ({ item, isEnrolled = false }) => {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer"
+      className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg transition cursor-pointer ${
+        isLocked ? 'opacity-90 hover:shadow-lg' : 'hover:shadow-xl'
+      }`}
       onClick={handleNavigate}
     >
       {/* Image */}
@@ -107,11 +115,23 @@ const ContentCard = ({ item, isEnrolled = false }) => {
             src={contentImage || '/images/content/default.png'}
             alt="image"
             sizes="100vw"
-            className="w-full h-full object-cover rounded-t-lg"
+            className={`w-full h-full object-cover rounded-t-lg ${isLocked ? 'grayscale' : ''}`}
           />
         </div>
-        {/* Completion Icon */}
-        {item.completed ? (
+        {/* Lock overlay */}
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-t-lg bg-black/40">
+            <div className="rounded-full bg-white/90 dark:bg-gray-800/90 p-3 shadow-lg">
+              <FiLock size={32} className="text-gray-600 dark:text-gray-400" />
+            </div>
+          </div>
+        )}
+        {/* Completion or Lock badge */}
+        {isLocked ? (
+          <div className="absolute -bottom-4 left-2 bg-white dark:bg-gray-700 rounded-full p-1 shadow-lg">
+            <FiLock size={24} className="text-gray-500 dark:text-gray-400" />
+          </div>
+        ) : item.completed ? (
           <div className="absolute -bottom-4 left-2 bg-white rounded-full p-1 shadow-lg">
             <BiCheck size={24} className="bg-secondary rounded-full text-white" />
           </div>
@@ -120,7 +140,10 @@ const ContentCard = ({ item, isEnrolled = false }) => {
 
       {/* Course Info */}
       <div className="p-4 flex flex-col justify-between h-[110px]">
-        <h2 className="text-lg font-bold line-clamp-1 text-gray-900 dark:text-white">{item.title}</h2>
+        <h2 className={`text-lg font-bold line-clamp-1 ${isLocked ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+          {item.title}
+          {isLocked && <span className="ml-1 text-sm font-normal">(Locked)</span>}
+        </h2>
 
         {/* Details */}
         {item.content_type === 'module' ? <ModuleContent {...item} /> : <SessionQuizContent {...item} />}

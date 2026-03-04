@@ -40,6 +40,9 @@ const EnrolledPrograms = () => {
 
   return (
     <div className="min-h-[60vh] flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
+      <div className="w-full h-[30px] flex justify-center items-center text-center text-gray-500 px-4">
+                Explore the Library to find and enroll in ones you'll love.
+              </div>
       {/* Status Filters */}
       <div className="flex gap-3 justify-center">
         {STATUS_FILTERS.map(filter => (

@@ -48,18 +48,37 @@ const ExpertCard = ({ expert, onClick }) => {
         {/* Specialization */}
         {expert?.specialization && (() => {
           const raw = expert.specialization;
-          const str = Array.isArray(raw) ? raw.join(' ') : String(raw ?? '');
-          const words = str.trim().split(/\s+/).filter(Boolean);
-          const firstTwo = words.slice(0, 2).join(' ');
-          const total = Array.isArray(expert.specialization) ? expert.specialization.length : 1;
-          const suffix = total > 1 ? `(+${total - 1})` : null;
-          if (!firstTwo) return null;
+          const list = Array.isArray(raw)
+            ? raw.filter(Boolean)
+            : String(raw ?? '')
+                .split(',')
+                .map(item => item.trim())
+                .filter(Boolean);
+
+          if (!list.length) return null;
+
+          const isSingle = list.length === 1;
+          const displayText = isSingle
+            ? list[0]
+            : list[0]
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 5)
+                .join(' ');
+          const extraCount = list.length > 1 ? list.length - 1 : 0;
+
           return (
-            <div className="flex items-center gap-2 text-sm text-gray-600 min-h-[1.25rem]">
-              <span className="line-clamp-1">
-                {firstTwo}
-                {suffix && <span className="text-gray-500"> {suffix}</span>}
+            <div className="mt-2 inline-flex max-w-full items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs text-gray-700">
+              <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-[10px] text-green-600">
+                ★
               </span>
+              <span className="min-w-0 truncate font-medium">{displayText}</span>
+              {extraCount > 0 && (
+                <span className="inline-flex flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-gray-700">
+                  +{extraCount}
+                </span>
+              )}
             </div>
           );
         })()}

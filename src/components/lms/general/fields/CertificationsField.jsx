@@ -11,7 +11,14 @@ const CertificationsField = ({
   const { options: tagsOptions } = useLMSCoachingAreas('Certifications');
 
   return (
-    <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
+    <FormikMultiSelect
+      {...props}
+      name={name}
+      label={label}
+      placeholder={placeholder}
+      options={tagsOptions}
+      max={5}
+    />
   );
 };
 

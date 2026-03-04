@@ -11,7 +11,14 @@ const CoachingAreasField = ({
   const { options: tagsOptions } = useLMSCoachingAreas('Coaching Areas');
 
   return (
-    <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
+    <FormikMultiSelect
+      {...props}
+      name={name}
+      label={label}
+      placeholder={placeholder}
+      options={tagsOptions}
+      max={10}
+    />
   );
 };
 

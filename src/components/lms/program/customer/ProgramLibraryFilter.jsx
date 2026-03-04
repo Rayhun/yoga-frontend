@@ -50,7 +50,6 @@ const ProgramLibraryFilter = ({
                 label="Categories"
                 placeholder="Categories"
                 options={categoriesOptions}
-                disablePortal
               />
             </div>
 
@@ -60,7 +59,6 @@ const ProgramLibraryFilter = ({
                 label="Tags"
                 placeholder="Tags"
                 options={tagsOptions}
-                disablePortal
               />
             </div>
           </div>

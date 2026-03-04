@@ -1,12 +1,8 @@
 'use client';
 
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import Image from 'next/image';
 import { FaPlay, FaCalendarAlt, FaTag } from 'react-icons/fa';
-import { getUserTimeAndTimezone } from '@/utils/helpers';
-
-dayjs.extend(utc);
 
 const EventCard = ({ event, onClick, isExpertView = false }) => {
   const isEnrolled = event?.is_enroll || isExpertView;
@@ -62,14 +58,7 @@ const EventCard = ({ event, onClick, isExpertView = false }) => {
           {event.start_date && (
             <div className="flex items-center gap-1.5">
               <FaCalendarAlt size={12} className="text-emerald-600 dark:text-emerald-400" />
-              {(() => {
-                const originalDate = dayjs.utc(event.start_date).format('DD MMM, YYYY');
-                if (!event.time_zone) return <span>{originalDate}</span>;
-                const result = getUserTimeAndTimezone(event.start_date, event.time_zone);
-                const userDate = result.userTime.format('DD MMM, YYYY');
-                // If date changed due to timezone, show user's date only
-                return <span>{userDate !== originalDate ? userDate : originalDate}</span>;
-              })()}
+              <span>{event.user_date ?? dayjs(event.start_date).format('DD MMM, YYYY')}</span>
             </div>
           )}
         </div>
@@ -81,11 +70,11 @@ const EventCard = ({ event, onClick, isExpertView = false }) => {
           </div>
         )}
         
-        {/* Price */}
-        {event?.price && (
+        {/* Price - show for any price including 0 (free) */}
+        {(event?.price !== undefined && event?.price !== null) && (
           <div className="flex items-center gap-2 min-h-[1.5rem]">
             <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-              {event.currency_symbol || '$'} {event.price}
+              {Number(event.price) === 0 ? 'Free' : `${event.currency_symbol || '$'} ${event.price}`}
             </span>
           </div>
         )}

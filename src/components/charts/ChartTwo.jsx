@@ -42,9 +42,8 @@ const ChartTwo = ({ contentStats, enrollmentStats }) => {
   const options = {
     chart: {
       fontFamily: 'Satoshi, sans-serif',
-      type: 'bar',
+      type: 'line',
       height: 335,
-      stacked: true,
       toolbar: {
         show: false,
       },
@@ -52,26 +51,14 @@ const ChartTwo = ({ contentStats, enrollmentStats }) => {
         enabled: false,
       },
     },
-    responsive: [
-      {
-        breakpoint: 1536,
-        options: {
-          plotOptions: {
-            bar: {
-              borderRadius: 0,
-              columnWidth: '25%',
-            },
-          },
-        },
-      },
-    ],
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        borderRadius: 0,
-        columnWidth: '25%',
-        borderRadiusApplication: 'end',
-        borderRadiusWhenStacked: 'last',
+    stroke: {
+      curve: 'smooth',
+      width: 2,
+    },
+    markers: {
+      size: 4,
+      hover: {
+        size: 6,
       },
     },
     dataLabels: {
@@ -86,9 +73,6 @@ const ChartTwo = ({ contentStats, enrollmentStats }) => {
       fontFamily: 'Satoshi',
       fontWeight: 500,
       fontSize: '14px',
-    },
-    fill: {
-      opacity: 1,
     },
   };
 
@@ -105,7 +89,7 @@ const ChartTwo = ({ contentStats, enrollmentStats }) => {
           <ReactApexChart
             options={{ ...options, colors: [theme.colors.primary, theme.colors.secondary] }}
             series={chartData.series}
-            type="bar"
+            type="line"
             height={350}
           />
         </div>
