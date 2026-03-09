@@ -12,7 +12,7 @@ const FormikCountrySelect = ({ name, label, placeholder, Icon, required, onChang
   const handleChange = useCallback(
     (_, selected) => {
       const selectedValue = selected?.name || '';
-      setFieldValue(name, selectedValue);
+      setFieldValue(name, selectedValue, true);
       onChange(selectedValue);
     },
     [name, onChange, setFieldValue]

@@ -11,7 +11,7 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
   const handleChange = useCallback(
     (_, selected) => {
       const selectedValue = selected?.value || '';
-      setFieldValue(name, selectedValue);
+      setFieldValue(name, selectedValue, true);
       onChange(selectedValue);
     },
     [name, onChange, setFieldValue]

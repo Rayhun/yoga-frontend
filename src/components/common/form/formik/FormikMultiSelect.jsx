@@ -25,7 +25,7 @@ const FormikMultiSelect = ({
       const arrayValue = raw
         .map(i => i.value)
         .filter(v => v != null && v !== '');
-      setFieldValue(name, arrayValue);
+      setFieldValue(name, arrayValue, true);
       onChange(raw);
     },
     [name, onChange, setFieldValue]
