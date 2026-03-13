@@ -1,0 +1,157 @@
+'use client';
+import { Formik, Form, FieldArray } from 'formik';
+import * as Yup from 'yup';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import FormikField from '@/components/common/form/formik/FormikField';
+import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
+import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import Button from '@/components/common/Button';
+import OnboardingQuizFormOptions from './OnboardingQuizFormOptions';
+import { addNewQuiz, updateExistingQuiz } from '@/services/private/onboarding/quiz';
+import { toastApiError } from '@/utils/helpers';
+import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
+import queryKeys from '@/utils/query-keys';
+import { ONBOARDING_QUIZ_CONTENT_TYPE_OPTIONS } from '@/utils/options';
+import { ONBOARDING_QUIZ_CONTENT_TYPE } from '@/utils/enums';
+import { uploadLMSFile } from '@/services/private/lms';
+
+const OnboardingQuizForm = ({ selected }) => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const isEditMode = Boolean(selected);
+  const { mutateAsync: addQuiz } = useMutation({
+    mutationFn: addNewQuiz,
+  });
+  const { mutateAsync: updateQuiz } = useMutation({
+    mutationFn: updateExistingQuiz,
+  });
+
+  const initialValues = {
+    title: selected?.title || '',
+    screen_type: selected?.screen_type || ONBOARDING_QUIZ_CONTENT_TYPE.text,
+    ordering: selected?.ordering || 0,
+    description: selected?.description || '',
+    is_required: selected?.required || false,
+    options: (selected?.options || [{ text: '', image: null, tags: [], program: '' }]).map(i => ({
+      text: i.text || '',
+      image: i.image_url || null,
+      tags: i.tags ? i.tags.map(tag => tag.id) : [],
+      program: i.program_id || '',
+    })),
+  };
+
+  const validationSchema = Yup.object({
+    title: Yup.string().required('Required!'),
+    ordering: Yup.number().required('Order is required').min(1).max(999),
+    description: Yup.string().required('Required!'),
+    is_required: Yup.boolean(),
+    options: Yup.array()
+      .of(
+        Yup.object({
+          text: Yup.string().required('Required!'),
+          image: Yup.mixed().nullable(),
+          tags: Yup.array().of(Yup.string()),
+          program: Yup.string(),
+        })
+      )
+      .min(2, 'At least 2 options are required.'),
+  });
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const isImageTypeQuiz = values.screen_type === ONBOARDING_QUIZ_CONTENT_TYPE.image;
+      let payload = { ...values };
+
+      if (isImageTypeQuiz) {
+        const uploadedImagesResponse = await Promise.all(
+          payload.options.map(option => uploadLMSFile({ file: option.image }))
+        );
+        uploadedImagesResponse?.forEach((imgResponse, i) => {
+          payload.options[i].image = imgResponse?.data?.file_link || null;
+        });
+      }
+
+      if (isEditMode) {
+        await updateQuiz({ payload: { id: selected.id, ...payload } });
+        toast.success('Quiz updated successfully');
+      } else {
+        await addQuiz({ payload: { ...payload } });
+        toast.success('Quiz added successfully');
+      }
+      await queryClient.invalidateQueries([
+        { queryKey: isEditMode ? [queryKeys.onboardingQuiz, selected.id] : [queryKeys.onboardingQuiz] },
+      ]);
+      router.push('/portal/admin/onboarding/quiz');
+    } catch (error) {
+      toastApiError(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <FormLayoutWrapper title="Quiz Form">
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ isSubmitting, setFieldValue }) => (
+          <Form className="flex flex-col gap-3">
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row md:items-center">
+              <div className="w-full md:w-1/2">
+                <FormikField name="title" label="Title" placeholder="Title" required />
+              </div>
+              <div className="w-full md:w-1/2">
+                <FormikSelect
+                  name="screen_type"
+                  label="Type"
+                  options={ONBOARDING_QUIZ_CONTENT_TYPE_OPTIONS}
+                  onChange={() => setFieldValue('options', [{ text: '', image: null, tags: [], program: '' }])}
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row md:items-center">
+              <div className="w-full md:w-1/2">
+                <FormikField
+                  name="ordering"
+                  label="Order"
+                  placeholder="Order"
+                  required
+                  min={1}
+                  max={999}
+                  type="number"
+                />
+              </div>
+              <div className="w-full md:w-1/2">
+                
+              </div>
+            </div>
+            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
+            <div className="flex">
+              <FormikCheckbox name="is_required" label="Is Required?" />
+            </div>
+            <div className="my-5 flex flex-col gap-3">
+              <h3 className="font-bold text-2xl text-black dark:text-white">Options</h3>
+              <FieldArray
+                name="options"
+                render={helpers => <OnboardingQuizFormOptions {...helpers} optionsData={selected?.options} />}
+              />
+            </div>
+
+            <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
+          </Form>
+        )}
+      </Formik>
+    </FormLayoutWrapper>
+  );
+};
+
+export default OnboardingQuizForm;

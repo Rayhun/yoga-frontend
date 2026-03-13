@@ -1,0 +1,30 @@
+'use client';
+import React from 'react';
+import DataStatsTwo from '../DataStats/DataStatsTwo';
+import ChartFive from '../../charts/ChartFive';
+import TableFour from '../Tables/TableFour';
+import ExternalLink from '../ExternalLink';
+import ChartSix from '../../charts/ChartSix';
+import FeaturedCampaigns from '../FeaturedCampaigns';
+import Feedback from '../Feedback';
+
+const Marketing = () => {
+  return (
+    <>
+      <DataStatsTwo />
+
+      <div className="mt-7.5 grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
+        <TableFour />
+        <ChartFive />
+        <ExternalLink />
+        <div className="col-span-12 xl:col-span-7">
+          <ChartSix />
+        </div>
+        <FeaturedCampaigns />
+        <Feedback />
+      </div>
+    </>
+  );
+};
+
+export default Marketing;
