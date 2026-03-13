@@ -10,7 +10,7 @@ const ChatWithAI = () => {
 
   const handleSendMessage = () => {
     if (inputText) {
-      router.push(`/portal/ai-coach?message=${inputText}`)
+      router.push(`/portal/ai-chat?message=${inputText}`)
       setInputText('');
     }
   };
@@ -46,7 +46,7 @@ const ChatWithAI = () => {
         </div>
       </div>
       <div className="mt-3 flex justify-center">
-        <Link href={'/portal/ai-coach'} className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors">
+        <Link href={'/portal/ai-chat'} className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors">
           Open full chat →
         </Link>
       </div>

@@ -13,7 +13,6 @@ import { HiOutlineStatusOnline, HiOutlineTag } from 'react-icons/hi';
 import { MdOutlineDescription, MdOutlineCategory } from 'react-icons/md';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../Button';
-
 const DetailSection = ({ label, children, icon: Icon }) => (
   <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-strokedark hover:shadow-md transition-shadow duration-200">
     <div className="flex items-center gap-3">
@@ -25,9 +24,9 @@ const DetailSection = ({ label, children, icon: Icon }) => (
 );
 
 const ProfileChip = ({ label }) => (
-  <Chip
-    label={label}
-    className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary capitalize font-medium border border-primary/20 dark:border-primary/30 hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors"
+  <Chip 
+    label={label} 
+    className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary capitalize font-medium border border-primary/20 dark:border-primary/30 hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors" 
   />
 );
 
@@ -35,7 +34,6 @@ export const GroupCoachingDetails = ({
   eventDetails,
   isLoading,
   isCustomerView = false,
-  isPublicView = false,
   eventId,
   handleCancelEvent,
   canceling,
@@ -43,8 +41,6 @@ export const GroupCoachingDetails = ({
   toggleCompletionModal,
   handleEnrollGroupCoaching,
   enrolling,
-  handlePublicBuyNow,
-  guestCheckoutLoading = false,
 }) => {
   const router = useRouter();
 
@@ -63,8 +59,9 @@ export const GroupCoachingDetails = ({
 
   if (isLoading) return <PageLoader />;
 
+  // Use user_datetime (user-local start) so end time matches the displayed start time; fallback to start_date
   const startDate = dayjs(eventDetails?.user_datetime || eventDetails?.start_date);
-  const endDate = dayjs(eventDetails.end_date);
+  const endDate = dayjs(eventDetails.end_date)
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
@@ -90,8 +87,8 @@ export const GroupCoachingDetails = ({
 
         {/* Right Section - Event Details */}
         <div className="w-full flex flex-col gap-4 p-5 lg:p-6 bg-white dark:bg-boxdark rounded-2xl shadow-lg border border-gray-100 dark:border-strokedark relative h-full min-h-[400px] lg:min-h-[500px]">
-          {/* Edit Button - hidden for customer and public views */}
-          {!isCustomerView && !isPublicView && (
+          {/* Edit Button */}
+          {!isCustomerView && (
             <button
               className="absolute right-4 top-4 inline-flex items-center gap-1.5 text-primary dark:text-primary hover:text-primary/80 text-xs font-semibold px-2.5 py-1 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 z-10"
               onClick={onEdit}
@@ -155,8 +152,8 @@ export const GroupCoachingDetails = ({
               </div>
             </div>
 
-            {/* Instructor/Guest - shown for customer and public views */}
-            {(isCustomerView || isPublicView) && (
+            {/* Instructor/Guest */}
+            {isCustomerView && (
               <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-boxdark-2 rounded-lg border border-gray-100 dark:border-strokedark">
                 <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
                   <LuUser size={18} className="text-primary dark:text-primary" />
@@ -190,9 +187,7 @@ export const GroupCoachingDetails = ({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs text-gray-600 dark:text-bodydark font-medium">
-                          Instructor{eventDetails.instructors.length > 1 ? 's' : ''}
-                        </span>
+                        <span className="text-xs text-gray-600 dark:text-bodydark font-medium">Instructor{eventDetails.instructors.length > 1 ? 's' : ''}</span>
                         <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
                           {eventDetails.instructors.map((instructor, index) => (
                             <span key={index}>
@@ -223,7 +218,6 @@ export const GroupCoachingDetails = ({
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-2.5 pt-2">
-            {/* Customer: enroll or buy */}
             {isCustomerView && !eventDetails?.is_enroll && (
               eventDetails?.price > 0 || eventDetails?.is_paid ? (
                 <Link href={`/payment/group_coaching/${eventId}`} className="w-full">
@@ -244,23 +238,7 @@ export const GroupCoachingDetails = ({
                 </Button>
               )
             )}
-
-            {/* Public view: guest checkout */}
-            {isPublicView && (
-              <Button
-                variant="primary"
-                size="xl"
-                onClick={handlePublicBuyNow}
-                disabled={guestCheckoutLoading}
-                fullWidth
-                className="shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                {guestCheckoutLoading ? 'Please wait...' : 'Buy Now'}
-              </Button>
-            )}
-
-            {/* Teacher view: complete / cancel */}
-            {!isCustomerView && !isPublicView && eventDetails?.status === 'Scheduled' && (
+            {!isCustomerView && eventDetails?.status === 'Scheduled' && (
               <div className="flex flex-col sm:flex-row gap-2.5">
                 <Button
                   variant="primary"
@@ -296,11 +274,12 @@ export const GroupCoachingDetails = ({
 
         {eventDetails?.meeting_link && (
           <DetailSection label="Meeting Link" icon={LuLink2}>
-            <a
-              className="text-primary dark:text-primary hover:text-primary/80 hover:underline font-medium break-all flex items-center gap-2"
-              href={eventDetails?.meeting_link}
+            <a 
+              className="text-primary dark:text-primary hover:text-primary/80 hover:underline font-medium break-all flex items-center gap-2" 
+              href={eventDetails?.meeting_link} 
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               <LuLink2 size={16} />
               {eventDetails?.meeting_link}
             </a>
@@ -309,9 +288,9 @@ export const GroupCoachingDetails = ({
 
         {eventDetails?.recording_link && (
           <DetailSection label="Recording Link" icon={LuLink2}>
-            <a
-              className="text-primary dark:text-primary hover:text-primary/80 hover:underline font-medium break-all flex items-center gap-2"
-              href={eventDetails?.recording_link}
+            <a 
+              className="text-primary dark:text-primary hover:text-primary/80 hover:underline font-medium break-all flex items-center gap-2" 
+              href={eventDetails?.recording_link} 
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -350,7 +329,7 @@ export const GroupCoachingDetails = ({
           <DetailSection label="Categories" icon={MdOutlineCategory}>
             <div className="flex flex-wrap gap-2">
               {eventDetails.categories.map((tag, index) =>
-                isCustomerView || isPublicView ? (
+                isCustomerView ? (
                   <ProfileChip key={`${index}-${tag}`} label={tag} />
                 ) : (
                   <ProfileChip key={tag.id} label={tag?.name} />
@@ -364,7 +343,7 @@ export const GroupCoachingDetails = ({
           <DetailSection label="Tags" icon={HiOutlineTag}>
             <div className="flex flex-wrap gap-2">
               {eventDetails.tags.map((tag, index) =>
-                isCustomerView || isPublicView ? (
+                isCustomerView ? (
                   <ProfileChip key={`${index}-${tag}`} label={tag} />
                 ) : (
                   <ProfileChip key={tag.id} label={tag?.name} />

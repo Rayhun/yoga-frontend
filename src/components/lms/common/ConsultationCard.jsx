@@ -5,6 +5,7 @@ import { FaPlay, FaClock } from 'react-icons/fa';
 
 const ConsultationCard = ({ consultation, onClick, isExpertView = false }) => {
   const isEnrolled = consultation?.is_enroll || isExpertView;
+  
   return (
     <div
       className="group relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer h-full flex flex-col"
@@ -19,16 +20,17 @@ const ConsultationCard = ({ consultation, onClick, isExpertView = false }) => {
           alt={consultation.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
-
+        
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
+        
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
             <FaPlay className="text-gray-700 ml-1" size={16} />
           </div>
         </div>
+        
         {/* Status Badge */}
         {isEnrolled && (
           <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -43,14 +45,15 @@ const ConsultationCard = ({ consultation, onClick, isExpertView = false }) => {
         <h4 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-green-700 transition-colors min-h-[3.5rem]">
           {consultation.title}
         </h4>
+        
         {/* Duration */}
         <div className="flex items-center gap-1 text-sm text-gray-600">
           <FaClock size={12} className="text-blue-500" />
           <span>{consultation.duration || 0} mins</span>
         </div>
-
+        
         {/* Price */}
-        {consultation?.price ? (
+        {consultation?.is_paid && consultation?.price ? (
           <div className="flex items-center gap-2 min-h-[1.5rem]">
             <span className="text-lg font-bold text-green-600">
               {consultation.currency_symbol || '$'} {consultation.price}
@@ -61,13 +64,13 @@ const ConsultationCard = ({ consultation, onClick, isExpertView = false }) => {
             <span className="text-lg font-bold text-green-600">Free</span>
           </div>
         )}
-
+        
         {/* Spacer to push button to bottom */}
         <div className="flex-1"></div>
-
+        
         {/* Action Button - Always at bottom */}
         <button
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             onClick();
           }}
