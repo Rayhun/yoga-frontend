@@ -120,7 +120,7 @@ const HelpSupportPage = () => {
               Our support team is available 24/7 to help you with any questions or concerns.
             </p>
             <Link
-              href="/portal/ai-faq"
+              href="/portal/ai-chat?type=support"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <span>Contact Support</span>

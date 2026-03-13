@@ -73,19 +73,6 @@ function useModal () {
 
         // Create a QueryClient instance for the modal
         const modalQueryClient = createModalQueryClient();
-        // eslint-disable-next-line @tanstack/query/stable-query-client
-        const modalQueryClient = new QueryClient({
-          defaultOptions: {
-            queries: {
-              retry: false,
-              refetchOnWindowFocus: false,
-              staleTime: 1000 * 60,
-            },
-            mutations: {
-              retry: false,
-            },
-          },
-        });
 
         root.render(
           <QueryClientProvider client={modalQueryClient}>

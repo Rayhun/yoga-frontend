@@ -12,7 +12,9 @@ import {
 
 const AboutSection = ({ label, children, icon: Icon }) => (
   <div className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+    {/* Decorative accent line */}
     <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-500 to-green-400 rounded-l-xl"></div>
+    
     <div className="flex items-start gap-3 mb-4">
       {Icon && (
         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 flex items-center justify-center">
@@ -44,18 +46,18 @@ const findRelatedLanguages = (languages) => {
     .filter(lang => lang !== undefined);
 };
 
-const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = false }) => {
+const UserProfileAbout = ({ data, isExpertView = false }) => {
   const relatedLanguages = findRelatedLanguages(data?.languages);
   return (
     <div className="flex flex-col gap-5">
       <AboutSection label="About" icon={FiUser}>
         <div className="prose prose-sm max-w-none dark:prose-invert">
-          <ControllableRichText showFullText={showFullAboutText}>
+          <ControllableRichText showFullText={true}>
             {data?.description || 'No description provided'}
           </ControllableRichText>
         </div>
       </AboutSection>
-
+      
       {data?.coaching_areas && data.coaching_areas.length > 0 && (
         <AboutSection label="Coaching Areas" icon={FiTarget}>
           <div className="flex flex-wrap gap-2.5">
@@ -65,7 +67,7 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
           </div>
         </AboutSection>
       )}
-
+      
       {relatedLanguages && relatedLanguages.length > 0 && (
         <AboutSection label="Languages" icon={FiGlobe}>
           <div className="flex flex-wrap gap-2.5">
@@ -75,7 +77,7 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
           </div>
         </AboutSection>
       )}
-
+      
       {data?.certifications && data.certifications.length > 0 && (
         <AboutSection label="Certifications" icon={FiAward}>
           <div className="flex flex-wrap gap-2.5">
@@ -85,7 +87,7 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
           </div>
         </AboutSection>
       )}
-
+      
       {data?.experience !== undefined && data.experience !== null && (
         <AboutSection label="Experience" icon={FiBriefcase}>
           <p className="text-base font-medium text-gray-900 dark:text-white">
@@ -93,7 +95,7 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
           </p>
         </AboutSection>
       )}
-
+      
       <AboutSection label={isExpertView ? "My Availability" : "Availability"} icon={FiCheckCircle}>
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${data?.available ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
