@@ -8,6 +8,7 @@ import { PiLightningLight } from 'react-icons/pi';
 import WellnessStats from '../dailyInsights/Stats';
 import MonthlyPatternsChart from '../dailyInsights/Chart';
 import KeyInsights from '../dailyInsights/KeyInsights';
+import AiInsightCard from '@/components/ai_insight/AiInsightCard';
 import { getCycleInsights } from '@/services/private/customer/goal';
 import queryKeys from '@/utils/query-keys';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
@@ -229,6 +230,19 @@ const CycleInsights = () => {
               <p className="text-gray-600">Personalized insights based on your cycle data.</p>
             </div>
             <KeyInsights insights={insightsData?.insight_data} />
+          </Section>
+
+          <Section>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+                  <span className="text-teal-600 text-sm">🎯</span>
+                </div>
+                Your Weekly Wellness Reflection
+              </h2>
+              <p className="text-gray-600">AI-powered recommendations based on your cycle.</p>
+            </div>
+            <AiInsightCard insight="cycle" />
           </Section>
         </div>
 

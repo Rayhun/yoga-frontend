@@ -31,3 +31,11 @@ export const toggleAIChatPromptStatus = async ({ id }) => {
 };
 
 
+export const getTrackers = async (insight) => {
+  const params = insight ? { insight } : {};
+  return axios.get('/goal-tracking/tracker/', { params });
+};
+
+export const getScheduleOptions = async () => {
+  return axios.get('/ai/prompts/schedule-options/');
+};
