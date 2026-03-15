@@ -143,7 +143,7 @@ const AIChatPromptsList = () => {
           <PageHeaderQuickActions actions={headerQuickActions} />
         </PageHeader>
 
-        <BasicTable isLoading={isLoading} columns={columns} data={data || []} />
+        <BasicTable isLoading={isLoading} columns={columns} data={data?.data || []} />
       </div>
     </React.Fragment>
   );

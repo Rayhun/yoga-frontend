@@ -90,6 +90,14 @@ const queryKeys = {
   customerSubscriptionHistory: 'customerSubscriptionHistory',
   guidedExperiences: 'guidedExperiences',
   lookupItems: 'lookupItems',
+  publicExpertProfile: 'publicExpertProfile',
+  publicExpertConsultations: 'publicExpertConsultations',
+  publicExpertConsultationDetails: 'publicExpertConsultationDetails',
+  publicExpertGroupCoaching: 'publicExpertGroupCoaching',
+  publicExpertGroupCoachingDetails: 'publicExpertGroupCoachingDetails',
+  publicExpertPrograms: 'publicExpertPrograms',
+  publicExpertProgramDetails: 'publicExpertProgramDetails',
+  guestCheckoutSession: 'guestCheckoutSession',
 };
 
 export default queryKeys;

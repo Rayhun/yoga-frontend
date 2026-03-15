@@ -4,14 +4,6 @@ export const createAIChatPromptType = async ({ payload, config = {} }) => {
   return axios.post('/ai/prompts/', payload, config);
 };
 
-export const getAIPromptsList = async () => {
-  return axios.get(`/ai/prompts/`);
-};
-
-export const getAIChatPromptDetails = async ({ id }) => {
-  return axios.get(`/ai/prompts/${id}/`);
-};
-
 export const updateAIChatPrompt = async ({ payload, config = {} }) => {
   // Handle both FormData and regular object payloads
   if (payload instanceof FormData) {
@@ -26,8 +18,23 @@ export const updateAIChatPrompt = async ({ payload, config = {} }) => {
   }
 };
 
+export const getAIPromptsList = async () => {
+  return axios.get(`/ai/prompts/`);
+};
+
+export const getAIChatPromptDetails = async ({ id }) => {
+  return axios.get(`/ai/prompts/${id}/`);
+};
+
 export const toggleAIChatPromptStatus = async ({ id }) => {
   return axios.post(`/ai/prompts/${id}/toggle_active/`);
 };
 
+export const getTrackers = async (insight) => {
+  const params = insight ? { insight } : {};
+  return axios.get('/goal-tracking/tracker/', { params });
+};
 
+export const getScheduleOptions = async () => {
+  return axios.get('/ai/prompts/schedule-options/');
+};

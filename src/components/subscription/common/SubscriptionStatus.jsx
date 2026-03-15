@@ -1,15 +1,17 @@
 'use client';
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { MdCheckCircle, MdError } from 'react-icons/md';
+import { MdCheckCircle, MdError, MdOutlineCancel } from 'react-icons/md';
 
 const VARIANT = {
   success: 'success',
   error: 'error',
+  cancel: 'cancel',
 };
 
 const SubscriptionMessage = ({ variant = VARIANT.error, renderButton = null }) => {
   const isSuccess = variant === VARIANT.success;
+  const isCancel = variant === VARIANT.cancel;
 
   const {
     Icon: MessageIcon,
@@ -18,14 +20,16 @@ const SubscriptionMessage = ({ variant = VARIANT.error, renderButton = null }) =
     regards: messageRegards,
   } = useMemo(
     () => ({
-      Icon: isSuccess ? MdCheckCircle : MdError,
-      heading: isSuccess ? 'Payment Successful!' : 'Oooppsss!!!',
+      Icon: isSuccess ? MdCheckCircle : isCancel ? MdOutlineCancel : MdError,
+      heading: isSuccess ? 'Payment Successful!' : isCancel ? 'Payment Cancelled' : 'Oooppsss!!!',
       description: isSuccess
         ? 'The payment has been completed successfully. You will be notified for further steps via email. Keep checking your email'
+        : isCancel
+        ? 'Your payment was cancelled before completion. No charge has been made. You can return and complete checkout anytime.'
         : 'Something went wrong in payment process. Please try again later after some time',
       regards: 'Thanks for being there with us.',
     }),
-    [isSuccess]
+    [isSuccess, isCancel]
   );
 
   return (
