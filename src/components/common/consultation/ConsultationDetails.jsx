@@ -23,9 +23,12 @@ export const ConsultationDetails = ({
   consultationDetails,
   isLoading,
   isCustomerView = false,
+  isPublicView = false,
   consultationId,
   handleEnrollConsultation,
   enrolling,
+  handlePublicBuyNow,
+  guestCheckoutLoading = false,
 }) => {
   const router = useRouter();
 
@@ -53,7 +56,7 @@ export const ConsultationDetails = ({
 
         {/* Right Section - Event Details */}
         <div className="w-full h-full flex flex-col gap-5 p-8 bg-white rounded-lg shadow-md dark:bg-boxdark relative">
-          {!isCustomerView && (
+          {!isCustomerView && !isPublicView && (
             <button
               className="absolute right-6 top-3 inline-flex items-center justify-center text-primary text-sm text-center font-medium hover:underline"
               onClick={onEdit}
@@ -79,7 +82,7 @@ export const ConsultationDetails = ({
           </div>
 
           {/* Instructor Info */}
-          {isCustomerView && (
+          {(isCustomerView || isPublicView) && (
             <div className="flex items-center gap-3">
               <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                 <Image
@@ -118,11 +121,20 @@ export const ConsultationDetails = ({
                 size="2xl"
                 onClick={handleEnrollConsultation}
                 disabled={enrolling}
-                // className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-2 text-center rounded-xl shadow hover:bg-primary/80"
               >
                 {enrolling ? 'Enrolling...' : 'Enroll Now'}
               </Button>
             ))}
+          {isPublicView && (
+            <Button
+              variant="primary"
+              size="2xl"
+              onClick={handlePublicBuyNow}
+              disabled={guestCheckoutLoading}
+            >
+              {guestCheckoutLoading ? 'Please wait...' : 'Buy Now'}
+            </Button>
+          )}
           {isCustomerView && consultationDetails?.is_enroll && (
             <div className="!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl bg-orange-500 text-white">
               {`Enrolled`}
@@ -202,7 +214,7 @@ export const ConsultationDetails = ({
       <DetailSection label={'Categories'}>
         <div className="flex flex-wrap gap-2">
           {consultationDetails?.categories?.map((tag, index) =>
-            isCustomerView ? (
+            isCustomerView || isPublicView ? (
               <ProfileChip key={`${index}-${tag}`} label={tag} />
             ) : (
               <ProfileChip key={tag.id} label={tag?.name} />
@@ -213,7 +225,7 @@ export const ConsultationDetails = ({
       <DetailSection label={'Tags'}>
         <div className="flex flex-wrap gap-2">
           {consultationDetails?.tags?.map((tag, index) =>
-            isCustomerView ? (
+            isCustomerView || isPublicView ? (
               <ProfileChip key={`${index}-${tag}`} label={tag} />
             ) : (
               <ProfileChip key={tag.id} label={tag?.name} />

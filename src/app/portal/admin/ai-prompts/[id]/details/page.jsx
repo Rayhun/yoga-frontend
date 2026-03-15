@@ -41,7 +41,7 @@ const Page = ({ params }) => {
       <PageHeader title="AI Chat Prompt Details">
         <PageHeaderQuickActions actions={headerActions} />
       </PageHeader>
-      <AIChatPromptDetails data={response?.data} />
+      <AIChatPromptDetails data={response?.data?.data} />
     </div>
   );
 };
