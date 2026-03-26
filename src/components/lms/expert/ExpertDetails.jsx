@@ -1,24 +1,44 @@
 'use client';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RiEdit2Line } from 'react-icons/ri';
+import { FiShare2 } from 'react-icons/fi';
 import ExpertProfileAbout from './ExpertProfileAbout';
 import Image from 'next/image';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
+import ShareProfileDialog from '@/components/expert/profile/ShareProfileDialog';
 
 const ExpertDetails = ({ data }) => {
   const router = useRouter();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const onEdit = () => router.push(`/portal/admin/lms/expert/${data.id}/edit`);
 
   return (
     <div className="relative">
-      <button
-        className="absolute right-6 top-3 inline-flex items-center justify-center text-primary  text-sm text-center font-medium hover:underline"
-        onClick={onEdit}
-      >
-        <RiEdit2Line />
-        Edit Profile
-      </button>
+      <div className="absolute right-6 top-3 flex items-center gap-4">
+        <button
+          className="inline-flex items-center justify-center gap-1 text-primary text-sm text-center font-medium hover:underline"
+          onClick={() => setShareDialogOpen(true)}
+        >
+          <FiShare2 />
+          Share Profile
+        </button>
+        <button
+          className="inline-flex items-center justify-center text-primary text-sm text-center font-medium hover:underline"
+          onClick={onEdit}
+        >
+          <RiEdit2Line />
+          Edit Profile
+        </button>
+      </div>
+
+      <ShareProfileDialog
+        open={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        expertEmail={data?.email || data?.expert_email || data?.user?.email}
+        expertId={data?.id}
+      />
       <div className="flex flex-col gap-6">
         <div className="text-center bg-white rounded-lg shadow-md flex items-center">
           <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">

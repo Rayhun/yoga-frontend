@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Popup from '@/components/common/popup';
 import { FiCopy, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const ShareProfileDialog = ({ open, onClose, expertEmail, expertId }) => {
   const [copied, setCopied] = useState(false);
+  const inputRef = useRef(null);
   const username = expertEmail?.split('@')?.[0] || expertId;
 
   const profileUrl =
@@ -13,17 +14,15 @@ const ShareProfileDialog = ({ open, onClose, expertEmail, expertId }) => {
 
   const handleCopy = async () => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+      if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(profileUrl);
       } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = profileUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
+        const input = inputRef.current;
+        input.select();
+        input.setSelectionRange(0, 99999);
+        const success = document.execCommand('copy');
+        if (!success) throw new Error('execCommand failed');
+        window.getSelection()?.removeAllRanges();
       }
       setCopied(true);
       toast.success('Link copied to clipboard!');
@@ -44,9 +43,9 @@ const ShareProfileDialog = ({ open, onClose, expertEmail, expertId }) => {
           Share your public profile link with clients and on social media to grow your reach.
         </p>
 
-        {/* Link display */}
         <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl p-3">
           <input
+            ref={inputRef}
             type="text"
             readOnly
             value={profileUrl}
@@ -61,7 +60,6 @@ const ShareProfileDialog = ({ open, onClose, expertEmail, expertId }) => {
           </button>
         </div>
 
-        {/* Copy button */}
         <button
           onClick={handleCopy}
           className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 ${
