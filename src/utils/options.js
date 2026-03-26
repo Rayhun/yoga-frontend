@@ -244,3 +244,11 @@ export const GROUP_VISIBILITY_OPTIONS = [
     value: GROUP_VISIBILITY.private,
   },
 ];
+
+export const SUBSCRIPTION_FREE_TRIAL_OPTIONS = [
+  { label: 'No Trial', value: 0 },
+  { label: '3 Days', value: 3 },
+  { label: '7 Days', value: 7 },
+  { label: '14 Days', value: 14 },
+  { label: '21 Days', value: 21 },
+];
