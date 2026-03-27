@@ -25,11 +25,14 @@ import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
 import CertificationsField from '../general/fields/CertificationsField';
+import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const { options: coachingAreaOptions } = useLMSCoachingAreas('Coaching Areas');
+  const { options: certificationOptions } = useLMSCoachingAreas('Certifications');
 
   const { mutateAsync: addExpert } = useMutation({
     mutationFn: addNewExpert,
@@ -103,11 +106,11 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one tag is required'),
     coaching_areas: Yup.array()
-      .of(Yup.string().required('Required!'))
+      .of(Yup.mixed().required('Required!'))
       .min(1, 'At least 1 coaching area is required')
       .max(10, 'Maximum 10 coaching areas are allowed'),
     certifications: Yup.array()
-      .of(Yup.string().required('Required!'))
+      .of(Yup.mixed().required('Required!'))
       .min(1, 'At least 1 certification is required')
       .max(5, 'Maximum 5 certifications are allowed'),
     languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
@@ -141,13 +144,38 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       }),
   });
 
+  const normalizeLookupIds = (items = [], options = []) => {
+    if (!Array.isArray(items)) return [];
+    return items
+      .map(item => {
+        if (item && typeof item === 'object') {
+          return item.id ?? item.value ?? item.label ?? null;
+        }
+        const matchedOption = options.find(
+          option =>
+            option?.value === item ||
+            (typeof item === 'string' &&
+              typeof option?.label === 'string' &&
+              option.label.toLowerCase() === item.toLowerCase())
+        );
+        return matchedOption?.value ?? item;
+      })
+      .filter(value => value !== null && value !== undefined && value !== '');
+  };
+
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const payload = {
+        ...values,
+        coaching_areas: normalizeLookupIds(values.coaching_areas, coachingAreaOptions),
+        certifications: normalizeLookupIds(values.certifications, certificationOptions),
+      };
+
       if (isEditMode) {
-        await updateExpert({ payload: { id: selected.id, ...values } });
+        await updateExpert({ payload: { id: selected.id, ...payload } });
         toast.success('Expert updated successfully');
       } else {
-        await addExpert({ payload: { ...values } });
+        await addExpert({ payload });
         toast.success('Expert created successfully');
       }
       await queryClient.invalidateQueries([
