@@ -9,6 +9,7 @@ import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { addNewSubscriptionPlan, updateExistingSubscriptionPlan } from '@/services/private/subscription/plan';
 import { toastApiError } from '@/utils/helpers';
 import {
@@ -45,6 +46,7 @@ const SubscriptionPlanForm = ({ selected }) => {
     features: selected?.features?.join('\n') || '',
     programs: selected?.programs?.map(program => program.id) || [],
     x_days_trial: selected?.x_days_trial ?? 7,
+    is_default: selected?.is_default ?? false,
   };
 
   const validationSchema = Yup.object({
@@ -73,6 +75,7 @@ const SubscriptionPlanForm = ({ selected }) => {
     features: Yup.string().required('Required!'),
     programs: Yup.array(),
     x_days_trial: Yup.number(),
+    is_default: Yup.boolean(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -210,7 +213,12 @@ const SubscriptionPlanForm = ({ selected }) => {
                 />
               </div>
             </div>
+            
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
+            <div className="flex items-center gap-3">
+              <FormikSwitch name="is_default" />
+              <span className="font-medium text-black dark:text-white">Set as Default Plan</span>
+            </div>
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
