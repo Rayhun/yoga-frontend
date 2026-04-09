@@ -216,8 +216,7 @@ const SubscriptionPlanForm = ({ selected }) => {
             
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
             <div className="flex items-center gap-3">
-              <FormikSwitch name="is_default" />
-              <span className="font-medium text-black dark:text-white">Set as Default Plan</span>
+              <FormikSwitch name="is_default"  label="Set as Default Plan"/>
             </div>
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
