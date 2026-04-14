@@ -45,7 +45,7 @@ const Page = () => {
       <ShareProfileDialog
         open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
-        expertEmail={expertData?.email || expertData?.expert_email || expertData?.user?.email}
+        publicUsername={expertData?.public_username}
         expertId={expertData?.id}
       />
     </React.Fragment>
