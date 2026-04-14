@@ -9,12 +9,14 @@ import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { addNewSubscriptionPlan, updateExistingSubscriptionPlan } from '@/services/private/subscription/plan';
 import { toastApiError } from '@/utils/helpers';
 import {
   SUBSCRIPTION_PAGE_STATUS_OPTIONS,
   SUBSCRIPTION_PAGE_TENURE_OPTIONS,
   SUBSCRIPTION_PAGE_TYPE_OPTIONS,
+  SUBSCRIPTION_FREE_TRIAL_OPTIONS,
 } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 import useLMSProgramOptions from '@/hooks/useLMSProgramOptions';
@@ -43,6 +45,8 @@ const SubscriptionPlanForm = ({ selected }) => {
     discounted_volume: selected?.discounted_volume || [],
     features: selected?.features?.join('\n') || '',
     programs: selected?.programs?.map(program => program.id) || [],
+    x_days_trial: selected?.x_days_trial ?? 7,
+    is_default: selected?.is_default ?? false,
   };
 
   const validationSchema = Yup.object({
@@ -53,22 +57,25 @@ const SubscriptionPlanForm = ({ selected }) => {
     price: Yup.number().required('Required!').min(0, 'Price must be at least 0'),
     discounted_price: Yup.number().when('subscription_type', {
       is: 'Individual',
-      then: (schema) => schema.min(0, 'Discounted Price must be at least 0'),
-      otherwise: (schema) => schema.min(0, 'Discounted Price must be at least 0'),
+      then: schema => schema.min(0, 'Discounted Price must be at least 0'),
+      otherwise: schema => schema.min(0, 'Discounted Price must be at least 0'),
     }),
     discounted_volume: Yup.array().when('subscription_type', {
       is: 'Business',
-      then: (schema) => schema.of(
-        Yup.object({
-          volume: Yup.number().required('Volume is required').min(1, 'Volume must be at least 1'),
-          type: Yup.string().required('Type is required'),
-          discount: Yup.number().required('Discount is required').min(0, 'Discount must be at least 0'),
-        })
-      ),
-      otherwise: (schema) => schema,
+      then: schema =>
+        schema.of(
+          Yup.object({
+            volume: Yup.number().required('Volume is required').min(1, 'Volume must be at least 1'),
+            type: Yup.string().required('Type is required'),
+            discount: Yup.number().required('Discount is required').min(0, 'Discount must be at least 0'),
+          })
+        ),
+      otherwise: schema => schema,
     }),
     features: Yup.string().required('Required!'),
     programs: Yup.array(),
+    x_days_trial: Yup.number(),
+    is_default: Yup.boolean(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -144,12 +151,19 @@ const SubscriptionPlanForm = ({ selected }) => {
                 />
               </div>
             </div>
-            
+
             {/* Conditional fields based on subscription type */}
             {values.subscription_type === 'Individual' && (
               <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <FormikField type="number" name="price" min={0} label="Price" placeholder="Price" required />
+                  <FormikField
+                    type="number"
+                    name="price"
+                    min={0}
+                    label="Price"
+                    placeholder="Price"
+                    required
+                  />
                 </div>
                 <div className="w-full xl:w-1/2">
                   <FormikField
@@ -162,32 +176,48 @@ const SubscriptionPlanForm = ({ selected }) => {
                 </div>
               </div>
             )}
-            
+
             {values.subscription_type === 'Business' && (
               <>
                 <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
                   <div className="w-full xl:w-1/2">
-                    <FormikField 
-                      type="number" 
-                      name="price" 
-                      min={0} 
-                      label="Per Volume Price" 
-                      placeholder="Per Volume Price" 
-                      required 
+                    <FormikField
+                      type="number"
+                      name="price"
+                      min={0}
+                      label="Per Volume Price"
+                      placeholder="Per Volume Price"
+                      required
                     />
                   </div>
                 </div>
                 <DiscountedVolumeManager />
               </>
             )}
+
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <FormikMultiSelect
+                  name="programs"
+                  label="Programs"
+                  placeholder="Select Programs"
+                  options={programOptions || []}
+                />
+              </div>
+              <div className="w-full xl:w-1/2">
+                <FormikSelect
+                  name="x_days_trial"
+                  label="Free Trial"
+                  placeholder="Select Free Trial"
+                  options={SUBSCRIPTION_FREE_TRIAL_OPTIONS}
+                />
+              </div>
+            </div>
             
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
-            <FormikMultiSelect
-              name="programs"
-              label="Programs"
-              placeholder="Select Programs"
-              options={programOptions || []}
-            />
+            <div className="flex items-center gap-3">
+              <FormikSwitch name="is_default"  label="Set as Default Plan"/>
+            </div>
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
