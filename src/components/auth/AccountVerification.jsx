@@ -1,26 +1,27 @@
 'use client';
 import React, { useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import OTPVerificationForm from './OTPVerificationForm';
-import { verifyEmail, verifyPhone, resendEmailOTPCode, resendPhoneOTPCode } from '@/services/public/auth';
+import { verifyEmail, resendEmailOTPCode } from '@/services/public/auth';
+// Mobile OTP verification disabled — backend currently uses email-only account verification.
+// import { verifyPhone, resendPhoneOTPCode } from '@/services/public/auth';
 import { toastApiError } from '@/utils/helpers';
 import Cookies from 'js-cookie';
 
 const AccountVerificationForm = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParamUtils();
-  // Read email and phone from sessionStorage for security (not from URL)
+  // Read email from sessionStorage for security (not from URL)
   const email = typeof window !== 'undefined' ? sessionStorage.getItem('pendingVerificationEmail') : null;
-  const phone = typeof window !== 'undefined' ? sessionStorage.getItem('pendingVerificationPhone') : null;
+  // const phone = typeof window !== 'undefined' ? sessionStorage.getItem('pendingVerificationPhone') : null;
   const step = searchParams.get('step');
   const email_verify = searchParams.get('email_verify') === 'true';
-  const mobile_verify = searchParams.get('mobile_verify') === 'true';
-  const isEmailVerification = step === 'email';
-  const isPhoneVerification = step === 'phone';
+  // const mobile_verify = searchParams.get('mobile_verify') === 'true';
+  const isEmailVerification = step === 'email' || step === 'phone';
+  // const isPhoneVerification = step === 'phone';
 
   const { mutateAsync: verifyEmailOTP, isSuccess: emailVerfied } = useMutation({
     mutationFn: verifyEmail,
@@ -28,23 +29,23 @@ const AccountVerificationForm = () => {
   const { mutateAsync: resendEmailOTP } = useMutation({
     mutationFn: resendEmailOTPCode,
   });
-  const { mutateAsync: verifyPhoneOTP, isSuccess: phoneVerfied } = useMutation({
-    mutationFn: verifyPhone,
-  });
-  const { mutateAsync: resendPhoneOTP } = useMutation({
-    mutationFn: resendPhoneOTPCode,
-  });
+  // const { mutateAsync: verifyPhoneOTP, isSuccess: phoneVerfied } = useMutation({
+  //   mutationFn: verifyPhone,
+  // });
+  // const { mutateAsync: resendPhoneOTP } = useMutation({
+  //   mutationFn: resendPhoneOTPCode,
+  // });
 
   const isEmailVerified = useMemo(() => {
     return Boolean(email_verify) || emailVerfied;
   }, [emailVerfied, email_verify]);
 
-  const isPhoneVerified = useMemo(() => {
-    return mobile_verify || phoneVerfied;
-  }, [phoneVerfied, mobile_verify]);
+  // const isPhoneVerified = useMemo(() => {
+  //   return mobile_verify || phoneVerfied;
+  // }, [phoneVerfied, mobile_verify]);
 
   // Redirect to signup only if email is missing (e.g. direct URL access).
-  // When coming from login with "email/mobile not verify", we have email but may not have phone.
+  // When coming from login with "email not verify", we have email but may not have phone.
   useEffect(() => {
     if (typeof window !== 'undefined' && step && !email) {
       router.replace('/auth/signup');
@@ -52,7 +53,7 @@ const AccountVerificationForm = () => {
   }, [email, step, router]);
 
   useEffect(() => {
-    if (isEmailVerified && isPhoneVerified) {
+    if (isEmailVerified) {
       const pendingToken = sessionStorage.getItem('pendingVerificationToken');
       if (pendingToken) {
         Cookies.set('token', pendingToken);
@@ -68,7 +69,7 @@ const AccountVerificationForm = () => {
         router.replace('/auth/login');
       }
     }
-  }, [isEmailVerified, isPhoneVerified, router]);
+  }, [isEmailVerified, router]);
 
   const handleResendEmailOTP = async () => {
     if (!email) {
@@ -92,51 +93,50 @@ const AccountVerificationForm = () => {
       return;
     }
     try {
-      const res = await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
+      await verifyEmailOTP({ payload: { email, email_otp: values.otp } });
       setSubmitting(false);
       toast.success('Email verified successfully');
-      nextStep('phone');
+      // nextStep('phone'); // mobile verification step disabled
     } catch (error) {
       toastApiError(error);
       setSubmitting(false);
     }
   };
 
-  const handleResendPhoneOTP = async () => {
-    if (!phone) {
-      toast.error('Phone number not found. Please sign up again.');
-      router.replace('/auth/signup');
-      return;
-    }
-    try {
-      await resendPhoneOTP({ payload: { phone: phone.replace(' ', '+') } });
-      toast.success('OTP resent to your phone');
-    } catch (error) {
-      toastApiError(error);
-    }
-  };
+  // const handleResendPhoneOTP = async () => {
+  //   if (!phone) {
+  //     toast.error('Phone number not found. Please sign up again.');
+  //     router.replace('/auth/signup');
+  //     return;
+  //   }
+  //   try {
+  //     await resendPhoneOTP({ payload: { phone: phone.replace(' ', '+') } });
+  //     toast.success('OTP resent to your phone');
+  //   } catch (error) {
+  //     toastApiError(error);
+  //   }
+  // };
 
-  const handleSubmitPhoneOTP = async (values, { setSubmitting }) => {
-    if (!email) {
-      toast.error('Email not found. Please sign up again.');
-      router.replace('/auth/signup');
-      setSubmitting(false);
-      return;
-    }
-    try {
-      const res = await verifyPhoneOTP({ payload: { email, number_otp: values.otp } });
-      setSubmitting(false);
-      toast.success('Phone verified successfully');
-    } catch (error) {
-      toastApiError(error);
-      setSubmitting(false);
-    }
-  };
+  // const handleSubmitPhoneOTP = async (values, { setSubmitting }) => {
+  //   if (!email) {
+  //     toast.error('Email not found. Please sign up again.');
+  //     router.replace('/auth/signup');
+  //     setSubmitting(false);
+  //     return;
+  //   }
+  //   try {
+  //     await verifyPhoneOTP({ payload: { email, number_otp: values.otp } });
+  //     setSubmitting(false);
+  //     toast.success('Phone verified successfully');
+  //   } catch (error) {
+  //     toastApiError(error);
+  //     setSubmitting(false);
+  //   }
+  // };
 
-  const nextStep = value => {
-    // Only update step in URL, keep email and phone in sessionStorage
-    router.replace(`${pathname}?step=${value}`);
-  };
+  // const nextStep = value => {
+  //   router.replace(`${pathname}?step=${value}`);
+  // };
 
   return (
     <div className="space-y-6">
@@ -157,16 +157,7 @@ const AccountVerificationForm = () => {
           />
         </>
       )}
-      {isPhoneVerification && (
-        <OTPVerificationForm
-          label="Phone OTP"
-          btnText="Verify Phone"
-          isVerified={isPhoneVerified}
-          onSubmit={handleSubmitPhoneOTP}
-          onResendOTP={handleResendPhoneOTP}
-          otpDuration={120}
-        />
-      )}
+      {/* Phone OTP UI removed — see commented handlers/imports at top of file to restore */}
     </div>
   );
 };

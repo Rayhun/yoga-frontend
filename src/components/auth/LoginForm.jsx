@@ -35,15 +35,14 @@ const LoginForm = () => {
       const { data: response } = await mutateAsync({ payload: values });
       if (response?.data?.token) {
         const userDetails = response?.data?.user;
-        const { email_verify, mobile_number_verify, on_boarding_quiz, role, mobile_number } =
-          userDetails?.profile;
+        const { email_verify, on_boarding_quiz, role } = userDetails?.profile;
         if (role?.toLowerCase() === 'teacher') {
-          if (!email_verify || !mobile_number_verify) {
+          // Only email verification is required on the frontend (mobile OTP flow disabled)
+          if (!email_verify) {
             sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
-            // Store email and phone in sessionStorage for security (not in URL)
             sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
-            sessionStorage.setItem('pendingVerificationPhone', mobile_number);
-            router.replace(`/auth/verify-account?step=${email_verify ? 'phone' : 'email'}`);
+            // sessionStorage.setItem('pendingVerificationPhone', mobile_number);
+            router.replace('/auth/verify-account?step=email');
           } else {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
@@ -87,22 +86,6 @@ const LoginForm = () => {
           setSubmitting(false);
           return;
         }
-        if (errorMessage.includes('Mobile number not verify') || errorMessage.includes('number verify first')) {
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('pendingVerificationEmail', values.email);
-            const mobileNumber = error.response?.data?.data?.mobile_number;
-            if (mobileNumber) {
-              sessionStorage.setItem('pendingVerificationPhone', mobileNumber);
-            } else {
-              sessionStorage.removeItem('pendingVerificationPhone');
-            }
-          }
-          toastApiError(error);
-          router.replace('/auth/verify-account?step=phone');
-          setSubmitting(false);
-          return;
-        }
-
         let fieldName = null;
 
         if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('expert')) {

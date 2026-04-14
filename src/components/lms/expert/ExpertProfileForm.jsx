@@ -92,12 +92,12 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       }),
     description: Yup.string()
       .required('Required!')
-      .test('max_length', 'Your content must be between 25 and 150 words', value => {
+      .test('max_length', 'Your content must be between 25 and 500 words', value => {
         if (!value) return false;
         // Strip HTML tags for word count
         const textContent = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
-        return wordsCount >= 25 && wordsCount <= 150;
+        return wordsCount >= 25 && wordsCount <= 500;
       }),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
@@ -326,7 +326,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FiInfo className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   About
                 </h3>
-                <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-150 words)" rows={5} required />
+                <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required />
               </div>
 
               {/* Divider */}

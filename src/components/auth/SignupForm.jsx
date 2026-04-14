@@ -72,7 +72,7 @@ const SignupForm = () => {
       await confirm({
         heading: 'Confirm Sign Up',
         message:
-          'One Time Password (OTP) will be sent to your entered email and phone number to verify your account. Are you sure you have entered your correct email and phone?',
+          'One Time Password (OTP) will be sent to your email to verify your account. Are you sure you have entered your correct email?',
       });
 
       // Only proceed if user confirmed (clicked OK)
@@ -88,13 +88,13 @@ const SignupForm = () => {
 
         const { data: createdUserAccount } = await mutateAsync({ payload });
 
-        toast.success('Account created successfully and OTP sent to your email and phone');
+        toast.success('Account created successfully and OTP sent to your email');
 
         const userDetails = createdUserAccount?.user;
         sessionStorage.setItem('pendingVerificationToken', createdUserAccount?.token);
-        // Store email and phone in sessionStorage for security (not in URL)
+        // Store email in sessionStorage for security (not in URL)
         sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
-        sessionStorage.setItem('pendingVerificationPhone', userDetails?.profile?.mobile_number);
+        // sessionStorage.setItem('pendingVerificationPhone', userDetails?.profile?.mobile_number); // mobile OTP verification disabled
 
         router.push('/auth/verify-account?step=email');
       } catch (error) {
