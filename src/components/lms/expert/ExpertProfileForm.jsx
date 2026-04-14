@@ -25,11 +25,14 @@ import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
 import CoachingAreasField from '../general/fields/CoachingAreasField';
 import CertificationsField from '../general/fields/CertificationsField';
+import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(selected);
+  const { options: coachingAreaOptions } = useLMSCoachingAreas('Coaching Areas');
+  const { options: certificationOptions } = useLMSCoachingAreas('Certifications');
 
   const { mutateAsync: addExpert } = useMutation({
     mutationFn: addNewExpert,
@@ -89,12 +92,12 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       }),
     description: Yup.string()
       .required('Required!')
-      .test('max_length', 'Your content must be between 25 and 150 words', value => {
+      .test('max_length', 'Your content must be between 25 and 500 words', value => {
         if (!value) return false;
         // Strip HTML tags for word count
         const textContent = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
-        return wordsCount >= 25 && wordsCount <= 150;
+        return wordsCount >= 25 && wordsCount <= 500;
       }),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
@@ -103,11 +106,11 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one tag is required'),
     coaching_areas: Yup.array()
-      .of(Yup.string().required('Required!'))
+      .of(Yup.mixed().required('Required!'))
       .min(1, 'At least 1 coaching area is required')
       .max(10, 'Maximum 10 coaching areas are allowed'),
     certifications: Yup.array()
-      .of(Yup.string().required('Required!'))
+      .of(Yup.mixed().required('Required!'))
       .min(1, 'At least 1 certification is required')
       .max(5, 'Maximum 5 certifications are allowed'),
     languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
@@ -141,13 +144,38 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
       }),
   });
 
+  const normalizeLookupIds = (items = [], options = []) => {
+    if (!Array.isArray(items)) return [];
+    return items
+      .map(item => {
+        if (item && typeof item === 'object') {
+          return item.id ?? item.value ?? item.label ?? null;
+        }
+        const matchedOption = options.find(
+          option =>
+            option?.value === item ||
+            (typeof item === 'string' &&
+              typeof option?.label === 'string' &&
+              option.label.toLowerCase() === item.toLowerCase())
+        );
+        return matchedOption?.value ?? item;
+      })
+      .filter(value => value !== null && value !== undefined && value !== '');
+  };
+
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const payload = {
+        ...values,
+        coaching_areas: normalizeLookupIds(values.coaching_areas, coachingAreaOptions),
+        certifications: normalizeLookupIds(values.certifications, certificationOptions),
+      };
+
       if (isEditMode) {
-        await updateExpert({ payload: { id: selected.id, ...values } });
+        await updateExpert({ payload: { id: selected.id, ...payload } });
         toast.success('Expert updated successfully');
       } else {
-        await addExpert({ payload: { ...values } });
+        await addExpert({ payload });
         toast.success('Expert created successfully');
       }
       await queryClient.invalidateQueries([
@@ -298,7 +326,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   <FiInfo className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   About
                 </h3>
-                <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-150 words)" rows={5} required />
+                <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required />
               </div>
 
               {/* Divider */}
