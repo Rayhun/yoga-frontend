@@ -98,6 +98,7 @@ const queryKeys = {
   publicExpertPrograms: 'publicExpertPrograms',
   publicExpertProgramDetails: 'publicExpertProgramDetails',
   guestCheckoutSession: 'guestCheckoutSession',
+  coupons: 'coupons',
 };
 
 export default queryKeys;
