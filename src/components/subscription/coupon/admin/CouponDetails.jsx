@@ -14,7 +14,7 @@ const CouponDetails = ({ data = {} }) => {
     <DetailsLayoutWrapper title="Coupon">
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Name">{data.name}</DetailsRecord>
-        <DetailsRecord label="Code">{data.code || '—'}</DetailsRecord>
+        <DetailsRecord label="Promotion Code">{data.promotion_code || '—'}</DetailsRecord>
         <DetailsRecord label="Coupon Type">{data.coupon_type}</DetailsRecord>
         <DetailsRecord label="Discount Type">{data.discount_type}</DetailsRecord>
         <DetailsRecord label="Discount">{discountLabel}</DetailsRecord>

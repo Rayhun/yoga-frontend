@@ -53,7 +53,7 @@ const CouponsList = () => {
   const tableColumns = useMemo(
     () => [
       { header: 'Name', accessorKey: 'name' },
-      { header: 'Code', accessorKey: 'code' },
+      { header: 'Promotion Code', accessorKey: 'promotion_code' },
       { header: 'Coupon Type', accessorKey: 'coupon_type' },
       { header: 'Discount Type', accessorKey: 'discount_type' },
       {

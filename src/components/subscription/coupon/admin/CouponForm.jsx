@@ -3,6 +3,7 @@ import { useField } from 'formik';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Popup from '@/components/common/popup';
 import Button from '@/components/common/Button';
@@ -67,26 +68,6 @@ const FormikDateField = ({ name, label }) => {
   );
 };
 
-const validationSchema = Yup.object({
-  name: Yup.string().required('Required!'),
-  code: Yup.string(),
-  coupon_type: Yup.string().required('Required!'),
-  discount_type: Yup.string().required('Required!'),
-  discount_value: Yup.number()
-    .typeError('Must be a number')
-    .required('Required!')
-    .positive('Must be greater than 0')
-    .when('discount_type', {
-      is: 'percent',
-      then: schema => schema.max(100, 'Percentage must be ≤ 100'),
-    }),
-  valid_to: Yup.string().test('after-valid-from', 'Must be after Valid From', function (value) {
-    const { valid_from } = this.parent;
-    if (!value || !valid_from) return true;
-    return new Date(value) > new Date(valid_from);
-  }),
-});
-
 const CouponForm = ({ open, onClose, selected }) => {
   const isEditMode = Boolean(selected);
   const queryClient = useQueryClient();
@@ -96,6 +77,47 @@ const CouponForm = ({ open, onClose, selected }) => {
     queryKey: [queryKeys.coupons, 'planOptions'],
     enabled: open,
   });
+
+  const plans = plansResponse?.data || [];
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object({
+        name: Yup.string().required('Required!'),
+        promotion_code: Yup.string(),
+        coupon_type: Yup.string().required('Required!'),
+        discount_type: Yup.string().required('Required!'),
+        product: Yup.string().when('coupon_type', {
+          is: 'platform',
+          then: schema => schema.required('Plan is required for Platform coupons'),
+        }),
+        discount_value: Yup.number()
+          .typeError('Must be a number')
+          .required('Required!')
+          .positive('Must be greater than 0')
+          .when('discount_type', {
+            is: 'percent',
+            then: schema => schema.max(100, 'Percentage must be ≤ 100'),
+          })
+          .test(
+            'platform-price-limit',
+            'Discount value cannot be greater than or equal to the plan price',
+            function (value) {
+              const { coupon_type, product } = this.parent;
+              if (coupon_type !== 'platform' || !product || !value) return true;
+              const plan = plans.find(p => p.id === product);
+              if (!plan?.price) return true;
+              return Number(value) < Number(plan.price);
+            }
+          ),
+        valid_to: Yup.string().test('after-valid-from', 'Must be after Valid From', function (value) {
+          const { valid_from } = this.parent;
+          if (!value || !valid_from) return true;
+          return new Date(value) > new Date(valid_from);
+        }),
+      }),
+    [plans]
+  );
 
   const planOptions = [
     { label: 'No specific plan', value: '' },
@@ -110,7 +132,7 @@ const CouponForm = ({ open, onClose, selected }) => {
 
   const initialValues = {
     name: selected?.name || '',
-    code: selected?.code || '',
+    promotion_code: selected?.promotion_code || '',
     coupon_type: selected?.coupon_type || '',
     description: selected?.description || '',
     discount_type: selected?.discount_type || '',
@@ -167,7 +189,7 @@ const CouponForm = ({ open, onClose, selected }) => {
                 <FormikField name="name" label="Name" placeholder="Coupon name" required />
               </div>
               <div className="w-full md:w-1/2">
-                <FormikField name="code" label="Code" placeholder="e.g. SUMMER20" />
+                <FormikField name="promotion_code" label="Promotion Code" placeholder="e.g. SUMMER20" />
               </div>
             </div>
 
