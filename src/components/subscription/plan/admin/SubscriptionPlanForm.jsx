@@ -47,6 +47,8 @@ const SubscriptionPlanForm = ({ selected }) => {
     programs: selected?.programs?.map(program => program.id) || [],
     x_days_trial: selected?.x_days_trial ?? 7,
     is_default: selected?.is_default ?? false,
+    stripe_product_id: selected?.stripe_product_id || '',
+    price_id: selected?.price_id || '',
   };
 
   const validationSchema = Yup.object({
@@ -214,6 +216,14 @@ const SubscriptionPlanForm = ({ selected }) => {
               </div>
             </div>
             
+            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <FormikField name="stripe_product_id" label="Stripe Product ID" placeholder="Stripe Product ID" />
+              </div>
+              <div className="w-full xl:w-1/2">
+                <FormikField name="price_id" label="Price ID" placeholder="Price ID" />
+              </div>
+            </div>
             <FormikField name="features" label="Features" placeholder="Features" rows={5} required />
             <div className="flex items-center gap-3">
               <FormikSwitch name="is_default"  label="Set as Default Plan"/>
