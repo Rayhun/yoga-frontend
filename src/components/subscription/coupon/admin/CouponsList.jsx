@@ -66,17 +66,6 @@ const CouponsList = () => {
         },
       },
       {
-        header: 'Plan',
-        cell: ({ row }) => row.original.product_detail?.title || 'All Plans',
-      },
-      {
-        header: 'Valid Until',
-        cell: ({ row }) =>
-          row.original.valid_to
-            ? new Date(row.original.valid_to).toLocaleDateString()
-            : '—',
-      },
-      {
         header: 'Status',
         cell: ({ row }) => {
           const isActive = row.original.active;
