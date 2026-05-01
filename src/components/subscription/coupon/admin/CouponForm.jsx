@@ -75,7 +75,7 @@ const CouponForm = ({ open, onClose, selected }) => {
   const validationSchema = useMemo(
     () =>
       Yup.object({
-        name: Yup.string().required('Required!'),
+        name: Yup.string().required('Required!').max(35, 'Name must be 35 characters or less'),
         promotion_code: Yup.string(),
         coupon_type: Yup.string().required('Required!'),
         discount_type: Yup.string().required('Required!'),
@@ -153,7 +153,7 @@ const CouponForm = ({ open, onClose, selected }) => {
           <Form className="flex flex-col gap-4 text-left mt-2">
             <div className="flex flex-col gap-x-6 gap-y-4 md:flex-row">
               <div className="w-full md:w-1/2">
-                <FormikField name="name" label="Name" placeholder="Coupon name" required />
+                <FormikField name="name" label="Name" placeholder="Coupon name" maxLength={35} required />
               </div>
               <div className="w-full md:w-1/2">
                 <FormikField name="promotion_code" label="Promotion Code" placeholder="e.g. SUMMER20" />
