@@ -82,8 +82,14 @@ const SubscriptionPlanForm = ({ selected }) => {
     try {
       // Filter out empty fields from payload
       const payload = { ...values };
-      if (!payload.discounted_price || payload.discounted_price === '') {
-        delete payload.discounted_price;
+      const hasDiscountedPrice = payload.discounted_price !== '' && payload.discounted_price !== null && payload.discounted_price !== undefined;
+      if (!hasDiscountedPrice) {
+        // In edit mode send null so the backend clears the existing value; in create mode just omit it
+        if (isEditMode) {
+          payload.discounted_price = null;
+        } else {
+          delete payload.discounted_price;
+        }
       }
       if (!payload.discounted_volume || payload.discounted_volume.length === 0) {
         delete payload.discounted_volume;
