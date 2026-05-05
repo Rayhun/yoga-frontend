@@ -152,7 +152,7 @@ const DailyInsights = () => {
             <KeyInsights insights={insightsData?.insight_data} />
           </Section>
 
-          <Section>
+          {/* <Section>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
@@ -163,7 +163,7 @@ const DailyInsights = () => {
               <p className="text-gray-600">AI-powered recommendations based on your habits.</p>
             </div>
             <AiInsightCard insight="habit" />
-          </Section>
+          </Section> */}
 
         </div>
 
