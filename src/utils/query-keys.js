@@ -103,6 +103,7 @@ const queryKeys = {
   adminNotificationStats: 'adminNotificationStats',
   adminNotificationLogs: 'adminNotificationLogs',
   adminDeviceTokensBrowse: 'adminDeviceTokensBrowse',
+  coupons: 'coupons',
 };
 
 export default queryKeys;

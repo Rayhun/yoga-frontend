@@ -134,7 +134,11 @@ const AIChatPromptsForm = ({ selected }) => {
       .nullable()
       .when('chat_type', {
         is: 'faqs',
-        then: schema => schema.required('File is required when chat type is FAQs'),
+        then: schema =>
+          schema.test('file-required', 'File is required when chat type is FAQs', value => {
+            if (isEditMode && selected?.faq_file) return true;
+            return !!value;
+          }),
         otherwise: schema => schema.notRequired(),
       })
       .test('fileSize', 'File is too large (max 10MB)', value => {
@@ -160,7 +164,7 @@ const AIChatPromptsForm = ({ selected }) => {
           return;
         }
         if (key === 'file' && values[key]) {
-          formData.append('file', values[key]);
+          formData.append('faq_file', values[key]);
         } else if (key === 'all_trackers' && Array.isArray(values[key])) {
           values[key].forEach(trackerId => {
             formData.append('all_trackers', trackerId);
@@ -361,7 +365,8 @@ const AIChatPromptsForm = ({ selected }) => {
               label={selectedChatType === 'faqs' ? 'Upload FAQs File' : 'Upload File (Optional)'}
               accept={['.pdf', '.doc', '.docx', '.txt', '.csv']}
               maxSize={10 * 1024 * 1024}
-              required={selectedChatType === 'faqs'}
+              required={selectedChatType === 'faqs' && !(isEditMode && selected?.faq_file)}
+              fileURL={selected?.faq_file || selected?.file_info?.url || ''}
             />
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>

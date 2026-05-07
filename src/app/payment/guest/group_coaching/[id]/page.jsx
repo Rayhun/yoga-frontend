@@ -49,11 +49,9 @@ const Page = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="text-center">
-        <Alert className="mt-5" variant="filled" severity="warning">
-          Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
-        </Alert>
-      </div>
+      <Alert className="mt-5" variant="filled" severity="warning">
+        Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
+      </Alert>
       <LoadingWrapper isLoading={isLoading}>
         {clientSecret ? (
           <StripeCheckout clientSecret={clientSecret} />

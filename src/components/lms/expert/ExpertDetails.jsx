@@ -17,13 +17,15 @@ const ExpertDetails = ({ data }) => {
   return (
     <div className="relative">
       <div className="absolute right-6 top-3 flex items-center gap-4">
-        <button
-          className="inline-flex items-center justify-center gap-1 text-primary text-sm text-center font-medium hover:underline"
-          onClick={() => setShareDialogOpen(true)}
-        >
-          <FiShare2 />
-          Share Profile
-        </button>
+        {data?.is_profile_complete && (
+          <button
+            className="inline-flex items-center justify-center gap-1 text-primary text-sm text-center font-medium hover:underline"
+            onClick={() => setShareDialogOpen(true)}
+          >
+            <FiShare2 />
+            Share Profile
+          </button>
+        )}
         <button
           className="inline-flex items-center justify-center text-primary text-sm text-center font-medium hover:underline"
           onClick={onEdit}

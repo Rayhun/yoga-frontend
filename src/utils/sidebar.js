@@ -5,6 +5,7 @@ import {
   MdHome,
   MdSubscriptions,
   MdPages,
+  MdLocalOffer,
   MdOutlineEventNote,
   MdOutlinePayments,
   MdTrackChanges,
@@ -284,6 +285,13 @@ const ADMIN = [
     label: 'Subscription Plans',
     href: '/portal/admin/subscription/plan',
     isActive: pathname => pathname.includes('/portal/admin/subscription/plan'),
+    disabled: false,
+  },
+  {
+    Icon: MdLocalOffer,
+    label: 'Coupons',
+    href: '/portal/admin/subscription/coupon',
+    isActive: pathname => pathname.includes('/portal/admin/subscription/coupon'),
     disabled: false,
   },
   {
