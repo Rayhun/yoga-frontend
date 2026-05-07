@@ -24,6 +24,8 @@ const VARIANT_TYPE_OPTIONS = [
   { label: 'Single select (with image)', value: 'single_select_image' },
 ];
 
+const ORDER_CHECK_FETCH_LIMIT = 500;
+
 function variantTypeLabel(type) {
   return VARIANT_TYPE_OPTIONS.find(o => o.value === type)?.label ?? type ?? '—';
 }
@@ -436,8 +438,6 @@ const OnboardingQuizForm = ({ selected }) => {
       return next;
     });
   };
-
-  const ORDER_CHECK_FETCH_LIMIT = 500;
 
   const { data: questionsListResponse, isFetched: questionsListFetched } = useQuery({
     queryKey: [queryKeys.onboardingQuizV2, 'order-validation'],
