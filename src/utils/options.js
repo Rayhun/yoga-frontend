@@ -42,10 +42,11 @@ export const CONTENT_TYPE_OPTIONS = [
 ];
 
 export const ACCESS_SETTING_OPTIONS = [
-  // {
-  //   label: 'Open',
-  //   value: ACCESS_SETTING.open,
-  // },
+  {
+    label: 'Open',
+    value: ACCESS_SETTING.open,
+  },
+  
   {
     label: 'Free',
     value: ACCESS_SETTING.free,

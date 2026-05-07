@@ -9,7 +9,8 @@ import {
   MdOutlinePayments,
   MdTrackChanges,
   MdGroupAdd,
-  MdList
+  MdList,
+  MdOutlineNotifications
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -113,6 +114,13 @@ const ADMIN = [
     label: 'Permissions',
     href: '/portal/admin/permissions',
     isActive: pathname => pathname.includes('/portal/admin/permissions'),
+    disabled: false,
+  },
+  {
+    Icon: MdOutlineNotifications,
+    label: 'Notifications',
+    href: '/portal/admin/notifications',
+    isActive: pathname => pathname.includes('/portal/admin/notifications'),
     disabled: false,
   },
   {

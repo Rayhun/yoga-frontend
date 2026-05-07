@@ -6,17 +6,17 @@ import queryKeys from '@/utils/query-keys';
 
 function useLMSTagOptions() {
   const { data: tagsResponse } = useQuery({
-    queryFn: getTagsList,
+    queryFn: () => getTagsList({ limit: 1000, offset: 0 }),
     queryKey: [queryKeys.lmsTags],
   });
 
   const categoriesOptions = useMemo(
     () =>
-      tagsResponse?.data?.map(option => ({
-        label: option.name,
+      (tagsResponse?.data?.data?.results || []).map(option => ({
+        label: option.label,
         value: option.id,
       })),
-    [tagsResponse?.data]
+    [tagsResponse?.data?.data?.results]
   );
 
   return {

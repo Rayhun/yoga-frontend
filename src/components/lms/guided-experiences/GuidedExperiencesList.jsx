@@ -10,7 +10,11 @@ import useConfirm from '@/hooks/useConfirm';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getGuidedExperiencesList, deleteGuidedExperience, toggleGuidedExperienceStatus } from '@/services/private/lms/guided-experiences';
+import {
+  getGuidedExperiencesList,
+  deleteGuidedExperience,
+  toggleGuidedExperienceStatus,
+} from '@/services/private/lms/guided-experiences';
 import queryKeys from '@/utils/query-keys';
 import { toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';

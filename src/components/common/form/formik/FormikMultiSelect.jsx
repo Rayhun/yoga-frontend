@@ -4,6 +4,7 @@ import { useField, useFormikContext } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 const FormikMultiSelect = ({
   name,
@@ -16,14 +17,15 @@ const FormikMultiSelect = ({
   onChange = () => null,
   ...rest
 }) => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, submitCount } = useFormikContext();
   const [field, meta] = useField(name);
+  const containerRef = useScrollToFirstErrorField(name);
 
   const handleChange = useCallback(
     (_, value) => {
       const raw = Array.isArray(value) ? value : [];
       const arrayValue = raw
-        .map(i => i.value)
+        .map(i => (typeof i === 'string' ? i : i?.value))
         .filter(v => v != null && v !== '');
       setFieldValue(name, arrayValue, true);
       onChange(raw);
@@ -48,17 +50,18 @@ const FormikMultiSelect = ({
 
   const selectedOptions = useMemo(
     () =>
-      fieldValueArray
-        .map(fv => options.find(opt => opt.value != null && opt.value !== '' && fv == opt.value))
-        .filter(Boolean),
+      fieldValueArray.map(fv => {
+        const matched = options.find(opt => opt.value != null && opt.value !== '' && fv == opt.value);
+        return matched || { label: String(fv), value: fv };
+      }),
     [fieldValueArray, options]
   );
 
-  // Show error whenever validation fails (e.g. over max) so user sees it without blurring
-  const isErrorField = Boolean(meta.error);
+  // Show error only after user interaction or form submit.
+  const isErrorField = Boolean(meta.error) && (meta.touched || submitCount > 0);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       {label && (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}
@@ -69,7 +72,9 @@ const FormikMultiSelect = ({
           {...rest}
           id={name}
           options={options}
-          getOptionLabel={option => option.label}
+          freeSolo={rest.freeSolo}
+          filterSelectedOptions
+          getOptionLabel={option => (typeof option === 'string' ? option : option.label)}
           getOptionKey={(option, index) =>
             option?.value != null && option?.value !== ''
               ? option.value

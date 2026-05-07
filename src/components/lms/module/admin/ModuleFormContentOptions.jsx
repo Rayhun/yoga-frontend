@@ -22,7 +22,7 @@ const ModuleFormContentOptions = ({ form, name, push, remove }) => {
         size="sm"
         variant="secondary"
         className="self-start"
-        onClick={() => push({ content_id: '', content_type: '', order: '' })}
+        onClick={() => push({ content_id: '', content_type: '', order_by: '' })}
       >
         Add Option
       </Button>

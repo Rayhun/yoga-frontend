@@ -18,11 +18,19 @@ export const toggleGuidedExperienceStatus = async ({ id }) => {
   return axios.post(`/LMS/events/${id}/toggle_active/`);
 };
 
+export const duplicateGuidedExperience = async ({ id }) => {
+  return axios.post(`/LMS/events/${id}/duplicate/`);
+};
+
 export const createGuidedExperience = async ({ payload: { categories, tags, ...payload } }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== null && value !== undefined && value !== '') {
-      formData.set(key, value);
+      if (key === 'recurring_dates') {
+        formData.set(key, JSON.stringify(value));
+      } else {
+        formData.set(key, value);
+      }
     }
   });
   if (categories && categories.length > 0) {
@@ -39,7 +47,11 @@ export const updateGuidedExperience = async ({ payload: { categories, tags, ...p
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value !== null && value !== undefined && value !== '') {
-      formData.set(key, value);
+      if (key === 'recurring_dates') {
+        formData.set(key, JSON.stringify(value));
+      } else {
+        formData.set(key, value);
+      }
     }
   });
   if (categories && categories.length > 0) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chip } from '@mui/material';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   cancelGroupCoaching,
@@ -18,6 +18,7 @@ import MarkCompleteForm from '@/components/common/MarkCompleteForm';
 
 export const ExpertGroupCoachingDetails = () => {
   const params = useParams();
+  const router = useRouter();
   const eventId = params.id;
   const confirm = useConfirm();
   const { isOpen: isCompletionModalOpen, toggle: toggleCompletionModal } = useToggle();
@@ -70,6 +71,10 @@ export const ExpertGroupCoachingDetails = () => {
     }
   };
 
+  const handleDuplicateEvent = async () => {
+    router.push(`/portal/teacher/group_coaching/add?copy_from=${eventId}`);
+  };
+
   return (
     <>
       <GroupCoachingDetails
@@ -80,6 +85,8 @@ export const ExpertGroupCoachingDetails = () => {
         canceling={isPending}
         completingEvent={isCompleting}
         toggleCompletionModal={toggleCompletionModal}
+        handleDuplicateEvent={handleDuplicateEvent}
+        duplicating={false}
       />
       <Popup heading={null} open={isCompletionModalOpen} onClose={() => toggleCompletionModal()}>
         <MarkCompleteForm handleSubmit={handleEventCompletion} toggleCompletionModal={toggleCompletionModal} />

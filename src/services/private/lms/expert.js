@@ -59,7 +59,9 @@ export const toggleExpertStatus = async ({ id }) => {
 
 export const exportExpertsList = async (params) => {
   const searchParams = getSearchParamsFromObject(params);
-  return axios.get(`/LMS/experts/export/?${searchParams}`,);
+  return axios.get(`/LMS/experts/export/?${searchParams}`, {
+    responseType: 'blob',
+  });
 };
 
 export const getLookupsListByCategory = async (category) => {

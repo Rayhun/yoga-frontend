@@ -3,14 +3,23 @@ import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { getUserTimeAndTimezone } from '@/utils/helpers';
+import { getUserTimeAndTimezone, toastApiError } from '@/utils/helpers';
+import { duplicateGuidedExperience } from '@/services/private/lms/guided-experiences';
+import queryKeys from '@/utils/query-keys';
 
 dayjs.extend(utc);
 
 const GuidedExperienceDetails = ({ data = {}, eventType }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: duplicateExperience, isPending: isDuplicating } = useMutation({
+    mutationFn: duplicateGuidedExperience,
+  });
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -65,10 +74,37 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
     return `/portal/admin/lms/expert/guided-experiences/${eventTypePath}/${data.id}/edit`;
   };
 
+  const handleCopy = async () => {
+    try {
+      const response = await duplicateExperience({ id: data.id });
+      const copiedEvent = response?.data?.data;
+      const itemEventType = copiedEvent?.event_type || eventType;
+      const eventTypePath = itemEventType === 'live event' ? 'live-event' : itemEventType;
+
+      toast.success('Guided experience copied successfully');
+      await queryClient.invalidateQueries([queryKeys.guidedExperiences, eventType]);
+
+      if (copiedEvent?.id) {
+        router.push(`/portal/admin/lms/expert/guided-experiences/${eventTypePath}/${copiedEvent.id}/edit`);
+      }
+    } catch (error) {
+      toastApiError(error);
+    }
+  };
+
   return (
     <DetailsLayoutWrapper 
       title="Guided Experience Details"
       onEdit={() => router.push(getEditPath())}
+      customActions={
+        <button
+          className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-1 text-sm text-center font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-60"
+          onClick={handleCopy}
+          disabled={isDuplicating}
+        >
+          {isDuplicating ? 'Copying...' : 'Copy'}
+        </button>
+      }
     >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title || 'N/A'}</DetailsRecord>

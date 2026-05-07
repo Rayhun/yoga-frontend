@@ -17,7 +17,7 @@ import Button from '@/components/common/Button';
 import { FiFilter } from 'react-icons/fi';
 import useToggle from '@/hooks/useToggle';
 import useConfirm from '@/hooks/useConfirm';
-import { downloadCSV, toastApiError } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -56,12 +56,7 @@ const ExpertsList = () => {
         });
 
         const response = await exportExperts(filters);
-        if (!response?.data?.data) {
-          toast.error('No data available to export');
-          return;
-        }
-        
-        downloadCSV(response.data.data, 'experts-list.csv');
+        downloadBlobAsCsv(response, 'expert_export.csv', 'Experts exported successfully');
 
         toast.success(`Experts exported successfully`);
       } catch (error) {

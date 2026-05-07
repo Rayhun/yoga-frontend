@@ -1,7 +1,7 @@
 import OnboardingQuizList from '@/components/onboarding/quiz/OnboardingQuizList';
 
 export const metadata = {
-  title: 'Onboarding Quizes',
+  title: 'Onboarding steps',
 };
 
 const Page = () => {

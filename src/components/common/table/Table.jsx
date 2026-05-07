@@ -5,7 +5,17 @@ import PaginationItem from '@mui/material/PaginationItem';
 import Spinner from '@/components/common/loader/Spinner';
 import { setDefaultPageSize } from '@/utils/helpers';
 
-const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = true, showFooter = true, CustomFilters = null }) => {
+const CustomTable = ({
+  isLoading = false,
+  table,
+  pagination = {},
+  showHeader = true,
+  showFooter = true,
+  showSearch = true,
+  CustomFilters = null,
+  /** Called with the row’s original record when a body row is clicked */
+  onRowClick,
+}) => {
   const { getHeaderGroups, getRowModel, getPageCount, getState, setGlobalFilter, setPageSize, setPageIndex } =
     table;
 
@@ -20,17 +30,19 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
     <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       {showHeader ? (
         <div className="flex justify-between border-b border-stroke px-8 py-4 dark:border-strokedark">
-          <div className='flex gap-4'>
-          <div className="w-100">
-            <input
-              type="text"
-              value={globalFilter}
-              onChange={e => setGlobalFilter(e.target.value)}
-              className="w-full rounded-md border border-stroke px-5 py-2.5 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
-              placeholder="Search..."
-            />
-          </div>
-          {CustomFilters}
+          <div className="flex gap-4">
+            {showSearch ? (
+              <div className="w-100">
+                <input
+                  type="text"
+                  value={globalFilter ?? ''}
+                  onChange={e => setGlobalFilter(e.target.value)}
+                  className="w-full rounded-md border border-stroke px-5 py-2.5 outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary"
+                  placeholder="Search..."
+                />
+              </div>
+            ) : null}
+            {CustomFilters}
           </div>
          
           <div className="flex items-center font-medium">
@@ -59,7 +71,7 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id} className="bg-[#F9FAFB] dark:bg-meta-4">
               {headerGroup.headers.map(header => (
-                <th key={header.id}>
+                <th key={header.id} className={header.column.columnDef.meta?.tableCellClassName ?? ''}>
                   <div className="flex items-center">
                     {header.isPlaceholder
                       ? null
@@ -116,9 +128,37 @@ const CustomTable = ({ isLoading = false, table, pagination = {}, showHeader = t
             <>
               {rows.length > 0 ? (
                 rows.map(row => (
-                  <tr key={row.id}>
+                  <tr
+                    key={row.id}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    role={onRowClick ? 'button' : undefined}
+                    className={
+                      onRowClick
+                        ? 'cursor-pointer outline-none transition-colors hover:bg-[#F3F4F6] focus-visible:ring-2 focus-visible:ring-primary/40 dark:hover:bg-meta-4/70'
+                        : undefined
+                    }
+                    onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                    onKeyDown={
+                      onRowClick
+                        ? e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onRowClick(row.original);
+                            }
+                          }
+                        : undefined
+                    }
+                  >
                     {row.getVisibleCells().map(cell => (
-                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      <td
+                        key={cell.id}
+                        className={cell.column.columnDef.meta?.tableCellClassName ?? ''}
+                        onClick={
+                          cell.column.columnDef.meta?.stopRowClick ? e => e.stopPropagation() : undefined
+                        }
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
                     ))}
                   </tr>
                 ))

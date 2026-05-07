@@ -13,6 +13,8 @@ import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 const moduleContentOptionsCache = new Map();
 const moduleLoadingStates = new Map();
 
+const getOrderByValue = item => Number(item?.order_by ?? item?.order);
+
 const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldError }) => {
   const router = useRouter();
   const { setFieldValue } = useFormikContext();
@@ -128,60 +130,60 @@ const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldEr
 
   const handleOrderChange = (orderValue) => {
     // Set the field value first
-    setFieldValue(`${name}.order`, orderValue);
+    setFieldValue(`${name}.order_by`, orderValue);
     
     // Clear any existing errors first
-    setFieldError(`${name}.order`, '');
+    setFieldError(`${name}.order_by`, '');
     
     // Check if order is empty
     if (!orderValue || orderValue === '') {
-      setFieldError(`${name}.order`, 'Order is required');
+      setFieldError(`${name}.order_by`, 'Order is required');
       return;
     }
     
     // Check if order is a valid positive number
     const orderNum = parseInt(orderValue);
     if (isNaN(orderNum) || orderNum < 1) {
-      setFieldError(`${name}.order`, 'Order must be a positive number');
+      setFieldError(`${name}.order_by`, 'Order must be a positive number');
       return;
     }
     
     // Check if order is already used by another row
     const currentIndex = parseInt(name.match(/\d+/)[0]);
     const isDuplicateOrder = allValues.module_content.some((item, index) => 
-      index !== currentIndex && item.order === orderNum
+      index !== currentIndex && getOrderByValue(item) === orderNum
     );
     
     if (isDuplicateOrder) {
-      setFieldError(`${name}.order`, 'Order number must be unique');
+      setFieldError(`${name}.order_by`, 'Order number must be unique');
     }
   };
 
   // Validate order field on blur
   const handleOrderBlur = () => {
-    const orderValue = values.order;
+    const orderValue = values.order_by;
     
     // Check if order is empty
     if (!orderValue || orderValue === '') {
-      setFieldError(`${name}.order`, 'Order is required');
+      setFieldError(`${name}.order_by`, 'Order is required');
       return;
     }
     
     // Check if order is a valid positive number
     const orderNum = parseInt(orderValue);
     if (isNaN(orderNum) || orderNum < 1) {
-      setFieldError(`${name}.order`, 'Order must be a positive number');
+      setFieldError(`${name}.order_by`, 'Order must be a positive number');
       return;
     }
     
     // Check if order is already used by another row
     const currentIndex = parseInt(name.match(/\d+/)[0]);
     const isDuplicateOrder = allValues.module_content.some((item, index) => 
-      index !== currentIndex && item.order === orderNum
+      index !== currentIndex && getOrderByValue(item) === orderNum
     );
     
     if (isDuplicateOrder) {
-      setFieldError(`${name}.order`, 'Order number must be unique');
+      setFieldError(`${name}.order_by`, 'Order number must be unique');
     }
   };
 
@@ -225,7 +227,7 @@ const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldEr
       <div className="w-[20%] min-w-[120px]">
         <FormikField 
           type="number" 
-          name={`${name}.order`} 
+          name={`${name}.order_by`} 
           label="Order" 
           placeholder="Order" 
           min={1} 

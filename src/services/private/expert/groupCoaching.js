@@ -21,7 +21,13 @@ export const getExpertGroupCoachingDetails = async ({ id }) => {
 export const createNewGroupCoaching = async ({ payload: { categories, tags, ...payload } }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
+    if (value !== null && value !== undefined && value !== '') {
+      if (key === 'recurring_dates') {
+        formData.set(key, JSON.stringify(value));
+      } else {
+        formData.set(key, value);
+      }
+    }
   });
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));
@@ -32,12 +38,22 @@ export const createNewGroupCoaching = async ({ payload: { categories, tags, ...p
 export const updateGroupCoaching = async ({ payload: { categories, tags, ...payload }, id }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
+    if (value !== null && value !== undefined && value !== '') {
+      if (key === 'recurring_dates') {
+        formData.set(key, JSON.stringify(value));
+      } else {
+        formData.set(key, value);
+      }
+    }
   });
   formData.set('categories', categories.join(','));
   formData.set('tags', tags.join(','));
 
   return axios.patch(`/LMS/events/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
+export const duplicateGroupCoaching = async ({ id }) => {
+  return axios.post(`/LMS/events/${id}/duplicate/`);
 };
 
 export const cancelGroupCoaching = async ({ id }) => {

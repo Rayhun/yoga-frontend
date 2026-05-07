@@ -6,6 +6,7 @@ const queryKeys = {
   businessSubscriptionHistory: 'businessSubscriptionHistory',
   loggedInUser: 'loggedInUser',
   onboardingQuiz: 'onboardingQuiz',
+  onboardingQuizV2: 'onboardingQuizV2',
   onboardingRecommendations: 'onboardingRecommendations',
   lmsCategories: 'lmsCategories',
   lmsFeaturedCategories: 'lmsFeaturedCategories',
@@ -98,6 +99,10 @@ const queryKeys = {
   publicExpertPrograms: 'publicExpertPrograms',
   publicExpertProgramDetails: 'publicExpertProgramDetails',
   guestCheckoutSession: 'guestCheckoutSession',
+  adminNotifications: 'adminNotifications',
+  adminNotificationStats: 'adminNotificationStats',
+  adminNotificationLogs: 'adminNotificationLogs',
+  adminDeviceTokensBrowse: 'adminDeviceTokensBrowse',
 };
 
 export default queryKeys;

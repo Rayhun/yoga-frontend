@@ -2,6 +2,8 @@
 
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import dayjs from 'dayjs';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
@@ -18,6 +20,7 @@ import { ONE_MB } from '@/utils/general';
 import { toastApiError } from '@/utils/helpers';
 import useUserTimeZone from '@/hooks/useUserTimeZone';
 import FormikMultiSelect from '../form/formik/FormikMultiSelect';
+import Popup from '@/components/common/popup';
 // import ZoomMeetingConnectionButton from '../ZoomMeetingConnectionButton';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -58,6 +61,8 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
   const { mutateAsync: update } = useMutation({
     mutationFn: updateGroupCoaching,
   });
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
+  const [editingRecurringIndex, setEditingRecurringIndex] = useState(null);
 
   const initialValues = {
     title: initialData?.title || '',
@@ -79,12 +84,40 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
           : initialData.followup_support.split(','))
       : [],
     is_zoom_event: initialData?.is_zoom_event || false,
+    is_recurring: initialData?.is_recurring || false,
+    recurring_dates: Array.isArray(initialData?.recurring_dates)
+      ? initialData.recurring_dates
+          .map(date => (dayjs(date).isValid() ? dayjs(date).format('YYYY-MM-DDTHH:mm') : ''))
+          .filter(Boolean)
+      : [],
+    recurring_picker_value: '',
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Event title is required'),
     description: Yup.string().required('Description is required'),
-    start_date: Yup.string().required('Start time is required'),
+    start_date: Yup.string()
+      .required('Start time is required')
+      .test(
+        'not-in-past',
+        'Start time cannot be in the past. Please choose current or future date/time.',
+        value => !!value && dayjs(value).isValid() && !dayjs(value).isBefore(dayjs())
+      ),
+    is_recurring: Yup.boolean(),
+    recurring_dates: Yup.array().when('is_recurring', {
+      is: true,
+      then: schema =>
+        schema
+          .of(
+            Yup.string().test(
+              'recurring-not-in-past',
+              'Recurring date/time cannot be in the past',
+              value => !!value && dayjs(value).isValid() && !dayjs(value).isBefore(dayjs())
+            )
+          )
+          .min(1, 'At least one recurring date/time is required'),
+      otherwise: schema => schema,
+    }),
     duration: Yup.number().required('Duration is required').min(1, 'Duration must be at least 1 minute'),
     time_zone: Yup.string().required('Timezone is required'),
     event_type: Yup.string().required(),
@@ -124,6 +157,17 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const payload = { ...values };
+      delete payload.recurring_picker_value;
+      if (payload.is_recurring) {
+        payload.recurring_dates = (payload.recurring_dates || [])
+          .filter(Boolean)
+          .map(date => dayjs(date).utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
+        if (!payload.start_date && payload.recurring_dates.length > 0) {
+          payload.start_date = payload.recurring_dates[0];
+        }
+      } else {
+        payload.recurring_dates = [];
+      }
       if (isEditMode) {
         if (typeof payload.image === 'string') delete payload.image;
         await update({ payload, id: eventId });
@@ -166,6 +210,83 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                 <FormikField name="title" label="Title" required />
                 <FormikField name="description" label="Description" rows={4} required />
                 <DateTimePicker name="start_date" label="Start Date & Time" required />
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Make it recurring</label>
+                  <ToggleButtonGroup
+                    value={values.is_recurring}
+                    exclusive
+                    onChange={(_, newValue) => {
+                      if (newValue !== null) {
+                        setFieldValue('is_recurring', newValue);
+                        if (!newValue) setFieldValue('recurring_dates', []);
+                      }
+                    }}
+                    size="small"
+                    color="primary"
+                  >
+                    <ToggleButton value={false}>No</ToggleButton>
+                    <ToggleButton value={true}>Yes</ToggleButton>
+                  </ToggleButtonGroup>
+                </div>
+
+                {values.is_recurring && (
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Recurring schedule</h4>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setEditingRecurringIndex(null);
+                          setFieldValue('recurring_picker_value', '');
+                          setIsRecurringModalOpen(true);
+                        }}
+                      >
+                        Add Date & Time
+                      </Button>
+                    </div>
+                    {(values.recurring_dates || []).map((item, index) => (
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2 items-center">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {dayjs(item).isValid() ? dayjs(item).format('MMM D, YYYY h:mm A') : item}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setEditingRecurringIndex(index);
+                            setFieldValue('recurring_picker_value', item);
+                            setIsRecurringModalOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() =>
+                            setFieldValue(
+                              'recurring_dates',
+                              (values.recurring_dates || []).filter((_, i) => i !== index)
+                            )
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    {touched?.recurring_dates && errors?.recurring_dates && (
+                      <p className="text-sm text-red-500">
+                        {typeof errors.recurring_dates === 'string'
+                          ? errors.recurring_dates
+                          : 'Please fix recurring date/time values'}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormikSelect name="time_zone" label="Time Zone" options={TIME_ZONES} required />
                   <FormikField name="duration" label="Duration (minutes)" type="number" min={1} required />
@@ -300,6 +421,40 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                       : 'Submit Guided Experience'}
                   </Button>
                 </div>
+                <Popup
+                  heading="Pick recurring date & time"
+                  open={isRecurringModalOpen}
+                  onClose={() => setIsRecurringModalOpen(false)}
+                  size="md"
+                >
+                  <div className="flex flex-col gap-4">
+                    <DateTimePicker name="recurring_picker_value" label="Date & Time" required />
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="secondary" onClick={() => setIsRecurringModalOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const picked = values.recurring_picker_value;
+                          if (!picked) return;
+                          const current = [...(values.recurring_dates || [])];
+                          if (editingRecurringIndex === null) {
+                            current.push(picked);
+                          } else {
+                            current[editingRecurringIndex] = picked;
+                          }
+                          setFieldValue('recurring_dates', current);
+                          setFieldValue('recurring_picker_value', '');
+                          setEditingRecurringIndex(null);
+                          setIsRecurringModalOpen(false);
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </Popup>
               </Form>
             );
           }}

@@ -1,9 +1,11 @@
 'use client';
 import React, { useMemo } from 'react';
-import ReactQuill from 'react-quill';
+import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
 import '@/css/quill-custom.css';
 import { useField } from 'formik';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 const FormikRichTextEditor = ({ 
   name, 

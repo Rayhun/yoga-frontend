@@ -13,6 +13,7 @@ import { HiOutlineStatusOnline, HiOutlineTag } from 'react-icons/hi';
 import { MdOutlineDescription, MdOutlineCategory } from 'react-icons/md';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../Button';
+import { MdOutlineContentCopy } from 'react-icons/md';
 
 const DetailSection = ({ label, children, icon: Icon }) => (
   <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-strokedark hover:shadow-md transition-shadow duration-200">
@@ -45,6 +46,8 @@ export const GroupCoachingDetails = ({
   enrolling,
   handlePublicBuyNow,
   guestCheckoutLoading = false,
+  handleDuplicateEvent,
+  duplicating = false,
 }) => {
   const router = useRouter();
 
@@ -72,6 +75,26 @@ export const GroupCoachingDetails = ({
 
   return (
     <div className="flex flex-col gap-8">
+      {!isCustomerView && !isPublicView && (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 px-3 py-1.5 text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 disabled:opacity-60"
+            onClick={handleDuplicateEvent}
+            disabled={duplicating}
+          >
+            <MdOutlineContentCopy size={16} />
+            {duplicating ? 'Copying...' : 'Use as Template'}
+          </button>
+          <button
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary/90 transition-all duration-200"
+            onClick={onEdit}
+          >
+            <RiEdit2Line size={16} />
+            Edit
+          </button>
+        </div>
+      )}
+
       {/* Event Details Card */}
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left Section - Image */}
@@ -90,17 +113,6 @@ export const GroupCoachingDetails = ({
 
         {/* Right Section - Event Details */}
         <div className="w-full flex flex-col gap-4 p-5 lg:p-6 bg-white dark:bg-boxdark rounded-2xl shadow-lg border border-gray-100 dark:border-strokedark relative h-full min-h-[400px] lg:min-h-[500px]">
-          {/* Edit Button - hidden for customer and public views */}
-          {!isCustomerView && !isPublicView && (
-            <button
-              className="absolute right-4 top-4 inline-flex items-center gap-1.5 text-primary dark:text-primary hover:text-primary/80 text-xs font-semibold px-2.5 py-1 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 z-10"
-              onClick={onEdit}
-            >
-              <RiEdit2Line size={16} />
-              Edit
-            </button>
-          )}
-
           {/* Enrolled Badge */}
           {isCustomerView && eventDetails?.is_enroll && (
             <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-lg flex items-center gap-1.5 z-10">

@@ -385,8 +385,13 @@ span.flatpickr-weekday,
   @apply !border-b border-stroke py-5 dark:border-strokedark font-bold;
 }
 
-.data-table-common .datatable-table > thead > tr:last-child > th input {
+/* Header filter/search inputs only — do not style checkboxes (they need fixed size) */
+.data-table-common .datatable-table > thead > tr:last-child > th input:not([type='checkbox']):not([type='radio']) {
   @apply h-[34px] w-full rounded border border-stroke bg-transparent px-3 text-sm outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary;
+}
+
+.data-table-common .datatable-table > thead > tr > th input[type='checkbox'] {
+  @apply h-4 w-4 min-h-[1rem] min-w-[1rem] max-h-4 max-w-4 shrink-0 cursor-pointer rounded border-stroke p-0 accent-primary;
 }
 
 .data-table-common .datatable-table > tbody > tr {

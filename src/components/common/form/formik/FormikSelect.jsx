@@ -3,18 +3,43 @@ import { useCallback, useMemo } from 'react';
 import { useField, useFormikContext } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
-const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, onChange = () => null, disabled = false, loading = false }) => {
+const FormikSelect = ({
+  name,
+  label,
+  options = [],
+  placeholder,
+  Icon,
+  required,
+  onChange = () => null,
+  disabled = false,
+  loading = false,
+  freeSolo = false,
+}) => {
   const { setFieldValue } = useFormikContext();
   const [field, meta] = useField(name);
+  const containerRef = useScrollToFirstErrorField(name);
 
   const handleChange = useCallback(
     (_, selected) => {
-      const selectedValue = selected?.value ?? " ";
+      const selectedValue =
+        typeof selected === 'string' ? selected : selected?.value ?? '';
       setFieldValue(name, selectedValue, true);
       onChange(selectedValue);
     },
     [name, onChange, setFieldValue]
+  );
+
+  const handleInputChange = useCallback(
+    (_, inputValue, reason) => {
+      if (!freeSolo) return;
+      if (reason === 'input' || reason === 'clear') {
+        setFieldValue(name, inputValue ?? '', true);
+        onChange(inputValue ?? '');
+      }
+    },
+    [freeSolo, name, onChange, setFieldValue]
   );
 
   const selectedOption = useMemo(
@@ -25,7 +50,7 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
   const isErrorField = Boolean(meta.touched && meta.error);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       {label && (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}
@@ -35,10 +60,11 @@ const FormikSelect = ({ name, label, options = [], placeholder, Icon, required, 
         <Autocomplete
           id={name}
           options={options}
-          getOptionLabel={option => option.label}
-          getOptionKey={option => option.value}
-          value={selectedOption || null}
+          freeSolo={freeSolo}
+          getOptionLabel={option => (typeof option === 'string' ? option : option.label)}
+          value={selectedOption || (freeSolo ? field.value || '' : null)}
           onChange={handleChange}
+          onInputChange={handleInputChange}
           disabled={disabled}
           loading={loading}
           renderInput={params => (

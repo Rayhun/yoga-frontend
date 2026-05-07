@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import { MdFileUpload, MdDelete, MdAttachFile } from 'react-icons/md';
 import { getFileFromURL } from '@/utils/helpers';
 import { ONE_MB } from '@/utils/general';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 function FormikDropzone({
   name: fieldName,
@@ -28,6 +29,7 @@ function FormikDropzone({
 }) {
   const [field, meta, helpers] = useField(fieldName);
   const [files, setFiles] = useState([]);
+  const containerRef = useScrollToFirstErrorField(fieldName);
 
   const handleFileChange = useCallback(
     newFiles => {
@@ -105,7 +107,7 @@ function FormikDropzone({
   const isErrorField = meta.touched && meta.error;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       {label ? (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}
