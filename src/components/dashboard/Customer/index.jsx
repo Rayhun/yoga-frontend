@@ -17,6 +17,7 @@ import QuickLinks from '../QuickLinks/QuickLinks';
 import DonutChart from '@/components/common/DonutChart';
 import { Chip } from '@mui/material';
 import '@/css/animations.css';
+import DailyMoodTuneIn from './DailyMoodTuneIn';
 
 const CustomerDashboard = () => {
   const router = useRouter();
@@ -145,6 +146,8 @@ const CustomerDashboard = () => {
           </div>
         </div>
       </div>
+
+      <DailyMoodTuneIn />
 
       {/* Quick Action Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

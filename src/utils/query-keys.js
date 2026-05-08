@@ -86,6 +86,7 @@ const queryKeys = {
   userPermissions: 'userPermissions',
   groupPermissions: 'groupPermissions',
   wellnessDashboard: 'wellnessDashboard',
+  dailyTrackingData: 'dailyTrackingData',
   businessWellnessDashboard: 'businessWellnessDashboard',
   customerSubscriptionStatus: 'customerSubscriptionStatus',
   customerSubscriptionHistory: 'customerSubscriptionHistory',
