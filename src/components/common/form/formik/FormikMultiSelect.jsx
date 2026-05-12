@@ -51,7 +51,9 @@ const FormikMultiSelect = ({
   const selectedOptions = useMemo(
     () =>
       fieldValueArray.map(fv => {
-        const matched = options.find(opt => opt.value != null && opt.value !== '' && fv == opt.value);
+        const matched = options.find(
+          opt => opt.value != null && opt.value !== '' && String(opt.value) === String(fv)
+        );
         return matched || { label: String(fv), value: fv };
       }),
     [fieldValueArray, options]

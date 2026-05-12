@@ -15,7 +15,7 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import { CategoriesField, TagsField } from '@/components/lms/general/fields';
+import { CategoriesField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -210,7 +210,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         }
         const matchedOption = options.find(
           option =>
-            option?.value === item ||
+            String(option?.value) === String(item) ||
             (typeof item === 'string' &&
               typeof option?.label === 'string' &&
               option.label.toLowerCase() === item.toLowerCase())
@@ -455,7 +455,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <CategoriesField name="categories" label="Categories" placeholder="Select categories" required />
-                  <TagsField name="tags" label="Tags" placeholder="Select tags" required />
+                  <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Select tags" required />
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <CoachingAreasField

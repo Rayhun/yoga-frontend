@@ -1,22 +1,23 @@
 'use client';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTagsList } from '@/services/private/lms/tag';
+import { getLmsContentTagsList } from '@/services/private/lms/tag';
 import queryKeys from '@/utils/query-keys';
 
+/** Options for LMS `Tag` M2M on programs, modules, sessions, etc. (LMS.Tag — not expert catalog tags). */
 function useLMSTagOptions() {
   const { data: tagsResponse } = useQuery({
-    queryFn: () => getTagsList({ limit: 1000, offset: 0 }),
-    queryKey: [queryKeys.lmsTags],
+    queryFn: getLmsContentTagsList,
+    queryKey: [queryKeys.lmsTags, 'lms-content-catalog'],
   });
 
   const categoriesOptions = useMemo(
     () =>
-      (tagsResponse?.data?.data?.results || []).map(option => ({
-        label: option.label,
+      (tagsResponse?.data?.data || []).map(option => ({
+        label: option.name ?? '',
         value: option.id,
       })),
-    [tagsResponse?.data?.data?.results]
+    [tagsResponse?.data?.data]
   );
 
   return {

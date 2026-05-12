@@ -29,8 +29,8 @@ const CustomTable = ({
   return (
     <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       {showHeader ? (
-        <div className="flex justify-between border-b border-stroke px-8 py-4 dark:border-strokedark">
-          <div className="flex gap-4">
+        <div className="flex justify-between gap-4 border-b border-stroke px-8 py-4 dark:border-strokedark">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
             {showSearch ? (
               <div className="w-100">
                 <input
@@ -45,7 +45,7 @@ const CustomTable = ({
             {CustomFilters}
           </div>
          
-          <div className="flex items-center font-medium">
+          <div className="flex shrink-0 items-center font-medium">
             <select
               value={pageSize}
               onChange={e => {

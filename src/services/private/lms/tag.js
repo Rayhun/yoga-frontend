@@ -1,6 +1,11 @@
 import axios from '@/lib/axios';
 import { API_V2_BASE_URL } from '@/utils/config';
 
+/** LMS legacy tags (LMS.Tag) for programs, modules, sessions — `id` + `name`. */
+export const getLmsContentTagsList = async () => {
+  return axios.get('/LMS/tag/list/');
+};
+
 export const getTagsList = async ({
   limit = 50,
   offset = 0,

@@ -1,9 +1,37 @@
 import axios from '@/lib/axios';
 import { getSearchParamsFromObject } from '@/utils/helpers';
 
-export const getExpertsList = async (params) => {
+export const getExpertsList = async (params = {}) => {
   const searchParams = getSearchParamsFromObject(params);
-  return axios.get(`/LMS/experts/?${searchParams}`);
+  const qs = searchParams.toString();
+  return axios.get(qs ? `/LMS/experts/?${qs}` : '/LMS/experts/');
+};
+
+/** Parse paginated experts list from GET /LMS/experts/ (envelope: data.results). */
+export const getExpertsListRows = response => {
+  const payload = response?.data?.data;
+  if (Array.isArray(payload)) return payload;
+  if (payload?.results && Array.isArray(payload.results)) return payload.results;
+  return [];
+};
+
+export const getExpertsListCount = response => {
+  const payload = response?.data?.data;
+  if (payload && typeof payload.count === 'number') return payload.count;
+  return 0;
+};
+
+export const getExpertCatalogTagsList = async (params = {}) => {
+  const searchParams = getSearchParamsFromObject(params);
+  const qs = searchParams.toString();
+  return axios.get(qs ? `/LMS/experts/catalog-tags/?${qs}` : '/LMS/experts/catalog-tags/');
+};
+
+/** Rows from GET /LMS/experts/catalog-tags/ */
+export const getExpertCatalogTagsRows = response => {
+  const payload = response?.data?.data;
+  if (payload?.results && Array.isArray(payload.results)) return payload.results;
+  return [];
 };
 
 export const getSingleExpert = async ({ id }) => {
