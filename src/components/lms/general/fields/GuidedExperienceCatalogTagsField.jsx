@@ -2,18 +2,18 @@
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import useExpertCatalogTagOptions from '@/hooks/useExpertCatalogTagOptions';
 
-const ExpertCatalogTagsField = ({
+/** Tags for guided experiences — catalog aliases limited to ``guided_experience`` namespaces on the API. */
+const GuidedExperienceCatalogTagsField = ({
   name = 'tags',
   label = 'Tags',
   placeholder = 'Select tags',
-  context = 'expert_profile',
   ...props
 }) => {
-  const { options: tagsOptions } = useExpertCatalogTagOptions({ context });
+  const { options: tagsOptions } = useExpertCatalogTagOptions({ context: 'guided_experience' });
 
   return (
     <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
   );
 };
 
-export default ExpertCatalogTagsField;
+export default GuidedExperienceCatalogTagsField;

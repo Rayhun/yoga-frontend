@@ -8,4 +8,5 @@ export { default as LanguagesField } from './LanguagesField';
 export { default as VisibilitySettingField } from './VisibilitySettingField';
 export { default as TagsField } from './TagsField';
 export { default as ExpertCatalogTagsField } from './ExpertCatalogTagsField';
+export { default as GuidedExperienceCatalogTagsField } from './GuidedExperienceCatalogTagsField';
 export { default as ExpertField } from './ExpertField';
