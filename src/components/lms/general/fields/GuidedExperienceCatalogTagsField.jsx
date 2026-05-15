@@ -9,10 +9,20 @@ const GuidedExperienceCatalogTagsField = ({
   placeholder = 'Select tags',
   ...props
 }) => {
-  const { options: tagsOptions } = useExpertCatalogTagOptions({ context: 'guided_experience' });
+  const { options: tagsOptions, isError } = useExpertCatalogTagOptions({
+    context: 'guided_experience',
+    // Skip show_on filter if production catalog rows use other surface labels
+    surface: 'all',
+  });
 
   return (
-    <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
+    <FormikMultiSelect
+      {...props}
+      name={name}
+      label={label}
+      placeholder={isError ? 'Could not load tags — check API / login' : placeholder}
+      options={tagsOptions}
+    />
   );
 };
 

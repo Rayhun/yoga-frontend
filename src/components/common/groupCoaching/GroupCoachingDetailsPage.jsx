@@ -14,6 +14,7 @@ import { MdOutlineDescription, MdOutlineCategory } from 'react-icons/md';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../Button';
 import { MdOutlineContentCopy } from 'react-icons/md';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 const DetailSection = ({ label, children, icon: Icon }) => (
   <div className="flex flex-col gap-4 bg-white dark:bg-boxdark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-strokedark hover:shadow-md transition-shadow duration-200">
@@ -365,7 +366,7 @@ export const GroupCoachingDetails = ({
                 isCustomerView || isPublicView ? (
                   <ProfileChip key={`${index}-${tag}`} label={tag} />
                 ) : (
-                  <ProfileChip key={tag.id} label={tag?.name} />
+                  <ProfileChip key={tag.id} label={getCatalogTagChipLabel(tag)} />
                 )
               )}
             </div>
@@ -379,7 +380,7 @@ export const GroupCoachingDetails = ({
                 isCustomerView || isPublicView ? (
                   <ProfileChip key={`${index}-${tag}`} label={tag} />
                 ) : (
-                  <ProfileChip key={tag.id} label={tag?.name} />
+                  <ProfileChip key={tag.id} label={getCatalogTagChipLabel(tag)} />
                 )
               )}
             </div>

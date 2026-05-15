@@ -9,7 +9,7 @@ import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker';
-import { CategoriesField, TagsField } from '@/components/lms/general/fields';
+import { CategoriesField, GuidedExperienceCatalogTagsField } from '@/components/lms/general/fields';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
@@ -342,7 +342,7 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CategoriesField required />
-                  <TagsField required />
+                  <GuidedExperienceCatalogTagsField required />
                 </div>
                 {/* <FormikSwitch name="is_online" label="Is Online Event?" /> */}
                 {/* <FormikRadioGroup

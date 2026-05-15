@@ -13,8 +13,9 @@ function useExpertCatalogTagOptions({
   offset = 0,
   search = '',
   namespace = '',
+  surface = '',
 } = {}) {
-  const { data: tagsResponse, ...rest } = useQuery({
+  const { data: tagsResponse, isError, error, ...rest } = useQuery({
     queryFn: () =>
       getExpertCatalogTagsList({
         context,
@@ -22,8 +23,10 @@ function useExpertCatalogTagOptions({
         offset,
         ...(search?.trim() ? { search: search.trim() } : {}),
         ...(namespace ? { namespace } : {}),
+        ...(surface ? { surface } : {}),
       }),
-    queryKey: [queryKeys.expertCatalogTags, context, limit, offset, search, namespace],
+    queryKey: [queryKeys.expertCatalogTags, context, limit, offset, search, namespace, surface],
+    retry: 1,
   });
 
   const options = useMemo(() => {
@@ -45,6 +48,8 @@ function useExpertCatalogTagOptions({
 
   return {
     options,
+    isError,
+    error,
     ...rest,
   };
 }

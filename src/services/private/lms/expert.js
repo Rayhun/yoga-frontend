@@ -33,6 +33,7 @@ export const getExpertCatalogTagsList = async (params = {}) => {
 export const getExpertCatalogTagsRows = response => {
   const payload = response?.data?.data;
   if (payload?.results && Array.isArray(payload.results)) return payload.results;
+  if (Array.isArray(payload)) return payload;
   return [];
 };
 
