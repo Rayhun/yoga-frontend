@@ -21,6 +21,20 @@ export const getExpertsListCount = response => {
   return 0;
 };
 
+/** Namespace rules for a form surface (required / optional / soft per namespace). */
+export const getExpertCatalogTagSchema = async (params = {}) => {
+  const { context = 'expert_profile', ...rest } = params;
+  const searchParams = getSearchParamsFromObject({ context, ...rest });
+  const qs = searchParams.toString();
+  return axios.get(qs ? `/LMS/experts/catalog-tag-schema/?${qs}` : '/LMS/experts/catalog-tag-schema/');
+};
+
+export const getExpertCatalogTagSchemaNamespaces = response => {
+  const payload = response?.data?.data;
+  if (payload?.namespaces && Array.isArray(payload.namespaces)) return payload.namespaces;
+  return [];
+};
+
 // Optional `context` (expert_profile | guided_experience | program | module | session | quiz) selects namespaces on the API.
 export const getExpertCatalogTagsList = async (params = {}) => {
   const { context = 'expert_profile', ...rest } = params;

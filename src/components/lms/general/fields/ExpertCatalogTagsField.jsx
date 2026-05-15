@@ -1,19 +1,9 @@
 'use client';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import useExpertCatalogTagOptions from '@/hooks/useExpertCatalogTagOptions';
+import SchemaCatalogTagsField from './SchemaCatalogTagsField';
 
-const ExpertCatalogTagsField = ({
-  name = 'tags',
-  label = 'Tags',
-  placeholder = 'Select tags',
-  context = 'expert_profile',
-  ...props
-}) => {
-  const { options: tagsOptions } = useExpertCatalogTagOptions({ context });
-
-  return (
-    <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
-  );
-};
+/** Expert / coach profile — namespaces from ``CONTENT_TAG_SCHEMA`` (expert_type, coaching_style, …). */
+const ExpertCatalogTagsField = props => (
+  <SchemaCatalogTagsField context="expert_profile" surface="all" {...props} />
+);
 
 export default ExpertCatalogTagsField;

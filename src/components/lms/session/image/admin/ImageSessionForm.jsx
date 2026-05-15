@@ -170,14 +170,10 @@ const ImageSession = ({ selected }) => {
                 <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
               </div>
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <CategoriesField required />
-              </div>
-              <div className="md:w-1/2">
-                <ContentCatalogTagsField context="session" required />
-              </div>
+            <div className="max-w-xl">
+              <CategoriesField required />
             </div>
+            <ContentCatalogTagsField context="session" />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
             <FormikDropzone
                   name="file"

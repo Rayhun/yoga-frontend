@@ -239,14 +239,10 @@ const ModuleForm = ({ selected }) => {
                 <VisibilitySettingField required />
               </div>
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <CategoriesField required />
-              </div>
-              <div className="md:w-1/2">
-                <ContentCatalogTagsField context="module" required />
-              </div>
+            <div className="max-w-xl">
+              <CategoriesField required />
             </div>
+            <ContentCatalogTagsField context="module" />
 
             <div className="my-5 flex flex-col gap-3">
               <h3 className="font-bold text-2xl text-black dark:text-white">Module Content</h3>

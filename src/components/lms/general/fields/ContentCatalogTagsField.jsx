@@ -1,23 +1,9 @@
 'use client';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import useExpertCatalogTagOptions from '@/hooks/useExpertCatalogTagOptions';
+import SchemaCatalogTagsField from './SchemaCatalogTagsField';
 
-/**
- * Catalog tag picker for LMS content (program, module, session, quiz).
- * Uses ``/LMS/experts/catalog-tags/?context=…`` — values are TagAlias IDs.
- */
-const ContentCatalogTagsField = ({
-  context,
-  name = 'tags',
-  label = 'Tags',
-  placeholder = 'Select tags',
-  ...props
-}) => {
-  const { options: tagsOptions } = useExpertCatalogTagOptions({ context });
-
-  return (
-    <FormikMultiSelect {...props} name={name} label={label} placeholder={placeholder} options={tagsOptions} />
-  );
-};
+/** Program / module / session / quiz — one picker per namespace per ``CONTENT_TAG_SCHEMA``. */
+const ContentCatalogTagsField = ({ context, ...props }) => (
+  <SchemaCatalogTagsField context={context} surface="all" {...props} />
+);
 
 export default ContentCatalogTagsField;
