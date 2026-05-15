@@ -8,6 +8,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
+import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import {
   AccessSettingField,
   DifficultyField,
@@ -54,6 +55,7 @@ const LMSQuizForm = ({ selected }) => {
       text,
       is_correct,
     })),
+    relife_index: Boolean(selected?.relife_index),
   };
 
   const validationSchema = Yup.object({
@@ -158,6 +160,7 @@ const LMSQuizForm = ({ selected }) => {
                 <FocusAreasField required />
               </div>
             </div>
+            <FormikCheckbox name="relife_index" label="Relife index" />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">
                 <FormikSubmittableField

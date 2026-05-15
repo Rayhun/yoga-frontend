@@ -10,6 +10,7 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import {
   AccessSettingField,
   DifficultyField,
@@ -57,6 +58,7 @@ const AudioSession = ({ selected }) => {
     tags: selected?.tags.map(i => i.id) || [],
     file: null,
     thumbnail: null,
+    relife_index: Boolean(selected?.relife_index),
   };
 
   const validationSchema = Yup.object({
@@ -174,6 +176,7 @@ const AudioSession = ({ selected }) => {
                 <FocusAreasField required />
               </div>
             </div>
+            <FormikCheckbox name="relife_index" label="Relife index" />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">
                 <FormikSubmittableField

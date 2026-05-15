@@ -9,6 +9,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import {
   AccessSettingField,
   VisibilitySettingField,
@@ -115,6 +116,7 @@ const ModuleForm = ({ selected }) => {
         order_by: order_by ?? order ?? '',
       })
     ),
+    relife_index: Boolean(selected?.relife_index),
   };
 
   const validationSchema = Yup.object({
@@ -237,6 +239,9 @@ const ModuleForm = ({ selected }) => {
               </div>
               <div className="w-full md:w-1/2">
                 <VisibilitySettingField required />
+              </div>
+              <div className="flex w-full items-center md:w-1/2">
+                <FormikCheckbox name="relife_index" label="Relife index" />
               </div>
             </div>
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
