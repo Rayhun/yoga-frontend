@@ -1,9 +1,26 @@
 'use client';
-import SchemaCatalogTagsField from './SchemaCatalogTagsField';
+import FormikCatalogTagsModalField from '@/components/common/form/formik/FormikCatalogTagsModalField';
 
-/** Program / module / session / quiz — one picker per namespace per ``CONTENT_TAG_SCHEMA``. */
-const ContentCatalogTagsField = ({ context, ...props }) => (
-  <SchemaCatalogTagsField context={context} surface="all" {...props} />
+/**
+ * Catalog tag picker for LMS content (program, module, session, quiz).
+ */
+const ContentCatalogTagsField = ({
+  context,
+  name = 'tags',
+  label = 'Tags',
+  modalTitle,
+  placeholder: _ignored,
+  ...props
+}) => (
+  <FormikCatalogTagsModalField
+    {...props}
+    name={name}
+    label={label}
+    context={context}
+    modalTitle={modalTitle ?? 'Select tags'}
+    searchPlaceholder="Search tags…"
+    triggerPlaceholder="Select"
+  />
 );
 
 export default ContentCatalogTagsField;

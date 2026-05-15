@@ -96,8 +96,10 @@ const ExpertForm = ({ selected }) => {
             </div>
             <FormikField name="title" label="Title" placeholder="Title" required />
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
-            <CategoriesField name="categories" label="Categories" placeholder="Categories" required />
-            <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Tags" required />
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+              <CategoriesField name="categories" label="Categories" placeholder="Categories" required />
+              <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Tags" required />
+            </div>
             <FormikDropzone
               name="file"
               label="File"

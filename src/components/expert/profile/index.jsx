@@ -58,9 +58,6 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
             <h3 className="text-xl font-bold text-white truncate">
               {`${userProfileDetails?.first_name || ''} ${userProfileDetails?.last_name || ''}`}
             </h3>
-            {/* <p className="text-sm text-white/90 font-medium truncate">
-              {userProfileDetails?.title || 'Wellness Expert'}
-            </p> */}
           </div>
         </div>
       </div>

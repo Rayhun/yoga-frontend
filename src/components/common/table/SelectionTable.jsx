@@ -17,6 +17,7 @@ const SelectionTable = ({
   rowSelection = {},
   setRowSelection = () => null,
 }) => {
+  const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: getDefaultPageSize(),
@@ -27,9 +28,11 @@ const SelectionTable = ({
     state: {
       rowSelection,
       pagination,
+      sorting,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),

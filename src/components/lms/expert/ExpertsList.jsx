@@ -140,10 +140,6 @@ const ExpertsList = () => {
         accessorKey: 'email',
       },
       {
-        header: 'Title',
-        accessorKey: 'title',
-      },
-      {
         header: 'Active Status',
         accessorKey: 'is_active',
         cell: ({ row }) => (row?.original?.is_active ? 'Active' : 'Inactive'),
@@ -155,7 +151,7 @@ const ExpertsList = () => {
       },
       {
         header: 'Coaching',
-        accessorKey: 'is_profile_completed',
+        accessorKey: 'has_event_or_consult',
         cell: ({ row }) => (row?.original?.has_event_or_consult ? 'Yes' : 'No'),
       },
     ],
@@ -282,7 +278,7 @@ const ExpertsList = () => {
         <TextField
           fullWidth
           size="small"
-          placeholder="Search name, email, business, title…"
+          placeholder="Search name, email, business…"
           value={searchInput}
           onChange={e => setSearchInput(e.target.value)}
           InputProps={{

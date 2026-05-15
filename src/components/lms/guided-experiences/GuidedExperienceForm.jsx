@@ -367,8 +367,10 @@ const GuidedExperienceForm = ({ selected = {}, eventType, onSuccess }) => {
                   )}
                 </div>
               </div>
-              <CategoriesField required />
-              <GuidedExperienceCatalogTagsField />
+              <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                <CategoriesField required />
+                <GuidedExperienceCatalogTagsField required />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

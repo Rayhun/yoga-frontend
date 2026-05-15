@@ -194,13 +194,9 @@ const VideoSession = ({ selected }) => {
                 <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
               </div>
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
                 <CategoriesField required />
-              </div>
-              <div className="md:w-1/2">
                 <ContentCatalogTagsField context="session" required />
-              </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">

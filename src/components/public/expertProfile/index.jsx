@@ -47,9 +47,6 @@ const PublicExpertProfile = ({ data: expertData }) => {
                   {`${expertData?.first_name || ''} ${expertData?.last_name || ''}`}
                 </h1>
               </div>
-              {expertData?.title && (
-                <p className="text-gray-600 mt-1 text-base sm:text-lg">{expertData.title}</p>
-              )}
             </div>
           </div>
         </div>

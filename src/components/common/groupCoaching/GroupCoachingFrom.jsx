@@ -340,8 +340,10 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                     )}
                   </div>
                 </div>
-                <CategoriesField required />
-                <GuidedExperienceCatalogTagsField />
+                <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                  <CategoriesField required />
+                  <GuidedExperienceCatalogTagsField required />
+                </div>
                 {/* <FormikSwitch name="is_online" label="Is Online Event?" /> */}
                 {/* <FormikRadioGroup
                   name="is_online"

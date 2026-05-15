@@ -1,24 +1,18 @@
 'use client';
-import useLMSCategoryOptions from '@/hooks/useLMSCategoryOptions';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+import FormikCategoriesModalField from '@/components/common/form/formik/FormikCategoriesModalField';
 
 const CategoriesField = ({
   name = 'categories',
   label = 'Categories',
-  placeholder = 'Categories',
+  placeholder = 'Select categories',
   ...props
-}) => {
-  const { options: categoriesOptions } = useLMSCategoryOptions();
-
-  return (
-    <FormikMultiSelect
-      {...props}
-      name={name}
-      label={label}
-      placeholder={placeholder}
-      options={categoriesOptions}
-    />
-  );
-};
+}) => (
+  <FormikCategoriesModalField
+    {...props}
+    name={name}
+    label={label}
+    triggerPlaceholder={placeholder}
+  />
+);
 
 export default CategoriesField;

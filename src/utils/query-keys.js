@@ -13,7 +13,6 @@ const queryKeys = {
   lmsTags: 'lmsTags',
   lmsExperts: 'lmsExperts',
   expertCatalogTags: 'expertCatalogTags',
-  catalogTagSchema: 'catalogTagSchema',
   expertCommissions: 'expertCommissions',
   expertPayments: 'expertPayments',
   lmsQuizes: 'lmsQuizes',

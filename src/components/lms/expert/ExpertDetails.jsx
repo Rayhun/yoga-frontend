@@ -75,7 +75,6 @@ const ExpertDetails = ({ data, showBackButton = true }) => {
                 <h3 className="truncate text-xl font-bold text-white">
                   {`${data?.first_name || ''} ${data?.last_name || ''}`}
                 </h3>
-                <p className="truncate text-sm font-medium text-white/90">{data?.title || 'Wellness Expert'}</p>
               </div>
             </div>
           </div>

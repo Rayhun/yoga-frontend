@@ -70,47 +70,81 @@ const CustomTable = ({
         <thead>
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id} className="bg-[#F9FAFB] dark:bg-meta-4">
-              {headerGroup.headers.map(header => (
-                <th key={header.id} className={header.column.columnDef.meta?.tableCellClassName ?? ''}>
-                  <div className="flex items-center">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+              {headerGroup.headers.map(header => {
+                const canSort = header.column.getCanSort();
+                const sortDir = header.column.getIsSorted();
+                const toggleSort = header.column.getToggleSortingHandler();
+                return (
+                  <th
+                    key={header.id}
+                    className={header.column.columnDef.meta?.tableCellClassName ?? ''}
+                    aria-sort={
+                      !canSort
+                        ? undefined
+                        : sortDir === 'asc'
+                          ? 'ascending'
+                          : sortDir === 'desc'
+                            ? 'descending'
+                            : 'none'
+                    }
+                  >
+                    <div
+                      className={`flex items-center ${canSort ? 'cursor-pointer select-none rounded-md py-0.5 hover:bg-gray-200/80 dark:hover:bg-meta-4/80' : ''}`}
+                      onClick={canSort ? toggleSort : undefined}
+                      onKeyDown={
+                        canSort
+                          ? e => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleSort(e);
+                              }
+                            }
+                          : undefined
+                      }
+                      role={canSort ? 'button' : undefined}
+                      tabIndex={canSort ? 0 : undefined}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
 
-                    {header.column.getCanSort() ? (
-                      <div
-                        className="ml-2 inline-flex flex-col space-y-[2px] cursor-pointer"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <span className="inline-block">
-                          <svg
-                            className="fill-current"
-                            width="10"
-                            height="5"
-                            viewBox="0 0 10 5"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M5 0L0 5H10L5 0Z" fill="" />
-                          </svg>
-                        </span>
-                        <span className="inline-block">
-                          <svg
-                            className="fill-current"
-                            width="10"
-                            height="5"
-                            viewBox="0 0 10 5"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M5 5L10 0L-4.37114e-07 8.74228e-07L5 5Z" fill="" />
-                          </svg>
-                        </span>
-                      </div>
-                    ) : null}
-                  </div>
-                </th>
-              ))}
+                      {canSort ? (
+                        <div
+                          className={`ml-2 inline-flex flex-col space-y-[2px] ${
+                            sortDir ? 'text-primary' : 'text-gray-400 dark:text-bodydark2'
+                          }`}
+                          aria-hidden
+                        >
+                          <span className="inline-block">
+                            <svg
+                              className={sortDir === 'asc' ? 'fill-primary' : 'fill-current'}
+                              width="10"
+                              height="5"
+                              viewBox="0 0 10 5"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M5 0L0 5H10L5 0Z" fill="" />
+                            </svg>
+                          </span>
+                          <span className="inline-block">
+                            <svg
+                              className={sortDir === 'desc' ? 'fill-primary' : 'fill-current'}
+                              width="10"
+                              height="5"
+                              viewBox="0 0 10 5"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M5 5L10 0L-4.37114e-07 8.74228e-07L5 5Z" fill="" />
+                            </svg>
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>

@@ -15,17 +15,14 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import { CategoriesField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
+import { CategoriesField, ExpertCatalogTagsField, CultureExperienceField, LanguagesField, CoachingAreasField, CertificationsField } from '@/components/lms/general/fields';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES, TITLE_OPTIONS } from '@/utils/constants';
+import { COACHING_STYLES_OPTIONS, TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
-import CoachingAreasField from '../general/fields/CoachingAreasField';
-import CertificationsField from '../general/fields/CertificationsField';
 import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
@@ -421,28 +418,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
               {currentStep === 2 && (
                 <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                      Coaching Details
-                    </h3>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <FormikSelect
-                        name="coaching_style"
-                        label="Coaching Style"
-                        placeholder="Select Coaching Style"
-                        options={COACHING_STYLES_OPTIONS}
-                        required
-                      />
-                      <FormikMultiSelect
-                        name="culture_experience"
-                        label="Culture Experience"
-                        placeholder="Select Culture Experience"
-                        options={CULTURE_EXPERIENCE_OPTIONS}
-                        required
-                      />
-                    </div>
-                  </div>
+                
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="space-y-4">
@@ -454,34 +430,54 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CategoriesField name="categories" label="Categories" placeholder="Select categories" required />
-                  <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Select tags" required />
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                    <CategoriesField name="categories" label="Categories" placeholder="Select categories" required />
+                    <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Select tags" required />
+                  </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CoachingAreasField
-                    name="coaching_areas"
-                    label="Coaching Areas"
-                    placeholder="Select or add coaching areas (max 10)"
-                    required
-                  />
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                    <CertificationsField
+                      name="certifications"
+                      label="Certifications"
+                      placeholder="Select or add certifications (max 5)"
+                      required
+                    />
+                    <LanguagesField
+                      name="languages"
+                      label="Languages"
+                      placeholder="Select languages you speak"
+                      required
+                    />
+                  </div>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CertificationsField
-                    name="certifications"
-                    label="Certifications"
-                    placeholder="Select or add certifications (max 5)"
-                    required
-                  />
-
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <FormikMultiSelect
-                    options={LANGUAGES}
-                    name="languages"
-                    label="Languages"
-                    placeholder="Select languages you speak"
-                    required
-                  />
-
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Coaching Details
+                    </h3>
+                    <FormikSelect
+                      name="coaching_style"
+                      label="Coaching Style"
+                      placeholder="Select Coaching Style"
+                      options={COACHING_STYLES_OPTIONS}
+                      required
+                    />
+                    <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                      <CultureExperienceField
+                        name="culture_experience"
+                        label="Culture Experience"
+                        placeholder="Select culture experience"
+                        required
+                      />
+                      <CoachingAreasField
+                        name="coaching_areas"
+                        label="Coaching Areas"
+                        placeholder="Select or add coaching areas (max 10)"
+                        required
+                      />
+                    </div>
+                  </div>
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-800/30">
                     <FormikSwitch name="available" label="Available for Coaching" />

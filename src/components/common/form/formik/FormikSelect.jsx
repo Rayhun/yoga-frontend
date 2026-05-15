@@ -50,7 +50,7 @@ const FormikSelect = ({
   const isErrorField = Boolean(meta.touched && meta.error);
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex w-full min-w-0 flex-col gap-1">
       {label && (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}
@@ -58,6 +58,7 @@ const FormikSelect = ({
       )}
       <div className="relative">
         <Autocomplete
+          fullWidth
           id={name}
           options={options}
           freeSolo={freeSolo}

@@ -79,7 +79,6 @@ const ExpertsList = () => {
       const filtered = allExperts.filter(expert => {
         const fullName = `${expert.first_name || ''} ${expert.last_name || ''}`.trim();
         return fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-               expert.title?.toLowerCase().includes(searchText.toLowerCase()) ||
                expert.specialization?.toLowerCase().includes(searchText.toLowerCase());
       });
       console.log('Filtered experts:', filtered); // Debug log

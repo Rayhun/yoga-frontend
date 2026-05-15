@@ -209,10 +209,10 @@ const ProgramForm = ({ selected }) => {
                 <VisibilitySettingField required />
               </div>
             </div>
-            <div className="max-w-xl">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <CategoriesField required />
+              <ContentCatalogTagsField context="program" required />
             </div>
-            <ContentCatalogTagsField context="program" />
             <div className="w-full xl:w-1/2">
               <FormikSelect
                 name="linked_program"

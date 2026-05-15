@@ -5,7 +5,7 @@ import queryKeys from '@/utils/query-keys';
 import { getLookupsListByCategory } from '@/services/private/lms/expert';
 
 function useLookUpsByCategory(category = 'Coaching Areas') {
-  const { data: lookupsResponse } = useQuery({
+  const { isLoading, isError, data: lookupsResponse } = useQuery({
     queryFn: () => getLookupsListByCategory(category),
     queryKey: [queryKeys.lookupsByCategory, category],
   });
@@ -20,6 +20,8 @@ function useLookUpsByCategory(category = 'Coaching Areas') {
   );
 
   return {
+    isLoading,
+    isError,
     options: categoriesOptions,
   };
 }

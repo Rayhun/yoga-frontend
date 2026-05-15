@@ -11,6 +11,7 @@ import CustomTable from './Table';
 import { getDefaultPageSize } from '@/utils/helpers';
 
 const BasicTable = ({ isLoading = false, columns = [], data = [], serverPagination = null, ...restProps }) => {
+  const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: getDefaultPageSize(),
@@ -39,8 +40,10 @@ const BasicTable = ({ isLoading = false, columns = [], data = [], serverPaginati
     data,
     columns,
     state: {
+      sorting,
       pagination: tablePagination,
     },
+    onSortingChange: setSorting,
     onPaginationChange: handlePaginationChange,
     manualPagination: isServerPagination,
     pageCount: isServerPagination ? serverPagination.pageCount ?? -1 : undefined,
