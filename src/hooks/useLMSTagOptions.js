@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getLmsContentTagsList } from '@/services/private/lms/tag';
 import queryKeys from '@/utils/query-keys';
 
-/** Options for LMS `Tag` M2M on programs, modules, sessions, etc. (LMS.Tag — not expert catalog tags). */
+/** Legacy LMS.Tag options (consultation, group coaching filters). Content uses ``useExpertCatalogTagOptions``. */
 function useLMSTagOptions() {
   const { data: tagsResponse } = useQuery({
     queryFn: getLmsContentTagsList,

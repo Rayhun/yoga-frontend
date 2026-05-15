@@ -10,6 +10,7 @@ import { BasicTable } from '@/components/common/table';
 import { deleteModuleContent } from '@/services/private/lms/module';
 import useConfirm from '@/hooks/useConfirm';
 import queryKeys from '@/utils/query-keys';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 const ModuleDetails = ({ data = {} }) => {
   const router = useRouter();
@@ -164,7 +165,7 @@ const ModuleDetails = ({ data = {} }) => {
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
         <DetailsRecord label="Content">
           <BasicTable
             columns={tableColumns}

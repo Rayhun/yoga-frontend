@@ -26,16 +26,22 @@ function useExpertCatalogTagOptions({
     queryKey: [queryKeys.expertCatalogTags, context, limit, offset, search, namespace],
   });
 
-    const options = useMemo(() => {
+  const options = useMemo(() => {
     const rows = getExpertCatalogTagsRows(tagsResponse);
+    const showNamespace = context !== 'expert_profile';
     return rows.map(row => {
       const aliasText = typeof row.alias === 'string' ? row.alias.trim() : '';
+      const base =
+        aliasText || row.tag_label || row.canonical_tag || String(row.id);
+      const ns = row.namespace_label || row.namespace;
+      const label =
+        showNamespace && ns ? `${ns}: ${base}` : base;
       return {
-        label: aliasText || row.tag_label || row.canonical_tag || String(row.id),
+        label,
         value: row.id,
       };
     });
-  }, [tagsResponse]);
+  }, [tagsResponse, context]);
 
   return {
     options,

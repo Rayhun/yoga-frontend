@@ -17,7 +17,7 @@ import {
   VisibilitySettingField,
   FocusAreasField,
   CategoriesField,
-  TagsField,
+  ContentCatalogTagsField,
   ExpertField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
@@ -192,7 +192,7 @@ const AudioSession = ({ selected }) => {
                 <CategoriesField required />
               </div>
               <div className="md:w-1/2">
-                <TagsField required />
+                <ContentCatalogTagsField context="session" required />
               </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">

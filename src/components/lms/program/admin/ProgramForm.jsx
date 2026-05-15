@@ -15,7 +15,7 @@ import {
   AccessSettingField,
   VisibilitySettingField,
   CategoriesField,
-  TagsField,
+  ContentCatalogTagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
 import ProgramFormContentOptions from './ProgramFormContentOptions';
@@ -214,7 +214,7 @@ const ProgramForm = ({ selected }) => {
                 <CategoriesField required />
               </div>
               <div className="md:w-1/2">
-                <TagsField required />
+                <ContentCatalogTagsField context="program" required />
               </div>
             </div>
             <div className="w-full xl:w-1/2">

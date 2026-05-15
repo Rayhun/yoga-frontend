@@ -21,7 +21,7 @@ export const getExpertsListCount = response => {
   return 0;
 };
 
-// Optional `context` (expert_profile | guided_experience | program | module | session) selects namespaces on the API.
+// Optional `context` (expert_profile | guided_experience | program | module | session | quiz) selects namespaces on the API.
 export const getExpertCatalogTagsList = async (params = {}) => {
   const { context = 'expert_profile', ...rest } = params;
   const searchParams = getSearchParamsFromObject({ context, ...rest });

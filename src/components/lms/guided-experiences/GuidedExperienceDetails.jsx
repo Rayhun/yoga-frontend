@@ -10,6 +10,7 @@ import utc from 'dayjs/plugin/utc';
 import { getUserTimeAndTimezone, toastApiError } from '@/utils/helpers';
 import { duplicateGuidedExperience } from '@/services/private/lms/guided-experiences';
 import queryKeys from '@/utils/query-keys';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 dayjs.extend(utc);
 
@@ -233,7 +234,7 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
         <MultiValueDetailsRecord
           label="Tags"
           data={data.tags}
-          getChipLabel={item => item.name || item}
+          getChipLabel={getCatalogTagChipLabel}
         />
 
         {data.is_online !== undefined && (

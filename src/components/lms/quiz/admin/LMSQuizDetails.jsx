@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 const LMSQuizDetails = ({ data = {} }) => {
   const router = useRouter();
@@ -20,7 +21,7 @@ const LMSQuizDetails = ({ data = {} }) => {
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
       </div>
     </DetailsLayoutWrapper>
   );

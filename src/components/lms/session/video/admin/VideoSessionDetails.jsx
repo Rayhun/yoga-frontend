@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 const VideoSessionDetails = ({ data = {} }) => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const VideoSessionDetails = ({ data = {} }) => {
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
         <DetailsRecord label="Video File">
           <DetailsFileCard fileURL={data.content_file} />
         </DetailsRecord>

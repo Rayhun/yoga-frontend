@@ -15,7 +15,7 @@ import {
   VisibilitySettingField,
   FocusAreasField,
   CategoriesField,
-  TagsField,
+  ContentCatalogTagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
 import LMSQuizFormOptions from './LMSQuizFormOptions';
@@ -176,7 +176,7 @@ const LMSQuizForm = ({ selected }) => {
                 <CategoriesField required />
               </div>
               <div className="md:w-1/2">
-                <TagsField required />
+                <ContentCatalogTagsField context="quiz" required />
               </div>
             </div>
 

@@ -13,7 +13,7 @@ import {
   AccessSettingField,
   VisibilitySettingField,
   CategoriesField,
-  TagsField,
+  ContentCatalogTagsField,
 } from '@/components/lms/general/fields';
 import Button from '@/components/common/Button';
 import ModuleFormContentOptions from './ModuleFormContentOptions';
@@ -244,7 +244,7 @@ const ModuleForm = ({ selected }) => {
                 <CategoriesField required />
               </div>
               <div className="md:w-1/2">
-                <TagsField required />
+                <ContentCatalogTagsField context="module" required />
               </div>
             </div>
 
