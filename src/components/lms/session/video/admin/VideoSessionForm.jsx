@@ -8,15 +8,16 @@ import { FaRegFileVideo, FaRegFileAudio, FaRegFileImage } from 'react-icons/fa6'
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import {
   AccessSettingField,
   DifficultyField,
   IntensityField,
   VisibilitySettingField,
   FocusAreasField,
+  EquipmentsField,
+  LanguagesField,
   CategoriesField,
   ContentCatalogTagsField,
   ExpertField,
@@ -29,6 +30,11 @@ import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
+import {
+  normalizeEquipmentsForForm,
+  normalizeFocusAreasForForm,
+  normalizeLanguagesForForm,
+} from '@/utils/sessionQuizInitialValues';
 
 const VideoSession = ({ selected }) => {
   const router = useRouter();
@@ -51,9 +57,9 @@ const VideoSession = ({ selected }) => {
     intensity: selected?.intensity || '',
     access_setting: selected?.access_setting || '',
     visibility_setting: selected?.visibility_setting || '',
-    focus_areas: selected?.focus_areas || [],
-    equipments: selected?.equipments || [],
-    languages: selected?.languages || [],
+    focus_areas: normalizeFocusAreasForForm(selected?.focus_areas),
+    equipments: normalizeEquipmentsForForm(selected?.equipments),
+    languages: normalizeLanguagesForForm(selected?.languages),
     categories: selected?.categories.map(i => i.id) || [],
     tags: selected?.tags.map(i => i.id) || [],
     file: null,
@@ -183,18 +189,18 @@ const VideoSession = ({ selected }) => {
                 <FocusAreasField required />
               </div>
             </div>
-            <FormikCheckbox name="relife_index" label="Relife index" />
+            <FormikSwitch
+              name="relife_index"
+              variant="card"
+              label="Relife index"
+              description="Turn on to surface this session in the Relife index."
+            />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <FormikSubmittableField
-                  name="equipments"
-                  label="Equipments"
-                  placeholder="Equipments"
-                  required
-                />
+              <div className="w-full md:w-1/2">
+                <EquipmentsField required />
               </div>
-              <div className="md:w-1/2">
-                <FormikSubmittableField name="languages" label="Languages" placeholder="Languages" required />
+              <div className="w-full md:w-1/2">
+                <LanguagesField required />
               </div>
             </div>
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">

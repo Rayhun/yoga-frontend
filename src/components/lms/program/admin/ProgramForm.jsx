@@ -10,7 +10,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { FiType, FiFileText, FiDollarSign } from 'react-icons/fi';
 import {
   AccessSettingField,
@@ -210,21 +210,30 @@ const ProgramForm = ({ selected }) => {
               <div className="w-full md:w-1/2">
                 <VisibilitySettingField required />
               </div>
-              <div className="flex w-full items-center md:w-1/2">
-                <FormikCheckbox name="relife_index" label="Relife index" />
-              </div>
             </div>
+            
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <CategoriesField required />
               <ContentCatalogTagsField context="program" required />
             </div>
-            <div className="w-full xl:w-1/2">
-              <FormikSelect
-                name="linked_program"
-                label="Linked Program"
-                placeholder="Select Linked Program"
-                options={programOptions}
-              />
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:items-start">
+              <div className="min-w-0">
+                <FormikSwitch
+                  name="relife_index"
+                  variant="card"
+                  elevateCardLabel
+                  label="Relife index"
+                  description="Turn on to surface this program in the Relife index."
+                />
+              </div>
+              <div className="min-w-0">
+                <FormikSelect
+                  name="linked_program"
+                  label="Linked Program"
+                  placeholder="Select Linked Program"
+                  options={programOptions}
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">

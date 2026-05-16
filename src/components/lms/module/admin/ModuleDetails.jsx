@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline } from 'react-icons/md';
-import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
+import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, RelifeIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import { BasicTable } from '@/components/common/table';
 import { deleteModuleContent } from '@/services/private/lms/module';
@@ -164,6 +164,9 @@ const ModuleDetails = ({ data = {} }) => {
         </DetailsRecord>
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
+        <DetailsRecord label="Relife index">
+          <RelifeIndexBadge value={data.relife_index} />
+        </DetailsRecord>
         <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
         <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
         <DetailsRecord label="Content">

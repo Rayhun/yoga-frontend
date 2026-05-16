@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
+import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, RelifeIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
@@ -21,6 +21,9 @@ const VideoSessionDetails = ({ data = {} }) => {
         <DetailsRecord label="Intensity">{data.intensity}</DetailsRecord>
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
+        <DetailsRecord label="Relife index">
+          <RelifeIndexBadge value={data.relife_index} />
+        </DetailsRecord>
         <MultiValueDetailsRecord label="Focus Areas" data={data.focus_areas} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
         <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
