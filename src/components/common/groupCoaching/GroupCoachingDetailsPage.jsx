@@ -359,6 +359,20 @@ export const GroupCoachingDetails = ({
           </DetailSection>
         )}
 
+        {eventDetails?.culture_experience?.length > 0 && (
+          <DetailSection label="Culture Experience" icon={HiOutlineTag}>
+            <div className="flex flex-wrap gap-2">
+              {eventDetails.culture_experience.map((tag, index) =>
+                isCustomerView || isPublicView ? (
+                  <ProfileChip key={`${index}-${tag}`} label={tag} />
+                ) : (
+                  <ProfileChip key={tag.id} label={getCatalogTagChipLabel(tag)} />
+                )
+              )}
+            </div>
+          </DetailSection>
+        )}
+
         {eventDetails?.categories && eventDetails.categories.length > 0 && (
           <DetailSection label="Categories" icon={MdOutlineCategory}>
             <div className="flex flex-wrap gap-2">
@@ -374,9 +388,23 @@ export const GroupCoachingDetails = ({
         )}
 
         {eventDetails?.tags && eventDetails.tags.length > 0 && (
-          <DetailSection label="Tags" icon={HiOutlineTag}>
+          <DetailSection label="Focus & approach?" icon={HiOutlineTag}>
             <div className="flex flex-wrap gap-2">
               {eventDetails.tags.map((tag, index) =>
+                isCustomerView || isPublicView ? (
+                  <ProfileChip key={`${index}-${tag}`} label={tag} />
+                ) : (
+                  <ProfileChip key={tag.id} label={getCatalogTagChipLabel(tag)} />
+                )
+              )}
+            </div>
+          </DetailSection>
+        )}
+
+        {eventDetails?.languages?.length > 0 && (
+          <DetailSection label="Languages" icon={HiOutlineTag}>
+            <div className="flex flex-wrap gap-2">
+              {eventDetails.languages.map((tag, index) =>
                 isCustomerView || isPublicView ? (
                   <ProfileChip key={`${index}-${tag}`} label={tag} />
                 ) : (

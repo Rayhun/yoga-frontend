@@ -5,7 +5,9 @@ import { toast } from 'react-toastify';
 import { Tab, Tabs } from '@mui/material';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline } from 'react-icons/md';
 import { GoPlus } from 'react-icons/go';
+import { BiImport } from 'react-icons/bi';
 import useDelete from '@/hooks/useDelete';
+import useImport from '@/hooks/useImport';
 import useConfirm from '@/hooks/useConfirm';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
@@ -14,9 +16,11 @@ import {
   getGuidedExperiencesList,
   deleteGuidedExperience,
   toggleGuidedExperienceStatus,
+  importGuidedExperiences,
+  exportGuidedExperiencesList,
 } from '@/services/private/lms/guided-experiences';
 import queryKeys from '@/utils/query-keys';
-import { toastApiError } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -40,6 +44,32 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
 
   // Create stable filters object using useMemo to prevent unnecessary re-renders
   const filters = useMemo(() => ({ event_type: eventType }), [eventType]);
+
+  const { isImporting, handleImport: handleImportExperiences } = useImport({
+    mutationFn: importGuidedExperiences,
+    invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
+    onSuccess: () => toast.success('Guided experiences imported successfully'),
+  });
+
+  const { mutateAsync: exportExperiences } = useMutation({
+    mutationFn: exportGuidedExperiencesList,
+  });
+
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({
+        message: 'Export guided experiences for the current type as CSV?',
+      });
+      const response = await exportExperiences({ event_type: eventType });
+      const slug = eventType === 'live event' ? 'live_event' : eventType;
+      downloadBlobAsCsv(response, `guided_experiences_${slug}_export.csv`);
+      toast.success('Guided experiences exported successfully');
+    } catch (error) {
+      if (error?.message !== 'cancel') {
+        toastApiError(error);
+      }
+    }
+  }, [confirm, exportExperiences, eventType]);
 
   const { handleDelete: handleDeleteExperience } = useDelete({
     mutationFn: deleteGuidedExperience,
@@ -180,6 +210,18 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'import',
+        Icon: BiImport,
+        label: 'Import',
+        isLoading: isImporting,
+        onClick: handleImportExperiences,
+      },
+      {
+        id: 'export',
+        label: 'Export',
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         variant: 'primary',
         onClick: () => {
@@ -191,7 +233,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         Icon: GoPlus,
       },
     ],
-    [router, propEventType, selectedEventType]
+    [router, propEventType, selectedEventType, handleImportExperiences, isImporting, handleExport]
   );
 
   const handleTabChange = (event, newValue) => {

@@ -9,7 +9,11 @@ import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker';
-import { CategoriesField, GuidedExperienceCatalogTagsField } from '@/components/lms/general/fields';
+import { EventCatalogTagsField } from '@/components/lms/general/fields';
+import {
+  GUIDED_EXPERIENCE_CATALOG_FIELDS,
+  mapGuidedExperienceTagIds,
+} from '@/utils/guidedExperienceTags';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
 import queryKeys from '@/utils/query-keys';
@@ -76,8 +80,10 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
     is_online: initialData?.is_online ?? true,
     image: isEditMode && initialData?.image ? initialData.image : null,
     meeting_link: initialData?.meeting_link || '',
-    categories: initialData?.categories?.map(i => i.id) || [],
-    tags: initialData?.tags?.map(i => i.id) || [],
+    culture_experience: mapGuidedExperienceTagIds(initialData?.culture_experience),
+    categories: mapGuidedExperienceTagIds(initialData?.categories),
+    tags: mapGuidedExperienceTagIds(initialData?.tags),
+    languages: mapGuidedExperienceTagIds(initialData?.languages),
     followup_support: initialData?.followup_support
       ? (Array.isArray(initialData.followup_support)
           ? initialData.followup_support
@@ -133,10 +139,18 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
       otherwise: schema => schema,
     }),
     price: Yup.number().required('Price is required').min(0, 'Price must be at least $0'),
+    culture_experience: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one culture experience is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
-    tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
+    tags: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one focus & approach is required'),
+    languages: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one language is required'),
     image: isEditMode
       ? Yup.mixed()
           .nullable()
@@ -341,8 +355,38 @@ const GroupCoachingForm = ({ initialData = {}, isEditMode = false, eventId }) =>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                  <CategoriesField required />
-                  <GuidedExperienceCatalogTagsField required />
+                  <EventCatalogTagsField
+                    name="culture_experience"
+                    field={GUIDED_EXPERIENCE_CATALOG_FIELDS.culture_experience.field}
+                    label={GUIDED_EXPERIENCE_CATALOG_FIELDS.culture_experience.label}
+                    modalTitle={GUIDED_EXPERIENCE_CATALOG_FIELDS.culture_experience.modalTitle}
+                    triggerPlaceholder={GUIDED_EXPERIENCE_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                    required
+                  />
+                  <EventCatalogTagsField
+                    name="categories"
+                    field={GUIDED_EXPERIENCE_CATALOG_FIELDS.categories.field}
+                    label={GUIDED_EXPERIENCE_CATALOG_FIELDS.categories.label}
+                    modalTitle={GUIDED_EXPERIENCE_CATALOG_FIELDS.categories.modalTitle}
+                    triggerPlaceholder={GUIDED_EXPERIENCE_CATALOG_FIELDS.categories.triggerPlaceholder}
+                    required
+                  />
+                  <EventCatalogTagsField
+                    name="tags"
+                    field={GUIDED_EXPERIENCE_CATALOG_FIELDS.tags.field}
+                    label={GUIDED_EXPERIENCE_CATALOG_FIELDS.tags.label}
+                    modalTitle={GUIDED_EXPERIENCE_CATALOG_FIELDS.tags.modalTitle}
+                    triggerPlaceholder={GUIDED_EXPERIENCE_CATALOG_FIELDS.tags.triggerPlaceholder}
+                    required
+                  />
+                  <EventCatalogTagsField
+                    name="languages"
+                    field={GUIDED_EXPERIENCE_CATALOG_FIELDS.languages.field}
+                    label={GUIDED_EXPERIENCE_CATALOG_FIELDS.languages.label}
+                    modalTitle={GUIDED_EXPERIENCE_CATALOG_FIELDS.languages.modalTitle}
+                    triggerPlaceholder={GUIDED_EXPERIENCE_CATALOG_FIELDS.languages.triggerPlaceholder}
+                    required
+                  />
                 </div>
                 {/* <FormikSwitch name="is_online" label="Is Online Event?" /> */}
                 {/* <FormikRadioGroup

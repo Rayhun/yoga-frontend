@@ -15,15 +15,15 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import { CategoriesField, ExpertCatalogTagsField, CultureExperienceField, LanguagesField, CoachingAreasField, CertificationsField } from '@/components/lms/general/fields';
+import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
+import { EXPERT_PROFILE_CATALOG_FIELDS, mapExpertTagIds } from '@/utils/expertProfileTags';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import { COACHING_STYLES_OPTIONS, TITLE_OPTIONS } from '@/utils/constants';
+import { TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
-import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
@@ -32,8 +32,6 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const [savedExpertId, setSavedExpertId] = useState(selected?.id || null);
   const [currentStep, setCurrentStep] = useState(1);
   const [draftValues, setDraftValues] = useState(null);
-  const { options: coachingAreaOptions } = useLMSCoachingAreas('Coaching Areas');
-  const { options: certificationOptions } = useLMSCoachingAreas('Certifications');
   const draftStorageKey = `expert_profile_form_draft_${isAdminContext ? 'admin' : 'teacher'}_${selected?.id || 'new'}`;
 
   const { mutateAsync: addExpert } = useMutation({
@@ -54,17 +52,18 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     intro: selected?.intro || '',
     business_name: selected?.business_name || '',
     description: selected?.description || '',
-    categories: selected?.categories?.map(i => i.id) || [],
-    tags: selected?.tags?.map(i => i.id) || [],
-    coaching_areas: selected?.coaching_areas?.map(i => i.id) || [],
-    certifications: selected?.certifications?.map(i => i.id) || [],
-    languages: selected?.languages?.[0]?.split(',') || [],
+    practice_type: mapExpertTagIds(selected?.practice_type),
+    coaching_style: mapExpertTagIds(selected?.coaching_style),
+    culture_experience: mapExpertTagIds(selected?.culture_experience),
+    categories: mapExpertTagIds(selected?.categories),
+    tags: mapExpertTagIds(selected?.tags),
+    coaching_areas: mapExpertTagIds(selected?.coaching_areas),
+    certifications: selected?.certifications?.map(item => item?.id).filter(Boolean) || [],
+    languages: mapExpertTagIds(selected?.languages),
     // credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
-    culture_experience: selected?.culture_experience?.split(',') || [],
-    coaching_style: selected?.coaching_style || '',
     file: selected?.file || null,
     program_file: null,
   };
@@ -115,19 +114,28 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
           return wordsCount >= 25 && wordsCount <= 500;
         }),
+      practice_type: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least one practice type is required'),
       categories: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one category is required'),
-      tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one tag is required'),
+      tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one focus & approach is required'),
       coaching_areas: Yup.array()
-        .of(Yup.mixed().required('Required!'))
+        .of(Yup.number().required('Required!'))
         .min(1, 'At least 1 coaching area is required')
         .max(10, 'Maximum 10 coaching areas are allowed'),
       certifications: Yup.array()
-        .of(Yup.mixed().required('Required!'))
+        .of(Yup.number().required('Required!'))
         .min(1, 'At least 1 certification is required')
         .max(5, 'Maximum 5 certifications are allowed'),
-      languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
-      culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
-      coaching_style: Yup.string().required('Coaching Style is required'),
+      languages: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least 1 language is required'),
+      culture_experience: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least one culture experience is required'),
+      coaching_style: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least one coaching style is required'),
       experience: Yup.number()
         .required('Experience is required')
         .integer('Experience must be a whole number')
@@ -175,6 +183,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         'website',
       ],
       2: [
+        'practice_type',
         'coaching_style',
         'culture_experience',
         'description',
@@ -198,25 +207,6 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     return Yup.object(schemaForStep);
   }, [currentStep, fullFieldSchema, stepFieldKeys]);
 
-  const normalizeLookupIds = (items = [], options = []) => {
-    if (!Array.isArray(items)) return [];
-    return items
-      .map(item => {
-        if (item && typeof item === 'object') {
-          return item.id ?? item.value ?? item.label ?? null;
-        }
-        const matchedOption = options.find(
-          option =>
-            String(option?.value) === String(item) ||
-            (typeof item === 'string' &&
-              typeof option?.label === 'string' &&
-              option.label.toLowerCase() === item.toLowerCase())
-        );
-        return matchedOption?.value ?? item;
-      })
-      .filter(value => value !== null && value !== undefined && value !== '');
-  };
-
   const persistDraft = (values, step) => {
     if (typeof window === 'undefined') return;
     localStorage.setItem(
@@ -235,11 +225,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
   const handleSubmit = async (values, { setSubmitting, setTouched }) => {
     try {
-      const normalizedPayload = {
-        ...values,
-        coaching_areas: normalizeLookupIds(values.coaching_areas, coachingAreaOptions),
-        certifications: normalizeLookupIds(values.certifications, certificationOptions),
-      };
+      const normalizedPayload = { ...values };
 
       const stepPayloadMap = {
         1: {
@@ -255,6 +241,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           website: normalizedPayload.website,
         },
         2: {
+          practice_type: normalizedPayload.practice_type,
           coaching_style: normalizedPayload.coaching_style,
           culture_experience: normalizedPayload.culture_experience,
           description: normalizedPayload.description,
@@ -429,24 +416,45 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required />
                   </div>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+                  <ExpertCatalogTagsField
+                    name="practice_type"
+                    field={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.field}
+                    label={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.label}
+                    modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.modalTitle}
+                    triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.triggerPlaceholder}
+                    required
+                  />
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
                   <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                    <CategoriesField name="categories" label="Categories" placeholder="Select categories" required />
-                    <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Select tags" required />
+                    <ExpertCatalogTagsField
+                      name="categories"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.categories.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.categories.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.categories.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.categories.triggerPlaceholder}
+                      required
+                    />
+                    <ExpertCatalogTagsField
+                      name="tags"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.tags.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.tags.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.tags.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.tags.triggerPlaceholder}
+                      required
+                    />
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                    <CertificationsField
-                      name="certifications"
-                      label="Certifications"
-                      placeholder="Select or add certifications (max 5)"
-                      required
-                    />
-                    <LanguagesField
+                    <CertificationsField name="certifications" required />
+                    <ExpertCatalogTagsField
                       name="languages"
-                      label="Languages"
-                      placeholder="Select languages you speak"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.languages.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.languages.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.languages.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.languages.triggerPlaceholder}
                       required
                     />
                   </div>
@@ -456,27 +464,32 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       Coaching Details
                     </h3>
-                    <FormikSelect
-                      name="coaching_style"
-                      label="Coaching Style"
-                      placeholder="Select Coaching Style"
-                      options={COACHING_STYLES_OPTIONS}
-                      required
-                    />
                     <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                      <CultureExperienceField
-                        name="culture_experience"
-                        label="Culture Experience"
-                        placeholder="Select culture experience"
+                      <ExpertCatalogTagsField
+                        name="coaching_style"
+                        field={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.field}
+                        label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.label}
+                        modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.modalTitle}
+                        triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.triggerPlaceholder}
                         required
                       />
-                      <CoachingAreasField
-                        name="coaching_areas"
-                        label="Coaching Areas"
-                        placeholder="Select or add coaching areas (max 10)"
+                      <ExpertCatalogTagsField
+                        name="culture_experience"
+                        field={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.field}
+                        label={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.label}
+                        modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.modalTitle}
+                        triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
                         required
                       />
                     </div>
+                    <ExpertCatalogTagsField
+                      name="coaching_areas"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.triggerPlaceholder}
+                      required
+                    />
                   </div>
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-800/30">

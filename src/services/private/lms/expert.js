@@ -50,32 +50,43 @@ export const getSingleExpert = async ({ id }) => {
   return axios.get(`/LMS/experts/${id}/`);
 };
 
-export const addNewExpert = async ({ payload: { categories, tags, ...payload } }) => {
-  const formData = new FormData();
+const EXPERT_ID_ARRAY_FIELDS = [
+  'practice_type',
+  'coaching_style',
+  'culture_experience',
+  'categories',
+  'tags',
+  'coaching_areas',
+  'certifications',
+  'languages',
+];
+
+const appendExpertFormData = (formData, payload) => {
   Object.entries(payload).forEach(([key, value]) => {
+    if (key === 'available') {
+      formData.set(key, value);
+      return;
+    }
+    if (EXPERT_ID_ARRAY_FIELDS.includes(key)) {
+      if (Array.isArray(value) && value.length > 0) {
+        formData.set(key, value.join(','));
+      }
+      return;
+    }
     if (value) formData.set(key, value);
   });
-  if (categories && categories.length > 0) {
-    formData.set('categories', categories.join(','));
-  }
-  if (tags && tags.length > 0) {
-    formData.set('tags', tags.join(','));
-  }
+};
+
+export const addNewExpert = async ({ payload }) => {
+  const formData = new FormData();
+  appendExpertFormData(formData, payload);
 
   return axios.post('/LMS/experts/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
-export const updateExistingExpert = async ({ payload: { id, categories, tags, ...payload } }) => {
+export const updateExistingExpert = async ({ payload: { id, ...rest } }) => {
   const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (key==='available' || value) formData.set(key, value);
-  });
-  if (categories && categories.length > 0) {
-    formData.set('categories', categories.join(','));
-  }
-  if (tags && tags.length > 0) {
-    formData.set('tags', tags.join(','));
-  }
+  appendExpertFormData(formData, rest);
 
   return axios.put(`/LMS/experts/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };

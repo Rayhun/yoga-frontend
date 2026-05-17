@@ -6,22 +6,30 @@ import Dialog from '@mui/material/Dialog';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import { MdClose } from 'react-icons/md';
-import { HiMagnifyingGlass, HiOutlineExclamationCircle, HiOutlineTag, HiPlus } from 'react-icons/hi2';
+import {
+  HiChevronDown,
+  HiMagnifyingGlass,
+  HiOutlineExclamationCircle,
+  HiOutlineTag,
+  HiPlus,
+} from 'react-icons/hi2';
 import useExpertCatalogTagOptions from '@/hooks/useExpertCatalogTagOptions';
 import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 import SelectedChipsScrollRegion from './SelectedChipsScrollRegion';
 
 /**
- * Pill trigger opens a modal to search and multi-select catalog tags (TagAlias IDs).
+ * Pill trigger opens a modal to search and multi-select catalog tags (canonical Tag IDs),
+ * grouped by namespace with label-only options.
  */
 const FormikCatalogTagsModalField = ({
   name,
   label,
   required,
   context = 'expert_profile',
+  field: catalogField = '',
   surface = '',
   modalTitle = 'Select tags',
-  searchPlaceholder = 'Search by name…',
+  searchPlaceholder = 'Search by label…',
   triggerPlaceholder = 'Select',
   className = '',
   placeholder: _legacyPlaceholder,
@@ -34,6 +42,8 @@ const FormikCatalogTagsModalField = ({
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  /** Namespace slugs that are collapsed in the picker list. */
+  const [collapsedNamespaces, setCollapsedNamespaces] = useState(() => new Set());
 
   const hasTagSelection =
     Array.isArray(field.value) && field.value.filter(v => v != null && v !== '').length > 0;
@@ -47,10 +57,16 @@ const FormikCatalogTagsModalField = ({
     if (!open) return;
     setSearchInput('');
     setDebouncedSearch('');
+    setCollapsedNamespaces(new Set());
   }, [open]);
+
+  useEffect(() => {
+    if (debouncedSearch) setCollapsedNamespaces(new Set());
+  }, [debouncedSearch]);
 
   const {
     catalogRows,
+    groupedCatalogRows,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -58,6 +74,7 @@ const FormikCatalogTagsModalField = ({
     isError,
   } = useExpertCatalogTagOptions({
     context,
+    field: catalogField,
     surface,
     search: debouncedSearch,
     enabled: open || hasTagSelection,
@@ -72,7 +89,7 @@ const FormikCatalogTagsModalField = ({
 
   const idToLabel = useMemo(() => {
     const m = new Map();
-    catalogRows.forEach(r => m.set(r.id, r.primaryLabel));
+    catalogRows.forEach(r => m.set(r.id, r.label));
     return m;
   }, [catalogRows]);
 
@@ -86,6 +103,15 @@ const FormikCatalogTagsModalField = ({
     },
     [name, selectedIds, setFieldValue]
   );
+
+  const toggleNamespaceCollapsed = useCallback(namespace => {
+    setCollapsedNamespaces(prev => {
+      const next = new Set(prev);
+      if (next.has(namespace)) next.delete(namespace);
+      else next.add(namespace);
+      return next;
+    });
+  }, []);
 
   const handleListScroll = useCallback(
     e => {
@@ -102,6 +128,8 @@ const FormikCatalogTagsModalField = ({
     selectedIds.length === 0
       ? triggerPlaceholder
       : `${selectedIds.length} tag${selectedIds.length === 1 ? '' : 's'} selected`;
+
+  const hasVisibleGroups = groupedCatalogRows.some(g => g.tags.length > 0);
 
   return (
     <div
@@ -182,14 +210,13 @@ const FormikCatalogTagsModalField = ({
         }}
       >
         <div className="flex max-h-[min(85vh,640px)] flex-col">
-          {/* Header */}
           <header className="flex shrink-0 items-start justify-between gap-3 px-5 pb-2 pt-5">
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">
                 {modalTitle}
               </h2>
               <p className="mt-1 text-xs text-gray-500 dark:text-bodydark2">
-                Search and select one or more tags. Changes save as you tap.
+                Tags are grouped by category. Select one or more labels.
               </p>
             </div>
             <button
@@ -202,7 +229,6 @@ const FormikCatalogTagsModalField = ({
             </button>
           </header>
 
-          {/* Search */}
           <div className="shrink-0 px-5 pb-1 pt-2">
             <div className="relative">
               <HiMagnifyingGlass
@@ -220,7 +246,6 @@ const FormikCatalogTagsModalField = ({
             </div>
           </div>
 
-          {/* List */}
           <div
             className="min-h-[240px] flex-1 overflow-y-auto px-3 py-2 sm:min-h-[280px]"
             onScroll={handleListScroll}
@@ -237,7 +262,7 @@ const FormikCatalogTagsModalField = ({
                 <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 <p className="text-sm text-gray-500 dark:text-bodydark2">Loading tags…</p>
               </div>
-            ) : catalogRows.length === 0 ? (
+            ) : !hasVisibleGroups ? (
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
                 <HiOutlineTag className="h-14 w-14 shrink-0 text-gray-200 dark:text-bodydark2" />
                 <p className="max-w-xs text-sm leading-relaxed text-gray-500 dark:text-bodydark2">
@@ -247,35 +272,86 @@ const FormikCatalogTagsModalField = ({
                 </p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-100 dark:divide-strokedark">
-                {catalogRows.map(row => {
-                  const checked = selectedIds.includes(row.id);
+              <ul className="space-y-3">
+                {groupedCatalogRows.map(group => {
+                  if (!group.tags.length) return null;
+                  const isCollapsed = collapsedNamespaces.has(group.namespace);
+                  const selectedInGroup = group.tags.filter(t =>
+                    selectedIds.includes(t.id)
+                  ).length;
                   return (
-                    <li key={row.id} className="first:pt-0">
+                    <li
+                      key={group.namespace}
+                      className="overflow-hidden rounded-xl border border-gray-100 dark:border-strokedark"
+                    >
                       <button
                         type="button"
-                        onClick={() => toggleId(row.id)}
-                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition ${
-                          checked
-                            ? 'bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-primary/15 dark:ring-primary/40'
-                            : 'hover:bg-gray-50 dark:hover:bg-meta-4'
-                        }`}
+                        onClick={() => toggleNamespaceCollapsed(group.namespace)}
+                        aria-expanded={!isCollapsed}
+                        className="flex w-full items-center gap-2 bg-gray-50/80 px-3 py-2.5 text-left transition hover:bg-gray-100 dark:bg-meta-4/40 dark:hover:bg-meta-4"
                       >
-                        <Checkbox
-                          checked={checked}
-                          size="small"
-                          tabIndex={-1}
-                          sx={{
-                            p: 0.25,
-                            pointerEvents: 'none',
-                            color: 'rgb(148 163 184)',
-                            '&.Mui-checked': { color: 'var(--mui-palette-primary-main, #16a34a)' },
-                          }}
+                        <HiChevronDown
+                          className={`h-4 w-4 shrink-0 text-gray-500 transition-transform duration-200 dark:text-bodydark2 ${
+                            isCollapsed ? '-rotate-90' : 'rotate-0'
+                          }`}
+                          aria-hidden
                         />
-                        <span className="min-w-0 flex-1 text-sm leading-snug text-gray-900 dark:text-white">
-                          {row.primaryLabel}
+                        <span className="min-w-0 flex-1 text-sm font-bold text-gray-900 dark:text-white">
+                          {group.namespaceLabel}
+                        </span>
+                        {selectedInGroup > 0 ? (
+                          <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary dark:bg-primary/25">
+                            {selectedInGroup}
+                          </span>
+                        ) : null}
+                        <span className="shrink-0 text-xs tabular-nums text-gray-400 dark:text-bodydark2">
+                          {group.tags.length}
                         </span>
                       </button>
+                      {!isCollapsed ? (
+                        <ul>
+                          {group.tags.map((tag, index) => {
+                            const checked = selectedIds.includes(tag.id);
+                            return (
+                              <li
+                                key={tag.id}
+                                className={
+                                  index > 0
+                                    ? 'border-t border-gray-100 dark:border-strokedark'
+                                    : ''
+                                }
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => toggleId(tag.id)}
+                                  className={`flex w-full items-center gap-3 px-3 py-2.5 pl-9 text-left transition ${
+                                    checked
+                                      ? 'bg-emerald-50 dark:bg-primary/15'
+                                      : 'hover:bg-gray-50 dark:hover:bg-meta-4'
+                                  }`}
+                                >
+                                  <Checkbox
+                                    checked={checked}
+                                    size="small"
+                                    tabIndex={-1}
+                                    sx={{
+                                      p: 0.25,
+                                      pointerEvents: 'none',
+                                      color: 'rgb(148 163 184)',
+                                      '&.Mui-checked': {
+                                        color: 'var(--mui-palette-primary-main, #16a34a)',
+                                      },
+                                    }}
+                                  />
+                                  <span className="min-w-0 flex-1 text-sm leading-snug text-gray-800 dark:text-white">
+                                    {tag.label}
+                                  </span>
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
                     </li>
                   );
                 })}
@@ -288,7 +364,6 @@ const FormikCatalogTagsModalField = ({
             ) : null}
           </div>
 
-          {/* Footer */}
           <footer className="shrink-0 border-t border-gray-100 bg-gray-50/80 px-5 pb-5 pt-4 dark:border-strokedark dark:bg-meta-4/50">
             <button
               type="button"

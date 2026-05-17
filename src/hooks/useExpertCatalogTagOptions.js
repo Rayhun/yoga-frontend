@@ -7,16 +7,22 @@ import {
   getExpertCatalogTagSchema,
 } from '@/services/private/lms/expert';
 import queryKeys from '@/utils/query-keys';
+import {
+  getCatalogTagNamespaceLabel,
+  getCatalogTagRowLabel,
+  groupCatalogRowsByNamespace,
+} from '@/utils/catalogTag';
 
 /** Page size for catalog tag dropdown infinite scroll (backend max 500). */
 export const CATALOG_TAGS_PAGE_SIZE = 100;
 
 /**
- * Catalog ``TagAlias`` rows from ``/LMS/experts/catalog-tags/`` with scroll-to-load-more.
- * Namespaces + ``show_on`` depend on ``context``; API also returns ``tag_schema`` (from CONTENT_TAG_SCHEMA).
+ * Catalog ``Tag`` rows from ``/LMS/experts/catalog-tags/`` with scroll-to-load-more.
+ * Namespaces depend on ``context``; API also returns ``tag_schema`` (from CONTENT_TAG_SCHEMA).
  */
 function useExpertCatalogTagOptions({
   context = 'expert_profile',
+  field = '',
   search = '',
   namespace = '',
   surface = '',
@@ -38,6 +44,7 @@ function useExpertCatalogTagOptions({
       queryKeys.expertCatalogTags,
       'infinite',
       context,
+      field,
       trimmedSearch,
       namespace,
       surface,
@@ -47,6 +54,7 @@ function useExpertCatalogTagOptions({
         context,
         limit: CATALOG_TAGS_PAGE_SIZE,
         offset: pageParam,
+        ...(field ? { field } : {}),
         ...(trimmedSearch ? { search: trimmedSearch } : {}),
         ...(namespace ? { namespace } : {}),
         ...(surface !== undefined && surface !== '' ? { surface } : {}),
@@ -65,56 +73,48 @@ function useExpertCatalogTagOptions({
     enabled,
   });
 
-  const options = useMemo(() => {
-    const pages = data?.pages ?? [];
-    const showNamespace = context !== 'expert_profile';
-    const byId = new Map();
-    for (const page of pages) {
-      const rows = getExpertCatalogTagsRows(page);
-      for (const row of rows) {
-        if (byId.has(row.id)) continue;
-        const aliasText = typeof row.alias === 'string' ? row.alias.trim() : '';
-        const base =
-          aliasText || row.tag_label || row.canonical_tag || String(row.id);
-        const ns = row.namespace_label || row.namespace;
-        const label = showNamespace && ns ? `${ns}: ${base}` : base;
-        byId.set(row.id, { label, value: row.id });
-      }
-    }
-    return Array.from(byId.values());
-  }, [data?.pages, context]);
-
   const tagSchema = useMemo(() => {
     const first = data?.pages?.[0];
     return getExpertCatalogTagSchema(first) ?? null;
   }, [data?.pages]);
 
+  const namespaceOrder = useMemo(
+    () => (tagSchema ? Object.keys(tagSchema) : null),
+    [tagSchema]
+  );
+
   const catalogRows = useMemo(() => {
     const pages = data?.pages ?? [];
-    const showNamespace = context !== 'expert_profile';
     const byId = new Map();
     for (const page of pages) {
       for (const row of getExpertCatalogTagsRows(page)) {
         if (byId.has(row.id)) continue;
-        const aliasText = typeof row.alias === 'string' ? row.alias.trim() : '';
-        const base =
-          aliasText || row.tag_label || row.canonical_tag || String(row.id);
-        const ns = row.namespace_label || row.namespace;
-        const primaryLabel = showNamespace && ns ? `${ns}: ${base}` : base;
         byId.set(row.id, {
           id: row.id,
-          primaryLabel,
-          namespace: ns,
+          label: getCatalogTagRowLabel(row),
+          namespace: row.namespace,
+          namespaceLabel: getCatalogTagNamespaceLabel(row),
           raw: row,
         });
       }
     }
     return Array.from(byId.values());
-  }, [data?.pages, context]);
+  }, [data?.pages]);
+
+  const groupedCatalogRows = useMemo(
+    () => groupCatalogRowsByNamespace(catalogRows, { namespaceOrder }),
+    [catalogRows, namespaceOrder]
+  );
+
+  const options = useMemo(
+    () => catalogRows.map(r => ({ label: r.label, value: r.id })),
+    [catalogRows]
+  );
 
   return {
     options,
     catalogRows,
+    groupedCatalogRows,
     tagSchema,
     fetchNextPage,
     hasNextPage: Boolean(hasNextPage),

@@ -103,7 +103,7 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
           onClick={handleCopy}
           disabled={isDuplicating}
         >
-          {isDuplicating ? 'Copying...' : 'Copy'}
+          {isDuplicating ? 'Copying...' : 'Use as Template'}
         </button>
       }
     >
@@ -226,14 +226,26 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
         )}
 
         <MultiValueDetailsRecord
-          label="Categories"
-          data={data.categories}
-          getChipLabel={item => item.name || item}
+          label="Culture Experience"
+          data={data.culture_experience}
+          getChipLabel={getCatalogTagChipLabel}
         />
 
         <MultiValueDetailsRecord
-          label="Tags"
+          label="Categories"
+          data={data.categories}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
           data={data.tags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={data.languages}
           getChipLabel={getCatalogTagChipLabel}
         />
 

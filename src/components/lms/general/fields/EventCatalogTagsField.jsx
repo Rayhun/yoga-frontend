@@ -2,14 +2,14 @@
 import FormikCatalogTagsModalField from '@/components/common/form/formik/FormikCatalogTagsModalField';
 
 /**
- * Catalog tag picker for expert profile (and other contexts).
- * Pass ``field`` to load namespace-scoped tags from ``/LMS/experts/catalog-tags/?field=…``.
+ * Catalog tag picker for guided experiences (events).
+ * Pass ``field`` to load namespace-scoped tags from ``/LMS/experts/catalog-tags/?context=guided_experience&field=…``.
  */
-const ExpertCatalogTagsField = ({
+const EventCatalogTagsField = ({
   name = 'tags',
   label = 'Tags',
   field: catalogField = '',
-  context = 'expert_profile',
+  context = 'guided_experience',
   modalTitle = 'Select tags',
   triggerPlaceholder = 'Select',
   placeholder: _ignored,
@@ -21,10 +21,11 @@ const ExpertCatalogTagsField = ({
     label={label}
     field={catalogField}
     context={context}
+    surface="all"
     modalTitle={modalTitle}
     searchPlaceholder="Search tags…"
     triggerPlaceholder={triggerPlaceholder}
   />
 );
 
-export default ExpertCatalogTagsField;
+export default EventCatalogTagsField;
