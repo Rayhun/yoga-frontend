@@ -31,10 +31,12 @@ const FormikCatalogTagsModalField = ({
   modalTitle = 'Select tags',
   searchPlaceholder = 'Search by label…',
   triggerPlaceholder = 'Select',
+  maxSelections,
   className = '',
   placeholder: _legacyPlaceholder,
   ...rest
 }) => {
+  const isSingleSelect = maxSelections === 1;
   const { setFieldValue, submitCount } = useFormikContext();
   const [field, meta] = useField(name);
   const containerRef = useScrollToFirstErrorField(name);
@@ -96,12 +98,19 @@ const FormikCatalogTagsModalField = ({
   const toggleId = useCallback(
     id => {
       const num = Number(id);
-      const next = selectedIds.includes(num)
-        ? selectedIds.filter(x => x !== num)
-        : [...selectedIds, num];
+      let next;
+      if (isSingleSelect) {
+        next = selectedIds.includes(num) ? [] : [num];
+      } else if (selectedIds.includes(num)) {
+        next = selectedIds.filter(x => x !== num);
+      } else if (maxSelections != null && selectedIds.length >= maxSelections) {
+        return;
+      } else {
+        next = [...selectedIds, num];
+      }
       setFieldValue(name, next, true);
     },
-    [name, selectedIds, setFieldValue]
+    [isSingleSelect, maxSelections, name, selectedIds, setFieldValue]
   );
 
   const toggleNamespaceCollapsed = useCallback(namespace => {
@@ -124,10 +133,13 @@ const FormikCatalogTagsModalField = ({
   );
 
   const isErrorField = Boolean(meta.error) && (meta.touched || submitCount > 0);
+  const fieldLabel = (label || 'item').replace(/\?+$/, '').trim();
   const summaryText =
     selectedIds.length === 0
       ? triggerPlaceholder
-      : `${selectedIds.length} tag${selectedIds.length === 1 ? '' : 's'} selected`;
+      : isSingleSelect
+        ? idToLabel.get(selectedIds[0]) ?? triggerPlaceholder
+        : `${selectedIds.length} ${fieldLabel} selected`;
 
   const hasVisibleGroups = groupedCatalogRows.some(g => g.tags.length > 0);
 
@@ -216,7 +228,9 @@ const FormikCatalogTagsModalField = ({
                 {modalTitle}
               </h2>
               <p className="mt-1 text-xs text-gray-500 dark:text-bodydark2">
-                Tags are grouped by category. Select one or more labels.
+                {isSingleSelect
+                  ? 'Tags are grouped by category. Select one label.'
+                  : 'Tags are grouped by category. Select one or more labels.'}
               </p>
             </div>
             <button

@@ -116,7 +116,8 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         }),
       practice_type: Yup.array()
         .of(Yup.number().required('Required!'))
-        .min(1, 'At least one practice type is required'),
+        .min(1, 'Practice type is required')
+        .max(1, 'Only one practice type can be selected'),
       categories: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one category is required'),
       tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one focus & approach is required'),
       coaching_areas: Yup.array()
@@ -423,6 +424,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     label={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.label}
                     modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.modalTitle}
                     triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.triggerPlaceholder}
+                    maxSelections={1}
                     required
                   />
 

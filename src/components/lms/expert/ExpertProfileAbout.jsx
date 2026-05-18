@@ -35,13 +35,13 @@ const ExpertProfileAbout = ({ data }) => {
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
           {data?.coaching_areas?.map(item => (
-            <ProfileChip key={item.id} label={item?.title} />
+            <ProfileChip key={item.id} label={item?.label} />
           ))}
         </div>
       </AboutSection>
       <AboutSection label="Languages">
         <div className="flex flex-wrap gap-2">
-          {relatedLanguages?.map((language, index) => (
+          {data?.languages?.map((language, index) => (
             <ProfileChip key={index} label={language.label} />
           ))}
         </div>
