@@ -14,6 +14,14 @@ import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import { getCustomerExpertsList } from '@/services/private/customer/expert';
 import ExpertCard from './ExpertCard';
 
+function specializationSearchText(specialization) {
+  if (!specialization) return '';
+  if (Array.isArray(specialization)) {
+    return specialization.filter(Boolean).join(' ').toLowerCase();
+  }
+  return String(specialization).toLowerCase();
+}
+
 const ExpertsList = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
@@ -62,11 +70,10 @@ const ExpertsList = () => {
     initialPageParam: 0,
   });
 
-  const allExperts = useMemo(() => {
-    const experts = data?.pages?.flatMap(page => page?.data?.data.data || []) || [];
-    console.log('All experts:', experts); // Debug log
-    return experts;
-  }, [data?.pages]);
+  const allExperts = useMemo(
+    () => data?.pages?.flatMap(page => page?.data?.data.data || []) || [],
+    [data?.pages]
+  );
 
   // Extract categories from the API response
   const categories = useMemo(() => {
@@ -74,18 +81,18 @@ const ExpertsList = () => {
     return lastPage?.data?.data?.['all-categories'] || [];
   }, [data?.pages]);
 
-  const filteredExperts = useMemo(
-    () => {
-      const filtered = allExperts.filter(expert => {
-        const fullName = `${expert.first_name || ''} ${expert.last_name || ''}`.trim();
-        return fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-               expert.specialization?.toLowerCase().includes(searchText.toLowerCase());
-      });
-      console.log('Filtered experts:', filtered); // Debug log
-      return filtered;
-    },
-    [allExperts, searchText]
-  );
+  const filteredExperts = useMemo(() => {
+    const query = searchText.toLowerCase();
+    if (!query) return allExperts;
+
+    return allExperts.filter(expert => {
+      const fullName = `${expert.first_name || ''} ${expert.last_name || ''}`.trim();
+      return (
+        fullName.toLowerCase().includes(query) ||
+        specializationSearchText(expert.specialization).includes(query)
+      );
+    });
+  }, [allExperts, searchText]);
 
   // Debug pagination info
   const paginationInfo = useMemo(() => {
