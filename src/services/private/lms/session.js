@@ -9,7 +9,7 @@ export const getSingleSession = async ({ id }) => {
 };
 
 export const addNewSession = async ({
-  payload: { focus_areas, equipments, languages, categories, tags, ...payload },
+  payload: { focus_areas, equipments, languages, categories, culture_experience, ...payload },
 }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
@@ -19,18 +19,20 @@ export const addNewSession = async ({
   formData.set('equipments', equipments.join(','));
   formData.set('languages', languages.join(','));
   formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  formData.set('culture_experience', culture_experience.join(','));
 
   return axios.post('/LMS/session/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
-export const updateExistingSession = async ({ payload: { id, categories, tags, ...payload } }) => {
+export const updateExistingSession = async ({
+  payload: { id, categories, culture_experience, ...payload },
+}) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value) formData.set(key, value);
   });
   formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  formData.set('culture_experience', culture_experience.join(','));
 
   return axios.put(`/LMS/session/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };

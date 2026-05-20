@@ -15,9 +15,14 @@ import { FiType, FiFileText, FiDollarSign } from 'react-icons/fi';
 import {
   AccessSettingField,
   VisibilitySettingField,
-  CategoriesField,
-  ContentCatalogTagsField,
+  CatalogTagsField,
 } from '@/components/lms/general/fields';
+import {
+  CONTENT_CATALOG_FIELDS,
+  CONTENT_CATALOG_FIELD_NAMESPACES,
+  mapContentFieldTagIds,
+  seedCatalogRowsFromTags,
+} from '@/utils/contentCatalogTags';
 import Button from '@/components/common/Button';
 import ProgramFormContentOptions from './ProgramFormContentOptions';
 import { addNewProgram, updateExistingProgram } from '@/services/private/lms/program';
@@ -52,8 +57,13 @@ const ProgramForm = ({ selected }) => {
     // Map "open" from backend to "free" in the form
     access_setting: selected?.access_setting === ACCESS_SETTING.open ? ACCESS_SETTING.free : (selected?.access_setting || ''),
     visibility_setting: selected?.visibility_setting || '',
-    categories: selected?.categories.map(i => i.id) || [],
-    tags: selected?.tags.map(i => i.id) || [],
+    categories: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories),
+    focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
+    culture_experience: mapContentFieldTagIds(
+      selected?.tags,
+      CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
+    ),
+    languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
     linked_program: selected?.linked_program || '',
     program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '', order: '' }]).map(
       ({ content_id, content_type, drip, order, order_by, title }) => ({
@@ -85,7 +95,15 @@ const ProgramForm = ({ selected }) => {
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
-    tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
+    focus_areas: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 focus & approach is required'),
+    culture_experience: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one culture experience is required'),
+    languages: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 language is required'),
     program_content: Yup.array()
       .of(
         Yup.object({
@@ -213,8 +231,51 @@ const ProgramForm = ({ selected }) => {
             </div>
             
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-              <CategoriesField required />
-              <ContentCatalogTagsField context="program" required />
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories)}
+                name="categories"
+                field={CONTENT_CATALOG_FIELDS.categories.field}
+                label={CONTENT_CATALOG_FIELDS.categories.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.categories.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.categories.triggerPlaceholder}
+                required
+              />
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas)}
+                name="focus_areas"
+                field={CONTENT_CATALOG_FIELDS.focus_areas.field}
+                label={CONTENT_CATALOG_FIELDS.focus_areas.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.focus_areas.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.focus_areas.triggerPlaceholder}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(
+                  selected?.tags,
+                  CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
+                )}
+                name="culture_experience"
+                field={CONTENT_CATALOG_FIELDS.culture_experience.field}
+                label={CONTENT_CATALOG_FIELDS.culture_experience.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.culture_experience.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                required
+              />
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages)}
+                name="languages"
+                field={CONTENT_CATALOG_FIELDS.languages.field}
+                label={CONTENT_CATALOG_FIELDS.languages.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.languages.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.languages.triggerPlaceholder}
+                required
+              />
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:items-start">
               <div className="min-w-0">

@@ -10,6 +10,7 @@ export { default as CoachingAreasField } from './CoachingAreasField';
 export { default as CertificationsField } from './CertificationsField';
 export { default as VisibilitySettingField } from './VisibilitySettingField';
 export { default as TagsField } from './TagsField';
+export { default as CatalogTagsField } from './CatalogTagsField';
 export { default as ExpertCatalogTagsField } from './ExpertCatalogTagsField';
 export { default as GuidedExperienceCatalogTagsField } from './GuidedExperienceCatalogTagsField';
 export { default as EventCatalogTagsField } from './EventCatalogTagsField';

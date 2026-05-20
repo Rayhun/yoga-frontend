@@ -13,12 +13,15 @@ import {
   DifficultyField,
   IntensityField,
   VisibilitySettingField,
-  FocusAreasField,
+  CatalogTagsField,
   EquipmentsField,
-  LanguagesField,
-  CategoriesField,
-  ContentCatalogTagsField,
 } from '@/components/lms/general/fields';
+import {
+  CONTENT_CATALOG_FIELDS,
+  CONTENT_CATALOG_FIELD_NAMESPACES,
+  mapContentFieldTagIds,
+  seedCatalogRowsFromTags,
+} from '@/utils/contentCatalogTags';
 import Button from '@/components/common/Button';
 import LMSQuizFormOptions from './LMSQuizFormOptions';
 import { addNewQuiz, updateExistingQuiz } from '@/services/private/lms/quiz';
@@ -26,11 +29,7 @@ import { toastApiError } from '@/utils/helpers';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
-import {
-  normalizeEquipmentsForForm,
-  normalizeFocusAreasForForm,
-  normalizeLanguagesForForm,
-} from '@/utils/sessionQuizInitialValues';
+import { normalizeEquipmentsForForm } from '@/utils/sessionQuizInitialValues';
 
 const LMSQuizForm = ({ selected }) => {
   const router = useRouter();
@@ -52,11 +51,14 @@ const LMSQuizForm = ({ selected }) => {
     intensity: selected?.intensity || '',
     access_setting: selected?.access_setting || '',
     visibility_setting: selected?.visibility_setting || '',
-    focus_areas: normalizeFocusAreasForForm(selected?.focus_areas),
+    focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
     equipments: normalizeEquipmentsForForm(selected?.equipments),
-    languages: normalizeLanguagesForForm(selected?.languages),
-    categories: selected?.categories.map(i => i.id) || [],
-    tags: selected?.tags.map(i => i.id) || [],
+    culture_experience: mapContentFieldTagIds(
+      selected?.tags,
+      CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
+    ),
+    languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
+    categories: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories),
     options: (selected?.options || [{ text: '', is_correct: false }]).map(({ text, is_correct }) => ({
       text,
       is_correct,
@@ -74,14 +76,18 @@ const LMSQuizForm = ({ selected }) => {
     access_setting: Yup.string().required('Required!'),
     visibility_setting: Yup.string().required('Required!'),
     focus_areas: Yup.array()
-      .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 focus area is required'),
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 focus & approach is required'),
     equipments: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 equipment is required'),
-    languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
+    culture_experience: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one culture experience is required'),
+    languages: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 language is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
-    tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
     options: Yup.array()
       .of(
         Yup.object({
@@ -163,7 +169,16 @@ const LMSQuizForm = ({ selected }) => {
                 <VisibilitySettingField required />
               </div>
               <div className="w-full md:w-1/2">
-                <FocusAreasField required />
+                <CatalogTagsField
+                  context="quiz"
+                  seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas)}
+                  name="focus_areas"
+                  field={CONTENT_CATALOG_FIELDS.focus_areas.field}
+                  label={CONTENT_CATALOG_FIELDS.focus_areas.label}
+                  modalTitle={CONTENT_CATALOG_FIELDS.focus_areas.modalTitle}
+                  triggerPlaceholder={CONTENT_CATALOG_FIELDS.focus_areas.triggerPlaceholder}
+                  required
+                />
               </div>
             </div>
             <FormikSwitch
@@ -177,12 +192,42 @@ const LMSQuizForm = ({ selected }) => {
                 <EquipmentsField required />
               </div>
               <div className="w-full md:w-1/2">
-                <LanguagesField required />
+                <CatalogTagsField
+                  context="quiz"
+                  seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages)}
+                  name="languages"
+                  field={CONTENT_CATALOG_FIELDS.languages.field}
+                  label={CONTENT_CATALOG_FIELDS.languages.label}
+                  modalTitle={CONTENT_CATALOG_FIELDS.languages.modalTitle}
+                  triggerPlaceholder={CONTENT_CATALOG_FIELDS.languages.triggerPlaceholder}
+                  required
+                />
               </div>
             </div>
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-              <CategoriesField required />
-              <ContentCatalogTagsField context="quiz" required />
+              <CatalogTagsField
+                context="quiz"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories)}
+                name="categories"
+                field={CONTENT_CATALOG_FIELDS.categories.field}
+                label={CONTENT_CATALOG_FIELDS.categories.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.categories.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.categories.triggerPlaceholder}
+                required
+              />
+              <CatalogTagsField
+                context="quiz"
+                seedRows={seedCatalogRowsFromTags(
+                  selected?.tags,
+                  CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
+                )}
+                name="culture_experience"
+                field={CONTENT_CATALOG_FIELDS.culture_experience.field}
+                label={CONTENT_CATALOG_FIELDS.culture_experience.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.culture_experience.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                required
+              />
             </div>
 
             <div className="my-5 flex flex-col gap-3">

@@ -8,29 +8,36 @@ import Chip from '@mui/material/Chip';
 import { MdClose } from 'react-icons/md';
 import { HiMagnifyingGlass, HiOutlineExclamationCircle, HiOutlineListBullet, HiPlus } from 'react-icons/hi2';
 import useScrollToFirstErrorField from './useScrollToFirstErrorField';
-import SelectedChipsScrollRegion from './SelectedChipsScrollRegion';
 
 const sameValue = (a, b) => String(a) === String(b);
 
 /**
- * Pill + modal multi-select for static or API-loaded { label, value } options.
- * Values stay the same type as in `options` (string or number).
+ * Pill + modal single-select for static or API-loaded { label, value } options.
+ * Matches catalog / categories picker styling.
  */
-const FormikMultiOptionsModalField = ({
+const FormikSingleOptionModalField = ({
   name,
   label,
   required,
   options = [],
-  /** @type {'tag'|'category'|'language'|'culture'|'coaching_area'|'certification'|'selection'} */
-  chipKind = 'selection',
-  modalTitle = 'Select options',
+  modalTitle = 'Select option',
   searchPlaceholder = 'Search…',
   triggerPlaceholder = 'Select',
-  max,
+  onChange = () => null,
+  disabled = false,
   loading = false,
   loadError = false,
+  onListScroll,
+  isFetchingNextPage = false,
+  /** When set, search is controlled by the parent (e.g. server-side expert search). */
+  searchValue,
+  onSearchChange,
+  filterOptionsLocally = true,
+  onOpenChange,
   className = '',
   placeholder: _legacyPlaceholder,
+  Icon: _Icon,
+  freeSolo: _freeSolo,
   ...rest
 }) => {
   const { setFieldValue, submitCount } = useFormikContext();
@@ -38,19 +45,28 @@ const FormikMultiOptionsModalField = ({
   const containerRef = useScrollToFirstErrorField(name);
 
   const [open, setOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [internalSearch, setInternalSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  const isSearchControlled = onSearchChange != null;
+  const searchInput = isSearchControlled ? (searchValue ?? '') : internalSearch;
+  const setSearchInput = isSearchControlled ? onSearchChange : setInternalSearch;
+
   useEffect(() => {
+    if (!filterOptionsLocally) return;
     const t = setTimeout(() => setDebouncedSearch(searchInput.trim()), 320);
     return () => clearTimeout(t);
-  }, [searchInput]);
+  }, [filterOptionsLocally, searchInput]);
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [onOpenChange, open]);
 
   useEffect(() => {
     if (!open) return;
     setSearchInput('');
-    setDebouncedSearch('');
-  }, [open]);
+    if (filterOptionsLocally) setDebouncedSearch('');
+  }, [filterOptionsLocally, open, setSearchInput]);
 
   const rows = useMemo(
     () =>
@@ -62,52 +78,51 @@ const FormikMultiOptionsModalField = ({
   );
 
   const filteredRows = useMemo(() => {
+    if (!filterOptionsLocally) return rows;
     const q = debouncedSearch.toLowerCase();
     if (!q) return rows;
     return rows.filter(r => r.primaryLabel.toLowerCase().includes(q));
-  }, [rows, debouncedSearch]);
+  }, [filterOptionsLocally, rows, debouncedSearch]);
 
-  const selectedValues = useMemo(() => {
-    const v = field.value;
-    if (!v) return [];
-    if (!Array.isArray(v)) return [];
-    return v.filter(x => x != null && x !== '');
-  }, [field.value]);
+  const selectedValue =
+    field.value === '' || field.value === null || field.value === undefined ? null : field.value;
 
-  const labelByValue = useMemo(() => {
-    const m = new Map();
-    rows.forEach(r => m.set(String(r.value), r.primaryLabel));
-    return m;
-  }, [rows]);
+  const selectedLabel = useMemo(() => {
+    if (selectedValue == null) return '';
+    const hit = options.find(o => sameValue(o.value, selectedValue));
+    return hit ? String(hit.label ?? '') : String(selectedValue);
+  }, [options, selectedValue]);
 
-  const toggleValue = useCallback(
+  const selectValue = useCallback(
     raw => {
       const option = options.find(o => sameValue(o.value, raw));
       const canonical = option ? option.value : raw;
-
-      if (max != null && selectedValues.length >= max) {
-        const already = selectedValues.some(s => sameValue(s, canonical));
-        if (!already) return;
+      if (selectedValue != null && sameValue(selectedValue, canonical)) {
+        setFieldValue(name, '', true);
+        onChange('');
+      } else {
+        setFieldValue(name, canonical, true);
+        onChange(canonical);
+        setOpen(false);
       }
-
-      const next = selectedValues.some(s => sameValue(s, canonical))
-        ? selectedValues.filter(s => !sameValue(s, canonical))
-        : [...selectedValues, canonical];
-      setFieldValue(name, next, true);
     },
-    [max, name, options, selectedValues, setFieldValue]
+    [name, onChange, options, selectedValue, setFieldValue]
+  );
+
+  const clearValue = useCallback(() => {
+    setFieldValue(name, '', true);
+    onChange('');
+  }, [name, onChange, setFieldValue]);
+
+  const handleListScroll = useCallback(
+    e => {
+      onListScroll?.(e);
+    },
+    [onListScroll]
   );
 
   const isErrorField = Boolean(meta.error) && (meta.touched || submitCount > 0);
-  const summaryText =
-    selectedValues.length === 0
-      ? triggerPlaceholder
-      : max === 1 && selectedValues.length === 1
-        ? labelByValue.get(String(selectedValues[0])) ?? triggerPlaceholder
-        : `${selectedValues.length} selected`;
-
-  const measureKey = selectedValues.map(v => String(v)).join('\u0001');
-  const atMax = max != null && selectedValues.length >= max;
+  const summaryText = selectedLabel || triggerPlaceholder;
 
   return (
     <div ref={containerRef} className={`flex min-w-0 flex-col gap-2 ${className}`} {...rest}>
@@ -123,48 +138,40 @@ const FormikMultiOptionsModalField = ({
 
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className={`flex w-full items-center justify-between gap-3 rounded-full border bg-white px-4 py-3 text-left shadow-sm transition hover:border-gray-300 hover:shadow dark:border-strokedark dark:bg-boxdark dark:hover:border-bodydark2 ${
+        disabled={disabled}
+        title={selectedLabel || undefined}
+        onClick={() => !disabled && setOpen(true)}
+        className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-full border bg-white px-4 py-3 text-left shadow-sm transition hover:border-gray-300 hover:shadow disabled:cursor-not-allowed disabled:opacity-60 dark:border-strokedark dark:bg-boxdark dark:hover:border-bodydark2 ${
           isErrorField ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-200'
         }`}
       >
         <span
-          className={
-            selectedValues.length === 0
+          className={`min-w-0 flex-1 truncate ${
+            selectedValue == null
               ? 'text-sm text-gray-400 dark:text-bodydark2'
               : 'text-sm font-medium text-gray-900 dark:text-white'
-          }
+          }`}
         >
           {summaryText}
         </span>
         <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition group-hover:border-gray-300 dark:border-strokedark dark:bg-meta-4 dark:text-bodydark2"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition dark:border-strokedark dark:bg-meta-4 dark:text-bodydark2"
           aria-hidden
         >
           <HiPlus className="h-5 w-5" strokeWidth={2} />
         </span>
       </button>
 
-      {atMax ? (
-        <p className="m-0 text-xs text-amber-800/90 dark:text-amber-200/90">
-          Maximum {max} reached. Remove one to add another.
-        </p>
-      ) : null}
-
-      {selectedValues.length > 0 ? (
-        <SelectedChipsScrollRegion measureKey={measureKey} selectedCount={selectedValues.length} kind={chipKind}>
-          <div className="flex flex-wrap gap-1.5">
-            {selectedValues.map(val => (
-              <Chip
-                key={String(val)}
-                size="small"
-                label={labelByValue.get(String(val)) ?? String(val)}
-                onDelete={() => toggleValue(val)}
-                className="!h-auto !max-w-full !rounded-lg !border !border-gray-200 !bg-gray-50 !py-0.5 !pl-2 !pr-1 !text-xs !font-medium !text-gray-800 dark:!border-strokedark dark:!bg-meta-4 dark:!text-white"
-              />
-            ))}
-          </div>
-        </SelectedChipsScrollRegion>
+      {selectedValue != null && selectedLabel ? (
+        <div className="flex min-w-0 max-w-full gap-1.5">
+          <Chip
+            size="small"
+            title={selectedLabel}
+            label={selectedLabel}
+            onDelete={disabled ? undefined : clearValue}
+            className="!h-auto !max-w-full !rounded-lg !border !border-gray-200 !bg-gray-50 !py-0.5 !pl-2 !pr-1 !text-xs !font-medium !text-gray-800 dark:!border-strokedark dark:!bg-meta-4 dark:!text-white [&_.MuiChip-label]:block [&_.MuiChip-label]:max-w-full [&_.MuiChip-label]:truncate"
+          />
+        </div>
       ) : null}
 
       {isErrorField ? <small className="text-xs text-red-500">{meta.error}</small> : null}
@@ -192,7 +199,7 @@ const FormikMultiOptionsModalField = ({
                 {modalTitle}
               </h2>
               <p className="mt-1 text-xs text-gray-500 dark:text-bodydark2">
-                Search and tap to select. Changes apply immediately.
+                Search and tap one option to select.
               </p>
             </div>
             <button
@@ -222,7 +229,10 @@ const FormikMultiOptionsModalField = ({
             </div>
           </div>
 
-          <div className="min-h-[240px] flex-1 overflow-y-auto px-3 py-2 sm:min-h-[280px]">
+          <div
+            className="min-h-[240px] flex-1 overflow-y-auto px-3 py-2 sm:min-h-[280px]"
+            onScroll={handleListScroll}
+          >
             {loadError ? (
               <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center">
                 <HiOutlineExclamationCircle className="h-14 w-14 shrink-0 text-red-300 dark:text-red-400/80" />
@@ -239,31 +249,28 @@ const FormikMultiOptionsModalField = ({
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
                 <HiOutlineListBullet className="h-14 w-14 shrink-0 text-gray-200 dark:text-bodydark2" />
                 <p className="max-w-xs text-sm leading-relaxed text-gray-500 dark:text-bodydark2">
-                  {debouncedSearch ? 'No results match your search. Try different keywords.' : 'No options available.'}
+                  {searchInput.trim()
+                    ? 'No results match your search. Try different keywords.'
+                    : 'No options available.'}
                 </p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-100 dark:divide-strokedark">
                 {filteredRows.map(row => {
-                  const checked = selectedValues.some(s => sameValue(s, row.value));
-                  const disabledAdd = !checked && max != null && selectedValues.length >= max;
+                  const checked = selectedValue != null && sameValue(selectedValue, row.value);
                   return (
-                    <li key={String(row.value)} className="first:pt-0">
+                    <li key={String(row.value)}>
                       <button
                         type="button"
-                        disabled={disabledAdd}
-                        onClick={() => !disabledAdd && toggleValue(row.value)}
+                        onClick={() => selectValue(row.value)}
                         className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition ${
-                          disabledAdd
-                            ? 'cursor-not-allowed opacity-50'
-                            : checked
-                              ? 'bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-primary/15 dark:ring-primary/40'
-                              : 'hover:bg-gray-50 dark:hover:bg-meta-4'
+                          checked
+                            ? 'bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-primary/15 dark:ring-primary/40'
+                            : 'hover:bg-gray-50 dark:hover:bg-meta-4'
                         }`}
                       >
                         <Checkbox
                           checked={checked}
-                          disabled={disabledAdd}
                           size="small"
                           tabIndex={-1}
                           sx={{
@@ -282,6 +289,11 @@ const FormikMultiOptionsModalField = ({
                 })}
               </ul>
             )}
+            {isFetchingNextPage ? (
+              <div className="flex justify-center py-4">
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : null}
           </div>
 
           <footer className="shrink-0 border-t border-gray-100 bg-gray-50/80 px-5 pb-5 pt-4 dark:border-strokedark dark:bg-meta-4/50">
@@ -299,4 +311,4 @@ const FormikMultiOptionsModalField = ({
   );
 };
 
-export default FormikMultiOptionsModalField;
+export default FormikSingleOptionModalField;

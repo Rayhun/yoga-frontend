@@ -2,10 +2,29 @@
 import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, RelifeIndexBadge } from '@/components/common/details';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import {
+  CONTENT_CATALOG_FIELD_NAMESPACES,
+  filterContentTagsByNamespace,
+} from '@/utils/contentCatalogTags';
 
 const LMSQuizDetails = ({ data = {} }) => {
   const router = useRouter();
-
+  const focusAreaTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas
+  );
+  const languageTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.languages
+  );
+  const categoryTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.categories
+  );
+  const cultureExperienceTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
+  );
   return (
     <DetailsLayoutWrapper title="Quiz" onEdit={() => router.push(`/portal/admin/lms/quiz/${data.id}/edit`)}>
       <div className="flex flex-col gap-5">
@@ -20,11 +39,29 @@ const LMSQuizDetails = ({ data = {} }) => {
         <DetailsRecord label="Relife index">
           <RelifeIndexBadge value={data.relife_index} />
         </DetailsRecord>
-        <MultiValueDetailsRecord label="Focus Areas" data={data.focus_areas} getChipLabel={i => i} />
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
+          data={focusAreaTags.length ? focusAreaTags : data.focus_areas}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
+        <MultiValueDetailsRecord
+          label="Culture Experience"
+          data={cultureExperienceTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={languageTags.length ? languageTags : data.languages}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
+        <MultiValueDetailsRecord
+          label="Categories"
+          data={categoryTags.length ? categoryTags : data.categories}
+          getChipLabel={item =>
+            typeof item === 'string' ? item : item?.name ?? getCatalogTagChipLabel(item)
+          }
+        />
       </div>
     </DetailsLayoutWrapper>
   );

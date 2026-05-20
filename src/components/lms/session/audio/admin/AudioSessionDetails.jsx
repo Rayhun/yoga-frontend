@@ -3,10 +3,29 @@ import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, RelifeIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import {
+  SESSION_CATALOG_FIELD_NAMESPACES,
+  filterSessionTagsByNamespace,
+} from '@/utils/sessionCatalogTags';
 
 const AudioSessionDetails = ({ data = {} }) => {
   const router = useRouter();
-
+  const focusAreaTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.focus_areas
+  );
+  const languageTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.languages
+  );
+  const categoryTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.categories
+  );
+  const cultureExperienceTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
+  );
   return (
     <DetailsLayoutWrapper
       title="Audio Session"
@@ -24,11 +43,29 @@ const AudioSessionDetails = ({ data = {} }) => {
         <DetailsRecord label="Relife index">
           <RelifeIndexBadge value={data.relife_index} />
         </DetailsRecord>
-        <MultiValueDetailsRecord label="Focus Areas" data={data.focus_areas} getChipLabel={i => i} />
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
+          data={focusAreaTags.length ? focusAreaTags : data.focus_areas}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={getCatalogTagChipLabel} />
+        <MultiValueDetailsRecord
+          label="Culture Experience"
+          data={cultureExperienceTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={languageTags.length ? languageTags : data.languages}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
+        <MultiValueDetailsRecord
+          label="Categories"
+          data={categoryTags.length ? categoryTags : data.categories}
+          getChipLabel={item =>
+            typeof item === 'string' ? item : item?.name ?? getCatalogTagChipLabel(item)
+          }
+        />
         <DetailsRecord label="Audio File">
           <DetailsFileCard fileURL={data.content_file} />
         </DetailsRecord>

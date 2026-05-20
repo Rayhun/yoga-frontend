@@ -15,13 +15,16 @@ import {
   DifficultyField,
   IntensityField,
   VisibilitySettingField,
-  FocusAreasField,
+  CatalogTagsField,
   EquipmentsField,
-  LanguagesField,
-  CategoriesField,
-  ContentCatalogTagsField,
   ExpertField,
 } from '@/components/lms/general/fields';
+import {
+  SESSION_CATALOG_FIELDS,
+  SESSION_CATALOG_FIELD_NAMESPACES,
+  mapSessionFieldTagIds,
+  seedCatalogRowsFromTags,
+} from '@/utils/sessionCatalogTags';
 import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { addNewSession, updateExistingSession } from '@/services/private/lms/session';
@@ -30,11 +33,7 @@ import { LMS_DOC_STATUS_OPTIONS } from '@/utils/options';
 import queryKeys from '@/utils/query-keys';
 import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
-import {
-  normalizeEquipmentsForForm,
-  normalizeFocusAreasForForm,
-  normalizeLanguagesForForm,
-} from '@/utils/sessionQuizInitialValues';
+import { normalizeEquipmentsForForm } from '@/utils/sessionQuizInitialValues';
 
 const VideoSession = ({ selected }) => {
   const router = useRouter();
@@ -57,11 +56,14 @@ const VideoSession = ({ selected }) => {
     intensity: selected?.intensity || '',
     access_setting: selected?.access_setting || '',
     visibility_setting: selected?.visibility_setting || '',
-    focus_areas: normalizeFocusAreasForForm(selected?.focus_areas),
+    focus_areas: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.focus_areas),
     equipments: normalizeEquipmentsForForm(selected?.equipments),
-    languages: normalizeLanguagesForForm(selected?.languages),
-    categories: selected?.categories.map(i => i.id) || [],
-    tags: selected?.tags.map(i => i.id) || [],
+    culture_experience: mapSessionFieldTagIds(
+      selected?.tags,
+      SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
+    ),
+    languages: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages),
+    categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
     relife_index: Boolean(selected?.relife_index),
   };
@@ -79,14 +81,18 @@ const VideoSession = ({ selected }) => {
     access_setting: Yup.string().required('Required!'),
     visibility_setting: Yup.string().required('Required!'),
     focus_areas: Yup.array()
-      .of(Yup.string().required('Required!'))
-      .min(1, 'At least 1 focus area is required'),
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 focus & approach is required'),
     equipments: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 equipment is required'),
-    languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
+    culture_experience: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one culture experience is required'),
+    languages: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 language is required'),
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
-    tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
     file: Yup.mixed()
       .required('Required!')
       .test(
@@ -186,7 +192,16 @@ const VideoSession = ({ selected }) => {
                 <VisibilitySettingField required />
               </div>
               <div className="w-full md:w-1/2">
-                <FocusAreasField required />
+                <CatalogTagsField
+                  context="session"
+                  seedRows={seedCatalogRowsFromTags(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.focus_areas)}
+                  name="focus_areas"
+                  field={SESSION_CATALOG_FIELDS.focus_areas.field}
+                  label={SESSION_CATALOG_FIELDS.focus_areas.label}
+                  modalTitle={SESSION_CATALOG_FIELDS.focus_areas.modalTitle}
+                  triggerPlaceholder={SESSION_CATALOG_FIELDS.focus_areas.triggerPlaceholder}
+                  required
+                />
               </div>
             </div>
             <FormikSwitch
@@ -200,12 +215,42 @@ const VideoSession = ({ selected }) => {
                 <EquipmentsField required />
               </div>
               <div className="w-full md:w-1/2">
-                <LanguagesField required />
+                <CatalogTagsField
+                  context="session"
+                  seedRows={seedCatalogRowsFromTags(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages)}
+                  name="languages"
+                  field={SESSION_CATALOG_FIELDS.languages.field}
+                  label={SESSION_CATALOG_FIELDS.languages.label}
+                  modalTitle={SESSION_CATALOG_FIELDS.languages.modalTitle}
+                  triggerPlaceholder={SESSION_CATALOG_FIELDS.languages.triggerPlaceholder}
+                  required
+                />
               </div>
             </div>
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                <CategoriesField required />
-                <ContentCatalogTagsField context="session" required />
+              <CatalogTagsField
+                context="session"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories)}
+                name="categories"
+                field={SESSION_CATALOG_FIELDS.categories.field}
+                label={SESSION_CATALOG_FIELDS.categories.label}
+                modalTitle={SESSION_CATALOG_FIELDS.categories.modalTitle}
+                triggerPlaceholder={SESSION_CATALOG_FIELDS.categories.triggerPlaceholder}
+                required
+              />
+              <CatalogTagsField
+                context="session"
+                seedRows={seedCatalogRowsFromTags(
+                  selected?.tags,
+                  SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
+                )}
+                name="culture_experience"
+                field={SESSION_CATALOG_FIELDS.culture_experience.field}
+                label={SESSION_CATALOG_FIELDS.culture_experience.label}
+                modalTitle={SESSION_CATALOG_FIELDS.culture_experience.modalTitle}
+                triggerPlaceholder={SESSION_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                required
+              />
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="md:w-1/2">

@@ -32,6 +32,7 @@ const FormikCatalogTagsModalField = ({
   searchPlaceholder = 'Search by label…',
   triggerPlaceholder = 'Select',
   maxSelections,
+  seedRows = [],
   className = '',
   placeholder: _legacyPlaceholder,
   ...rest
@@ -46,9 +47,6 @@ const FormikCatalogTagsModalField = ({
   const [debouncedSearch, setDebouncedSearch] = useState('');
   /** Namespace slugs that are collapsed in the picker list. */
   const [collapsedNamespaces, setCollapsedNamespaces] = useState(() => new Set());
-
-  const hasTagSelection =
-    Array.isArray(field.value) && field.value.filter(v => v != null && v !== '').length > 0;
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput.trim()), 320);
@@ -79,7 +77,7 @@ const FormikCatalogTagsModalField = ({
     field: catalogField,
     surface,
     search: debouncedSearch,
-    enabled: open || hasTagSelection,
+    enabled: open,
   });
 
   const selectedIds = useMemo(() => {
@@ -89,11 +87,22 @@ const FormikCatalogTagsModalField = ({
     return [];
   }, [field.value]);
 
+  const mergedCatalogRows = useMemo(() => {
+    const byId = new Map();
+    for (const row of seedRows ?? []) {
+      if (row?.id != null) byId.set(row.id, row);
+    }
+    for (const row of catalogRows) {
+      if (row?.id != null) byId.set(row.id, row);
+    }
+    return Array.from(byId.values());
+  }, [catalogRows, seedRows]);
+
   const idToLabel = useMemo(() => {
     const m = new Map();
-    catalogRows.forEach(r => m.set(r.id, r.label));
+    mergedCatalogRows.forEach(r => m.set(r.id, r.label));
     return m;
-  }, [catalogRows]);
+  }, [mergedCatalogRows]);
 
   const toggleId = useCallback(
     id => {

@@ -205,8 +205,8 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
   }, [values.content_type]);
 
   return (
-    <div className="flex gap-x-6 gap-y-1 items-center overflow-auto">
-      <div className="w-[20%] min-w-[150px]">
+    <div className="flex items-start gap-x-6 gap-y-1 overflow-auto">
+      <div className="w-36 shrink-0">
         <FormikSelect
           name={`${name}.content_type`}
           label="Type"
@@ -216,7 +216,7 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
           required
         />
       </div>
-      <div className="w-[20%] min-w-[150px]">
+      <div className="min-w-0 flex-1 basis-[35%]">
         <FormikSelect
           name={`${name}.content_id`}
           label="Content"
@@ -226,7 +226,7 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
           required
         />
       </div>
-      <div className="w-[15%] min-w-[120px]">
+      <div className="w-[15%] min-w-[120px] shrink-0">
         <FormikField 
           type="number" 
           name={`${name}.drip`} 
@@ -236,7 +236,7 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
           required 
         />
       </div>
-      <div className="w-[15%] min-w-[120px]">
+      <div className="w-[15%] min-w-[120px] shrink-0">
         <FormikField 
           type="number" 
           name={`${name}.order`} 
@@ -248,7 +248,7 @@ const ProgramFormContentOption = ({ values, name, onRemove, allValues, setFieldE
           onBlur={handleOrderBlur}
         />
       </div>
-      <div className="w-[30%] min-w-[180px] flex items-center justify-center gap-2">
+      <div className="flex w-[30%] min-w-[180px] shrink-0 items-center justify-center gap-2 self-center">
         {values.content_id && (
           <>
             <button 

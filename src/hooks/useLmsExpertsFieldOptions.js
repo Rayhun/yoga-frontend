@@ -48,6 +48,7 @@ function useLmsExpertsFieldOptions({ search = '', enabled = true } = {}) {
       return loaded;
     },
     retry: 1,
+    throwOnError: false,
     enabled,
   });
 

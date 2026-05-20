@@ -70,6 +70,7 @@ function useExpertCatalogTagOptions({
       return loaded;
     },
     retry: 1,
+    throwOnError: false,
     enabled,
   });
 

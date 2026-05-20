@@ -1,25 +1,25 @@
 'use client';
-import FormikCatalogTagsModalField from '@/components/common/form/formik/FormikCatalogTagsModalField';
+import CatalogTagsField from './CatalogTagsField';
 
-/**
- * Catalog tag picker for LMS content (program, module, session, quiz).
- */
+/** Catalog tag picker for LMS content (program, module, session, quiz). */
 const ContentCatalogTagsField = ({
   context,
+  field = 'tags',
   name = 'tags',
   label = 'Tags',
   modalTitle,
+  triggerPlaceholder = 'Select tags',
   placeholder: _ignored,
   ...props
 }) => (
-  <FormikCatalogTagsModalField
+  <CatalogTagsField
     {...props}
     name={name}
     label={label}
+    field={field}
     context={context}
     modalTitle={modalTitle ?? 'Select tags'}
-    searchPlaceholder="Search tags…"
-    triggerPlaceholder="Select"
+    triggerPlaceholder={triggerPlaceholder}
   />
 );
 

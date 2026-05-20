@@ -1,30 +1,7 @@
 'use client';
-import FormikCatalogTagsModalField from '@/components/common/form/formik/FormikCatalogTagsModalField';
+import CatalogTagsField from './CatalogTagsField';
 
-/**
- * Catalog tag picker for expert profile (and other contexts).
- * Pass ``field`` to load namespace-scoped tags from ``/LMS/experts/catalog-tags/?field=…``.
- */
-const ExpertCatalogTagsField = ({
-  name = 'tags',
-  label = 'Tags',
-  field: catalogField = '',
-  context = 'expert_profile',
-  modalTitle = 'Select tags',
-  triggerPlaceholder = 'Select',
-  placeholder: _ignored,
-  ...props
-}) => (
-  <FormikCatalogTagsModalField
-    {...props}
-    name={name}
-    label={label}
-    field={catalogField}
-    context={context}
-    modalTitle={modalTitle}
-    searchPlaceholder="Search tags…"
-    triggerPlaceholder={triggerPlaceholder}
-  />
-);
+/** Catalog tag picker for expert profile. */
+const ExpertCatalogTagsField = props => <CatalogTagsField context="expert_profile" {...props} />;
 
 export default ExpertCatalogTagsField;
