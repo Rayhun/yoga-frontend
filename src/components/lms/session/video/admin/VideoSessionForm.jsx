@@ -23,7 +23,9 @@ import {
   SESSION_CATALOG_FIELDS,
   SESSION_CATALOG_FIELD_NAMESPACES,
   mapSessionFieldTagIds,
+  mapContentCultureExperienceIds,
   seedCatalogRowsFromTags,
+  seedCultureExperienceRows,
 } from '@/utils/sessionCatalogTags';
 import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
@@ -58,10 +60,7 @@ const VideoSession = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     focus_areas: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.focus_areas),
     equipments: normalizeEquipmentsForForm(selected?.equipments),
-    culture_experience: mapSessionFieldTagIds(
-      selected?.tags,
-      SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
-    ),
+    culture_experience: mapContentCultureExperienceIds(selected),
     languages: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages),
     categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
@@ -240,10 +239,7 @@ const VideoSession = ({ selected }) => {
               />
               <CatalogTagsField
                 context="session"
-                seedRows={seedCatalogRowsFromTags(
-                  selected?.tags,
-                  SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
-                )}
+                seedRows={seedCultureExperienceRows(selected)}
                 name="culture_experience"
                 field={SESSION_CATALOG_FIELDS.culture_experience.field}
                 label={SESSION_CATALOG_FIELDS.culture_experience.label}

@@ -5,6 +5,7 @@ import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 import {
   CONTENT_CATALOG_FIELD_NAMESPACES,
   filterContentTagsByNamespace,
+  getCultureExperienceDisplayData,
 } from '@/utils/contentCatalogTags';
 
 const LMSQuizDetails = ({ data = {} }) => {
@@ -21,10 +22,7 @@ const LMSQuizDetails = ({ data = {} }) => {
     data.tags,
     CONTENT_CATALOG_FIELD_NAMESPACES.categories
   );
-  const cultureExperienceTags = filterContentTagsByNamespace(
-    data.tags,
-    CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-  );
+  const cultureExperienceTags = getCultureExperienceDisplayData(data);
   return (
     <DetailsLayoutWrapper title="Quiz" onEdit={() => router.push(`/portal/admin/lms/quiz/${data.id}/edit`)}>
       <div className="flex flex-col gap-5">

@@ -19,7 +19,9 @@ import {
   CONTENT_CATALOG_FIELDS,
   CONTENT_CATALOG_FIELD_NAMESPACES,
   mapContentFieldTagIds,
+  mapContentCultureExperienceIds,
   seedCatalogRowsFromTags,
+  seedCultureExperienceRows,
 } from '@/utils/contentCatalogTags';
 import Button from '@/components/common/Button';
 import ModuleFormContentOptions from './ModuleFormContentOptions';
@@ -114,10 +116,7 @@ const ModuleForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     categories: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories),
     focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
-    culture_experience: mapContentFieldTagIds(
-      selected?.tags,
-      CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-    ),
+    culture_experience: mapContentCultureExperienceIds(selected),
     languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
     module_content: (selected?.module || [{ content_id: '', content_type: '' }]).map(
       ({ content_id, content_type, order_by, order }) => ({
@@ -290,10 +289,7 @@ const ModuleForm = ({ selected }) => {
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <CatalogTagsField
                 context="module"
-                seedRows={seedCatalogRowsFromTags(
-                  selected?.tags,
-                  CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-                )}
+                seedRows={seedCultureExperienceRows(selected)}
                 name="culture_experience"
                 field={CONTENT_CATALOG_FIELDS.culture_experience.field}
                 label={CONTENT_CATALOG_FIELDS.culture_experience.label}

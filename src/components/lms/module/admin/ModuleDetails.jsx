@@ -14,6 +14,7 @@ import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 import {
   CONTENT_CATALOG_FIELD_NAMESPACES,
   filterContentTagsByNamespace,
+  getCultureExperienceDisplayData,
 } from '@/utils/contentCatalogTags';
 
 const ModuleDetails = ({ data = {} }) => {
@@ -32,10 +33,7 @@ const ModuleDetails = ({ data = {} }) => {
     data.tags,
     CONTENT_CATALOG_FIELD_NAMESPACES.categories
   );
-  const cultureExperienceTags = filterContentTagsByNamespace(
-    data.tags,
-    CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-  );
+  const cultureExperienceTags = getCultureExperienceDisplayData(data);
   const { mutateAsync: deleteContent, isPending: isDeleting } = useMutation({
     mutationFn: deleteModuleContent,
     onSuccess: () => {

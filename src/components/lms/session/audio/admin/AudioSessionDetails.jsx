@@ -6,6 +6,7 @@ import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 import {
   SESSION_CATALOG_FIELD_NAMESPACES,
   filterSessionTagsByNamespace,
+  getCultureExperienceDisplayData,
 } from '@/utils/sessionCatalogTags';
 
 const AudioSessionDetails = ({ data = {} }) => {
@@ -22,10 +23,7 @@ const AudioSessionDetails = ({ data = {} }) => {
     data.tags,
     SESSION_CATALOG_FIELD_NAMESPACES.categories
   );
-  const cultureExperienceTags = filterSessionTagsByNamespace(
-    data.tags,
-    SESSION_CATALOG_FIELD_NAMESPACES.culture_experience
-  );
+  const cultureExperienceTags = getCultureExperienceDisplayData(data);
   return (
     <DetailsLayoutWrapper
       title="Audio Session"

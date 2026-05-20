@@ -20,7 +20,9 @@ import {
   CONTENT_CATALOG_FIELDS,
   CONTENT_CATALOG_FIELD_NAMESPACES,
   mapContentFieldTagIds,
+  mapContentCultureExperienceIds,
   seedCatalogRowsFromTags,
+  seedCultureExperienceRows,
 } from '@/utils/contentCatalogTags';
 import Button from '@/components/common/Button';
 import LMSQuizFormOptions from './LMSQuizFormOptions';
@@ -53,10 +55,7 @@ const LMSQuizForm = ({ selected }) => {
     visibility_setting: selected?.visibility_setting || '',
     focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
     equipments: normalizeEquipmentsForForm(selected?.equipments),
-    culture_experience: mapContentFieldTagIds(
-      selected?.tags,
-      CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-    ),
+    culture_experience: mapContentCultureExperienceIds(selected),
     languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
     categories: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories),
     options: (selected?.options || [{ text: '', is_correct: false }]).map(({ text, is_correct }) => ({
@@ -217,10 +216,7 @@ const LMSQuizForm = ({ selected }) => {
               />
               <CatalogTagsField
                 context="quiz"
-                seedRows={seedCatalogRowsFromTags(
-                  selected?.tags,
-                  CONTENT_CATALOG_FIELD_NAMESPACES.culture_experience
-                )}
+                seedRows={seedCultureExperienceRows(selected)}
                 name="culture_experience"
                 field={CONTENT_CATALOG_FIELDS.culture_experience.field}
                 label={CONTENT_CATALOG_FIELDS.culture_experience.label}
