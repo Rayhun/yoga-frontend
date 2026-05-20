@@ -64,7 +64,7 @@ const VideoSession = ({ selected }) => {
     languages: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages),
     categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
-    relife_index: Boolean(selected?.relife_index),
+    relief_index: Boolean(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -204,10 +204,10 @@ const VideoSession = ({ selected }) => {
               </div>
             </div>
             <FormikSwitch
-              name="relife_index"
+              name="relief_index"
               variant="card"
-              label="Relife index"
-              description="Turn on to surface this session in the Relife index."
+              label="Relief index"
+              description="Turn on to surface this session in the Relief index."
             />
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">

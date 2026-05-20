@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, RelifeIndexBadge } from '@/components/common/details';
+import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, ReliefIndexBadge } from '@/components/common/details';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 import {
   CONTENT_CATALOG_FIELD_NAMESPACES,
@@ -34,8 +34,8 @@ const LMSQuizDetails = ({ data = {} }) => {
         <DetailsRecord label="Intensity">{data.intensity}</DetailsRecord>
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
-        <DetailsRecord label="Relife index">
-          <RelifeIndexBadge value={data.relife_index} />
+        <DetailsRecord label="Relief index">
+          <ReliefIndexBadge value={data.relief_index} />
         </DetailsRecord>
         <MultiValueDetailsRecord
           label="Focus & approach?"

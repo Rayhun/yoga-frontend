@@ -125,7 +125,7 @@ const ModuleForm = ({ selected }) => {
         order_by: order_by ?? order ?? '',
       })
     ),
-    relife_index: Boolean(selected?.relife_index),
+    relief_index: Boolean(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -259,10 +259,10 @@ const ModuleForm = ({ selected }) => {
               </div>
             </div>
             <FormikSwitch
-              name="relife_index"
+              name="relief_index"
               variant="card"
-              label="Relife index"
-              description="Turn on to surface this module in the Relife index."
+              label="Relief index"
+              description="Turn on to surface this module in the Relief index."
             />
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <CatalogTagsField

@@ -74,7 +74,7 @@ const ProgramForm = ({ selected }) => {
       })
     ),
     price: selected?.price || 0,
-    relife_index: Boolean(selected?.relife_index),
+    relief_index: Boolean(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -276,11 +276,11 @@ const ProgramForm = ({ selected }) => {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:items-start">
               <div className="min-w-0">
                 <FormikSwitch
-                  name="relife_index"
+                  name="relief_index"
                   variant="card"
                   elevateCardLabel
-                  label="Relife index"
-                  description="Turn on to surface this program in the Relife index."
+                  label="Relief index"
+                  description="Turn on to surface this program in the Relief index."
                 />
               </div>
               <div className="min-w-0">

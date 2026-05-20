@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * Read-only yes / no for `relife_index` on admin LMS detail pages only.
+ * Read-only yes / no for `relief_index` on admin LMS detail pages only.
  * Do not use in customer-facing views — omit this field entirely there.
  */
-const RelifeIndexBadge = ({ value }) => (
+const ReliefIndexBadge = ({ value }) => (
   <span
     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
       value
@@ -16,4 +16,4 @@ const RelifeIndexBadge = ({ value }) => (
   </span>
 );
 
-export default RelifeIndexBadge;
+export default ReliefIndexBadge;
