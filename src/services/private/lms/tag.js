@@ -19,6 +19,12 @@ export const getTagsList = async ({
   });
 };
 
+export const getTagFilterOptions = async ({ namespace = '' } = {}) => {
+  return axios.get(`${API_V2_BASE_URL}/tags/filter-options/`, {
+    params: namespace ? { namespace } : undefined,
+  });
+};
+
 export const getSingleTag = async ({ id }) => {
   return axios.get(`${API_V2_BASE_URL}/tags/${id}/`);
 };

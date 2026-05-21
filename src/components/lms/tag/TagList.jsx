@@ -15,7 +15,13 @@ import useConfirm from '@/hooks/useConfirm';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable, TableActions } from '@/components/common/table';
-import { getTagsList, deleteSingleTag, importTags, exportTags } from '@/services/private/lms/tag';
+import {
+  getTagsList,
+  getTagFilterOptions,
+  deleteSingleTag,
+  importTags,
+  exportTags,
+} from '@/services/private/lms/tag';
 import queryKeys from '@/utils/query-keys';
 import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 import { getDefaultPageSize } from '@/utils/helpers';
@@ -165,30 +171,38 @@ const TagsList = () => {
       getTagsList({ limit: pagination.pageSize, offset, ...filters, search: debouncedSearch }),
     queryKey: [queryKeys.lmsTags, pagination.pageSize, offset, filters, debouncedSearch],
   });
+
+  const { data: filterOptionsResponse } = useQuery({
+    queryFn: () => getTagFilterOptions({ namespace: filters.namespace }),
+    queryKey: [queryKeys.lmsTags, 'filter-options', filters.namespace],
+    staleTime: 60_000,
+  });
+
   useHandleApiResponse(failureReason);
 
   const data = response?.data?.data?.results || [];
   const totalCount = response?.data?.data?.count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pagination.pageSize));
-  const namespaceFilterOptions = useMemo(() => {
-    const bySlug = new Map();
-    data.forEach(item => {
-      const slug = item.namespace;
-      if (!slug || bySlug.has(slug)) return;
-      bySlug.set(slug, item.namespace_label || slug);
-    });
-    return [...bySlug.entries()].map(([value, label]) => ({ label, value }));
-  }, [data]);
 
-  const canonicalFilterOptions = useMemo(() => {
-    const byCanonical = new Map();
-    data.forEach(item => {
-      const slug = item.canonical_tag;
-      if (!slug || byCanonical.has(slug)) return;
-      byCanonical.set(slug, item.label || slug);
-    });
-    return [...byCanonical.entries()].map(([value, label]) => ({ label, value }));
-  }, [data]);
+  const filterOptions = filterOptionsResponse?.data?.data || {};
+  const namespaceFilterOptions = useMemo(
+    () =>
+      (filterOptions.namespaces || []).map(item => ({
+        label: item.label || item.value,
+        value: item.value,
+      })),
+    [filterOptions.namespaces]
+  );
+
+  const canonicalFilterOptions = useMemo(
+    () =>
+      (filterOptions.canonical_tags || []).map(item => ({
+        label: item.label || item.value,
+        value: item.value,
+        namespace: item.namespace,
+      })),
+    [filterOptions.canonical_tags]
+  );
   const statusOptions = [
     { label: 'Active', value: 'active' },
     { label: 'Inactive', value: 'inactive' },
@@ -276,7 +290,11 @@ const TagsList = () => {
               }
               onChange={(_, selected) => {
                 setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                setFilters(prev => ({ ...prev, namespace: selected?.value || '' }));
+                setFilters(prev => ({
+                  ...prev,
+                  namespace: selected?.value || '',
+                  canonical_tag: '',
+                }));
               }}
               renderInput={params => (
                 <TextField
