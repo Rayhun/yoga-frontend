@@ -67,8 +67,17 @@ export const GroupCoachingDetails = ({
 
   if (isLoading) return <PageLoader />;
 
-  const startDate = dayjs(eventDetails?.user_datetime || eventDetails?.start_date);
-  const endDate = dayjs(eventDetails.end_date);
+  const startDate = dayjs(
+    eventDetails?.user_datetime || eventDetails?.start_date
+  );
+  const durationMins = Number(eventDetails?.duration) || 0;
+  const endDate = eventDetails?.end_date
+    ? dayjs(eventDetails.end_date)
+    : eventDetails?.user_end_datetime
+      ? dayjs(eventDetails.user_end_datetime)
+      : startDate.add(durationMins, 'minute');
+  const startTimeLabel = eventDetails?.user_time ?? startDate.format('h:mm A');
+  const endTimeLabel = eventDetails?.user_end_time ?? endDate.format('h:mm A');
 
   const onEdit = () => {
     router.push(`/portal/teacher/group_coaching/${eventId}/edit`);
@@ -143,7 +152,7 @@ export const GroupCoachingDetails = ({
                       {eventDetails?.user_date ?? startDate.format('dddd, MMMM D, YYYY')}
                     </div>
                     <div className="font-semibold text-sm text-gray-600 dark:text-bodydark">
-                      {`${eventDetails?.user_time ?? startDate.format('h:mm A')} - ${endDate.format('h:mm A')}`}
+                      {`${startTimeLabel} - ${endTimeLabel}`}
                     </div>
                   </>
                 ) : (
