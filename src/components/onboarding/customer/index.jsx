@@ -523,10 +523,12 @@ const CustomerOnboarding = () => {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <Button type="button" variant="secondary" onClick={handleBack} disabled={!canGoBack || isSubmitting}>
-            Back
-          </Button>
+        <div className={`mt-6 flex items-center gap-3 ${canGoBack ? 'justify-between' : 'justify-end'}`}>
+          {canGoBack ? (
+            <Button type="button" variant="secondary" onClick={handleBack} disabled={isSubmitting}>
+              Back
+            </Button>
+          ) : null}
           <Button onClick={handleContinue} disabled={!selectedOptionId || isSubmitting} isLoading={isSubmitting}>
             Continue
           </Button>

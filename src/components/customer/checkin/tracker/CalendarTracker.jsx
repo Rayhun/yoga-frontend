@@ -5,7 +5,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { getTrackerInfo, getPeriodGoal, createPeriodGoal, updatePeriodGoal } from '@/services/private/customer/goal';
+import { createPeriodGoal, updatePeriodGoal } from '@/services/private/customer/goal';
+import {
+  useInvalidatePeriodTrackerQueries,
+  usePeriodGoalsByMonthQuery,
+  useTrackerInfoQuery,
+} from '@/hooks/usePeriodTrackerQueries';
 import { useRouter } from 'next/navigation';
 
 const Section = ({ children, className = "" }) => (
@@ -215,12 +220,27 @@ const CalendarTracker = () => {
   const router = useRouter();
   const [periodStart, setPeriodStart] = useState(null);
   const [periodEnd, setPeriodEnd] = useState(null);
-  const [trackerData, setTrackerData] = useState(null);
-  const [cycleInfo, setCycleInfo] = useState(null);
   const [existingData, setExistingData] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM'));
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { invalidatePeriodGoals, invalidateTrackerInfo } = useInvalidatePeriodTrackerQueries();
+
+  const {
+    data: trackerInfo,
+    isLoading: isLoadingTrackerInfo,
+    isError: isTrackerInfoError,
+  } = useTrackerInfoQuery();
+
+  const {
+    data: periodGoals = [],
+    isLoading: isLoadingPeriodGoals,
+    isError: isPeriodGoalsError,
+    isFetching: isFetchingPeriodGoals,
+  } = usePeriodGoalsByMonthQuery(currentMonth);
+
+  const trackerData = trackerInfo?.page_info ?? null;
+  const cycleInfo = trackerInfo?.cycle_info ?? null;
+  const loading = isLoadingTrackerInfo || isLoadingPeriodGoals;
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState(null);
   const [notificationTimer, setNotificationTimer] = useState(null);
@@ -265,44 +285,32 @@ const CalendarTracker = () => {
     }, 4000);
   }, [notificationTimer, isPaused]);
 
-  // Fetch tracker data and existing period data
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch tracker configuration
-        const trackerResponse = await getTrackerInfo();
-        if (trackerResponse.data.status === 'success') {
-          const data = trackerResponse.data.data;
-          setTrackerData(data.page_info);
-          setCycleInfo(data.cycle_info);
-        }
+    if (isTrackerInfoError || isPeriodGoalsError) {
+      setError('Failed to load tracker data');
+      showNotification('Failed to load tracker data. Please try again.', 'error');
+      return;
+    }
 
-        // Fetch existing period data for current month
-        // Backend now sorts by period_start (ascending - first dates first), then period_end, then created_at
-        const periodResponse = await getPeriodGoal(currentMonth);
-        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
-          const existingPeriod = periodResponse.data.data[0];
-          setExistingData(existingPeriod);
-          
-          // Populate form with existing data
-          setPeriodStart(existingPeriod.period_start);
-          setPeriodEnd(existingPeriod.period_end);
-          
-          showNotification('Existing data loaded successfully!', 'success');
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load tracker data');
-        showNotification('Failed to load tracker data. Please try again.', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
+    setError(null);
+  }, [isTrackerInfoError, isPeriodGoalsError, showNotification]);
 
-    fetchData();
-  }, [currentMonth]);
+  // Populate form when month period data is available
+  useEffect(() => {
+    if (isFetchingPeriodGoals) return;
+
+    if (periodGoals.length > 0) {
+      const existingPeriod = periodGoals[0];
+      setExistingData(existingPeriod);
+      setPeriodStart(existingPeriod.period_start);
+      setPeriodEnd(existingPeriod.period_end);
+      return;
+    }
+
+    setExistingData(null);
+    setPeriodStart(null);
+    setPeriodEnd(null);
+  }, [currentMonth, periodGoals, isFetchingPeriodGoals]);
 
   // Handle date selection
   const handleDateChange = useCallback((date) => {
@@ -387,27 +395,10 @@ const CalendarTracker = () => {
           setExistingData(response.data.data);
         }
         
-        // Refresh data to get updated information
-        // Backend now sorts by period_start (ascending - first dates first), then period_end, then created_at
-        const periodResponse = await getPeriodGoal(currentMonth);
-        if (periodResponse.data.status === 'success' && periodResponse.data.data.length > 0) {
-          // Get the most recent record (first in sorted list by period_start)
-          setExistingData(periodResponse.data.data[0]);
-          setPeriodStart(periodResponse.data.data[0].period_start);
-          setPeriodEnd(periodResponse.data.data[0].period_end);
-        }
-        
-        // Reload tracker data to get updated information
-        try {
-          const trackerResponse = await getTrackerInfo();
-          if (trackerResponse.data.status === 'success') {
-            const data = trackerResponse.data.data;
-            setTrackerData(data.page_info);
-            setCycleInfo(data.cycle_info);
-          }
-        } catch (reloadError) {
-          console.error('Error reloading tracker data:', reloadError);
-        }
+        await Promise.all([
+          invalidatePeriodGoals(currentMonth),
+          invalidateTrackerInfo(),
+        ]);
       } else {
         throw new Error(response.data.message || 'Failed to save tracker data');
       }
@@ -417,7 +408,17 @@ const CalendarTracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [periodStart, periodEnd, trackerData, existingData, currentMonth]);
+  }, [
+    periodStart,
+    periodEnd,
+    trackerData,
+    cycleInfo,
+    existingData,
+    currentMonth,
+    invalidatePeriodGoals,
+    invalidateTrackerInfo,
+    showNotification,
+  ]);
 
   // Handle month navigation
   const handleMonthChange = useCallback((newMonth) => {

@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { getTrackerInfo, createPeriodDailyGoal, updatePeriodDailyGoal, listPeriodDailyGoals } from '@/services/private/customer/goal';
+import { createPeriodDailyGoal, updatePeriodDailyGoal } from '@/services/private/customer/goal';
+import {
+  useInvalidatePeriodTrackerQueries,
+  usePeriodDailyGoalsQuery,
+  useTrackerInfoQuery,
+} from '@/hooks/usePeriodTrackerQueries';
 import { useRouter } from 'next/navigation';
 import { MdOutlineDateRange } from 'react-icons/md';
 import Calender from '@/components/common/Calender';
@@ -444,11 +449,8 @@ const DailyTracker = () => {
   const router = useRouter();
   const [symptomLevels, setSymptomLevels] = useState({});
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
-  const [trackerData, setTrackerData] = useState(null);
-  const [cycleInfo, setCycleInfo] = useState(null);
   const [existingData, setExistingData] = useState(null);
   const [currentMonth] = useState(new Date().toISOString().slice(0, 7)); // Current month in YYYY-MM format
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -456,6 +458,29 @@ const DailyTracker = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const { invalidatePeriodDailyGoals, invalidateTrackerInfo } = useInvalidatePeriodTrackerQueries();
+  const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+  const dailyGoalsParams = useMemo(
+    () => ({ start_date: selectedDateStr, end_date: selectedDateStr }),
+    [selectedDateStr]
+  );
+
+  const {
+    data: trackerInfo,
+    isLoading: isLoadingTrackerInfo,
+    isError: isTrackerInfoError,
+  } = useTrackerInfoQuery();
+
+  const trackerData = trackerInfo?.page_info ?? null;
+  const cycleInfo = trackerInfo?.cycle_info ?? null;
+
+  const {
+    data: dailyGoals = [],
+    isFetching: isFetchingDailyGoals,
+    isError: isDailyGoalsError,
+  } = usePeriodDailyGoalsQuery(dailyGoalsParams, { enabled: Boolean(trackerData) });
+
+  const loading = isLoadingTrackerInfo;
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
@@ -518,107 +543,45 @@ const DailyTracker = () => {
     }, 4000);
   }, [notificationTimer, isPaused]);
 
-  // Fetch tracker configuration only
   useEffect(() => {
-    const fetchTrackerConfig = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch tracker configuration
-        const trackerResponse = await getTrackerInfo();
-        if (trackerResponse.data.status === 'success') {
-          const data = trackerResponse.data.data;
-          setTrackerData(data.page_info);
-          setCycleInfo(data.cycle_info);
-          
-          // Initialize symptom levels
-          const initialSymptomLevels = {};
-          Object.keys(data.page_info.symptoms_level).forEach(symptom => {
-            initialSymptomLevels[symptom] = 1;
-          });
-          setSymptomLevels(initialSymptomLevels);
-        }
-      } catch (err) {
-        console.error('Error fetching tracker config:', err);
-        setError('Failed to load tracker configuration');
-        showNotification('Failed to load tracker configuration. Please try again.', 'error');
-      } finally {
-        setLoading(false);
-      }
+    if (isTrackerInfoError) {
+      setError('Failed to load tracker configuration');
+      showNotification('Failed to load tracker configuration. Please try again.', 'error');
+    }
+  }, [isTrackerInfoError, showNotification]);
+
+  useEffect(() => {
+    if (!trackerData || isFetchingDailyGoals) return;
+
+    const buildDefaultSymptomLevels = () => {
+      const initialSymptomLevels = {};
+      Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
+        initialSymptomLevels[symptom] = 1;
+      });
+      return initialSymptomLevels;
     };
 
-    fetchTrackerConfig();
-  }, []); // Only run once on mount
+    if (isDailyGoalsError) {
+      setSymptomLevels(buildDefaultSymptomLevels());
+      setSelectedSymptoms([]);
+      setExistingData(null);
+      return;
+    }
 
-  // Load existing data when selectedDate changes
-  useEffect(() => {
-    if (!trackerData || !selectedDate) return;
+    if (dailyGoals.length > 0) {
+      const existing = dailyGoals[0];
+      setExistingData(existing);
+      setSymptomLevels(existing.symptom_levels || buildDefaultSymptomLevels());
+      setSelectedSymptoms(existing.selected_symptoms || []);
+    } else {
+      setExistingData(null);
+      setSymptomLevels(buildDefaultSymptomLevels());
+      setSelectedSymptoms([]);
+    }
 
-    const loadExistingData = async () => {
-      try {
-        const dateStr = selectedDate.format('YYYY-MM-DD');
-        
-        // Fetch existing data for the selected date
-        const response = await listPeriodDailyGoals({
-          start_date: dateStr,
-          end_date: dateStr
-        });
-
-        if (response.data.status === 'success' && response.data.data && response.data.data.length > 0) {
-          // Found existing data for this date
-          const existing = response.data.data[0];
-          setExistingData(existing);
-          
-          // Populate form with existing data
-          if (existing.symptom_levels) {
-            setSymptomLevels(existing.symptom_levels);
-          } else {
-            // Initialize with default values
-            const initialSymptomLevels = {};
-            Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-              initialSymptomLevels[symptom] = 1;
-            });
-            setSymptomLevels(initialSymptomLevels);
-          }
-          
-          if (existing.selected_symptoms) {
-            setSelectedSymptoms(existing.selected_symptoms);
-          } else {
-            setSelectedSymptoms([]);
-          }
-          
-          setHasUnsavedChanges(false);
-          setSaveStatus('idle');
-        } else {
-          // No existing data for this date, initialize with defaults
-          setExistingData(null);
-          
-          // Initialize symptom levels with default values
-          const initialSymptomLevels = {};
-          Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-            initialSymptomLevels[symptom] = 1;
-          });
-          setSymptomLevels(initialSymptomLevels);
-          setSelectedSymptoms([]);
-          
-          setHasUnsavedChanges(false);
-          setSaveStatus('idle');
-        }
-      } catch (err) {
-        console.error('Error loading existing data:', err);
-        // On error, just initialize with defaults
-        const initialSymptomLevels = {};
-        Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-          initialSymptomLevels[symptom] = 1;
-        });
-        setSymptomLevels(initialSymptomLevels);
-        setSelectedSymptoms([]);
-        setExistingData(null);
-      }
-    };
-
-    loadExistingData();
-  }, [selectedDate, trackerData]); // Load when date or tracker config changes
+    setHasUnsavedChanges(false);
+    setSaveStatus('idle');
+  }, [selectedDate, trackerData, dailyGoals, isFetchingDailyGoals, isDailyGoalsError]);
 
   // Handle symptom level changes
   const handleSymptomLevelChange = useCallback((symptom, level) => {
@@ -676,17 +639,10 @@ const DailyTracker = () => {
         setHasUnsavedChanges(false);
         setSaveStatus('saved');
         
-        // Reload tracker data to get updated information
-        try {
-          const trackerResponse = await getTrackerInfo();
-          if (trackerResponse.data.status === 'success') {
-            const data = trackerResponse.data.data;
-            setTrackerData(data.page_info);
-            setCycleInfo(data.cycle_info);
-          }
-        } catch (reloadError) {
-          console.error('Error reloading tracker data:', reloadError);
-        }
+        await Promise.all([
+          invalidatePeriodDailyGoals(dailyGoalsParams),
+          invalidateTrackerInfo(),
+        ]);
         
         // Reset save status after 3 seconds
         setTimeout(() => setSaveStatus('idle'), 3000);
@@ -703,7 +659,18 @@ const DailyTracker = () => {
     } finally {
       setSaving(false);
     }
-  }, [symptomLevels, selectedSymptoms, trackerData, existingData, showNotification, selectedDate]);
+  }, [
+    symptomLevels,
+    selectedSymptoms,
+    trackerData,
+    cycleInfo,
+    existingData,
+    showNotification,
+    selectedDate,
+    dailyGoalsParams,
+    invalidatePeriodDailyGoals,
+    invalidateTrackerInfo,
+  ]);
 
   // Loading state
   if (loading) {
