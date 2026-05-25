@@ -209,6 +209,16 @@ const PRIORITIES = [
   { value: 'low', label: 'Low' },
 ];
 
+const SCHEDULE_TYPES = [
+  { value: 'immediate', label: 'Immediate (manual send)' },
+  { value: 'utc', label: 'UTC datetime' },
+  { value: 'local_time', label: 'Personalized (each user’s local time)' },
+];
+
+function isScheduledCampaign(row) {
+  return row?.schedule_type === 'local_time' || row?.schedule_type === 'utc';
+}
+
 const DEVICE_FILTER_OPTIONS = [
   { label: 'All devices', value: '' },
   { label: 'Android', value: 'android' },
@@ -245,6 +255,11 @@ const AdminNotifications = () => {
     body: '',
     notification_type: 'general',
     priority: 'normal',
+    schedule_type: 'immediate',
+    scheduled_at: '',
+    trigger_time: '19:00',
+    trigger_date: '',
+    is_recurring: true,
     target_users_selected: [],
     target_tokens_selected: [],
     action_url: '',
@@ -420,7 +435,9 @@ const AdminNotifications = () => {
   ]);
 
   const toggleSelectAllPendingOnPage = () => {
-    const pendingIds = notificationRows.filter(r => !r.is_sent).map(r => r.id);
+    const pendingIds = notificationRows
+      .filter(r => !r.is_sent && !isScheduledCampaign(r))
+      .map(r => r.id);
     const allOn = pendingIds.length > 0 && pendingIds.every(id => selectedCampaignIds.has(id));
     setSelectedCampaignIds(prev => {
       const next = new Set(prev);
@@ -449,6 +466,24 @@ const AdminNotifications = () => {
     if (tokenIds.length) payload.target_token_ids = tokenIds;
 
     if (compose.action_url.trim()) payload.action_url = compose.action_url.trim();
+
+    payload.schedule_type = compose.schedule_type;
+    if (compose.schedule_type === 'utc') {
+      if (!compose.scheduled_at) {
+        toast.error('Scheduled UTC date/time is required.');
+        return;
+      }
+      payload.scheduled_at = new Date(compose.scheduled_at).toISOString();
+    }
+    if (compose.schedule_type === 'local_time') {
+      if (!compose.trigger_time) {
+        toast.error('Trigger time is required (e.g. 19:00 for 7 PM local).');
+        return;
+      }
+      payload.trigger_time = compose.trigger_time.length === 5 ? `${compose.trigger_time}:00` : compose.trigger_time;
+      payload.is_recurring = compose.is_recurring;
+      if (compose.trigger_date) payload.trigger_date = compose.trigger_date;
+    }
 
     await createMutation.mutateAsync({ payload });
   };
@@ -506,10 +541,37 @@ const AdminNotifications = () => {
         },
       },
       {
+        header: 'Schedule',
+        accessorKey: 'schedule_type',
+        cell: ({ row }) => {
+          const r = row.original;
+          if (r.schedule_type === 'local_time') {
+            return (
+              <span className="text-xs text-bodydark2">
+                <Pill variant="brand">Local {r.trigger_time || '—'}</Pill>
+                {r.is_recurring ? ' · daily' : ' · once'}
+              </span>
+            );
+          }
+          if (r.schedule_type === 'utc') {
+            return <Pill variant="neutral">UTC</Pill>;
+          }
+          return <Pill variant="neutral">Manual</Pill>;
+        },
+      },
+      {
         header: 'Status',
         accessorKey: 'is_sent',
-        cell: ({ getValue }) =>
-          getValue() ? <Pill variant="success">Sent</Pill> : <Pill variant="warning">Draft</Pill>,
+        cell: ({ row }) => {
+          const r = row.original;
+          if (r.schedule_type === 'local_time' && r.is_active) {
+            return <Pill variant="success">Active</Pill>;
+          }
+          if (r.schedule_type === 'utc' && !r.is_sent && r.is_active) {
+            return <Pill variant="warning">Scheduled</Pill>;
+          }
+          return r.is_sent ? <Pill variant="success">Sent</Pill> : <Pill variant="warning">Draft</Pill>;
+        },
       },
       {
         header: 'Targets',
@@ -543,6 +605,13 @@ const AdminNotifications = () => {
         },
         cell: ({ row }) => {
           const r = row.original;
+          if (isScheduledCampaign(r)) {
+            return (
+              <span className="text-xs text-bodydark2" title="Sent automatically by the scheduler">
+                Auto
+              </span>
+            );
+          }
           return (
             <div className="inline-flex flex-row flex-nowrap items-center gap-1">
               <button
@@ -823,7 +892,9 @@ const AdminNotifications = () => {
                       explicit device rows should fire.
                     </p>
                   </div>
-                  <Pill variant="brand">Draft → Send when ready</Pill>
+                  <Pill variant="brand">
+                    {compose.schedule_type === 'immediate' ? 'Draft → Send when ready' : 'Scheduler handles delivery'}
+                  </Pill>
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-2">
@@ -868,6 +939,62 @@ const AdminNotifications = () => {
                       disableClearable
                     />
                   </label>
+                  <label className="block md:col-span-1">
+                    <span className={fieldLabelClass}>Schedule</span>
+                    <PortalSelect
+                      id="compose-schedule-type"
+                      value={compose.schedule_type}
+                      onChange={v => setCompose(c => ({ ...c, schedule_type: v }))}
+                      options={SCHEDULE_TYPES}
+                      placeholder="How to deliver"
+                      disableClearable
+                    />
+                  </label>
+                  {compose.schedule_type === 'utc' ? (
+                    <label className="block md:col-span-1">
+                      <span className={fieldLabelClass}>UTC date & time</span>
+                      <input
+                        type="datetime-local"
+                        className={fieldInputClass}
+                        value={compose.scheduled_at}
+                        onChange={e => setCompose(c => ({ ...c, scheduled_at: e.target.value }))}
+                      />
+                    </label>
+                  ) : null}
+                  {compose.schedule_type === 'local_time' ? (
+                    <>
+                      <label className="block md:col-span-1">
+                        <span className={fieldLabelClass}>Trigger time (user local)</span>
+                        <input
+                          type="time"
+                          className={fieldInputClass}
+                          value={compose.trigger_time}
+                          onChange={e => setCompose(c => ({ ...c, trigger_time: e.target.value }))}
+                        />
+                        <p className="mt-1 text-xs text-bodydark2">
+                          Each user receives the push at this time in their timezone (saved on login).
+                        </p>
+                      </label>
+                      <label className="block md:col-span-1">
+                        <span className={fieldLabelClass}>One-shot date (optional)</span>
+                        <input
+                          type="date"
+                          className={fieldInputClass}
+                          value={compose.trigger_date}
+                          onChange={e => setCompose(c => ({ ...c, trigger_date: e.target.value }))}
+                        />
+                      </label>
+                      <label className="flex items-center gap-2 md:col-span-2">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-stroke text-primary"
+                          checked={compose.is_recurring}
+                          onChange={e => setCompose(c => ({ ...c, is_recurring: e.target.checked }))}
+                        />
+                        <span className="text-sm text-bodydark2">Repeat daily at trigger time</span>
+                      </label>
+                    </>
+                  ) : null}
                   <label className="block md:col-span-1">
                     <span className={fieldLabelClass}>Action URL</span>
                     <input
@@ -1134,9 +1261,28 @@ const AdminNotifications = () => {
               <dl className="divide-y divide-stroke/55 dark:divide-strokedark">
                 <DetailGridRow label="Created">{formatNotificationTimestamp(campaignDetailRow.created_at)}</DetailGridRow>
                 <DetailGridRow label="Sent at">{formatNotificationTimestamp(campaignDetailRow.sent_at)}</DetailGridRow>
-                <DetailGridRow label="Scheduled at">
+                <DetailGridRow label="Schedule type">
+                  {campaignDetailRow.schedule_type || 'immediate'}
+                </DetailGridRow>
+                <DetailGridRow label="Scheduled at (UTC)">
                   {formatNotificationTimestamp(campaignDetailRow.scheduled_at)}
                 </DetailGridRow>
+                {campaignDetailRow.schedule_type === 'local_time' ? (
+                  <>
+                    <DetailGridRow label="Trigger time (local)">
+                      {campaignDetailRow.trigger_time || '—'}
+                    </DetailGridRow>
+                    <DetailGridRow label="Trigger date">
+                      {campaignDetailRow.trigger_date || '— (daily if recurring)'}
+                    </DetailGridRow>
+                    <DetailGridRow label="Recurring">
+                      {campaignDetailRow.is_recurring ? 'Yes' : 'No'}
+                    </DetailGridRow>
+                    <DetailGridRow label="Scheduler active">
+                      {campaignDetailRow.is_active ? 'Yes' : 'No'}
+                    </DetailGridRow>
+                  </>
+                ) : null}
                 <DetailGridRow label="Delivery stats">
                   <span className="inline-flex flex-wrap items-center gap-2 text-sm">
                     <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-700 dark:text-emerald-400">

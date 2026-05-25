@@ -1,9 +1,9 @@
 'use client';
-import { createContext } from 'react';
+import { createContext, useEffect } from 'react';
 import { redirect } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
-import { authenticateUser } from '@/services/public/auth';
+import { authenticateUser, updateUserTimezone } from '@/services/public/auth';
 import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
 import { USER_ROLE, USER_SUB_ROLE } from '@/utils/authorization';
@@ -47,6 +47,12 @@ function AuthProvider({ children }) {
     queryFn: authenticateUser,
     queryKey: [queryKeys.loggedInUser],
   });
+
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      updateUserTimezone().catch(() => {});
+    }
+  }, [isLoading, isError]);
 
   if (isLoading) return <FullScreenLoader />;
 

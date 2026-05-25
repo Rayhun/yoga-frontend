@@ -5,7 +5,12 @@ export const authenticateUser = async () => {
 };
 
 export const loginUser = async ({ payload }) => {
+  // Timezone is sent via X-User-Timezone on every request (axios interceptor), same as events.
   return axios.post('/auth/login', payload);
+};
+
+export const updateUserTimezone = async () => {
+  return axios.patch('/auth/user/timezone/');
 };
 
 export const registerNewUser = async ({ payload }) => {

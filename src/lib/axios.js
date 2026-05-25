@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '@/utils/config';
 import { logRequestFailure, isLogApiRequest } from '@/utils/logger';
+import { getBrowserIANATimezone } from '@/utils/timezone';
 import Cookies from 'js-cookie';
 
 /**
@@ -19,6 +20,9 @@ apiClient.interceptors.request.use(req => {
   const token = Cookies.get('token');
   if (token) {
     req.headers.Authorization = `token ${token}`;
+  }
+  if (typeof window !== 'undefined') {
+    req.headers['X-User-Timezone'] = getBrowserIANATimezone();
   }
   return req;
 });
