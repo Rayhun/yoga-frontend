@@ -64,6 +64,26 @@ const FormikCatalogTagsModalField = ({
     if (debouncedSearch) setCollapsedNamespaces(new Set());
   }, [debouncedSearch]);
 
+  const selectedIds = useMemo(() => {
+    const v = field.value;
+    if (!v) return [];
+    if (Array.isArray(v)) return v.map(Number).filter(n => !Number.isNaN(n));
+    return [];
+  }, [field.value]);
+
+  const seedLabelById = useMemo(() => {
+    const m = new Map();
+    for (const row of seedRows ?? []) {
+      if (row?.id != null && row.label) m.set(row.id, row.label);
+    }
+    return m;
+  }, [seedRows]);
+
+  const missingLabelIds = useMemo(
+    () => selectedIds.filter(id => !seedLabelById.has(id)),
+    [selectedIds, seedLabelById]
+  );
+
   const {
     catalogRows,
     groupedCatalogRows,
@@ -77,15 +97,8 @@ const FormikCatalogTagsModalField = ({
     field: catalogField,
     surface,
     search: debouncedSearch,
-    enabled: open,
+    enabled: open || missingLabelIds.length > 0,
   });
-
-  const selectedIds = useMemo(() => {
-    const v = field.value;
-    if (!v) return [];
-    if (Array.isArray(v)) return v.map(Number).filter(n => !Number.isNaN(n));
-    return [];
-  }, [field.value]);
 
   const mergedCatalogRows = useMemo(() => {
     const byId = new Map();

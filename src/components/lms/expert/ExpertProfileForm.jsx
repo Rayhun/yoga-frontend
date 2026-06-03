@@ -16,7 +16,11 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
-import { EXPERT_PROFILE_CATALOG_FIELDS, mapExpertTagIds } from '@/utils/expertProfileTags';
+import {
+  EXPERT_PROFILE_CATALOG_FIELDS,
+  mapExpertTagIds,
+  seedExpertTagRows,
+} from '@/utils/expertProfileTags';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
@@ -424,6 +428,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     label={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.label}
                     modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.modalTitle}
                     triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.triggerPlaceholder}
+                    seedRows={seedExpertTagRows(selected?.practice_type)}
                     maxSelections={1}
                     required
                   />
@@ -436,6 +441,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       label={EXPERT_PROFILE_CATALOG_FIELDS.categories.label}
                       modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.categories.modalTitle}
                       triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.categories.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.categories)}
                       required
                     />
                     <ExpertCatalogTagsField
@@ -444,6 +450,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       label={EXPERT_PROFILE_CATALOG_FIELDS.tags.label}
                       modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.tags.modalTitle}
                       triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.tags.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.tags)}
                       required
                     />
                   </div>
@@ -457,6 +464,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       label={EXPERT_PROFILE_CATALOG_FIELDS.languages.label}
                       modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.languages.modalTitle}
                       triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.languages.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.languages)}
                       required
                     />
                   </div>
@@ -473,6 +481,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                         label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.label}
                         modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.modalTitle}
                         triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.triggerPlaceholder}
+                        seedRows={seedExpertTagRows(selected?.coaching_style)}
                         required
                       />
                       <ExpertCatalogTagsField
@@ -481,6 +490,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                         label={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.label}
                         modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.modalTitle}
                         triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                        seedRows={seedExpertTagRows(selected?.culture_experience)}
                         required
                       />
                     </div>
@@ -490,6 +500,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.label}
                       modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.modalTitle}
                       triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.coaching_areas)}
                       required
                     />
                   </div>

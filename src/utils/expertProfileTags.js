@@ -1,3 +1,5 @@
+import { getCatalogTagChipLabel, getCatalogTagNamespaceLabel } from '@/utils/catalogTag';
+
 /** Map expert profile form field names to catalog-tags API ``field`` param. */
 
 export const EXPERT_PROFILE_CATALOG_FIELDS = {
@@ -45,8 +47,27 @@ export const EXPERT_PROFILE_CATALOG_FIELDS = {
   },
 };
 
-/** Read catalog tag IDs from API expert payload (M2M tag objects). */
+/** Normalize expert tag payload (M2M arrays or single FK object like ``practice_type``). */
+export function normalizeExpertTagItems(items) {
+  if (!items) return [];
+  if (Array.isArray(items)) return items.filter(item => item != null);
+  if (typeof items === 'object') return [items];
+  return [];
+}
+
+/** Read catalog tag IDs from API expert payload. */
 export function mapExpertTagIds(items) {
-  if (!Array.isArray(items)) return [];
-  return items.map(item => (item && typeof item === 'object' ? item.id : item)).filter(Boolean);
+  return normalizeExpertTagItems(items)
+    .map(item => (item && typeof item === 'object' ? item.id : item))
+    .filter(Boolean);
+}
+
+/** Chip seed rows from saved expert tag objects (labels before modal/catalog fetch). */
+export function seedExpertTagRows(items) {
+  return normalizeExpertTagItems(items).map(item => ({
+    id: item.id,
+    label: getCatalogTagChipLabel(item),
+    namespace: item?.namespace ?? item?.namespace_slug,
+    namespaceLabel: getCatalogTagNamespaceLabel(item),
+  }));
 }
