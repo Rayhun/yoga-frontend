@@ -215,6 +215,20 @@ const SCHEDULE_TYPES = [
   { value: 'local_time', label: 'Personalized (each user’s local time)' },
 ];
 
+const CAMPAIGN_KINDS = [
+  { value: 'routine', label: 'Routine follow-on notification' },
+  { value: 'welcome', label: 'Welcome notification (once per user)' },
+];
+
+const RECURRENCE_OPTIONS = [
+  { value: 'once', label: 'Once' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+];
+
+const PERSONALIZATION_HINT = 'Use <first name> in title or body (e.g. Hi <first name>, …)';
+
 function isScheduledCampaign(row) {
   return row?.schedule_type === 'local_time' || row?.schedule_type === 'utc';
 }
@@ -255,11 +269,13 @@ const AdminNotifications = () => {
     body: '',
     notification_type: 'general',
     priority: 'normal',
+    campaign_kind: 'routine',
     schedule_type: 'immediate',
     scheduled_at: '',
     trigger_time: '19:00',
     trigger_date: '',
-    is_recurring: true,
+    recurrence: 'daily',
+    target_all_end_users: false,
     target_users_selected: [],
     target_tokens_selected: [],
     action_url: '',
@@ -458,11 +474,20 @@ const AdminNotifications = () => {
       body: compose.body.trim(),
       notification_type: compose.notification_type,
       priority: compose.priority,
+      campaign_kind: compose.campaign_kind,
     };
 
     const userIds = compose.target_users_selected.map(o => o.value).filter(id => Number.isFinite(Number(id)));
     const tokenIds = compose.target_tokens_selected.map(o => o.value).filter(id => Number.isFinite(Number(id)));
-    if (userIds.length) payload.target_user_ids = userIds;
+
+    if (compose.target_all_end_users) {
+      payload.target_all_end_users = true;
+    } else if (userIds.length) {
+      payload.target_user_ids = userIds;
+    } else if (!tokenIds.length) {
+      payload.target_all_end_users = true;
+    }
+
     if (tokenIds.length) payload.target_token_ids = tokenIds;
 
     if (compose.action_url.trim()) payload.action_url = compose.action_url.trim();
@@ -481,7 +506,12 @@ const AdminNotifications = () => {
         return;
       }
       payload.trigger_time = compose.trigger_time.length === 5 ? `${compose.trigger_time}:00` : compose.trigger_time;
-      payload.is_recurring = compose.is_recurring;
+
+      const recurrence = compose.campaign_kind === 'welcome' ? 'once' : compose.recurrence;
+      payload.is_recurring = recurrence !== 'once';
+      if (recurrence !== 'once') {
+        payload.recurrence_interval = recurrence;
+      }
       if (compose.trigger_date) payload.trigger_date = compose.trigger_date;
     }
 
@@ -527,9 +557,21 @@ const AdminNotifications = () => {
         ),
       },
       {
+        header: 'Kind',
+        accessorKey: 'campaign_kind',
+        cell: ({ getValue }) => {
+          const kind = getValue() || 'routine';
+          return (
+            <Pill variant={kind === 'welcome' ? 'info' : 'brand'}>
+              {kind === 'welcome' ? 'Welcome' : 'Routine'}
+            </Pill>
+          );
+        },
+      },
+      {
         header: 'Type',
         accessorKey: 'notification_type',
-        cell: ({ getValue }) => <Pill variant="brand">{getValue()}</Pill>,
+        cell: ({ getValue }) => <Pill variant="neutral">{getValue()}</Pill>,
       },
       {
         header: 'Priority',
@@ -546,10 +588,12 @@ const AdminNotifications = () => {
         cell: ({ row }) => {
           const r = row.original;
           if (r.schedule_type === 'local_time') {
+            const interval = r.recurrence_interval || 'daily';
+            const repeatLabel = r.is_recurring ? interval : 'once';
             return (
               <span className="text-xs text-bodydark2">
                 <Pill variant="brand">Local {r.trigger_time || '—'}</Pill>
-                {r.is_recurring ? ' · daily' : ' · once'}
+                {` · ${repeatLabel}`}
               </span>
             );
           }
@@ -577,10 +621,16 @@ const AdminNotifications = () => {
         header: 'Targets',
         cell: ({ row }) => (
           <span className="text-sm text-bodydark2">
-            <span className="font-medium text-black dark:text-white">{row.original.target_users_count ?? 0}</span>{' '}
-            users ·{' '}
-            <span className="font-medium text-black dark:text-white">{row.original.target_tokens_count ?? 0}</span>{' '}
-            tokens
+            {row.original.target_all_end_users ? (
+              <Pill variant="brand">All end users</Pill>
+            ) : (
+              <>
+                <span className="font-medium text-black dark:text-white">{row.original.target_users_count ?? 0}</span>{' '}
+                users ·{' '}
+                <span className="font-medium text-black dark:text-white">{row.original.target_tokens_count ?? 0}</span>{' '}
+                tokens
+              </>
+            )}
           </span>
         ),
       },
@@ -884,12 +934,13 @@ const AdminNotifications = () => {
                       New campaign
                     </h2>
                     <p className="mt-2 max-w-2xl text-sm text-bodydark2">
-                      Search and pick users or device tokens below (multi-select). Leave both empty to target all active
-                      users. After saving, use{' '}
-                      <strong className="font-semibold text-emerald-700 dark:text-emerald-400">Users</strong> sends for
-                      audience-wide drafts and{' '}
-                      <strong className="font-semibold text-emerald-700 dark:text-emerald-400">Tokens</strong> when only
-                      explicit device rows should fire.
+                      Target all end users (customers only — experts and affiliates excluded), or search specific
+                      users. Use <code className="text-xs">&lt;first name&gt;</code> in title/body for personalization
+                      (e.g. Hi &lt;first name&gt;, …). Choose{' '}
+                      <strong className="font-semibold text-emerald-700 dark:text-emerald-400">Welcome</strong> for
+                      one-time onboarding messages, or{' '}
+                      <strong className="font-semibold text-emerald-700 dark:text-emerald-400">Routine</strong> for
+                      recurring follow-ons.
                     </p>
                   </div>
                   <Pill variant="brand">
@@ -902,7 +953,7 @@ const AdminNotifications = () => {
                     <span className={fieldLabelClass}>Title</span>
                     <input
                       className={fieldInputClass}
-                      placeholder="Summer wellness reminder"
+                      placeholder="Hi <first name> — summer wellness reminder"
                       value={compose.title}
                       onChange={e => setCompose(c => ({ ...c, title: e.target.value }))}
                     />
@@ -918,15 +969,33 @@ const AdminNotifications = () => {
                       disableClearable
                     />
                   </label>
+                  <label className="block md:col-span-1">
+                    <span className={fieldLabelClass}>Campaign kind</span>
+                    <PortalSelect
+                      id="compose-campaign-kind"
+                      value={compose.campaign_kind}
+                      onChange={v =>
+                        setCompose(c => ({
+                          ...c,
+                          campaign_kind: v,
+                          recurrence: v === 'welcome' ? 'once' : c.recurrence === 'once' ? 'daily' : c.recurrence,
+                        }))
+                      }
+                      options={CAMPAIGN_KINDS}
+                      placeholder="Select kind"
+                      disableClearable
+                    />
+                  </label>
                   <label className="block md:col-span-2">
                     <span className={fieldLabelClass}>Body</span>
                     <textarea
                       rows={4}
                       className={fieldTextareaClass}
-                      placeholder="Short message users see on device…"
+                      placeholder="Hi <first name>, short message users see on device…"
                       value={compose.body}
                       onChange={e => setCompose(c => ({ ...c, body: e.target.value }))}
                     />
+                    <p className="mt-1 text-xs text-bodydark2">{PERSONALIZATION_HINT}</p>
                   </label>
                   <label className="block md:col-span-1">
                     <span className={fieldLabelClass}>Priority</span>
@@ -984,14 +1053,26 @@ const AdminNotifications = () => {
                           onChange={e => setCompose(c => ({ ...c, trigger_date: e.target.value }))}
                         />
                       </label>
-                      <label className="flex items-center gap-2 md:col-span-2">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-stroke text-primary"
-                          checked={compose.is_recurring}
-                          onChange={e => setCompose(c => ({ ...c, is_recurring: e.target.checked }))}
+                      <label className="block md:col-span-1">
+                        <span className={fieldLabelClass}>Repeat</span>
+                        <PortalSelect
+                          id="compose-recurrence"
+                          value={compose.campaign_kind === 'welcome' ? 'once' : compose.recurrence}
+                          onChange={v => setCompose(c => ({ ...c, recurrence: v }))}
+                          options={
+                            compose.campaign_kind === 'welcome'
+                              ? RECURRENCE_OPTIONS.filter(o => o.value === 'once')
+                              : RECURRENCE_OPTIONS
+                          }
+                          placeholder="How often"
+                          disableClearable
+                          disabled={compose.campaign_kind === 'welcome'}
                         />
-                        <span className="text-sm text-bodydark2">Repeat daily at trigger time</span>
+                        {compose.campaign_kind === 'welcome' ? (
+                          <p className="mt-1 text-xs text-bodydark2">
+                            Welcome campaigns are sent once per user (on signup or first scheduled window).
+                          </p>
+                        ) : null}
                       </label>
                     </>
                   ) : null}
@@ -1004,15 +1085,37 @@ const AdminNotifications = () => {
                       onChange={e => setCompose(c => ({ ...c, action_url: e.target.value }))}
                     />
                   </label>
+                  <label className="flex cursor-pointer items-center gap-2 md:col-span-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-stroke text-primary"
+                      checked={compose.target_all_end_users}
+                      onChange={e =>
+                        setCompose(c => ({
+                          ...c,
+                          target_all_end_users: e.target.checked,
+                          target_users_selected: e.target.checked ? [] : c.target_users_selected,
+                        }))
+                      }
+                    />
+                    <span className="text-sm text-bodydark2">
+                      Send to all end users (customers only — excludes experts &amp; affiliates)
+                    </span>
+                  </label>
                   <label className="block md:col-span-2">
                     <span className={fieldLabelClass}>Target users</span>
                     <PortalMultiSearchSelect
                       id="compose-target-users"
-                      placeholder="Search by name, email, or user id…"
+                      placeholder={
+                        compose.target_all_end_users
+                          ? 'Disabled — all end users selected'
+                          : 'Search end users by name, email, or user id…'
+                      }
                       noOptionsText="Type at least one character"
                       value={compose.target_users_selected}
                       onChange={next => setCompose(c => ({ ...c, target_users_selected: next }))}
                       loadOptions={loadUserTargetOptions}
+                      disabled={compose.target_all_end_users}
                     />
                   </label>
                   <label className="block md:col-span-2">
@@ -1237,6 +1340,11 @@ const AdminNotifications = () => {
                     {campaignDetailRow.body || '—'}
                   </p>
                 </DetailGridRow>
+                <DetailGridRow label="Campaign kind">
+                  <Pill variant={campaignDetailRow.campaign_kind === 'welcome' ? 'info' : 'brand'}>
+                    {campaignDetailRow.campaign_kind === 'welcome' ? 'Welcome (once per user)' : 'Routine follow-on'}
+                  </Pill>
+                </DetailGridRow>
                 <DetailGridRow label="Type">
                   <Pill variant="brand">{campaignDetailRow.notification_type}</Pill>
                 </DetailGridRow>
@@ -1276,7 +1384,9 @@ const AdminNotifications = () => {
                       {campaignDetailRow.trigger_date || '— (daily if recurring)'}
                     </DetailGridRow>
                     <DetailGridRow label="Recurring">
-                      {campaignDetailRow.is_recurring ? 'Yes' : 'No'}
+                      {campaignDetailRow.is_recurring
+                        ? campaignDetailRow.recurrence_interval || 'daily'
+                        : 'Once'}
                     </DetailGridRow>
                     <DetailGridRow label="Scheduler active">
                       {campaignDetailRow.is_active ? 'Yes' : 'No'}
@@ -1302,23 +1412,27 @@ const AdminNotifications = () => {
             <DetailModalSection title="Targets">
               <dl className="divide-y divide-stroke/55 dark:divide-strokedark">
                 <DetailGridRow label="Summary">
-                  <span className="text-sm">
-                    <span className="font-semibold text-black dark:text-white">
-                      {campaignDetailRow.target_users_count ?? 0}
-                    </span>{' '}
-                    users ·{' '}
-                    <span className="font-semibold text-black dark:text-white">
-                      {campaignDetailRow.target_tokens_count ?? 0}
-                    </span>{' '}
-                    tokens
-                  </span>
+                  {campaignDetailRow.target_all_end_users ? (
+                    <Pill variant="brand">All end users (customers only)</Pill>
+                  ) : (
+                    <span className="text-sm">
+                      <span className="font-semibold text-black dark:text-white">
+                        {campaignDetailRow.target_users_count ?? 0}
+                      </span>{' '}
+                      users ·{' '}
+                      <span className="font-semibold text-black dark:text-white">
+                        {campaignDetailRow.target_tokens_count ?? 0}
+                      </span>{' '}
+                      tokens
+                    </span>
+                  )}
                 </DetailGridRow>
                 <DetailGridRow label="Target user emails">
                   {formatTargetIdList(campaignDetailRow.target_user_emails, 40) ? (
                     <pre className={detailMonoPreClass}>{formatTargetIdList(campaignDetailRow.target_user_emails, 40)}</pre>
                   ) : (
                     <span className="text-bodydark2">
-                      None stored — send actions may target all users unless token targets are set.
+                      None stored — send actions target all end users unless token targets are set.
                     </span>
                   )}
                 </DetailGridRow>
