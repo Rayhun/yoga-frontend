@@ -75,7 +75,7 @@ const ExpertDetails = ({ data, showBackButton = true }) => {
                 <h3 className="truncate text-xl font-bold text-white">
                   {`${data?.first_name || ''} ${data?.last_name || ''}`}
                 </h3>
-                <p className="my-1 font-medium">{data?.practice_type?.map(item => item.label).join(', ')}</p>
+                <p className="my-1 font-medium">{data?.practice_type?.label || ''}</p>
               </div>
             </div>
           </div>
