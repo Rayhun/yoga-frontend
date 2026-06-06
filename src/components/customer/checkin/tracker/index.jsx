@@ -12,6 +12,7 @@ import {
   useTrackerInfoQuery,
 } from '@/hooks/usePeriodTrackerQueries';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 const Section = ({ children, className = "" }) => (
   <div className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
@@ -267,71 +268,24 @@ const Tracker = () => {
   const cycleInfo = trackerInfo?.cycle_info ?? null;
   const loading = isLoadingTrackerInfo || (Boolean(trackerInfo) && isLoadingPeriodGoals);
   const [saving, setSaving] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [notificationTimer, setNotificationTimer] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const loadedMonthRef = useRef(null);
 
-  // Show notification function
-  // duration: 'short' (800ms) for calendar actions, 'long' (4000ms) for other notifications
-  const showNotification = useCallback((message, type = 'success', duration = 'long') => {
-    console.log('Showing notification:', { message, type, duration });
-    
-    // Clear any existing timer
-    if (notificationTimer) {
-      clearInterval(notificationTimer);
-    }
-    
-    // Set duration: 'short' = 400ms (less than 1 second), 'long' = 4000ms (4 seconds)
-    const durationMs = duration === 'short' ? 800 : 1000;
-    const progressStep = duration === 'short' ? 25 : 12.5; // 400ms: 25% per 100ms (4 intervals), 800ms: 12.5% per 100ms (8 intervals)
-    
-    setNotification({ message, type, progress: 100, duration: durationMs });
-    setIsHovered(false);
-    setIsPaused(false);
-    
-    // Start countdown timer
-    let progress = 100;
-    const timer = setInterval(() => {
-      if (!isPaused) {
-        progress -= progressStep;
-        setNotification(prev => prev ? { ...prev, progress } : null);
-        
-        if (progress <= 0) {
-          clearInterval(timer);
-          setNotification(null);
-          setNotificationTimer(null);
-        }
-      }
-    }, 100);
-    
-    setNotificationTimer(timer);
-    
-    // Fallback timeout
-    setTimeout(() => {
-      clearInterval(timer);
-      setNotification(null);
-      setNotificationTimer(null);
-    }, durationMs);
-  }, [notificationTimer, isPaused]);
-
   useEffect(() => {
     if (isTrackerInfoError) {
       setError('Failed to load tracker configuration');
-      showNotification('Failed to load tracker configuration. Please try again.', 'error');
+      toast.error('Failed to load tracker configuration. Please try again.');
     }
-  }, [isTrackerInfoError, showNotification]);
+  }, [isTrackerInfoError]);
 
   useEffect(() => {
     if (!trackerData || isFetchingPeriodGoals) return;
 
     if (isPeriodGoalsError) {
       setError('Failed to load data for this month');
-      showNotification('Failed to load data for this month. Please try again.', 'error');
+      toast.error('Failed to load data for this month. Please try again.');
       return;
     }
 
@@ -349,10 +303,7 @@ const Tracker = () => {
     setPeriodEnd(null);
     setPeriodDates([]);
 
-    if (periodGoals.length > 0) {
-      showNotification(`${periodGoals.length} existing record(s) found for this month!`, 'success');
-    }
-  }, [currentMonth, trackerData, periodGoals, isFetchingPeriodGoals, isPeriodGoalsError, showNotification]);
+  }, [currentMonth, trackerData, periodGoals, isFetchingPeriodGoals, isPeriodGoalsError]);
 
   // Helper function to check if dates form a consecutive range
   const checkConsecutiveRange = useCallback((dates) => {
@@ -460,7 +411,7 @@ const Tracker = () => {
         // Period Start - Validation: Cannot select future dates
         if (clickedDate.isAfter(dayjs(), 'day')) {
           setTimeout(() => {
-            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
+            toast.error('Cannot select future dates. Please select a date today or in the past.');
           }, 0);
           return;
         }
@@ -471,7 +422,7 @@ const Tracker = () => {
         setPeriodEnd(null); // Clear end date when setting new start
         // Show notification after state updates - short duration for calendar actions
         // setTimeout(() => {
-        //   showNotification(`Period start set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
+        //   toast.error(`Period start set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
         // }, 0);
         break;
         
@@ -479,7 +430,7 @@ const Tracker = () => {
         // Period End - Validation: Must have start date first
         if (!periodStart) {
           setTimeout(() => {
-            showNotification('Please select a start date first before setting an end date.', 'error', 'short');
+            toast.error('Please select a start date first before setting an end date.');
           }, 0);
           return;
         }
@@ -487,7 +438,7 @@ const Tracker = () => {
         // Validation: Cannot select future dates
         if (clickedDate.isAfter(dayjs(), 'day')) {
           setTimeout(() => {
-            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
+            toast.error('Cannot select future dates. Please select a date today or in the past.');
           }, 0);
           return;
         }
@@ -496,7 +447,7 @@ const Tracker = () => {
         const startDate = dayjs(periodStart);
         if (clickedDate.isBefore(startDate) || clickedDate.isSame(startDate, 'day')) {
           setTimeout(() => {
-            showNotification(`End date must be after the start date (${dayjs(periodStart).format('MMM DD, YYYY')}).`, 'error', 'short');
+            toast.error(`End date must be after the start date (${dayjs(periodStart).format('MMM DD, YYYY')}).`);
           }, 0);
           return;
         }
@@ -513,7 +464,7 @@ const Tracker = () => {
         setPeriodDates(allDates.sort());
         // Show notification after state updates - short duration for calendar actions
         // setTimeout(() => {
-        //   showNotification(`Period end set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
+        //   toast.error(`Period end set to ${dayjs(dateStr).format('MMM DD, YYYY')}`, 'success', 'short');
         // }, 0);
         break;
         
@@ -521,7 +472,7 @@ const Tracker = () => {
         // Period Days - Validation: Cannot select future dates
         if (clickedDate.isAfter(dayjs(), 'day')) {
           setTimeout(() => {
-            showNotification('Cannot select future dates. Please select a date today or in the past.', 'error', 'short');
+            toast.error('Cannot select future dates. Please select a date today or in the past.');
           }, 0);
           return;
         }
@@ -529,7 +480,7 @@ const Tracker = () => {
         // Period Days - Validation: Must have start date first
         if (!periodStart) {
           setTimeout(() => {
-            showNotification('Please select a start date first before adding period days.', 'error', 'short');
+            toast.error('Please select a start date first before adding period days.');
           }, 0);
           return;
         }
@@ -558,7 +509,7 @@ const Tracker = () => {
             }
             // Show notification after state updates - short duration for calendar actions
             // setTimeout(() => {
-            //   showNotification(`Date removed from period`, 'success', 'short');
+            //   toast.error(`Date removed from period`, 'success', 'short');
             // }, 0);
             return newDates;
           } else {
@@ -571,7 +522,7 @@ const Tracker = () => {
               // Check if the clicked date is the next sequential date
               if (!clickedDate.isSame(nextExpectedDate, 'day')) {
                 setTimeout(() => {
-                  showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error', 'short');
+                  toast.error(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`);
                 }, 0);
                 return prevArray;
               }
@@ -582,7 +533,7 @@ const Tracker = () => {
               
               if (!clickedDate.isSame(nextExpectedDate, 'day')) {
                 setTimeout(() => {
-                  showNotification(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`, 'error', 'short');
+                  toast.error(`Please select dates sequentially. Next date should be ${nextExpectedDate.format('MMM DD, YYYY')}.`);
                 }, 0);
                 return prevArray;
               }
@@ -606,7 +557,7 @@ const Tracker = () => {
             // If no end date exists, don't set it - user must explicitly select "Period End"
             // Show notification after state updates - short duration for calendar actions
             // setTimeout(() => {
-            //   showNotification(`Date added to period`, 'success', 'short');
+            //   toast.error(`Date added to period`, 'success', 'short');
             // }, 0);
             return sorted;
           }
@@ -616,7 +567,7 @@ const Tracker = () => {
       default:
         break;
     }
-  }, [selectedDate, periodStart, periodEnd, showNotification, checkConsecutiveRange]);
+  }, [selectedDate, periodStart, periodEnd, checkConsecutiveRange]);
 
   // Get selected dates array - use periodDates if available, otherwise calculate from start/end
   const getSelectedDates = useMemo(() => {
@@ -681,9 +632,7 @@ const Tracker = () => {
       }
       
       if (response.data.status === 'success') {
-        const action = (existingData && selectedRecordId) ? 'updated' : 'saved';
-        console.log('Success response:', response.data);
-        showNotification(`Calendar data ${action} successfully!`, 'success');
+        toast.success('Saved successfully');
         
         // Update existing data with the response data
         if (response.data.data) {
@@ -707,7 +656,7 @@ const Tracker = () => {
       }
     } catch (err) {
       console.error('Error saving tracker data:', err);
-      showNotification('Failed to save tracker data. Please try again.', 'error');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -720,7 +669,6 @@ const Tracker = () => {
     existingData,
     selectedRecordId,
     currentMonth,
-    showNotification,
     invalidatePeriodGoals,
     invalidateTrackerInfo,
   ]);
@@ -738,8 +686,6 @@ const Tracker = () => {
     setPeriodStart(record.period_start);
     setPeriodEnd(record.period_end || null);
     setPeriodDates(record.period_dates || []);
-    const endDateText = record.period_end ? ` to ${record.period_end}` : '';
-    showNotification(`Selected record for update: ${record.period_start}${endDateText}`, 'success');
   }, []);
 
   // Handle new record creation
@@ -749,7 +695,6 @@ const Tracker = () => {
     setPeriodStart(null);
     setPeriodEnd(null);
     setPeriodDates([]);
-    showNotification('Creating new record...', 'success');
   }, []);
 
   const renderDay = useCallback((day, _value, props) => {
@@ -1478,154 +1423,6 @@ const Tracker = () => {
               Cancel
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Interactive Notification Toast */}
-      {notification && (
-        <div 
-          className={`fixed top-4 right-4 z-[9999] transform transition-all duration-500 ease-out cursor-pointer group ${
-            isHovered ? 'scale-105 shadow-2xl' : 'scale-100'
-          } ${
-            notification.type === 'success' 
-              ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500' 
-              : 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500'
-          }`}
-          style={{
-            position: 'fixed',
-            top: '16px',
-            right: '16px',
-            zIndex: 9999,
-            minWidth: '320px',
-            maxWidth: '420px',
-            borderRadius: '16px',
-            pointerEvents: 'auto', // Only capture events within notification bounds
-            boxShadow: isHovered ? `
-              0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 0 0 1px rgba(255, 255, 255, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2)
-            ` : `
-              0 20px 25px -5px rgba(0, 0, 0, 0.1),
-              0 10px 10px -5px rgba(0, 0, 0, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `,
-            border: `1px solid ${notification.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-            backdropFilter: 'blur(10px)',
-          }}
-          onMouseEnter={() => {
-            setIsHovered(true);
-            setIsPaused(true);
-          }}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setIsPaused(false);
-          }}
-          onClick={(e) => {
-            // Click to dismiss - stop propagation to prevent interfering with calendar
-            e.stopPropagation();
-            if (notificationTimer) {
-              clearInterval(notificationTimer);
-              setNotificationTimer(null);
-            }
-            setNotification(null);
-          }}
-        >
-          {/* Interactive Timer Bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-black bg-opacity-20 rounded-t-2xl overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-100 ease-linear ${
-                isPaused ? 'opacity-50' : 'opacity-100'
-              } ${
-                notification.type === 'success' 
-                  ? 'bg-gradient-to-r from-green-300 to-green-400' 
-                  : 'bg-gradient-to-r from-red-300 to-red-400'
-              }`}
-              style={{ width: `${notification.progress}%` }}
-            />
-            {isPaused && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              </div>
-            )}
-          </div>
-          
-          {/* Content */}
-          <div className="px-6 py-4 pt-5 flex items-center gap-4">
-            {/* Animated Icon */}
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
-              isHovered ? 'scale-110 rotate-12' : 'scale-100 rotate-0'
-            } ${
-              notification.type === 'success' 
-                ? 'bg-white bg-opacity-20 shadow-green-200 group-hover:bg-opacity-30' 
-                : 'bg-white bg-opacity-20 shadow-red-200 group-hover:bg-opacity-30'
-            }`}>
-              {notification.type === 'success' ? (
-                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
-                  isHovered ? 'scale-110' : 'scale-100'
-                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
-                  isHovered ? 'scale-110' : 'scale-100'
-                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-            
-            {/* Message with hover effects */}
-            <div className="flex-1">
-              <p className={`text-white font-semibold text-sm leading-tight drop-shadow-sm transition-all duration-300 ${
-                isHovered ? 'text-base' : 'text-sm'
-              }`}>
-                {notification.message}
-              </p>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-white text-xs opacity-80">
-                  {isPaused ? 'Paused' : `${((notification.progress / 100) * (notification.duration || 4000) / 1000).toFixed(1)}s remaining`}
-                </p>
-                {isPaused && (
-                  <div className="flex gap-1">
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Interactive Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (notificationTimer) {
-                  clearInterval(notificationTimer);
-                  setNotificationTimer(null);
-                }
-                setNotification(null);
-              }}
-              className={`w-8 h-8 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 flex items-center justify-center transition-all duration-200 ${
-                isHovered ? 'scale-110 bg-opacity-30' : 'scale-100'
-              } hover:scale-125 hover:rotate-90`}
-            >
-              <svg className="w-4 h-4 text-white transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-            </button>
-          </div>
-          
-          {/* Animated Bottom Glow */}
-          <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl transition-all duration-300 ${
-            notification.type === 'success' 
-              ? 'bg-gradient-to-r from-transparent via-green-300 to-transparent' 
-              : 'bg-gradient-to-r from-transparent via-red-300 to-transparent'
-          } ${isHovered ? 'opacity-80' : 'opacity-50'}`} />
-          
-          {/* Hover Indicator */}
-          {isHovered && (
-            <div className="absolute inset-0 rounded-2xl border-2 border-white border-opacity-30 pointer-events-none animate-pulse" />
-          )}
         </div>
       )}
     </div>
