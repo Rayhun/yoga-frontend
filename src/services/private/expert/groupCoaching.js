@@ -64,6 +64,10 @@ export const duplicateGroupCoaching = async ({ id }) => {
   return axios.post(`/LMS/events/${id}/duplicate/`);
 };
 
+export const deleteGroupCoaching = async ({ id }) => {
+  return axios.delete(`/LMS/events/${id}/`);
+};
+
 export const cancelGroupCoaching = async ({ id }) => {
   return axios.post(`/event/${id}/status/`, { event_status: 'cancelled', recording_link: '' });
 };

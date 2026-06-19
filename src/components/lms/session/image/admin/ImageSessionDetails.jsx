@@ -2,12 +2,15 @@
 import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, ReliefIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 import {
   SESSION_CATALOG_FIELD_NAMESPACES,
   filterSessionTagsByNamespace,
   getCultureExperienceDisplayData,
 } from '@/utils/sessionCatalogTags';
+
+const isImageUrl = url => /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(url || '');
 
 const ImageSessionDetails = ({ data = {} }) => {
   const router = useRouter();
@@ -24,14 +27,17 @@ const ImageSessionDetails = ({ data = {} }) => {
     SESSION_CATALOG_FIELD_NAMESPACES.categories
   );
   const cultureExperienceTags = getCultureExperienceDisplayData(data);
+
   return (
     <DetailsLayoutWrapper
-      title="Image Session"
+      title="Guide / Lesson"
       onEdit={() => router.push(`/portal/admin/lms/session/image/${data.id}/edit`)}
     >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title}</DetailsRecord>
-        <DetailsRecord label="Description">{data.description}</DetailsRecord>
+        <DetailsRecord label="Content (Rich Text)">
+          <ControllableRichText>{data.description || 'No rich text content provided'}</ControllableRichText>
+        </DetailsRecord>
         <DetailsRecord label="Status">{data.status}</DetailsRecord>
         <DetailsRecord label="Difficulty">{data.difficulty}</DetailsRecord>
         <DetailsRecord label="Intensity">{data.intensity}</DetailsRecord>
@@ -63,9 +69,21 @@ const ImageSessionDetails = ({ data = {} }) => {
             typeof item === 'string' ? item : item?.name ?? getCatalogTagChipLabel(item)
           }
         />
-        <DetailsRecord label="File">
-          <DetailsFileCard fileURL={data.content_file} isImage />
-        </DetailsRecord>
+        {data.content_file ? (
+          <DetailsRecord label="Document">
+            <DetailsFileCard fileURL={data.content_file} isImage={isImageUrl(data.content_file)} />
+          </DetailsRecord>
+        ) : null}
+        {data.thumbnail_image ? (
+          <DetailsRecord label="Cover Image / Infographic">
+            <DetailsFileCard fileURL={data.thumbnail_image} isImage />
+          </DetailsRecord>
+        ) : null}
+        {data.content_audio ? (
+          <DetailsRecord label="Audio File">
+            <DetailsFileCard fileURL={data.content_audio} />
+          </DetailsRecord>
+        ) : null}
       </div>
     </DetailsLayoutWrapper>
   );

@@ -20,8 +20,8 @@ export default function DefaultLayout({ children }) {
           {/* <!-- ===== Header End ===== --> */}
 
           {/* <!-- ===== Main Content Start ===== --> */}
-          <main>
-            <div className="mx-auto max-w-screen-3xl p-4 md:p-6 2xl:p-10 overflow-y-auto">{children}</div>
+          <main className="flex-1">
+            <div className="mx-auto max-w-screen-3xl overflow-y-auto p-3 sm:p-4 md:p-6 2xl:p-10">{children}</div>
           </main>
           {/* <!-- ===== Main Content End ===== --> */}
         </div>

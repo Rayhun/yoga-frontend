@@ -63,11 +63,14 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
       </div>
 
       {/* Tabs Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 p-4 sm:p-6">
         <Tabs
           value={selectedTab}
           className="mb-4"
           onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
           sx={{
             '& .MuiTab-root': {

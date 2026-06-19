@@ -8,19 +8,51 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { getUserTimeAndTimezone, toastApiError } from '@/utils/helpers';
-import { duplicateGuidedExperience } from '@/services/private/lms/guided-experiences';
+import {
+  deleteGuidedExperience,
+  duplicateGuidedExperience,
+} from '@/services/private/lms/guided-experiences';
 import queryKeys from '@/utils/query-keys';
 import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import useConfirm from '@/hooks/useConfirm';
+import useDelete from '@/hooks/useDelete';
 
 dayjs.extend(utc);
+
+const EVENT_DELETE_BLOCKED_MESSAGE =
+  'This event cannot be deleted because users have signed up or tickets have been sold. Please refund or cancel all orders before deleting this event.';
 
 const GuidedExperienceDetails = ({ data = {}, eventType }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const { mutateAsync: duplicateExperience, isPending: isDuplicating } = useMutation({
     mutationFn: duplicateGuidedExperience,
   });
+
+  const { handleDelete: handleDeleteExperience, isDeleting } = useDelete({
+    mutationFn: deleteGuidedExperience,
+    invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
+    getConfirmOptions: {
+      heading: 'Delete event?',
+      message:
+        'Are you sure you want to delete this event? This action cannot be undone.',
+    },
+    onSuccess: () => {
+      toast.success('Event deleted successfully');
+      const eventTypePath = eventType === 'live event' ? 'live-event' : eventType;
+      router.push(`/portal/admin/lms/expert/guided-experiences/${eventTypePath}`);
+    },
+  });
+
+  const handleDelete = async () => {
+    if (!data.can_delete) {
+      toast.error(data.delete_blocked_message || EVENT_DELETE_BLOCKED_MESSAGE);
+      return;
+    }
+    await handleDeleteExperience({ id: data.id });
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -97,6 +129,8 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
     <DetailsLayoutWrapper 
       title="Guided Experience Details"
       onEdit={() => router.push(getEditPath())}
+      onDelete={handleDelete}
+      isDeleting={isDeleting}
       customActions={
         <button
           className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-1 text-sm text-center font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-60"

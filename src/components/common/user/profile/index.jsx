@@ -23,9 +23,9 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
   };
 
   return (
-    <div className='flex flex-col gap-6'>
-      <div className="text-center bg-white rounded-lg shadow-md flex items-center">
-        <div className="relative z-30 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
+    <div className='flex flex-col gap-4 sm:gap-6'>
+      <div className="flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md sm:flex-row sm:p-6">
+        <div className="relative z-30 h-24 w-24 shrink-0 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:w-44 sm:p-3">
           <div className="relative drop-shadow-2">
             <Image
               src={userProfileDetails?.file || '/images/user/user-06.png'}
@@ -66,21 +66,24 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
             </label> */}
           </div>
         </div>
-        <div className="w-full text-left flex items-center">
-          <div className=''>
-            <h3 className="text-2xl font-semibold text-black dark:text-white">{`${userProfileDetails?.first_name} ${userProfileDetails?.last_name}`}</h3>
+        <div className="w-full text-center sm:text-left">
+          <div>
+            <h3 className="text-xl font-semibold text-black dark:text-white sm:text-2xl">{`${userProfileDetails?.first_name} ${userProfileDetails?.last_name}`}</h3>
             <p className="my-1 font-medium">{userProfileDetails?.title}</p>
             {/* <p className="text-sm">42.1k followers</p> */}
             {/* <button className="bg-primary text-white rounded-full mt-2 px-8 py-2">Follow</button> */}
           </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col gap-6">
+      <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-md text-gray-800 dark:text-gray-200 sm:gap-6 sm:p-6">
         {/* Tabs */}
         <Tabs
           value={selectedTab}
-          className="mt-5"
+          className="mt-2 sm:mt-5"
           onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           classes={{ scroller: '!overflow-x-auto no-scrollbar' }}
         >
           <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' />

@@ -1,6 +1,6 @@
 import Chip from '@mui/material/Chip';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
-import { LANGUAGES } from '@/utils/constants';
+import { getCoachingAreaLabel, getLanguageDisplayLabels } from '@/utils/expertProfileTags';
 import { 
   FiUser, 
   FiTarget, 
@@ -32,25 +32,13 @@ const ProfileChip = ({ label }) => (
   />
 );
 
-const findRelatedLanguages = (languages) => {
-  if (!languages || !Array.isArray(languages)) return [];
-  
-  const normalizedLanguages = languages.flatMap(lang => 
-    typeof lang === 'string' ? lang.split(',') : lang
-  );
-  
-  return normalizedLanguages
-    .map(lang => LANGUAGES.find(item => item.value === lang))
-    .filter(lang => lang !== undefined);
-};
-
-const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = false }) => {
-  const relatedLanguages = findRelatedLanguages(data?.languages);
+const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = false, disableLinks = false }) => {
+  const languageLabels = getLanguageDisplayLabels(data?.languages);
   return (
     <div className="flex flex-col gap-5">
       <AboutSection label="About" icon={FiUser}>
         <div className="prose prose-sm max-w-none dark:prose-invert">
-          <ControllableRichText showFullText={showFullAboutText}>
+          <ControllableRichText showFullText={showFullAboutText} disableLinks={disableLinks}>
             {data?.description || 'No description provided'}
           </ControllableRichText>
         </div>
@@ -60,17 +48,17 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
         <AboutSection label="Coaching Areas" icon={FiTarget}>
           <div className="flex flex-wrap gap-2.5">
             {data.coaching_areas.map(item => (
-              <ProfileChip key={item.id} label={item?.title} />
+              <ProfileChip key={item.id} label={getCoachingAreaLabel(item)} />
             ))}
           </div>
         </AboutSection>
       )}
 
-      {relatedLanguages && relatedLanguages.length > 0 && (
+      {languageLabels.length > 0 && (
         <AboutSection label="Languages" icon={FiGlobe}>
           <div className="flex flex-wrap gap-2.5">
-            {relatedLanguages.map((language, index) => (
-              <ProfileChip key={index} label={language?.label} />
+            {languageLabels.map((language, index) => (
+              <ProfileChip key={index} label={language} />
             ))}
           </div>
         </AboutSection>

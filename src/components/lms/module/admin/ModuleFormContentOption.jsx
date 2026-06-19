@@ -5,7 +5,7 @@ import { useFormikContext } from 'formik';
 import { useRouter } from 'next/navigation';
 import { MdOutlineRemoveRedEye, MdOutlineEdit, MdDeleteOutline } from 'react-icons/md';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikField from '@/components/common/form/formik/FormikField';
+import SortableRowControls from '@/components/common/form/SortableRowControls';
 import { getModuleContentOptions } from '@/services/private/lms/module';
 import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 
@@ -13,9 +13,21 @@ import { MODULE_TYPE_OPTIONS } from '@/utils/options';
 const moduleContentOptionsCache = new Map();
 const moduleLoadingStates = new Map();
 
-const getOrderByValue = item => Number(item?.order_by ?? item?.order);
-
-const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldError }) => {
+const ModuleFormContentOption = ({
+  values,
+  name,
+  index,
+  total,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragging,
+  isDragOver,
+}) => {
   const router = useRouter();
   const { setFieldValue } = useFormikContext();
   const [contentOptions, setContentOptions] = useState([]);
@@ -128,65 +140,6 @@ const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldEr
     }
   };
 
-  const handleOrderChange = (orderValue) => {
-    // Set the field value first
-    setFieldValue(`${name}.order_by`, orderValue);
-    
-    // Clear any existing errors first
-    setFieldError(`${name}.order_by`, '');
-    
-    // Check if order is empty
-    if (!orderValue || orderValue === '') {
-      setFieldError(`${name}.order_by`, 'Order is required');
-      return;
-    }
-    
-    // Check if order is a valid positive number
-    const orderNum = parseInt(orderValue);
-    if (isNaN(orderNum) || orderNum < 1) {
-      setFieldError(`${name}.order_by`, 'Order must be a positive number');
-      return;
-    }
-    
-    // Check if order is already used by another row
-    const currentIndex = parseInt(name.match(/\d+/)[0]);
-    const isDuplicateOrder = allValues.module_content.some((item, index) => 
-      index !== currentIndex && getOrderByValue(item) === orderNum
-    );
-    
-    if (isDuplicateOrder) {
-      setFieldError(`${name}.order_by`, 'Order number must be unique');
-    }
-  };
-
-  // Validate order field on blur
-  const handleOrderBlur = () => {
-    const orderValue = values.order_by;
-    
-    // Check if order is empty
-    if (!orderValue || orderValue === '') {
-      setFieldError(`${name}.order_by`, 'Order is required');
-      return;
-    }
-    
-    // Check if order is a valid positive number
-    const orderNum = parseInt(orderValue);
-    if (isNaN(orderNum) || orderNum < 1) {
-      setFieldError(`${name}.order_by`, 'Order must be a positive number');
-      return;
-    }
-    
-    // Check if order is already used by another row
-    const currentIndex = parseInt(name.match(/\d+/)[0]);
-    const isDuplicateOrder = allValues.module_content.some((item, index) => 
-      index !== currentIndex && getOrderByValue(item) === orderNum
-    );
-    
-    if (isDuplicateOrder) {
-      setFieldError(`${name}.order_by`, 'Order number must be unique');
-    }
-  };
-
   // Initialize component on mount and handle content type changes
   useEffect(() => {
     const handleContentType = async () => {
@@ -203,65 +156,76 @@ const ModuleFormContentOption = ({ values, name, onRemove, allValues, setFieldEr
   }, [values.content_type]);
 
   return (
-    <div className="flex items-start gap-x-6 gap-y-1 overflow-auto">
-      <div className="w-36 shrink-0">
-        <FormikSelect
-          name={`${name}.content_type`}
-          label="Type"
-          placeholder="Type"
-          options={MODULE_TYPE_OPTIONS}
-          onChange={(value) => handleTypeChange(value)}
-          required
-        />
-      </div>
-      <div className="min-w-0 flex-1 basis-[35%]">
-        <FormikSelect
-          name={`${name}.content_id`}
-          label="Content"
-          placeholder="Content"
-          options={contentOptions}
-          loading={isPending}
-          required
-        />
-      </div>
-      <div className="w-[20%] min-w-[120px] shrink-0">
-        <FormikField 
-          type="number" 
-          name={`${name}.order_by`} 
-          label="Order" 
-          placeholder="Order" 
-          min={1} 
-          required
-          onChange={(e) => handleOrderChange(e.target.value)}
-          onBlur={handleOrderBlur}
-        />
-      </div>
-      <div className="flex w-[20%] min-w-[150px] shrink-0 items-center justify-center gap-2 self-center">
-        {values.content_id && (
-          <>
-            <button 
-              onClick={() => handleViewContent(values)} 
-              className="hover:text-primary p-1"
-              title="View"
-            >
-              <MdOutlineRemoveRedEye size={20} />
-            </button>
-            <button 
-              onClick={() => handleEditContent(values)} 
-              className="hover:text-primary p-1"
-              title="Edit"
-            >
-              <MdOutlineEdit size={20} />
-            </button>
-          </>
-        )}
-        <button 
-          onClick={onRemove} 
-          className="hover:text-primary p-1"
-          title="Delete"
-        >
-          <MdDeleteOutline size={20} />
-        </button>
+    <div
+      className={`flex items-start gap-x-4 gap-y-1 overflow-auto rounded-lg border border-stroke p-3 dark:border-strokedark ${
+        isDragOver ? 'ring-2 ring-primary' : ''
+      }`}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
+      <SortableRowControls
+        index={index}
+        total={total}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragEnd={onDragEnd}
+        isDragging={isDragging}
+        isDragOver={isDragOver}
+      />
+      <div className="flex min-w-0 flex-1 items-start gap-x-6 gap-y-1 overflow-auto">
+        <div className="w-36 shrink-0">
+          <FormikSelect
+            name={`${name}.content_type`}
+            label="Type"
+            placeholder="Type"
+            options={MODULE_TYPE_OPTIONS}
+            onChange={(value) => handleTypeChange(value)}
+            required
+          />
+        </div>
+        <div className="min-w-0 flex-1 basis-[35%]">
+          <FormikSelect
+            name={`${name}.content_id`}
+            label="Content"
+            placeholder="Content"
+            options={contentOptions}
+            loading={isPending}
+            required
+          />
+        </div>
+        <div className="flex w-[20%] min-w-[150px] shrink-0 items-center justify-center gap-2 self-center">
+          {values.content_id && (
+            <>
+              <button 
+                type="button"
+                onClick={() => handleViewContent(values)} 
+                className="hover:text-primary p-1"
+                title="View"
+              >
+                <MdOutlineRemoveRedEye size={20} />
+              </button>
+              <button 
+                type="button"
+                onClick={() => handleEditContent(values)} 
+                className="hover:text-primary p-1"
+                title="Edit"
+              >
+                <MdOutlineEdit size={20} />
+              </button>
+            </>
+          )}
+          <button 
+            type="button"
+            onClick={onRemove} 
+            className="hover:text-primary p-1"
+            title="Delete"
+          >
+            <MdDeleteOutline size={20} />
+          </button>
+        </div>
       </div>
     </div>
   );

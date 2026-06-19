@@ -49,6 +49,8 @@ export const GroupCoachingDetails = ({
   guestCheckoutLoading = false,
   handleDuplicateEvent,
   duplicating = false,
+  handleDeleteEvent,
+  deleting = false,
 }) => {
   const router = useRouter();
 
@@ -87,6 +89,14 @@ export const GroupCoachingDetails = ({
     <div className="flex flex-col gap-8">
       {!isCustomerView && !isPublicView && (
         <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 px-3 py-1.5 text-sm font-semibold text-red-500 hover:border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 disabled:opacity-60"
+            onClick={handleDeleteEvent}
+            disabled={deleting}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
           <button
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 px-3 py-1.5 text-sm font-semibold text-primary hover:border-primary/50 hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 disabled:opacity-60"
             onClick={handleDuplicateEvent}

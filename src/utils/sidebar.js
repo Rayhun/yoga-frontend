@@ -241,7 +241,7 @@ const ADMIN = [
         isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
       },
       {
-        label: 'Image Sessions',
+        label: 'Guides / Lessons',
         href: '/portal/admin/lms/session/image',
         isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
       },
@@ -476,7 +476,7 @@ const STAFF = [
         isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
       },
       {
-        label: 'Image Sessions',
+        label: 'Guides / Lessons',
         href: '/portal/admin/lms/session/image',
         isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
       },

@@ -162,6 +162,16 @@ function InboxProvider({ children }) {
   }, [messages.data]);
 
   const setActiveConversation = useCallback(async selected => {
+    if (!selected) {
+      setConversations(prevState => ({
+        ...prevState,
+        active: null,
+      }));
+      setRoomID('');
+      setMessages({ isLoading: false, data: [] });
+      return;
+    }
+
     setConversations(prevState => ({
       ...prevState,
       active: selected,

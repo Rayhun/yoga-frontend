@@ -12,8 +12,7 @@ import MessagesList from './MessagesList';
 import MessageForm from './MessageForm';
 import WelcomeMessage from './WelcomeMessage';
 
-// Coaches Icon Component - Uses woman icon image (no matching icon found)
-const CoachesIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }) => {
+const CoachesIcon = ({ className = 'w-4 h-4 md:w-5 md:h-5' }) => {
   return (
     <Image
       src="/images/icon/woman.png"
@@ -29,63 +28,65 @@ const Inbox = () => {
   const { user } = useAuthContext();
   const {
     conversations: { data: conversationsData, active: activeConversation, isLoading: isLoadingConversations },
+    actions: { setActiveConversation },
   } = useInbox();
   const shouldShowCoachesTab = user?.profile?.role !== USER_ROLE.TEACHER;
-  const [activeTab, setActiveTab] = useState('circles'); // 'circles' or 'coaches'
-  const [circlesSubTab, setCirclesSubTab] = useState('my-circles'); // For circles sub-navigation
-  const [coachesSubTab, setCoachesSubTab] = useState('my-chats'); // For coaches sub-navigation
+  const [activeTab, setActiveTab] = useState('circles');
+  const [circlesSubTab, setCirclesSubTab] = useState('my-circles');
+  const [coachesSubTab, setCoachesSubTab] = useState('my-chats');
 
-  // Separate circles and coaches
-  // Circles: all conversations EXCEPT coach conversations (is_coach: true)
   const circles = conversationsData.filter(conv => !conv.is_coach);
-  // Coaches: only conversations where is_coach is true
   const coaches = conversationsData.filter(conv => conv.is_coach === true);
 
+  const showMobileChat = Boolean(activeConversation);
+  const handleMobileBack = () => setActiveConversation(null);
+
   return (
-    <div className="h-full md:h-[80vh] overflow-hidden">
-      <div className="h-full flex flex-col md:flex-row bg-white shadow-lg overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-full md:w-1/3 h-[70vh] md:h-full flex flex-col bg-gray-50 border-r border-gray-200">
-          {/* Top Navigation Tabs */}
+    <div className="inbox-height overflow-hidden">
+      <div className="flex h-full flex-col overflow-hidden bg-white shadow-lg md:flex-row">
+        {/* Left Sidebar — full width on mobile when no chat is open */}
+        <div
+          className={`w-full md:w-1/3 md:min-w-[280px] lg:min-w-[320px] flex flex-col border-r border-gray-200 bg-gray-50 ${
+            showMobileChat ? 'hidden md:flex' : 'flex h-full'
+          }`}
+        >
           <div className="flex border-b border-gray-200 bg-white">
             <button
               onClick={() => setActiveTab('circles')}
-              className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-4 py-2 md:py-3 font-medium transition-colors text-xs md:text-sm ${
+              className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors md:gap-2 md:px-4 md:py-3 md:text-sm ${
                 activeTab === 'circles'
-                  ? 'text-green-600 border-b-2 border-green-600'
+                  ? 'border-b-2 border-green-600 text-green-600'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <FiUsers className="w-4 h-4 md:w-5 md:h-5" />
+              <FiUsers className="h-4 w-4 md:h-5 md:w-5" />
               <span>Circles</span>
             </button>
             {shouldShowCoachesTab && (
               <button
                 onClick={() => setActiveTab('coaches')}
-                className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-4 py-2 md:py-3 font-medium transition-colors text-xs md:text-sm ${
+                className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors md:gap-2 md:px-4 md:py-3 md:text-sm ${
                   activeTab === 'coaches'
-                    ? 'text-green-600 border-b-2 border-green-600'
+                    ? 'border-b-2 border-green-600 text-green-600'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
-                {/* Prefer icon, fallback to image */}
-                <CoachesIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <CoachesIcon className="h-4 w-4 md:h-5 md:w-5" />
                 <span>Coaches</span>
               </button>
             )}
           </div>
 
-          {/* Content based on active tab */}
           {activeTab === 'circles' || !shouldShowCoachesTab ? (
-            <CirclesList 
-              circles={circles} 
+            <CirclesList
+              circles={circles}
               isLoading={isLoadingConversations}
               activeSubTab={circlesSubTab}
               setActiveSubTab={setCirclesSubTab}
             />
           ) : (
-            <CoachesList 
-              coaches={coaches} 
+            <CoachesList
+              coaches={coaches}
               isLoading={isLoadingConversations}
               activeSubTab={coachesSubTab}
               setActiveSubTab={setCoachesSubTab}
@@ -93,12 +94,16 @@ const Inbox = () => {
           )}
         </div>
 
-        {/* Chat Area */}
-        <div className="w-full md:w-2/3 h-[70vh] md:h-full flex flex-col bg-white">
+        {/* Chat Area — full width on mobile when a conversation is open */}
+        <div
+          className={`w-full md:w-2/3 flex flex-col bg-white ${
+            showMobileChat ? 'flex h-full' : 'hidden md:flex'
+          }`}
+        >
           {activeConversation ? (
-            <div className="h-full flex flex-col">
-              <ActiveConversationHeader />
-              <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex h-full flex-col">
+              <ActiveConversationHeader onBack={handleMobileBack} />
+              <div className="flex min-h-0 flex-1 flex-col">
                 <MessagesList />
               </div>
               <MessageForm />
@@ -106,18 +111,18 @@ const Inbox = () => {
           ) : conversationsData.length === 0 && !isLoadingConversations ? (
             <WelcomeMessage activeTab={activeTab} />
           ) : isLoadingConversations ? (
-            <div className="w-full h-full flex flex-col justify-center items-center p-8 bg-transparent">
-              <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <div className="flex h-full w-full flex-col items-center justify-center bg-transparent p-8">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80 shadow-lg backdrop-blur-sm">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-green-600"></div>
               </div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">Loading Conversations...</h3>
-              <p className="text-gray-500 text-center max-w-sm">
+              <h3 className="mb-2 text-lg font-medium text-gray-700">Loading Conversations...</h3>
+              <p className="max-w-sm text-center text-gray-500">
                 Please wait while we load your conversations
               </p>
             </div>
           ) : (
-            <WelcomeMessage 
-              activeTab={activeTab} 
+            <WelcomeMessage
+              activeTab={activeTab}
               onExploreCircles={() => {
                 setActiveTab('circles');
                 setCirclesSubTab('discover');

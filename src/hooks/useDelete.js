@@ -13,7 +13,7 @@ function useDelete({
 }) {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending: isDeleting } = useMutation({
     mutationFn,
   });
 
@@ -41,7 +41,7 @@ function useDelete({
     [confirm, getConfirmOptions, invalidateQueryKey, mutateAsync, onSuccess, queryClient]
   );
 
-  return { handleDelete };
+  return { handleDelete, isDeleting };
 }
 
 export default useDelete;

@@ -29,10 +29,10 @@ const CustomTable = ({
   return (
     <section className="data-table-common data-table-two rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       {showHeader ? (
-        <div className="flex justify-between gap-4 border-b border-stroke px-8 py-4 dark:border-strokedark">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-4 border-b border-stroke px-4 py-4 dark:border-strokedark sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:gap-4">
             {showSearch ? (
-              <div className="w-100">
+              <div className="w-full sm:max-w-xs md:max-w-sm lg:w-100">
                 <input
                   type="text"
                   value={globalFilter ?? ''}
@@ -45,7 +45,7 @@ const CustomTable = ({
             {CustomFilters}
           </div>
          
-          <div className="flex shrink-0 items-center font-medium">
+          <div className="flex shrink-0 items-center font-medium text-sm">
             <select
               value={pageSize}
               onChange={e => {
@@ -61,12 +61,13 @@ const CustomTable = ({
                 </option>
               ))}
             </select>
-            <p className="pl-2 text-black dark:text-white">Entries Per Page</p>
+            <p className="pl-2 text-black dark:text-white">Per Page</p>
           </div>
         </div>
       ) : null}
 
-      <table className="datatable-table w-full table-auto !border-collapse overflow-hidden break-words px-4 md:table-fixed md:overflow-auto md:px-8 !h-[300px]">
+      <div className="overflow-x-auto">
+      <table className="datatable-table w-full min-w-[640px] table-auto !border-collapse overflow-hidden break-words px-2 md:table-fixed md:overflow-auto md:px-4 lg:px-8">
         <thead>
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id} className="bg-[#F9FAFB] dark:bg-meta-4">
@@ -207,10 +208,11 @@ const CustomTable = ({
           )}
         </tbody>
       </table>
+      </div>
 
       {showFooter ? (
-        <div className="flex justify-between border-t border-stroke px-8 py-5 dark:border-strokedark">
-          <p className="font-medium">
+        <div className="flex flex-col gap-3 border-t border-stroke px-4 py-4 dark:border-strokedark sm:flex-row sm:items-center sm:justify-between sm:px-6 md:px-8 md:py-5">
+          <p className="text-sm font-medium sm:text-base">
             Showing {pageIndex + 1} 0f {pagesCount} pages
           </p>
           <Pagination

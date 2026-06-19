@@ -1,6 +1,6 @@
 import Chip from '@mui/material/Chip';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
-import { LANGUAGES } from '@/utils/constants';
+import { getCoachingAreaLabel, getLanguageDisplayLabels } from '@/utils/expertProfileTags';
 
 const AboutSection = ({ label, children }) => (
   <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm">
@@ -11,38 +11,25 @@ const AboutSection = ({ label, children }) => (
 
 const ProfileChip = ({ label }) => <Chip label={label} className="bg-dark/10 text-dark" />;
 
-const findRelatedLanguages = (languages) => {
-  if (!languages || !Array.isArray(languages)) return [];
-  
-  const normalizedLanguages = languages.flatMap(lang => 
-    typeof lang === 'string' ? lang.split(',') : lang
-  );
-  
-  return normalizedLanguages
-    .map(lang => LANGUAGES.find(item => item.value === lang))
-    .filter(lang => lang !== undefined);
-};
-
 const ExpertProfileAbout = ({ data }) => {
-
-  const relatedLanguages = findRelatedLanguages(data?.languages);
+  const languageLabels = getLanguageDisplayLabels(data?.languages);
 
   return (
     <div className="flex flex-col gap-7">
       <AboutSection label="About">
-        <ControllableRichText showFullText={true}>{data?.description || 'No description provided'}</ControllableRichText>
+        <ControllableRichText showFullText={true} disableLinks>{data?.description || 'No description provided'}</ControllableRichText>
       </AboutSection>
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
           {data?.coaching_areas?.map(item => (
-            <ProfileChip key={item.id} label={item?.label} />
+            <ProfileChip key={item.id} label={getCoachingAreaLabel(item)} />
           ))}
         </div>
       </AboutSection>
       <AboutSection label="Languages">
         <div className="flex flex-wrap gap-2">
-          {data?.languages?.map((language, index) => (
-            <ProfileChip key={index} label={language.label} />
+          {languageLabels.map((language, index) => (
+            <ProfileChip key={index} label={language} />
           ))}
         </div>
       </AboutSection>
@@ -53,13 +40,6 @@ const ExpertProfileAbout = ({ data }) => {
           ))}
         </div>
       </AboutSection>
-      {/* <AboutSection label="Coaching Content">
-        <div className="flex flex-wrap gap-2">
-          {data?.coaching_content?.split(',').map((content, index) => (
-            content && <ProfileChip key={index} label={content} />
-          ))}
-        </div>
-      </AboutSection> */}
       <AboutSection label="Experience">
         <p>{`${data?.experience || '0'} ${data?.experience > 1 ? 'years' : 'year'}`}</p>
       </AboutSection>

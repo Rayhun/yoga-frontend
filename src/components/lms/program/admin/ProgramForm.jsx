@@ -64,15 +64,15 @@ const ProgramForm = ({ selected }) => {
     culture_experience: mapContentCultureExperienceIds(selected),
     languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
     linked_program: selected?.linked_program || '',
-    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '', order: '' }]).map(
-      ({ content_id, content_type, drip, order, order_by, title }) => ({
+    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }])
+      .slice()
+      .sort((a, b) => (a.order_by ?? a.order ?? 0) - (b.order_by ?? b.order ?? 0))
+      .map(({ content_id, content_type, drip, title }) => ({
         content_id,
         content_type,
         drip,
-        order: order_by || order || '', // Prioritize order_by from API response (edit mode)
-        title: title || '', // Preserve the title from API response for display
-      })
-    ),
+        title: title || '',
+      })),
     price: selected?.price || 0,
     relief_index: Boolean(selected?.relief_index),
   };
@@ -109,16 +109,9 @@ const ProgramForm = ({ selected }) => {
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
           drip: Yup.number('Must be a number').min(0, 'Must be a non-negative number').required('Required!'),
-          order: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
-      .min(1, 'At least 1 option is required.')
-      .test('uniqueOrder', 'Order numbers must be unique', function(value) {
-        if (!value) return true;
-        const orders = value.map(item => item.order).filter(order => order !== '');
-        const uniqueOrders = new Set(orders);
-        return orders.length === uniqueOrders.size;
-      }),
+      .min(1, 'At least 1 option is required.'),
     price: Yup.number().when('access_setting', {
       is: ACCESS_SETTING.buy_now,
       then: schema =>
@@ -134,16 +127,10 @@ const ProgramForm = ({ selected }) => {
     try {
       const { file, linked_program, program_content, ...payload } = values;
 
-      // Transform program_content to remove title and change order to order_by
-      const transformedProgramContent = program_content.map(({ title, order, ...content }) => ({
+      payload.program_content = program_content.map(({ title, ...content }, index) => ({
         ...content,
-        order_by: order,
+        order_by: index + 1,
       }));
-
-      payload.program_content = transformedProgramContent;
-      
-      // Debug: Log the transformed payload to confirm order_by is included
-      console.log('Transformed program_content payload:', transformedProgramContent);
 
       // Only include linked_program in payload if it's not empty
       if (linked_program && linked_program !== '') {

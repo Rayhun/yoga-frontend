@@ -118,13 +118,13 @@ const ModuleForm = ({ selected }) => {
     focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
     culture_experience: mapContentCultureExperienceIds(selected),
     languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
-    module_content: (selected?.module || [{ content_id: '', content_type: '' }]).map(
-      ({ content_id, content_type, order_by, order }) => ({
+    module_content: (selected?.module || [{ content_id: '', content_type: '' }])
+      .slice()
+      .sort((a, b) => (a.order_by ?? a.order ?? 0) - (b.order_by ?? b.order ?? 0))
+      .map(({ content_id, content_type }) => ({
         content_id,
         content_type,
-        order_by: order_by ?? order ?? '',
-      })
-    ),
+      })),
     relief_index: Boolean(selected?.relief_index),
   };
 
@@ -161,18 +161,9 @@ const ModuleForm = ({ selected }) => {
         Yup.object({
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
-          order_by: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
-      .min(1, 'At least 1 option is required.')
-      .test('uniqueOrder', 'Order numbers must be unique', function(value) {
-        if (!value) return true;
-        const orders = value
-          .map(item => Number(item.order_by))
-          .filter(orderBy => Number.isFinite(orderBy) && orderBy > 0);
-        const uniqueOrders = new Set(orders);
-        return orders.length === uniqueOrders.size;
-      }),
+      .min(1, 'At least 1 option is required.'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -181,10 +172,10 @@ const ModuleForm = ({ selected }) => {
       const normalizedPayload = {
         ...payload,
         benefits: normalizeBenefits(payload.benefits),
-        module_content: payload.module_content.map(({ content_id, content_type, order_by }) => ({
+        module_content: payload.module_content.map(({ content_id, content_type }, index) => ({
           content_id,
           content_type,
-          order_by: Number(order_by),
+          order_by: index + 1,
         })),
       };
       let fileLink = selected?.image || '';

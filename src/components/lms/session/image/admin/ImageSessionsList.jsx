@@ -25,12 +25,12 @@ const ImageSessionsList = () => {
   const { isImporting, handleImport: handleImportImageSessions } = useImport({
     mutationFn: importSessions,
     invalidateQueryKey: [queryKeys.lmsImageSessions],
-    onSuccess: () => toast.success('Image Session imported successfully'),
+    onSuccess: () => toast.success('Guide imported successfully'),
   });
   const { handleDelete: handleDeleteImageSession } = useDelete({
     mutationFn: deleteSingleSession,
     invalidateQueryKey: [queryKeys.lmsImageSessions],
-    onSuccess: () => toast.success('Image Session deleted successfully'),
+    onSuccess: () => toast.success('Guide deleted successfully'),
   });
 
   const { mutateAsync: exportSessionsFn, isPending: isExporting } = useMutation({
@@ -38,10 +38,10 @@ const ImageSessionsList = () => {
   });
   const handleExport = useCallback(async () => {
     try {
-      await confirm({ message: 'Export image sessions?' });
+      await confirm({ message: 'Export guides?' });
       const response = await exportSessionsFn({ content_type: 'image' });
-      downloadBlobAsCsv(response, 'image_sessions_export.csv');
-      toast.success('Image sessions exported successfully');
+      downloadBlobAsCsv(response, 'guide_lessons_export.csv');
+      toast.success('Guides exported successfully');
     } catch (e) {
       if (e?.message !== 'cancel') toastApiError(e);
     }
@@ -107,7 +107,7 @@ const ImageSessionsList = () => {
       {
         id: 'add',
         Icon: MdOutlineAdd,
-        label: 'Add New Image Session',
+        label: 'Add New Guide',
         onClick: () => router.push('/portal/admin/lms/session/image/add'),
       },
     ],
@@ -123,7 +123,7 @@ const ImageSessionsList = () => {
 
   return (
     <div>
-      <PageHeader title="Image Sessions">
+      <PageHeader title="Guides / Lessons">
         <StaffPermissionGuard>
           <PageHeaderQuickActions actions={headerQuickActions} />
         </StaffPermissionGuard>

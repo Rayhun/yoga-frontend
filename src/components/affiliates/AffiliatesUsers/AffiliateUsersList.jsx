@@ -91,8 +91,11 @@ const AffiliateUsersList = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const isReapproval = selectedUser?.status === 'Declined';
       await approveUser({ payload: { ...values, id: selected } });
-      toast.success('Affiliate user approved successfully');
+      toast.success(
+        isReapproval ? 'Affiliate re-approved successfully' : 'Affiliate user approved successfully'
+      );
 
       await queryClient.invalidateQueries([
         {
@@ -107,27 +110,36 @@ const AffiliateUsersList = () => {
     }
   };
 
-  const handDecline = useCallback(
-    async selectedId => {
-      await confirm({
-        message: 'Are you sure you want to decline this affiliate user?',
-      })
-        .then(async () => {
-          await approveUser({ payload: { status: 'Declined', id: selectedId } });
-          toast.success('Affiliate user declined');
-
-          await queryClient.invalidateQueries([
-            {
-              queryKey: [queryKeys.affiliateUsers],
-            },
-          ]);
-        })
-        .catch(error => {
-          toastApiError(error);
+  const handleDecline = useCallback(
+    async (selectedId, { isDisapproval = false } = {}) => {
+      try {
+        await confirm({
+          heading: isDisapproval ? 'Disapprove affiliate?' : 'Decline affiliate?',
+          message: isDisapproval
+            ? 'Are you sure you want to disapprove this affiliate? They will lose access to the affiliate portal.'
+            : 'Are you sure you want to decline this affiliate user?',
         });
+        await approveUser({ payload: { status: 'Declined', id: selectedId } });
+        toast.success(isDisapproval ? 'Affiliate disapproved successfully' : 'Affiliate user declined');
+
+        await queryClient.invalidateQueries([
+          {
+            queryKey: [queryKeys.affiliateUsers],
+          },
+        ]);
+      } catch (error) {
+        if (error?.message !== 'User cancelled') {
+          toastApiError(error);
+        }
+      }
     },
     [confirm, approveUser, queryClient]
   );
+
+  const handleApprove = useCallback(user => {
+    setSelectedUser(user);
+    setSelected(user.id);
+  }, []);
 
   const handleEdit = useCallback(user => {
     setSelectedUser(user);
@@ -138,15 +150,21 @@ const AffiliateUsersList = () => {
     () => [
       {
         id: 'approve',
-        render: row => row?.original?.status === 'Pending',
+        render: row => ['Pending', 'Declined'].includes(row?.original?.status),
         Icon: BsPersonCheck,
-        onClick: row => setSelected(row?.original?.id),
+        onClick: row => handleApprove(row?.original),
       },
       {
         id: 'decline',
         render: row => row?.original?.status === 'Pending',
         Icon: BsPersonX,
-        onClick: row => handDecline(row?.original?.id),
+        onClick: row => handleDecline(row?.original?.id),
+      },
+      {
+        id: 'disapprove',
+        render: row => row?.original?.status === 'Approved',
+        Icon: BsPersonX,
+        onClick: row => handleDecline(row?.original?.id, { isDisapproval: true }),
       },
       {
         id: 'view',
@@ -160,7 +178,7 @@ const AffiliateUsersList = () => {
         onClick: row => handleEdit(row?.original),
       },
     ],
-    [setSelected, handDecline, router, handleEdit]
+    [handleApprove, handleDecline, router, handleEdit]
   );
 
   const { isLoading, columns, data } = useTable({
@@ -170,7 +188,10 @@ const AffiliateUsersList = () => {
     rowActions,
   });
 
-  const handleCloseApproval = () => setSelected(null);
+  const handleCloseApproval = () => {
+    setSelected(null);
+    setSelectedUser(undefined);
+  };
   const headerQuickActions = useMemo(
     () => [
       {

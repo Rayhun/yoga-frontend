@@ -14,7 +14,7 @@ import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
 
 const Section = ({ children, className = "" }) => (
-  <div className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
+  <div className={`bg-white portal-section rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
     <div>{children}</div>
   </div>
 );

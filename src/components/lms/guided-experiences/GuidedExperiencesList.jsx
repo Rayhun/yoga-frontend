@@ -35,6 +35,9 @@ const EVENT_TYPES = {
   MASTERCLASS: 'masterclass',
 };
 
+const EVENT_DELETE_BLOCKED_MESSAGE =
+  'This event cannot be deleted because users have signed up or tickets have been sold. Please refund or cancel all orders before deleting this event.';
+
 const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const router = useRouter();
   const [selectedEventType, setSelectedEventType] = useState(propEventType || EVENT_TYPES.WORKSHOP);
@@ -74,8 +77,23 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const { handleDelete: handleDeleteExperience } = useDelete({
     mutationFn: deleteGuidedExperience,
     invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
-    onSuccess: () => toast.success('Guided experience deleted successfully'),
+    getConfirmOptions: {
+      heading: 'Delete event?',
+      message: 'Are you sure you want to delete this event? This action cannot be undone.',
+    },
+    onSuccess: () => toast.success('Event deleted successfully'),
   });
+
+  const handleDeleteRow = useCallback(
+    row => {
+      if (!row?.original?.can_delete) {
+        toast.error(row?.original?.delete_blocked_message || EVENT_DELETE_BLOCKED_MESSAGE);
+        return;
+      }
+      handleDeleteExperience({ id: row.original.id });
+    },
+    [handleDeleteExperience]
+  );
 
   const { mutateAsync: toggleStatus } = useMutation({
     mutationFn: toggleGuidedExperienceStatus,
@@ -175,7 +193,8 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
       {
         id: 'delete',
         Icon: MdDeleteOutline,
-        onClick: row => handleDeleteExperience({ id: row.original.id }),
+        render: row => row?.original?.can_delete,
+        onClick: row => handleDeleteRow(row),
       },
       {
         id: 'active',
@@ -190,7 +209,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         onClick: row => handleToggleStatus(row?.original),
       },
     ],
-    [handleDeleteExperience, router, handleToggleStatus, eventType]
+    [handleDeleteRow, router, handleToggleStatus, eventType]
   );
 
   const { isLoading, columns, data: tableData } = useTable({

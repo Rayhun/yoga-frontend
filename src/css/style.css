@@ -76,6 +76,22 @@
   .inbox-height {
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
   }
+
+  .portal-hero {
+    @apply py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8;
+  }
+
+  .portal-section {
+    @apply p-4 sm:p-6 md:p-8;
+  }
+
+  .portal-search-input {
+    @apply w-full min-w-0 sm:min-w-[240px] md:min-w-[300px];
+  }
+
+  .portal-search-row {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4;
+  }
 }
 
 /* third-party libraries CSS */
@@ -373,12 +389,12 @@ span.flatpickr-weekday,
 
 .data-table-common .datatable-table > tbody > tr > td:first-child,
 .data-table-common .datatable-table > thead > tr > th:first-child {
-  @apply pl-8;
+  @apply pl-4 md:pl-8;
 }
 
 .data-table-common .datatable-table > tbody > tr > td:last-child,
 .data-table-common .datatable-table > thead > tr > th:last-child {
-  @apply pr-8;
+  @apply pr-4 md:pr-8;
 }
 
 .data-table-common .datatable-table > thead > tr:last-child > th {
@@ -435,7 +451,7 @@ span.flatpickr-weekday,
 }
 
 .data-table-two .datatable-bottom {
-  @apply flex flex-col gap-4 px-8 py-7 after:hidden sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:space-x-4;
+  @apply flex flex-col gap-4 px-4 py-5 after:hidden sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:space-x-4 md:px-8 md:py-7;
 }
 
 .data-table-two .datatable-search input {

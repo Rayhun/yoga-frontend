@@ -32,7 +32,7 @@ export const CONTENT_TYPE_OPTIONS = [
     value: CONTENT_TYPE.audio,
   },
   {
-    label: 'Image',
+    label: 'Guide',
     value: CONTENT_TYPE.image,
   },
   {
@@ -147,7 +147,7 @@ export const INTENSITY_LEVEL_OPTIONS = [
 
 export const MODULE_TYPE_OPTIONS = [
   {
-    label: 'Image',
+    label: 'Guide',
     value: MODULE_TYPE.image,
   },
   {
@@ -166,7 +166,7 @@ export const MODULE_TYPE_OPTIONS = [
 
 export const PROGRAM_TYPE_OPTIONS = [
   {
-    label: 'Image',
+    label: 'Guide',
     value: PROGRAM_TYPE.image,
   },
   {

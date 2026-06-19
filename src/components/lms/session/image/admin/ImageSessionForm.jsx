@@ -4,7 +4,8 @@ import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaRegFileImage } from 'react-icons/fa6';
+import { FaRegFileImage, FaRegFileAudio } from 'react-icons/fa6';
+import { MdOutlineDescription } from 'react-icons/md';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
@@ -37,6 +38,48 @@ import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
 import { normalizeEquipmentsForForm } from '@/utils/sessionQuizInitialValues';
 
+const GUIDE_DOCUMENT_ACCEPT = {
+  'image/png': [],
+  'image/jpeg': [],
+  'image/jpg': [],
+  'application/pdf': [],
+  'application/msword': [],
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+};
+
+const stripHtml = value =>
+  (value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+
+const GUIDE_CONTENT_FORMAT = {
+  richText: 'rich_text',
+  document: 'document',
+};
+
+const GUIDE_CONTENT_FORMAT_OPTIONS = [
+  { label: 'Rich Text', value: GUIDE_CONTENT_FORMAT.richText },
+  { label: 'Document (PDF / Word / Image)', value: GUIDE_CONTENT_FORMAT.document },
+];
+
+const getInitialContentFormat = selected => {
+  if (!selected) return '';
+  if (selected.content_file) return GUIDE_CONTENT_FORMAT.document;
+  if (stripHtml(selected.description).length > 0) return GUIDE_CONTENT_FORMAT.richText;
+  return '';
+};
+
+const isAllowedGuideDocument = file => {
+  if (!file?.type) return false;
+  return (
+    file.type.startsWith('image/') ||
+    file.type === 'application/pdf' ||
+    file.type === 'application/msword' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  );
+};
+
 const ImageSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -50,8 +93,8 @@ const ImageSession = ({ selected }) => {
 
   const initialValues = {
     title: selected?.title || '',
+    content_format: getInitialContentFormat(selected),
     description: selected?.description || '',
-    duration: selected?.duration || '',
     status: selected?.status || '',
     expert: selected?.expert || '',
     difficulty: selected?.difficulty || '',
@@ -64,13 +107,20 @@ const ImageSession = ({ selected }) => {
     languages: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages),
     categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
+    thumbnail: null,
+    audio_file: null,
     relief_index: Boolean(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Required!'),
-    description: Yup.string().required('Required!'),
-    duration: Yup.string().required('Required!'),
+    content_format: Yup.string().required('Select a content type'),
+    description: Yup.string().when('content_format', {
+      is: GUIDE_CONTENT_FORMAT.richText,
+      then: schema =>
+        schema.test('rich-text-content', 'Rich text content is required.', value => stripHtml(value).length > 0),
+      otherwise: schema => schema.notRequired(),
+    }),
     status: Yup.string().required('Required!'),
     expert: Yup.string(),
     difficulty: Yup.string().required('Required!'),
@@ -91,24 +141,62 @@ const ImageSession = ({ selected }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     file: Yup.mixed()
-      .required('Required!')
-      .test(
-        'fileType',
-        'Unsupported file format. Only images are allowed.',
-        value => value && value.type.includes('image')
-      )
-      .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
+      .nullable()
+      .when('content_format', {
+        is: GUIDE_CONTENT_FORMAT.document,
+        then: schema =>
+          schema
+            .test('fileRequired', 'Document is required.', function validateFile(value) {
+              const hasUploadedFile = Boolean(value);
+              const hasExistingFile = isEditMode && Boolean(selected?.content_file);
+              return hasUploadedFile || hasExistingFile;
+            })
+            .test('fileType', 'Unsupported file format. Use PDF, Word, or image files.', value => {
+              if (!value) return true;
+              return isAllowedGuideDocument(value);
+            })
+            .test('fileSize', 'File size must be less than 10 MB', value => {
+              if (!value) return true;
+              return value.size <= 10 * ONE_MB;
+            }),
+        otherwise: schema => schema.notRequired(),
+      }),
+    thumbnail: Yup.mixed()
+      .nullable()
+      .test('fileType', 'Unsupported file format. Only images are allowed.', value => {
+        if (!value) return true;
+        return value.type?.includes('image');
+      })
+      .test('fileSize', 'File size must be less than 1 MB', value => {
+        if (!value) return true;
+        return value.size <= 1 * ONE_MB;
+      }),
+    audio_file: Yup.mixed()
+      .nullable()
+      .test('fileType', 'Unsupported file format. Only audio files are allowed.', value => {
+        if (!value) return true;
+        return value.type?.includes('audio');
+      })
+      .test('fileSize', 'File size must be less than 5 MB', value => {
+        if (!value) return true;
+        return value.size <= 5 * ONE_MB;
+      }),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const payload = { ...values, content_type: SESSION_TYPE.image };
+      const payload = {
+        ...values,
+        content_type: SESSION_TYPE.image,
+        ...(values.content_format === GUIDE_CONTENT_FORMAT.richText ? { file: null } : { description: '' }),
+      };
+      delete payload.content_format;
       if (isEditMode) {
         await updateImageSession({ payload: { id: selected.id, ...payload } });
-        toast.success('Image Session updated successfully');
+        toast.success('Guide updated successfully');
       } else {
         await addImageSession({ payload });
-        toast.success('Image Session added successfully');
+        toast.success('Guide added successfully');
       }
       await queryClient.invalidateQueries([
         { queryKey: isEditMode ? [queryKeys.lmsImageSessions, selected.id] : [queryKeys.lmsImageSessions] },
@@ -122,14 +210,14 @@ const ImageSession = ({ selected }) => {
   };
 
   return (
-    <FormLayoutWrapper title="Image Session Form">
+    <FormLayoutWrapper title="Guide / Lesson Form">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, values, setFieldValue }) => (
           <Form className="flex flex-col gap-3">
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
@@ -139,7 +227,53 @@ const ImageSession = ({ selected }) => {
                 <ExpertField />
               </div>
             </div>
-            <FormikRichTextEditor name="description" label="Description" placeholder="Description" rows={5} required />
+
+            <div className="rounded-lg border border-stroke bg-gray-50 p-4 dark:border-strokedark dark:bg-meta-4/20">
+              <h4 className="mb-1 text-sm font-semibold text-black dark:text-white">Guide Content</h4>
+              <p className="mb-4 text-xs text-body dark:text-bodydark">
+                Choose a content type, then add your lesson. Cover image and audio are optional.
+              </p>
+              <div className="flex flex-col gap-4">
+                <FormikSelect
+                  name="content_format"
+                  label="Content Type"
+                  placeholder="Select content type"
+                  options={GUIDE_CONTENT_FORMAT_OPTIONS}
+                  required
+                  onChange={value => {
+                    if (value === GUIDE_CONTENT_FORMAT.richText) {
+                      setFieldValue('file', null);
+                    } else if (value === GUIDE_CONTENT_FORMAT.document) {
+                      setFieldValue('description', '');
+                    }
+                  }}
+                />
+
+                {values.content_format === GUIDE_CONTENT_FORMAT.richText ? (
+                  <FormikRichTextEditor
+                    name="description"
+                    label="Content (Rich Text)"
+                    placeholder="Write lesson content..."
+                    rows={5}
+                    required
+                  />
+                ) : null}
+
+                {values.content_format === GUIDE_CONTENT_FORMAT.document ? (
+                  <FormikDropzone
+                    name="file"
+                    label="Document (PDF / Word / Image)"
+                    fileURLs={selected?.content_file ? [selected.content_file] : []}
+                    Icon={MdOutlineDescription}
+                    accept={GUIDE_DOCUMENT_ACCEPT}
+                    supportedFilesText="PDF, Word (.doc/.docx), and image files are supported."
+                    maxSize={10 * ONE_MB}
+                    required
+                  />
+                ) : null}
+              </div>
+            </div>
+
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">
                 <FormikSelect
@@ -224,16 +358,33 @@ const ImageSession = ({ selected }) => {
                 required
               />
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-            <FormikDropzone
-                  name="file"
-                  label="File"
-                  fileURLs={selected?.content_file ? [selected?.content_file] : []}
-                  Icon={FaRegFileImage}
-                  required
-                />
-              <div className="md:w-1/2">
-                
+
+            <div className="rounded-lg border border-stroke bg-gray-50 p-4 dark:border-strokedark dark:bg-meta-4/20">
+              <h4 className="mb-4 text-sm font-semibold text-black dark:text-white">Optional Media</h4>
+              <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
+                <div className="w-full md:w-1/2">
+                  <FormikDropzone
+                    name="thumbnail"
+                    label="Cover Image / Infographic"
+                    fileURLs={selected?.thumbnail_image ? [selected.thumbnail_image] : []}
+                    Icon={FaRegFileImage}
+                  />
+                </div>
+                <div className="w-full md:w-1/2">
+                  <FormikDropzone
+                    name="audio_file"
+                    label="Audio File"
+                    fileURLs={selected?.content_audio ? [selected.content_audio] : []}
+                    Icon={FaRegFileAudio}
+                    accept={{
+                      'audio/wav': [],
+                      'audio/mp3': [],
+                      'audio/mpeg': [],
+                    }}
+                    supportedFilesText="wav, mp3 and mpeg files are supported."
+                    maxSize={5 * ONE_MB}
+                  />
+                </div>
               </div>
             </div>
 

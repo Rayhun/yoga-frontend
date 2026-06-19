@@ -15,7 +15,7 @@ import LoadingWrapper from '@/components/common/loader/Wrapper';
 import { useQuery } from '@tanstack/react-query';
 
 const Section = ({ children, className = "" }) => (
-  <div className={`bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
+  <div className={`bg-white portal-section rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
     <div>{children}</div>
   </div>
 );

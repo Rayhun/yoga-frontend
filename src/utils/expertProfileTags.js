@@ -1,4 +1,5 @@
 import { getCatalogTagChipLabel, getCatalogTagNamespaceLabel } from '@/utils/catalogTag';
+import { LANGUAGES } from '@/utils/constants';
 
 /** Map expert profile form field names to catalog-tags API ``field`` param. */
 
@@ -70,4 +71,38 @@ export function seedExpertTagRows(items) {
     namespace: item?.namespace ?? item?.namespace_slug,
     namespaceLabel: getCatalogTagNamespaceLabel(item),
   }));
+}
+
+/** Display label for coaching area tags from expert API (`title` or legacy `label`). */
+export function getCoachingAreaLabel(item) {
+  return item?.title ?? item?.label ?? '';
+}
+
+/** Normalize expert language values from API (string labels, codes, or tag objects). */
+export function getLanguageDisplayLabels(languages) {
+  if (!languages || !Array.isArray(languages)) return [];
+
+  return languages.flatMap(lang => {
+    if (typeof lang === 'string') {
+      return lang
+        .split(',')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .map(part => {
+          const byValue = LANGUAGES.find(item => item.value === part);
+          const byLabel = LANGUAGES.find(item => item.label === part);
+          return byValue?.label || byLabel?.label || part;
+        });
+    }
+
+    if (lang && typeof lang === 'object') {
+      const raw = lang.label ?? lang.title ?? lang.value;
+      if (!raw) return [];
+      const byValue = LANGUAGES.find(item => item.value === raw);
+      const byLabel = LANGUAGES.find(item => item.label === raw);
+      return [byValue?.label || byLabel?.label || raw];
+    }
+
+    return [];
+  });
 }

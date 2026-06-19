@@ -23,6 +23,7 @@ import {
 } from '@/utils/expertProfileTags';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
+import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { TITLE_OPTIONS } from '@/utils/constants';
@@ -249,7 +250,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           practice_type: normalizedPayload.practice_type,
           coaching_style: normalizedPayload.coaching_style,
           culture_experience: normalizedPayload.culture_experience,
-          description: normalizedPayload.description,
+          description: stripHtmlLinks(normalizedPayload.description),
           categories: normalizedPayload.categories,
           tags: normalizedPayload.tags,
           coaching_areas: normalizedPayload.coaching_areas,
@@ -418,7 +419,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       <FiInfo className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       About
                     </h3>
-                    <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required />
+                    <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required disableLinks />
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700" />

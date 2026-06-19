@@ -84,11 +84,11 @@ const CustomerDashboard = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6 min-h-screen">
+    <div className="mx-auto max-w-7xl">
       
       {/* Hero Section */}
-      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
-        <div className="relative z-10 flex flex-col md:flex-row items-center">
+      <div className="portal-hero bg-white text-gray-800 rounded-2xl shadow-2xl mb-6 md:mb-8 relative overflow-hidden border border-gray-100">
+        <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-6 h-6 bg-gray-800 rounded-sm rotate-45 flex items-center justify-center">
@@ -273,7 +273,7 @@ const CustomerDashboard = () => {
         </div>
 
         {/* Charts Container */}
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-16 md:gap-32 p-8">
+        <div className="relative z-10 flex flex-col items-center justify-center gap-8 p-4 sm:flex-row sm:gap-12 sm:p-6 md:gap-16 lg:gap-32 md:p-8">
           {isLoadingWellness ? (
             <div className="flex items-center justify-center py-16">
               <Spinner size="lg" />
@@ -419,8 +419,8 @@ const CustomerDashboard = () => {
       </div>
 
       {/* AI Chat Section - Above the grid */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl shadow-lg border border-emerald-100 p-8 mb-8">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-lg mb-6 md:mb-8 sm:p-6 md:p-8">
+        <div className="mb-4 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center">
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
