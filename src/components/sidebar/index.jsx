@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
@@ -11,9 +11,13 @@ import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
 
+const DISABLED_NAV_INFO_ITEMS = ['Dashboard', 'Circles'];
+const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
+
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const activeTab = searchParams.get('active_tab');
   const {
     user,
@@ -37,7 +41,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
-  const [showDashboardInfo, setShowDashboardInfo] = useState(false);
+  const [showDisabledNavInfo, setShowDisabledNavInfo] = useState(false);
+  const [disabledNavLabel, setDisabledNavLabel] = useState('');
   const [modalAnimation, setModalAnimation] = useState(false);
 
   // close on click outside
@@ -110,47 +115,80 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     [roleBasedSidebarMenuItems, userSubRole, user?.isBusinessOwner]
   );
 
-  const handleDisabledDashboardClick = (e) => {
+  const handleDisabledNavClick = (e, label) => {
     e.preventDefault();
-    setShowDashboardInfo(true);
-    // Trigger animation after modal is shown
+    setDisabledNavLabel(label);
+    setShowDisabledNavInfo(true);
     setTimeout(() => setModalAnimation(true), 10);
   };
 
   const closeModal = () => {
     setModalAnimation(false);
-    setTimeout(() => setShowDashboardInfo(false), 200);
+    setTimeout(() => {
+      setShowDisabledNavInfo(false);
+      setDisabledNavLabel('');
+    }, 200);
   };
 
-  const getMissingRequirements = () => {
+  const getMissingRequirements = (navLabel) => {
     const missing = [];
-    if (!is_profile_complete) missing.push({ text: 'Complete your profile', icon: FiUser });
-    if (!has_event_or_consult) missing.push({ text: 'Add guided experiences', icon: FiCalendar });
-    if (!stripe_onboarded) missing.push({ text: 'Set up your PayPal account', icon: FiCreditCard });
+    if (!is_profile_complete) {
+      missing.push({
+        text: 'Complete your profile',
+        icon: FiUser,
+        action: () => router.push('/portal/teacher/profile?active_tab=about'),
+        actionText: 'Complete Profile',
+      });
+    }
+    if (!has_event_or_consult) {
+      missing.push({
+        text: 'Add guided experiences',
+        icon: FiCalendar,
+        action: () => router.push('/portal/teacher/group_coaching/add'),
+        actionText: 'Add Guided Experiences',
+      });
+    }
+    if (navLabel === 'Dashboard' && !stripe_onboarded) {
+      missing.push({
+        text: 'Set up your PayPal account',
+        icon: FiCreditCard,
+        action: () => router.push('/portal/teacher/payments'),
+        actionText: 'Link Account',
+      });
+    }
+    if (navLabel === 'Circles' && !isDevelopmentEnvironment && is_profile_complete && has_event_or_consult) {
+      missing.push({
+        text: 'Circles is coming soon',
+        icon: HiOutlineInformationCircle,
+      });
+    }
     return missing;
   };
+
+  const missingRequirements = disabledNavLabel ? getMissingRequirements(disabledNavLabel) : [];
 
   // Handle escape key to close modal
   useEffect(() => {
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && showDashboardInfo) {
+      if (event.key === 'Escape' && showDisabledNavInfo) {
         closeModal();
       }
     };
 
-    if (showDashboardInfo) {
+    if (showDisabledNavInfo) {
       document.addEventListener('keydown', handleEscapeKey);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
       document.body.style.overflow = 'unset';
     };
-  }, [showDashboardInfo]);
+  }, [showDisabledNavInfo]);
 
 
   return (
+    <>
     <aside
       ref={sidebar}
       className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden duration-300 ease-linear lg:static lg:translate-x-0 ${
@@ -366,11 +404,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </ul>
                 ) : (
                   <li className="list-none">
-                    {menuItem.label === 'Dashboard' && menuItem.disabled ? (
+                    {menuItem.disabled && DISABLED_NAV_INFO_ITEMS.includes(menuItem.label) ? (
                       <button
-                        onClick={handleDisabledDashboardClick}
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out w-full text-left
-                          cursor-pointer opacity-50 text-gray-400 hover:opacity-70`}
+                        type="button"
+                        onClick={e => handleDisabledNavClick(e, menuItem.label)}
+                        className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out w-full text-left cursor-pointer opacity-50 text-gray-400 hover:opacity-70 hover:bg-emerald-50/50"
                         aria-disabled={true}
                       >
                         {menuItem.Icon && <menuItem.Icon size={24} />}
@@ -436,8 +474,84 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </nav>
       </div>
 
-      {/* Dashboard Info Modal */}
     </aside>
+
+    {showDisabledNavInfo && (
+      <div
+        className={`fixed inset-0 z-[10000] flex items-center justify-center p-4 transition-opacity duration-200 ${
+          modalAnimation ? 'bg-black/60 opacity-100' : 'bg-black/0 opacity-0'
+        }`}
+        onClick={closeModal}
+      >
+        <div
+          className={`bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-200 ${
+            modalAnimation ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          }`}
+          onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="disabled-nav-info-title"
+        >
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                <HiOutlineInformationCircle className="text-emerald-600 dark:text-emerald-400 text-2xl" />
+              </div>
+              <div>
+                <h3 id="disabled-nav-info-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {disabledNavLabel} Unavailable
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Complete the following steps to unlock {disabledNavLabel.toLowerCase()}.
+                </p>
+              </div>
+            </div>
+
+            <ul className="space-y-3 mb-6">
+              {missingRequirements.map((requirement, index) => {
+                const Icon = requirement.icon;
+                return (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="text-emerald-600 dark:text-emerald-400 shrink-0" size={20} />
+                      <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
+                        {requirement.text}
+                      </span>
+                    </div>
+                    {requirement.action && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeModal();
+                          requirement.action();
+                        }}
+                        className="shrink-0 px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                      >
+                        {requirement.actionText}
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
