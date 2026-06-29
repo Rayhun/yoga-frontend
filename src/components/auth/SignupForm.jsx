@@ -19,7 +19,7 @@ import FormikPhoneFieldWithValidation from '@/components/common/form/formik/Form
 const SignupForm = () => {
   const router = useRouter();
   const confirm = useConfirm();
-  
+
   const { mutateAsync } = useMutation({
     mutationFn: registerNewUser,
   });

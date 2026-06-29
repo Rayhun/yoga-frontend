@@ -66,7 +66,9 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
-    culture_experience: selected?.culture_experience?.split(',') || [],
+    culture_experience: Array.isArray(selected?.culture_experience)
+      ? selected.culture_experience
+      : selected?.culture_experience?.split(',') || [],
     coaching_style: selected?.coaching_style || '',
     file: selected?.file || null,
     program_file: null,
