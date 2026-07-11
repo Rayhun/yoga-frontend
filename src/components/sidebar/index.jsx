@@ -140,7 +140,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         actionText: 'Complete Profile',
       });
     }
-    if (!has_event_or_consult) {
+    if (!has_event_or_consult && navLabel === 'Dashboard') {
       missing.push({
         text: 'Add guided experiences',
         icon: FiCalendar,
@@ -156,7 +156,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         actionText: 'Link Account',
       });
     }
-    if (navLabel === 'Circles' && !isDevelopmentEnvironment && is_profile_complete && has_event_or_consult) {
+    if (navLabel === 'Circles' && !isDevelopmentEnvironment && is_profile_complete) {
       missing.push({
         text: 'Circles is coming soon',
         icon: HiOutlineInformationCircle,

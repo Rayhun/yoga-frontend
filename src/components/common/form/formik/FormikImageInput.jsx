@@ -13,6 +13,7 @@ const FormikImageInput = ({
   disabled = false,
   required = false,
   size = 160,               // ← control your circle diameter here
+  shape = 'circle',         // 'circle' | 'square'
 }) => {
   const [field, meta, helpers] = useField(name);
   const [preview, setPreview] = useState(fileURL);
@@ -65,7 +66,9 @@ const FormikImageInput = ({
   const onDragLeave = () => setDragging(false);
 
   const isError = meta.touched && !!meta.error;
-  const dimClass = `w-[${size}px] h-[${size}px]`; // e.g. w-[160px] h-[160px]
+  const isCircle = shape === 'circle';
+  const dimClass = `w-[${size}px] h-[${size}px]`;
+  const radiusClass = isCircle ? 'rounded-full' : 'rounded-xl';
 
   const handleRemove = () => {
     helpers.setValue(null);
@@ -81,7 +84,7 @@ const FormikImageInput = ({
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         className={`
-          relative ${dimClass} rounded-full overflow-hidden select-none
+          relative ${dimClass} ${radiusClass} overflow-hidden select-none
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           ${isError ? 'border-red-500' : dragging ? 'border-blue-400' : 'border-gray-300 hover:border-gray-400'}
           border-2
@@ -97,11 +100,10 @@ const FormikImageInput = ({
         />
 
         {preview ? (
-          // Inner preview is clipped by parent circle
           <img
             src={preview}
             alt="preview"
-            className="object-cover w-full h-full rounded-full"
+            className={`w-full h-full ${radiusClass} ${isCircle ? 'object-cover' : 'object-contain bg-white'}`}
           />
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">

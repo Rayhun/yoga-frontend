@@ -2,7 +2,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import dayjs from 'dayjs';
-import { FiPlus, FiSearch } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { useInbox } from '@/context/InboxContext';
@@ -13,8 +13,9 @@ import LoadingWrapper from '../common/loader/Wrapper';
 import Spinner from '../common/loader/Spinner';
 import WelcomeMessage from './WelcomeMessage';
 import ExploreGroupsModal from './ExploreGroupsModal';
+import InviteClientButton from './InviteClientButton';
 
-const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
+const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab, showDiscover = true, showInviteClient = false }) => {
   const {
     conversations: { active: activeConversation },
     actions: { setActiveConversation },
@@ -47,7 +48,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
     queryKey: [queryKeys.publicChats, currentPage, debouncedSearchText],
     refetchOnMount: 'always',
     retry: 2,
-    enabled: currentSubTab === 'discover',
+    enabled: showDiscover && currentSubTab === 'discover',
   });
 
   const joinChatMutation = useMutation({
@@ -108,17 +109,14 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
     <div className="flex flex-col h-full overflow-hidden">
       {/* My Circles Header */}
       <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
-        <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">My Circles</h2>
-        {/* <button
-          onClick={() => setIsExploreModalOpen(true)}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 md:py-2.5 px-3 md:px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm md:text-base"
-        >
-          <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
-          <span>Create New Circle</span>
-        </button> */}
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900">My Circles</h2>
+          {showInviteClient && <InviteClientButton />}
+        </div>
       </div>
 
       {/* Sub-navigation */}
+      {showDiscover && (
       <div className="flex border-b border-gray-200 bg-white">
         <button
           onClick={() => setCurrentSubTab('my-circles')}
@@ -141,9 +139,10 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
           Discover
         </button>
       </div>
+      )}
 
       {/* Search Bar - Only show for My Circles tab */}
-      {currentSubTab === 'my-circles' && (
+      {((currentSubTab === 'my-circles' || !showDiscover) && (
         <div className="px-3 md:px-4 py-2 md:py-3 bg-white border-b border-gray-200">
           <div className="relative">
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 md:w-4 md:h-4" />
@@ -156,11 +155,11 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
             />
           </div>
         </div>
-      )}
+      ))}
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        {currentSubTab === 'my-circles' ? (
+        {(currentSubTab === 'my-circles' || !showDiscover) ? (
           <LoadingWrapper isLoading={isLoading}>
             {/* Unread Messages Section */}
             {totalUnreadCount > 0 && (
@@ -227,7 +226,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
                   <FiSearch className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-500 text-sm">
-                  {searchText ? 'No circles found matching your search.' : 'No circles yet. Create or discover new circles!'}
+                  {searchText ? 'No circles found matching your search.' : showDiscover ? 'No circles yet. Create or discover new circles!' : 'No circles yet.'}
                 </p>
               </div>
             )}
@@ -296,6 +295,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab }) => {
         isOpen={isExploreModalOpen}
         onClose={() => setIsExploreModalOpen(false)}
       />
+
     </div>
   );
 };

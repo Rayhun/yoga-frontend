@@ -1,5 +1,6 @@
 import Chip from '@mui/material/Chip';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
+import BusinessProfileCard from '@/components/common/user/profile/about/BusinessProfileCard';
 import { getCoachingAreaLabel, getLanguageDisplayLabels } from '@/utils/expertProfileTags';
 
 const AboutSection = ({ label, children }) => (
@@ -19,6 +20,11 @@ const ExpertProfileAbout = ({ data }) => {
       <AboutSection label="About">
         <ControllableRichText showFullText={true} disableLinks>{data?.description || 'No description provided'}</ControllableRichText>
       </AboutSection>
+      {(data?.business_name || data?.business_logo) && (
+        <AboutSection label="Business">
+          <BusinessProfileCard businessName={data?.business_name} businessLogo={data?.business_logo} />
+        </AboutSection>
+      )}
       <AboutSection label="Coaching Areas">
         <div className="flex flex-wrap gap-2">
           {data?.coaching_areas?.map(item => (

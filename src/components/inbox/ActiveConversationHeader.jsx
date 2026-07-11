@@ -1,14 +1,22 @@
 'use client';
 import Image from 'next/image';
-import { FiArrowLeft } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+import { FiArrowLeft, FiInfo } from 'react-icons/fi';
 import { useInbox } from '@/context/InboxContext';
 import UserAvatar from './UserAvatar';
 
 const ActiveConversationHeader = ({ onBack }) => {
+  const router = useRouter();
   const {
     conversations: { active: activeConversation },
     connection: { isConnected: isSocketConnected },
   } = useInbox();
+
+  const handleViewDetail = () => {
+    if (activeConversation?.detail_url) {
+      router.push(activeConversation.detail_url);
+    }
+  };
 
   return (
     <div className="flex h-16 items-center justify-between border-b border-gray-300 bg-white px-3 py-3 sm:px-4">
@@ -49,11 +57,16 @@ const ActiveConversationHeader = ({ onBack }) => {
             isSocketConnected ? 'bg-green-500' : 'bg-orange-500'
           }`}
         ></div>
-        {activeConversation?.is_group && (
-          <svg className="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-          </svg>
-        )}
+        {activeConversation?.can_view_detail && activeConversation?.detail_url ? (
+          <button
+            type="button"
+            onClick={handleViewDetail}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-600 transition-colors hover:bg-gray-100"
+            aria-label="View circle details"
+          >
+            <FiInfo className="h-5 w-5" />
+          </button>
+        ) : null}
       </div>
     </div>
   );

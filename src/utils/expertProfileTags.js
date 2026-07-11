@@ -1,4 +1,9 @@
-import { getCatalogTagChipLabel, getCatalogTagNamespaceLabel } from '@/utils/catalogTag';
+import {
+  getCatalogTagChipLabel,
+  getCatalogTagNamespaceLabel,
+  getCatalogTagRowLabel,
+  resolveCatalogTagIdsByLabel,
+} from '@/utils/catalogTag';
 import { LANGUAGES } from '@/utils/constants';
 
 /** Map expert profile form field names to catalog-tags API ``field`` param. */
@@ -60,17 +65,50 @@ export function normalizeExpertTagItems(items) {
 export function mapExpertTagIds(items) {
   return normalizeExpertTagItems(items)
     .map(item => (item && typeof item === 'object' ? item.id : item))
-    .filter(Boolean);
+    .filter(id => id != null && !Number.isNaN(Number(id)))
+    .map(Number);
+}
+
+/**
+ * Map expert ``languages`` from API (string labels or tag objects) to catalog tag IDs.
+ * Expert GET returns label strings; catalog rows are required to resolve labels to IDs.
+ */
+export function mapExpertLanguageIds(items, catalogRows = []) {
+  const normalized = normalizeExpertTagItems(items);
+  if (!normalized.length) return [];
+
+  const hasResolvableLabels = normalized.some(item => {
+    if (typeof item === 'string') return item.trim().length > 0;
+    if (item && typeof item === 'object' && item.id == null) {
+      return Boolean((item.label ?? item.title ?? '').trim());
+    }
+    return false;
+  });
+
+  if (hasResolvableLabels && catalogRows.length) {
+    return resolveCatalogTagIdsByLabel(normalized, catalogRows);
+  }
+
+  return mapExpertTagIds(normalized);
 }
 
 /** Chip seed rows from saved expert tag objects (labels before modal/catalog fetch). */
 export function seedExpertTagRows(items) {
-  return normalizeExpertTagItems(items).map(item => ({
-    id: item.id,
-    label: getCatalogTagChipLabel(item),
-    namespace: item?.namespace ?? item?.namespace_slug,
-    namespaceLabel: getCatalogTagNamespaceLabel(item),
-  }));
+  return normalizeExpertTagItems(items).flatMap(item => {
+    if (typeof item === 'string') {
+      const label = item.trim();
+      return label ? [{ label }] : [];
+    }
+
+    return [
+      {
+        id: item.id,
+        label: getCatalogTagChipLabel(item),
+        namespace: item?.namespace ?? item?.namespace_slug,
+        namespaceLabel: getCatalogTagNamespaceLabel(item),
+      },
+    ];
+  });
 }
 
 /** Display label for coaching area tags from expert API (`title` or legacy `label`). */

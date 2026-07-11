@@ -14,6 +14,7 @@ import {
   HiPlus,
 } from 'react-icons/hi2';
 import useExpertCatalogTagOptions from '@/hooks/useExpertCatalogTagOptions';
+import { getCatalogTagRowLabel } from '@/utils/catalogTag';
 import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 import SelectedChipsScrollRegion from './SelectedChipsScrollRegion';
 
@@ -74,7 +75,11 @@ const FormikCatalogTagsModalField = ({
   const seedLabelById = useMemo(() => {
     const m = new Map();
     for (const row of seedRows ?? []) {
-      if (row?.id != null && row.label) m.set(row.id, row.label);
+      if (row?.id == null) continue;
+      const rowLabel = getCatalogTagRowLabel(row);
+      if (rowLabel && String(rowLabel) !== String(row.id)) {
+        m.set(row.id, rowLabel);
+      }
     }
     return m;
   }, [seedRows]);
@@ -113,7 +118,12 @@ const FormikCatalogTagsModalField = ({
 
   const idToLabel = useMemo(() => {
     const m = new Map();
-    mergedCatalogRows.forEach(r => m.set(r.id, r.label));
+    mergedCatalogRows.forEach(row => {
+      const rowLabel = getCatalogTagRowLabel(row);
+      if (rowLabel && String(rowLabel) !== String(row.id)) {
+        m.set(row.id, rowLabel);
+      }
+    });
     return m;
   }, [mergedCatalogRows]);
 

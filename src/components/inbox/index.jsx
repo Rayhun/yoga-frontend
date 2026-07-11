@@ -31,6 +31,7 @@ const Inbox = () => {
     actions: { setActiveConversation },
   } = useInbox();
   const shouldShowCoachesTab = user?.profile?.role !== USER_ROLE.TEACHER;
+  const isExpertPortal = user?.profile?.role === USER_ROLE.TEACHER;
   const [activeTab, setActiveTab] = useState('circles');
   const [circlesSubTab, setCirclesSubTab] = useState('my-circles');
   const [coachesSubTab, setCoachesSubTab] = useState('my-chats');
@@ -83,6 +84,8 @@ const Inbox = () => {
               isLoading={isLoadingConversations}
               activeSubTab={circlesSubTab}
               setActiveSubTab={setCirclesSubTab}
+              showDiscover={!isExpertPortal}
+              showInviteClient={isExpertPortal}
             />
           ) : (
             <CoachesList
@@ -109,7 +112,7 @@ const Inbox = () => {
               <MessageForm />
             </div>
           ) : conversationsData.length === 0 && !isLoadingConversations ? (
-            <WelcomeMessage activeTab={activeTab} />
+            <WelcomeMessage activeTab={activeTab} showDiscover={!isExpertPortal} />
           ) : isLoadingConversations ? (
             <div className="flex h-full w-full flex-col items-center justify-center bg-transparent p-8">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80 shadow-lg backdrop-blur-sm">
@@ -123,10 +126,15 @@ const Inbox = () => {
           ) : (
             <WelcomeMessage
               activeTab={activeTab}
-              onExploreCircles={() => {
-                setActiveTab('circles');
-                setCirclesSubTab('discover');
-              }}
+              showDiscover={!isExpertPortal}
+              onExploreCircles={
+                isExpertPortal
+                  ? undefined
+                  : () => {
+                      setActiveTab('circles');
+                      setCirclesSubTab('discover');
+                    }
+              }
               onFindCoach={
                 shouldShowCoachesTab
                   ? () => {

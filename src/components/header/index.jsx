@@ -4,8 +4,14 @@ import DarkModeSwitcher from './DarkModeSwitcher';
 import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 import Image from 'next/image';
+import useAuthContext from '@/hooks/useAuthContext';
+import { USER_ROLE } from '@/utils/authorization';
+import InviteClientButton from '@/components/inbox/InviteClientButton';
 
 const Header = props => {
+  const { user } = useAuthContext();
+  const isExpertPortal = user?.profile?.role === USER_ROLE.TEACHER;
+
   return (
     <header className="sticky top-0 z-999 flex w-full shadow-lg transition-all duration-300 bg-gradient-to-r from-emerald-50/80 via-green-50/50 to-white dark:from-emerald-950/30 dark:via-green-950/20 dark:to-gray-900 border-b border-emerald-200/30 dark:border-emerald-800/20 backdrop-blur-sm">
       {/* Decorative Background Elements */}
@@ -65,6 +71,7 @@ const Header = props => {
         </div>
 
         <div className="flex items-center self-end gap-3 2xsm:gap-7">
+          {isExpertPortal ? <InviteClientButton variant="navbar" /> : null}
           {/* <!-- User Area --> */}
           <DropdownUser />
           {/* <!-- User Area --> */}

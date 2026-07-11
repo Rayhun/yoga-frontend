@@ -9,6 +9,8 @@ import {
   FiBriefcase, 
   FiCheckCircle 
 } from 'react-icons/fi';
+import { LuBriefcaseBusiness } from 'react-icons/lu';
+import BusinessProfileCard from './BusinessProfileCard';
 
 const AboutSection = ({ label, children, icon: Icon }) => (
   <div className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6 shadow-sm hover:shadow-md transition-all duration-300">
@@ -43,6 +45,12 @@ const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = fals
           </ControllableRichText>
         </div>
       </AboutSection>
+
+      {(data?.business_name || data?.business_logo) && (
+        <AboutSection label="Business" icon={LuBriefcaseBusiness}>
+          <BusinessProfileCard businessName={data?.business_name} businessLogo={data?.business_logo} />
+        </AboutSection>
+      )}
 
       {data?.coaching_areas && data.coaching_areas.length > 0 && (
         <AboutSection label="Coaching Areas" icon={FiTarget}>

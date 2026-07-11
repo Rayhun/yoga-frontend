@@ -4,7 +4,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
@@ -18,10 +18,16 @@ import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
 import {
   EXPERT_PROFILE_CATALOG_FIELDS,
+  mapExpertLanguageIds,
   mapExpertTagIds,
   seedExpertTagRows,
 } from '@/utils/expertProfileTags';
-import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
+import {
+  addNewExpert,
+  getExpertCatalogTagsList,
+  getExpertCatalogTagsRows,
+  updateExistingExpert,
+} from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
 import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
 import queryKeys from '@/utils/query-keys';
@@ -46,6 +52,36 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     mutationFn: updateExistingExpert,
   });
 
+  const needsLanguageResolution = Boolean(
+    selected?.languages?.some(
+      item =>
+        typeof item === 'string' ||
+        (item && typeof item === 'object' && item.id == null && (item.label || item.title))
+    )
+  );
+
+  const { data: languageCatalogResponse } = useQuery({
+    queryKey: [queryKeys.expertCatalogTags, 'languages', 'resolve'],
+    queryFn: () =>
+      getExpertCatalogTagsList({ context: 'expert_profile', field: 'languages', limit: 500 }),
+    enabled: needsLanguageResolution,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const languageCatalogRows = useMemo(() => {
+    return getExpertCatalogTagsRows(languageCatalogResponse).map(row => ({
+      id: row.id,
+      label: row.label,
+      namespace: row.namespace,
+      namespaceLabel: row.namespace_label,
+    }));
+  }, [languageCatalogResponse]);
+
+  const resolvedLanguageIds = useMemo(
+    () => mapExpertLanguageIds(selected?.languages, languageCatalogRows),
+    [selected?.languages, languageCatalogRows]
+  );
+
   const baseInitialValues = {
     first_name: selected?.first_name || '',
     middle_name: selected?.middle_name || '',
@@ -64,12 +100,13 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     tags: mapExpertTagIds(selected?.tags),
     coaching_areas: mapExpertTagIds(selected?.coaching_areas),
     certifications: selected?.certifications?.map(item => item?.id).filter(Boolean) || [],
-    languages: mapExpertTagIds(selected?.languages),
+    languages: resolvedLanguageIds,
     // credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
     file: selected?.file || null,
+    business_logo: selected?.business_logo || null,
     program_file: null,
   };
 
@@ -81,12 +118,37 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     if (!savedDraft) return;
     try {
       const parsedDraft = JSON.parse(savedDraft);
-      if (parsedDraft?.values) setDraftValues(parsedDraft.values);
+      if (parsedDraft?.values) {
+        const values = { ...parsedDraft.values };
+        const tagFields = [
+          'practice_type',
+          'coaching_style',
+          'culture_experience',
+          'categories',
+          'tags',
+          'coaching_areas',
+          'languages',
+        ];
+        tagFields.forEach(field => {
+          if (Array.isArray(values[field])) {
+            values[field] =
+              field === 'languages'
+                ? mapExpertLanguageIds(values[field], languageCatalogRows)
+                : mapExpertTagIds(values[field]);
+          }
+        });
+        if (Array.isArray(values.certifications)) {
+          values.certifications = values.certifications
+            .map(id => Number(id))
+            .filter(id => !Number.isNaN(id));
+        }
+        setDraftValues(values);
+      }
       if (parsedDraft?.step >= 1 && parsedDraft?.step <= 3) setCurrentStep(parsedDraft.step);
     } catch {
       localStorage.removeItem(draftStorageKey);
     }
-  }, [draftStorageKey]);
+  }, [draftStorageKey, languageCatalogRows]);
 
   const fullFieldSchema = useMemo(
     () => ({
@@ -134,6 +196,9 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         .min(1, 'At least 1 certification is required')
         .max(5, 'Maximum 5 certifications are allowed'),
       languages: Yup.array()
+        .transform(value =>
+          Array.isArray(value) ? value.map(v => Number(v)).filter(n => !Number.isNaN(n)) : value
+        )
         .of(Yup.number().required('Required!'))
         .min(1, 'At least 1 language is required'),
       culture_experience: Yup.array()
@@ -161,6 +226,16 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           return value && value.length > 0;
         }),
       file: Yup.mixed()
+        .nullable()
+        .test('fileType', 'Only image files are allowed', value => {
+          if (!value || typeof value === 'string') return true;
+          return value?.type?.includes('image');
+        })
+        .test('fileSize', 'File size must be less than 10 MB', value => {
+          if (!value || typeof value === 'string') return true;
+          return value.size <= 10 * ONE_MB;
+        }),
+      business_logo: Yup.mixed()
         .nullable()
         .test('fileType', 'Only image files are allowed', value => {
           if (!value || typeof value === 'string') return true;
@@ -200,7 +275,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         'languages',
         'available',
       ],
-      3: ['file'],
+      3: ['file', 'business_logo'],
     }),
     []
   );
@@ -260,6 +335,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         },
         3: {
           file: normalizedPayload.file,
+          business_logo: normalizedPayload.business_logo,
         },
       };
 
@@ -516,19 +592,38 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    Profile Photo
-                  </h3>
-                  <div className="flex justify-center items-center py-4">
-                    <div className="relative">
-                      <FormikImageInput name="file" label="" />
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Profile Photo
+                    </h3>
+                    <div className="flex justify-center items-center py-4">
+                      <div className="relative">
+                        <FormikImageInput name="file" label="" />
+                      </div>
                     </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Upload a professional photo that represents you. This will be visible to users.
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                    Upload a professional photo that represents you. This will be visible to users.
-                  </p>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <LuBriefcaseBusiness className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Business Logo
+                    </h3>
+                    <div className="flex justify-center items-center py-4">
+                      <div className="relative">
+                        <FormikImageInput name="business_logo" label="" />
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Upload your business or brand logo. This will appear on your profile alongside your business name.
+                    </p>
+                  </div>
                 </div>
               )}
 
