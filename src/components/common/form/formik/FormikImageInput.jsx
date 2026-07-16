@@ -67,8 +67,9 @@ const FormikImageInput = ({
 
   const isError = meta.touched && !!meta.error;
   const isCircle = shape === 'circle';
-  const dimClass = `w-[${size}px] h-[${size}px]`;
   const radiusClass = isCircle ? 'rounded-full' : 'rounded-xl';
+  // Inline styles required: Tailwind cannot detect dynamic class names like `w-[${size}px]`.
+  const dimStyle = { width: size, height: size };
 
   const handleRemove = () => {
     helpers.setValue(null);
@@ -76,15 +77,16 @@ const FormikImageInput = ({
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 items-center">
       {/* Outer circle */}
       <div
         onClick={() => !disabled && inputRef.current?.click()}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
+        style={dimStyle}
         className={`
-          relative ${dimClass} ${radiusClass} overflow-hidden select-none
+          relative shrink-0 ${radiusClass} overflow-hidden select-none
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           ${isError ? 'border-red-500' : dragging ? 'border-blue-400' : 'border-gray-300 hover:border-gray-400'}
           border-2
@@ -106,9 +108,9 @@ const FormikImageInput = ({
             className={`w-full h-full ${radiusClass} ${isCircle ? 'object-cover' : 'object-contain bg-white'}`}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
-            <MdFileUpload size={48} />
-            <p className="text-sm">Click or drop image</p>
+          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 px-2">
+            <MdFileUpload size={Math.min(40, size * 0.28)} />
+            <p className="text-xs text-center mt-1">Click or drop image</p>
           </div>
         )}
 

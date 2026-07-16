@@ -83,8 +83,18 @@ const JoinCircleView = ({ pageData, slug }) => {
   );
 
   const handleJoin = async () => {
+    const method = (primaryButton?.method || 'post').toLowerCase();
+
     if (primaryButton?.is_stripe && primaryButton?.stripe_url) {
       router.push(`/payment/join/${slug}`);
+      return;
+    }
+
+    // Backend sends method: "get" for free join → open onboard UI
+    if (method === 'get') {
+      const joinPath =
+        toAppPath(primaryButton?.frontend_url) || `/auth/join/${slug}`;
+      router.push(joinPath);
       return;
     }
 
@@ -103,7 +113,7 @@ const JoinCircleView = ({ pageData, slug }) => {
       setIsJoining(true);
       await executeCommunityAction({
         url: primaryButton.backend_url || primaryButton.url,
-        method: 'post',
+        method,
       });
       router.push('/portal/inbox');
     } catch {

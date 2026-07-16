@@ -1,12 +1,13 @@
 import { getCatalogTagChipLabel, getCatalogTagNamespaceLabel } from '@/utils/catalogTag';
+import { CONTENT_CSV_TAG_FIELD_NAMESPACES } from '@/utils/catalogTagCsv';
 
 /** Shared catalog tag field config for LMS content forms (session, program, module, quiz). */
 
 export const CONTENT_CATALOG_FIELD_NAMESPACES = {
-  categories: ['phase', 'challenge'],
-  focus_areas: ['modality', 'symptom'],
-  culture_experience: ['cultural'],
-  languages: ['language'],
+  categories: CONTENT_CSV_TAG_FIELD_NAMESPACES.categories,
+  focus_areas: CONTENT_CSV_TAG_FIELD_NAMESPACES.focus_areas,
+  culture_experience: CONTENT_CSV_TAG_FIELD_NAMESPACES.culture_experience,
+  languages: CONTENT_CSV_TAG_FIELD_NAMESPACES.languages,
 };
 
 export const CONTENT_CATALOG_FIELDS = {

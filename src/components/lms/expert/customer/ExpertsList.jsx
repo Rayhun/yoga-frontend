@@ -14,25 +14,23 @@ import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import { getCustomerExpertsList } from '@/services/private/customer/expert';
 import ExpertCard from './ExpertCard';
 
-function specializationSearchText(specialization) {
-  if (!specialization) return '';
-  if (Array.isArray(specialization)) {
-    return specialization.filter(Boolean).join(' ').toLowerCase();
-  }
-  return String(specialization).toLowerCase();
-}
-
 const ExpertsList = () => {
   const router = useRouter();
   const searchParams = useSearchParamUtils();
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filters, setFilters] = useState({});
   const observerRef = useRef();
   const loadingRef = useRef();
 
   // Get selected category from URL params
   const selectedCategory = searchParams.get('categories') || '';
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchText.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Create stable filters object that combines URL params and filter modal values
   const stableFilters = useMemo(() => {
@@ -43,8 +41,11 @@ const ExpertsList = () => {
       // Only clear categories if not set by filter modal
       combinedFilters.categories = [];
     }
+    if (debouncedSearch) {
+      combinedFilters.search = debouncedSearch;
+    }
     return combinedFilters;
-  }, [selectedCategory, filters]);
+  }, [selectedCategory, filters, debouncedSearch]);
 
   const {
     data,
@@ -80,19 +81,6 @@ const ExpertsList = () => {
     const lastPage = data?.pages?.[data.pages.length - 1];
     return lastPage?.data?.data?.['all-categories'] || [];
   }, [data?.pages]);
-
-  const filteredExperts = useMemo(() => {
-    const query = searchText.toLowerCase();
-    if (!query) return allExperts;
-
-    return allExperts.filter(expert => {
-      const fullName = `${expert.first_name || ''} ${expert.last_name || ''}`.trim();
-      return (
-        fullName.toLowerCase().includes(query) ||
-        specializationSearchText(expert.specialization).includes(query)
-      );
-    });
-  }, [allExperts, searchText]);
 
   // Debug pagination info
   const paginationInfo = useMemo(() => {
@@ -199,6 +187,7 @@ const ExpertsList = () => {
           <input
             className="portal-search-input rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Experts"
+            value={searchText}
             onChange={e => setSearchText(e.target.value || '')}
           />
           <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
@@ -213,7 +202,7 @@ const ExpertsList = () => {
           ) : (
             <>
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredExperts?.map((expert, idx) => (
+              {allExperts?.map((expert, idx) => (
                     <ExpertCard
                         key={expert.id ?? `expert-${idx}`}
                         expert={expert}
@@ -239,7 +228,7 @@ const ExpertsList = () => {
               )}
               
               {/* Pagination Info */}
-              {!isLoadingExperts && filteredExperts.length > 0 && (
+              {!isLoadingExperts && allExperts.length > 0 && (
                 <div className="flex justify-center mt-4 text-sm text-gray-500">
                   {/* Showing {paginationInfo.loadedRecords} of {paginationInfo.totalRecords} experts
                   {paginationInfo.hasMore && !hasNextPage && (
@@ -250,9 +239,9 @@ const ExpertsList = () => {
             </>
           )}
           
-          {!isLoadingExperts && filteredExperts.length === 0 && (
+          {!isLoadingExperts && allExperts.length === 0 && (
             <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
-              No experts found
+              {debouncedSearch || selectedCategory ? 'No experts found matching your criteria' : 'No experts found'}
             </div>
           )}
         </section>

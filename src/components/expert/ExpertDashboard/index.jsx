@@ -1,4 +1,9 @@
 'use client';
+/**
+ * @deprecated Legacy expert dashboard (LMS /expert/dashboard/).
+ * Teacher home now uses `@/components/expert/HomeDashboard` + GET /api/v2/expert/dashboard/.
+ * Kept for reference only — not mounted by the teacher dashboard page.
+ */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';

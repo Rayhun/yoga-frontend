@@ -1,42 +1,30 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import SubscriptionStatus from '@/components/subscription/common/SubscriptionStatus';
-// import { enrollProgram } from '@/services/private/customer/program';
-// import { useMutation } from '@tanstack/react-query';
-// import { useSearchParams, useRouter } from 'next/navigation';
-// import { toast } from 'react-toastify';
+import JoinCircleSuccessView from '@/components/join/JoinCircleSuccessView';
+import PageLoader from '@/components/common/loader/PageLoader';
 
-// export const metadata = {
-//   title: 'Payment Success',
-// };
+const PaymentSuccessContent = () => {
+  const searchParams = useSearchParams();
+  const communitySlug = searchParams.get('exp-ref');
 
-const Page = () => {
-  // const searchParams = useSearchParams();
-  // const router = useRouter();
-  // const programID = searchParams.get("pg");
-
-  // const { mutateAsync: enroll, isPending: isEnrolling } = useMutation({
-  //   mutationFn: enrollProgram,
-  // });
-
-  // const handleEnrollProgram = async () => {
-  //   try {
-  //     await enroll({ id: programID });
-  //     toast.success('Program enrolled successfully');
-  //     router.push(`/portal/customer/lms/program/${programID}/details`);
-  //   } catch (error) {
-  //     toast.error('Something went wrong in enrolling the program');
-  //   }
-  // };
-
-  // const renderButton = (
-  //   <button
-  //     onClick={handleEnrollProgram}
-  //     className="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/70 transition duration-300"
-  //   >
-  //     {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-  //   </button>
-  // );
+  if (communitySlug) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+        <JoinCircleSuccessView slug={communitySlug} />
+      </div>
+    );
+  }
 
   return <SubscriptionStatus variant="success" />;
 };
+
+const Page = () => (
+  <Suspense fallback={<PageLoader />}>
+    <PaymentSuccessContent />
+  </Suspense>
+);
 
 export default Page;

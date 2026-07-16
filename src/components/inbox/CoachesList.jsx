@@ -90,7 +90,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* My Coaches Header */}
       <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
         <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">My Coaches</h2>
@@ -142,7 +142,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {currentSubTab === 'my-chats' ? (
           <LoadingWrapper isLoading={isLoading}>
             {/* Unread Messages Section */}

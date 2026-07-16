@@ -146,10 +146,15 @@ const JoinOnboardWizard = ({ wizardData, inviteData, slug }) => {
         ? step2?.navigation?.can_go_back !== false
         : false;
 
+  const currentStepData =
+    currentStep === 1 ? step1 : currentStep === 2 ? step2 : step3;
+  const showProgress = currentStepData?.navigation?.show_progress_bar !== false;
+
   return (
     <JoinOnboardLayout
       activeStep={currentStep}
       canGoBack={canGoBack}
+      showProgress={showProgress}
       inviteData={inviteData}
       onBack={handleBack}
     >

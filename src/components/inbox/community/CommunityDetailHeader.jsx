@@ -1,11 +1,42 @@
 'use client';
 
-import { getCommunityColor, getHeaderBackgroundStyle } from './communityColors';
+import {
+  getCommunityColor,
+  getHeaderBackgroundStyle,
+  isCommunityMediaUrl,
+} from './communityColors';
+
+const CommunityIconBadge = ({
+  value,
+  alt,
+  shape = 'rounded',
+  className = '',
+  backgroundColor,
+  textClassName = 'text-base md:text-lg',
+}) => {
+  const isImage = isCommunityMediaUrl(value);
+  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
+
+  return (
+    <div
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden ${shapeClass} ${className}`}
+      style={{ backgroundColor }}
+    >
+      {isImage ? (
+        <img src={value} alt={alt || ''} className="h-full w-full object-cover" />
+      ) : (
+        <span className={textClassName}>{value}</span>
+      )}
+    </div>
+  );
+};
 
 const CommunityDetailHeader = ({ header }) => {
   if (!header) return null;
 
-  const hasIconGroup = header.logo_icon || header.avatar_url || header.avatar_icon;
+  const logoIcon = header.logo_icon;
+  const avatarSrc = header.avatar_url || header.avatar_icon;
+  const hasIconGroup = logoIcon || avatarSrc;
 
   return (
     <div
@@ -16,52 +47,33 @@ const CommunityDetailHeader = ({ header }) => {
         <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-5">
           {hasIconGroup ? (
             <div className="relative flex shrink-0 items-center">
-              {header.logo_icon ? (
-                <div
-                  className="relative z-0 flex h-11 w-11 items-center justify-center rounded-xl text-base md:h-12 md:w-12 md:text-lg"
-                  style={{
-                    backgroundColor: getCommunityColor(
-                      header.logo_background_color,
-                      'rgba(255, 255, 255, 0.14)'
-                    ),
-                  }}
-                >
-                  {header.logo_icon}
-                </div>
+              {logoIcon ? (
+                <CommunityIconBadge
+                  value={logoIcon}
+                  alt={`${header.title || 'Circle'} logo`}
+                  shape="rounded"
+                  className="relative z-0 h-11 w-11 md:h-12 md:w-12"
+                  backgroundColor={getCommunityColor(
+                    header.logo_background_color,
+                    'rgba(255, 255, 255, 0.14)'
+                  )}
+                />
               ) : null}
 
-              {header.avatar_url ? (
-                <div
-                  className={`relative z-10 h-12 w-12 shrink-0 overflow-hidden rounded-full md:h-14 md:w-14 ${
-                    header.logo_icon ? '-ml-2.5 md:-ml-3' : ''
+              {avatarSrc ? (
+                <CommunityIconBadge
+                  value={avatarSrc}
+                  alt={header.title || 'Expert'}
+                  shape="circle"
+                  className={`relative z-10 h-12 w-12 md:h-14 md:w-14 ${
+                    logoIcon ? '-ml-2.5 md:-ml-3' : ''
                   }`}
-                  style={{
-                    backgroundColor: getCommunityColor(
-                      header.avatar_background_color,
-                      '#F5F3ED'
-                    ),
-                  }}
-                >
-                  <img
-                    src={header.avatar_url}
-                    alt={header.title || 'Expert'}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : header.avatar_icon ? (
-                <div
-                  className={`relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl md:h-14 md:w-14 md:text-2xl ${
-                    header.logo_icon ? '-ml-2.5 md:-ml-3' : ''
-                  }`}
-                  style={{
-                    backgroundColor: getCommunityColor(
-                      header.avatar_background_color,
-                      '#F5F3ED'
-                    ),
-                  }}
-                >
-                  {header.avatar_icon}
-                </div>
+                  backgroundColor={getCommunityColor(
+                    header.avatar_background_color,
+                    '#F5F3ED'
+                  )}
+                  textClassName="text-xl md:text-2xl"
+                />
               ) : null}
             </div>
           ) : null}

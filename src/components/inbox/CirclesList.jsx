@@ -106,7 +106,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab, showDi
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* My Circles Header */}
       <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between gap-2">
@@ -158,7 +158,7 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab, showDi
       ))}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {(currentSubTab === 'my-circles' || !showDiscover) ? (
           <LoadingWrapper isLoading={isLoading}>
             {/* Unread Messages Section */}

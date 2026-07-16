@@ -8,6 +8,18 @@ export const DEFAULT_COMMUNITY_COLORS = {
 
 export const getCommunityColor = (color, fallback) => color || fallback;
 
+/** True when logo_icon / avatar_icon is an image URL (not an emoji fallback). */
+export const isCommunityMediaUrl = value => {
+  if (!value || typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (/^https?:\/\//i.test(trimmed)) return true;
+  if (trimmed.startsWith('//')) return true;
+  if (trimmed.startsWith('data:image/')) return true;
+  if (trimmed.startsWith('/')) return true;
+  return /\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?.*)?$/i.test(trimmed);
+};
+
 export const DEFAULT_HEADER_GRADIENT = {
   start: '#215138',
   end: '#386E51',

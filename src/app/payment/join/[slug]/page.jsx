@@ -8,7 +8,10 @@ import useGeoLocation from '@/hooks/useGeoLocation';
 import queryKeys from '@/utils/query-keys';
 import StripeCheckout from '@/components/subscription/checkout/StripeCheckout';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
-import { createCommunityJoinCheckoutSession } from '@/services/private/expert/community';
+import {
+  createCommunityJoinCheckoutSession,
+  getExpertCommunityJoinDetail,
+} from '@/services/private/expert/community';
 
 const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
 
@@ -20,14 +23,29 @@ const Page = () => {
   const isDev = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
   const isAllowed = isDev || (!!countryCode && ALLOWED_COUNTRIES.includes(countryCode));
 
+  const { data: joinDetailResponse } = useQuery({
+    queryFn: () => getExpertCommunityJoinDetail(slug),
+    queryKey: [queryKeys.expertCommunityJoinDetail, slug],
+    enabled: !!slug,
+  });
+
+  const primaryButton = joinDetailResponse?.data?.data?.footer_actions?.primary_button;
+  const checkoutMethod = primaryButton?.method || 'post';
+  const stripeUrl = primaryButton?.stripe_url;
+
   const {
     data: response,
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => createCommunityJoinCheckoutSession({ slug }),
-    queryKey: [queryKeys.communityJoinCheckout, slug],
-    enabled: !!slug && !isGeoLoading && isAllowed,
+    queryFn: () =>
+      createCommunityJoinCheckoutSession({
+        slug,
+        stripeUrl,
+        method: checkoutMethod,
+      }),
+    queryKey: [queryKeys.communityJoinCheckout, slug, checkoutMethod, stripeUrl],
+    enabled: !!slug && !isGeoLoading && isAllowed && !!joinDetailResponse,
   });
 
   useHandleApiResponse(failureReason);
@@ -56,7 +74,7 @@ const Page = () => {
           page
         </Alert>
       </div>
-      <LoadingWrapper isLoading={isLoading}>
+      <LoadingWrapper isLoading={isLoading || !joinDetailResponse}>
         {clientSecret ? (
           <StripeCheckout clientSecret={clientSecret} />
         ) : (

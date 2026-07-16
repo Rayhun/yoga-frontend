@@ -7,7 +7,6 @@ import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import queryKeys from '@/utils/query-keys';
-import ConsultationCard from '../common/ConsultationCard';
 import { getEnrolledGroupCoachings } from '@/services/private/customer/groupCoaching';
 import EventCard from '../common/EventCard';
 
@@ -17,9 +16,15 @@ const EnrolledGroupCoachings = () => {
   const nextSearchParams = useSearchParams();
   const selectedStatus = searchParams.get('status') || '';
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Get selected category from URL params using Next.js useSearchParams for stability
   const selectedCategory = nextSearchParams.get('categories') || '';
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchText.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Create stable filters object using useMemo to prevent unnecessary re-renders
   const filters = useMemo(() => {
@@ -27,8 +32,11 @@ const EnrolledGroupCoachings = () => {
     if (selectedCategory) {
       baseFilters.categories = [parseInt(selectedCategory)];
     }
+    if (debouncedSearch) {
+      baseFilters.search = debouncedSearch;
+    }
     return baseFilters;
-  }, [selectedCategory]);
+  }, [selectedCategory, debouncedSearch]);
 
   const { isLoading: isLoadingCoachings, data: coachingsResponse } = useQuery({
     queryFn: () => getEnrolledGroupCoachings(filters),
@@ -47,16 +55,6 @@ const EnrolledGroupCoachings = () => {
     () => responseData?.['all-events'] || [],
     [responseData]
   );
-
-  // Filter coachings based on search text only (category filtering is now handled by API)
-  const filteredCoachings = useMemo(() => {
-    if (!searchText) return coachings;
-    
-    return coachings.filter(coaching => {
-      return coaching.title.toLowerCase().includes(searchText.toLowerCase()) ||
-             coaching.description?.toLowerCase().includes(searchText.toLowerCase());
-    });
-  }, [coachings, searchText]);
 
   const handleSelectFeaturedCategory = selected => {
     // If clicking the same category, remove it from URL
@@ -117,6 +115,7 @@ const EnrolledGroupCoachings = () => {
           <input
             className="portal-search-input rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Guided Experiences"
+            value={searchText}
             onChange={e => setSearchText(e.target.value || '')}
           />
         </div>
@@ -129,9 +128,9 @@ const EnrolledGroupCoachings = () => {
             </div>
           ) : (
             <div>
-              {filteredCoachings.length > 0 ? (
+              {coachings.length > 0 ? (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                  {filteredCoachings.map(event => (
+                  {coachings.map(event => (
                     <EventCard
                       key={event.id}
                       event={event}
@@ -141,7 +140,7 @@ const EnrolledGroupCoachings = () => {
                 </div>
               ) : (
                 <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
-                  {searchText || selectedCategory ? 'No guided experiences found matching your criteria' : 'No guided experiences found'}
+                  {debouncedSearch || selectedCategory ? 'No guided experiences found matching your criteria' : 'No guided experiences found'}
                 </div>
               )}
             </div>

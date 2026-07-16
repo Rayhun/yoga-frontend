@@ -359,7 +359,14 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         setCurrentStep(prev => prev + 1);
         toast.success(`Step ${currentStep} saved successfully`);
       } else {
-        toast.success(isEditMode ? 'Expert updated successfully' : 'Expert created successfully');
+        const isFirstTimeProfileCompletion = !isAdminContext && !selected?.is_profile_complete;
+        toast.success(
+          isFirstTimeProfileCompletion
+            ? 'Profile completed! Next, create your first guided experience.'
+            : isEditMode
+              ? 'Expert updated successfully'
+              : 'Expert created successfully'
+        );
         clearDraft();
         await queryClient.invalidateQueries([
           {
@@ -372,10 +379,16 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 : [queryKeys.teacherProfile],
           },
         ]);
-        
+        if (!isAdminContext) {
+          await queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] });
+        }
+
         // Redirect based on context
         if (isAdminContext) {
           router.push('/portal/admin/lms/expert');
+        } else if (isFirstTimeProfileCompletion) {
+          // First-time profile completion → create guided experience
+          router.push('/portal/teacher/group_coaching/add');
         } else {
           router.push('/portal/teacher/profile?active_tab=about');
         }
@@ -592,16 +605,14 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                       <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       Profile Photo
                     </h3>
-                    <div className="flex justify-center items-center py-4">
-                      <div className="relative">
-                        <FormikImageInput name="file" label="" />
-                      </div>
+                    <div className="flex justify-center items-center py-2">
+                      <FormikImageInput name="file" label="" size={128} />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                       Upload a professional photo that represents you. This will be visible to users.
@@ -610,15 +621,13 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
                   <div className="border-t border-gray-200 dark:border-gray-700" />
 
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                       <LuBriefcaseBusiness className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       Business Logo
                     </h3>
-                    <div className="flex justify-center items-center py-4">
-                      <div className="relative">
-                        <FormikImageInput name="business_logo" label="" />
-                      </div>
+                    <div className="flex justify-center items-center py-2">
+                      <FormikImageInput name="business_logo" label="" size={128} />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                       Upload your business or brand logo. This will appear on your profile alongside your business name.

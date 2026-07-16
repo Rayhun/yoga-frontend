@@ -1,11 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FaFilter } from 'react-icons/fa';
 import useToggle from '@/hooks/useToggle';
-import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import Spinner from '@/components/common/loader/Spinner';
 import Popup from '@/components/common/popup';
 import queryKeys from '@/utils/query-keys';
@@ -18,39 +17,36 @@ const GroupCoachingLibrary = () => {
 
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filters, setFilters] = useState({});
 
-  const { isFetching: isLoadingCoachings, data: groupCoachingResponse, failureReason } = useQuery({
-    queryFn: () => getCustomerGroupCoachingList(filters),
-    queryKey: [queryKeys.customerEvents, JSON.stringify(filters)],
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchText.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const queryFilters = useMemo(() => {
+    const next = { ...filters };
+    if (debouncedSearch) next.search = debouncedSearch;
+    return next;
+  }, [filters, debouncedSearch]);
+
+  const { isFetching: isLoadingCoachings, data: groupCoachingResponse } = useQuery({
+    queryFn: () => getCustomerGroupCoachingList(queryFilters),
+    queryKey: [queryKeys.customerEvents, JSON.stringify(queryFilters)],
     onError: (err) => {
       console.error('Error fetching group coaching list:', err);
     },
   });
 
-
-
-  const filteredCoachings = useMemo(
-    () =>
-      (groupCoachingResponse?.data?.results?.data?.['all-events'] || []).filter(event =>
-        event.title.includes(searchText)
-      ),
-    [groupCoachingResponse?.data?.results?.data, searchText]
+  const coachings = useMemo(
+    () => groupCoachingResponse?.data?.results?.data?.['all-events'] || [],
+    [groupCoachingResponse?.data?.results?.data]
   );
 
   const handleApplyFilter = values => {
     setFilters(values);
     toggleFilterModal(false);
-  };
-
-  const handleSelectFeaturedCategory = selected => {
-    setFilters(prevState => {
-      const existingCategories = selected.id
-        ? [...new Set([...(prevState.categories || []), selected.id])]
-        : [];
-
-      return { ...prevState, categories: existingCategories };
-    });
   };
 
   return (
@@ -94,13 +90,11 @@ const GroupCoachingLibrary = () => {
       </div>
 
       <div className="p-4 sm:p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
-        {/* Categories */}
-        {/* <FeaturedCategories selected={filters.categories} onSelect={handleSelectFeaturedCategory} /> */}
-
         <div className="portal-search-row">
           <input
             className="portal-search-input rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Group Coachings"
+            value={searchText}
             onChange={e => setSearchText(e.target.value || '')}
           />
           <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
@@ -112,15 +106,19 @@ const GroupCoachingLibrary = () => {
             <div className="flex justify-center">
               <Spinner />
             </div>
-          ) : (
+          ) : coachings.length > 0 ? (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredCoachings?.map(event => (
+              {coachings.map(event => (
                 <EventCard
                   key={event.id}
                   event={event}
                   onClick={() => router.push(`/portal/customer/group_coaching/${event.id}/details`)}
                 />
               ))}
+            </div>
+          ) : (
+            <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
+              {debouncedSearch ? 'No group coachings found matching your search' : 'No group coachings found'}
             </div>
           )}
         </section>

@@ -497,7 +497,7 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
       label: 'Dashboard',
       href: '/portal/teacher/dashboard',
       isActive: pathname => pathname.includes('/portal/teacher/dashboard'),
-      disabled: !is_profile_complete || !has_event_or_consult || !stripe_onboarded,
+      disabled: false,
     },
     {
       Icon: FaInbox,
@@ -555,6 +555,13 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
       href: '/portal/teacher/payments',
       isActive: pathname => pathname.includes('/portal/teacher/payments'),
       disabled: !is_profile_complete || !stripe_onboarded,
+    },
+    {
+      Icon: MdGroupAdd,
+      label: 'Referrals',
+      href: '/portal/teacher/referrals',
+      isActive: pathname => pathname.includes('/portal/teacher/referrals'),
+      disabled: !is_profile_complete,
     },
   ];
 }

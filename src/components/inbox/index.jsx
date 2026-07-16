@@ -43,11 +43,11 @@ const Inbox = () => {
   const handleMobileBack = () => setActiveConversation(null);
 
   return (
-    <div className="inbox-height overflow-hidden">
-      <div className="flex h-full flex-col overflow-hidden bg-white shadow-lg md:flex-row">
+    <div className="inbox-height flex min-h-0 flex-col overflow-hidden">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white shadow-lg md:flex-row md:rounded-xl md:border md:border-gray-200">
         {/* Left Sidebar — full width on mobile when no chat is open */}
         <div
-          className={`w-full md:w-1/3 md:min-w-[280px] lg:min-w-[320px] flex flex-col border-r border-gray-200 bg-gray-50 ${
+          className={`min-h-0 w-full md:w-1/3 md:min-w-[280px] lg:min-w-[320px] flex flex-col border-r border-gray-200 bg-gray-50 ${
             showMobileChat ? 'hidden md:flex' : 'flex h-full'
           }`}
         >
@@ -99,17 +99,19 @@ const Inbox = () => {
 
         {/* Chat Area — full width on mobile when a conversation is open */}
         <div
-          className={`w-full md:w-2/3 flex flex-col bg-white ${
+          className={`min-h-0 w-full md:w-2/3 flex flex-col bg-white ${
             showMobileChat ? 'flex h-full' : 'hidden md:flex'
           }`}
         >
           {activeConversation ? (
-            <div className="flex h-full flex-col">
+            <div className="flex h-full min-h-0 flex-col overflow-hidden">
               <ActiveConversationHeader onBack={handleMobileBack} />
-              <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <MessagesList />
               </div>
-              <MessageForm />
+              <div className="flex-shrink-0">
+                <MessageForm />
+              </div>
             </div>
           ) : conversationsData.length === 0 && !isLoadingConversations ? (
             <WelcomeMessage activeTab={activeTab} showDiscover={!isExpertPortal} />

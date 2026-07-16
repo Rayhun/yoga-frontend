@@ -7,6 +7,7 @@ import JoinOnboardProgressBar from './JoinOnboardProgressBar';
 const JoinOnboardLayout = ({
   activeStep = 1,
   canGoBack = false,
+  showProgress = true,
   onBack,
   inviteData,
   children,
@@ -30,19 +31,21 @@ const JoinOnboardLayout = ({
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <div className="flex flex-1 flex-col justify-center px-5 pb-8 pt-6 sm:px-8 sm:pb-10 sm:pt-8 lg:px-10 lg:pb-12">
             <div className="mx-auto flex w-full max-w-[300px] flex-1 flex-col sm:max-w-[320px] lg:mx-0 lg:max-w-md">
-              <div className="mb-6 sm:mb-8">
-                {canGoBack ? (
-                  <button
-                    type="button"
-                    onClick={onBack}
-                    className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
-                    aria-label="Go back"
-                  >
-                    <FiChevronLeft className="h-5 w-5" />
-                  </button>
-                ) : null}
-                <JoinOnboardProgressBar activeStep={activeStep} />
-              </div>
+              {canGoBack || showProgress ? (
+                <div className="mb-6 sm:mb-8">
+                  {canGoBack ? (
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                      aria-label="Go back"
+                    >
+                      <FiChevronLeft className="h-5 w-5" />
+                    </button>
+                  ) : null}
+                  {showProgress ? <JoinOnboardProgressBar activeStep={activeStep} /> : null}
+                </div>
+              ) : null}
 
               {children}
             </div>

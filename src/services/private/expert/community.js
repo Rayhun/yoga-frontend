@@ -17,10 +17,20 @@ export const getExpertCommunityJoinOnboard = async slug => {
   return axios.get(`${API_V2_BASE_URL}/expert/community/join/onboard/${slug}/`);
 };
 
-export const createCommunityJoinCheckoutSession = async ({ slug, stripeUrl } = {}) => {
-  const actionUrl = resolveActionUrl(stripeUrl) || `${API_V2_BASE_URL}/expert/community/join/subscription/`;
+export const createCommunityJoinCheckoutSession = async ({
+  slug,
+  stripeUrl,
+  method = 'post',
+} = {}) => {
+  return executeCommunityAction({
+    url: stripeUrl || `${API_V2_BASE_URL}/expert/community/join/subscription/`,
+    method,
+    payload: { group_slug: slug },
+  });
+};
 
-  return axios.post(actionUrl, { group_slug: slug });
+export const getExpertCommunityJoinedSuccess = async slug => {
+  return axios.get(`${API_V2_BASE_URL}/expert/community/joined/${slug}/success/`);
 };
 
 export const resolveActionUrl = url => {

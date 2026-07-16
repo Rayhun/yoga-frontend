@@ -73,8 +73,9 @@
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
   }
 
+  /* Fill portal main area (no page scroll). Parent locks to viewport on inbox. */
   .inbox-height {
-    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    @apply h-full max-h-full min-h-0;
   }
 
   .portal-hero {

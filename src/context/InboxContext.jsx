@@ -162,11 +162,6 @@ function InboxProvider({ children }) {
     }
   }, [chatRoomMessage]);
 
-  useEffect(() => {
-    const emptyMessage = document.getElementById('empty-message');
-    emptyMessage?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.data]);
-
   const setActiveConversation = useCallback(async selected => {
     if (!selected) {
       setConversations(prevState => ({
