@@ -1,12 +1,21 @@
 'use client';
 import { useMemo } from 'react';
+import { BiExport } from 'react-icons/bi';
 import useTable from '@/hooks/useTable';
+import useExport from '@/hooks/useExport';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getUsersList } from '@/services/private/user';
+import { getUsersList, exportUsers } from '@/services/private/user';
 import queryKeys from '@/utils/query-keys';
 
 const UsersList = () => {
+  const { isExporting, handleExport } = useExport({
+    mutationFn: exportUsers,
+    filename: 'customers_export.csv',
+    confirmMessage: 'Export customers?',
+    successMessage: 'Customers exported successfully',
+  });
+
   const tableColumns = useMemo(
     () => [
       {
@@ -31,7 +40,18 @@ const UsersList = () => {
 
   const rowActions = useMemo(() => [], []);
 
-  const headerQuickActions = useMemo(() => [], []);
+  const headerQuickActions = useMemo(
+    () => [
+      {
+        id: 'export',
+        Icon: BiExport,
+        label: 'Export',
+        isLoading: isExporting,
+        onClick: handleExport,
+      },
+    ],
+    [handleExport, isExporting]
+  );
 
   const {
     isLoading,
