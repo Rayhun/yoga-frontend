@@ -489,8 +489,16 @@ const STAFF = [
   },
 ];
 
-const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded) => {
-  
+const getTeacherSidebarMenuItems = (
+  is_profile_complete,
+  has_event_or_consult,
+  stripe_onboarded,
+  is_chat_group = false
+) => {
+  const circlesHref = is_chat_group
+    ? '/portal/inbox'
+    : '/portal/teacher/community/create';
+
   return [
     {
       Icon: FiTarget,
@@ -502,8 +510,10 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
     {
       Icon: FaInbox,
       label: 'Circles',
-      href: '/portal/inbox',
-      isActive: pathname => pathname === '/portal/inbox',
+      href: circlesHref,
+      isActive: pathname =>
+        pathname === '/portal/inbox' ||
+        pathname.includes('/portal/teacher/community/create'),
       disabled: !isDevelopmentEnvironment || !is_profile_complete,
     },
     {

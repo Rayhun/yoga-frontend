@@ -29,6 +29,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const is_profile_complete = user?.profile?.is_profile_complete ?? false;
   const has_event_or_consult = user?.profile?.has_event_or_consult ?? false;
   const stripe_onboarded = user?.profile?.stripe_onboarded ?? false;
+  const is_chat_group = Boolean(user?.profile?.is_chat_group);
   const isCustomer = user?.isCustomer ?? false;
   const isAffiliate = userRole === USER_ROLE.AFFILIATE;
   const shouldUseCustomerStyle = isCustomer || isAffiliate;
@@ -78,10 +79,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded);
+    if (userRole === USER_ROLE.TEACHER) {
+      return SIDEBAR.getTeacherSidebarMenuItems(
+        is_profile_complete,
+        has_event_or_consult,
+        stripe_onboarded,
+        is_chat_group
+      );
+    }
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
+  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded, is_chat_group]);
 
   // Remove unused isTeacher variable - design is now universal
 

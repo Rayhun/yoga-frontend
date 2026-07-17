@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Inbox from '@/components/inbox';
 import useAuthContext from '@/hooks/useAuthContext';
 import { USER_ROLE } from '@/utils/authorization';
+import CreateCommunityCircleView from '@/components/inbox/community/CreateCommunityCircleView';
 import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 
 const Page = () => {
@@ -14,20 +14,20 @@ const Page = () => {
   const hasChatGroup = Boolean(user?.profile?.is_chat_group);
 
   useEffect(() => {
-    if (isExpert && !hasChatGroup) {
-      router.replace('/portal/teacher/community/create');
+    if (!isExpert) {
+      router.replace('/portal/inbox');
+      return;
+    }
+    if (hasChatGroup) {
+      router.replace('/portal/inbox');
     }
   }, [isExpert, hasChatGroup, router]);
 
-  if (isExpert && !hasChatGroup) {
+  if (!isExpert || hasChatGroup) {
     return <FullScreenLoader />;
   }
 
-  return (
-    <div className="inbox-height min-h-0 w-full overflow-hidden">
-      <Inbox />
-    </div>
-  );
+  return <CreateCommunityCircleView />;
 };
 
 export default Page;

@@ -1,14 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { FiUserPlus } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
-import Spinner from '@/components/common/loader/Spinner';
-import InviteClientModal from '@/components/inbox/InviteClientModal';
-import { getExpertCommunityData } from '@/services/private/expert/community';
-import queryKeys from '@/utils/query-keys';
+import useAuthContext from '@/hooks/useAuthContext';
 
 const VARIANT_CLASSES = {
   outline:
@@ -19,49 +13,26 @@ const VARIANT_CLASSES = {
 
 const InviteClientButton = ({ variant = 'outline', className = '', label = 'Invite Client' }) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuthContext();
+  const hasChatGroup = Boolean(user?.profile?.is_chat_group);
 
-  const handleClick = async () => {
-    setIsLoading(true);
-    try {
-      const response = await queryClient.fetchQuery({
-        queryKey: [queryKeys.expertCommunityData],
-        queryFn: getExpertCommunityData,
-      });
-      const communityData = response?.data?.data;
-
-      if (communityData?.has_community_circle) {
-        router.push('/portal/teacher/community');
-      } else {
-        setIsModalOpen(true);
-      }
-    } catch {
-      toast.error('Unable to load community data. Please try again.');
-    } finally {
-      setIsLoading(false);
+  const handleClick = () => {
+    if (hasChatGroup) {
+      router.push('/portal/teacher/community');
+    } else {
+      router.push('/portal/teacher/community/create');
     }
   };
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isLoading}
-        className={`${VARIANT_CLASSES[variant] || VARIANT_CLASSES.outline} ${className}`.trim()}
-      >
-        {isLoading ? (
-          <Spinner size={variant === 'navbar' ? 16 : 14} />
-        ) : (
-          <FiUserPlus className={variant === 'navbar' ? 'h-4 w-4' : 'h-3.5 w-3.5 md:h-4 md:w-4'} />
-        )}
-        <span>{label}</span>
-      </button>
-
-      <InviteClientModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`${VARIANT_CLASSES[variant] || VARIANT_CLASSES.outline} ${className}`.trim()}
+    >
+      <FiUserPlus className={variant === 'navbar' ? 'h-4 w-4' : 'h-3.5 w-3.5 md:h-4 md:w-4'} />
+      <span>{label}</span>
+    </button>
   );
 };
 
