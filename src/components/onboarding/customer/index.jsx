@@ -213,9 +213,9 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   } = useQuery({
     queryKey: [
       queryKeys.onboardingQuizV2,
-      isPublic ? 'public' : 'auth',
       'first-question',
-      pageSlug || 'default',
+      isPublic,
+      pageSlug,
     ],
     queryFn: () =>
       isPublic
