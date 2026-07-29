@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 import useAuthContext from '@/hooks/useAuthContext';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
@@ -10,6 +11,9 @@ import { USER_ROLE } from '@/utils/authorization';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
+import { getCustomerSidebarNavigation } from '@/services/private/customer/v2/navigation';
+import { buildCustomerV2SidebarMenu, customerV2MenuHasFooterActions } from '@/utils/customer-v2-navigation';
+import queryKeys from '@/utils/query-keys';
 
 const DISABLED_NAV_INFO_ITEMS = ['Dashboard', 'Circles'];
 const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
@@ -32,7 +36,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const is_chat_group = Boolean(user?.profile?.is_chat_group);
   const isCustomer = user?.isCustomer ?? false;
   const isAffiliate = userRole === USER_ROLE.AFFILIATE;
+  const isCustomerPortal = userRole === USER_ROLE.CUSTOMER;
   const shouldUseCustomerStyle = isCustomer || isAffiliate;
+
+  const { data: customerV2NavResponse } = useQuery({
+    queryFn: getCustomerSidebarNavigation,
+    queryKey: [queryKeys.customerV2SidebarNavigation],
+    enabled: isCustomerPortal,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const customerV2NavigationData = customerV2NavResponse?.data?.data;
+  const usesCustomerV2Sidebar = isCustomerPortal && Boolean(customerV2NavigationData);
+  const hideLegacyCustomerFooter = usesCustomerV2Sidebar && customerV2MenuHasFooterActions(customerV2NavigationData);
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -76,6 +92,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     }
   }, [sidebarExpanded]);
 
+  const customerV2Menu = useMemo(() => {
+    if (!usesCustomerV2Sidebar) return null;
+    return buildCustomerV2SidebarMenu(customerV2NavigationData, {
+      isBusinessOwner: user?.isBusinessOwner,
+    });
+  }, [usesCustomerV2Sidebar, customerV2NavigationData, user?.isBusinessOwner]);
+
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
@@ -88,8 +111,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       );
     }
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
+    if (customerV2Menu) return customerV2Menu.mainItems;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded, is_chat_group]);
+  }, [
+    userRole,
+    is_profile_complete,
+    has_event_or_consult,
+    stripe_onboarded,
+    is_chat_group,
+    customerV2Menu,
+  ]);
+
+  const customerV2FooterMenuItems = customerV2Menu?.footerItems ?? [];
 
   // Remove unused isTeacher variable - design is now universal
 
@@ -257,7 +290,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
           }`}>
             {subRoleBasedSidebarMenuItems.map(menuItem => (
-              <React.Fragment key={menuItem.label}>
+              <React.Fragment key={menuItem.id || menuItem.label}>
                 {menuItem.sub_menu ? (
                   <ul className="flex flex-col gap-2">
                     <SidebarLinkGroup activeCondition={menuItem?.hasActiveSubMenu(pathname)}>
@@ -452,8 +485,48 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             ))}
           </ul>
 
-          {/* Logout */}
-          {isCustomer && (
+          {usesCustomerV2Sidebar && customerV2FooterMenuItems.length > 0 ? (
+            <ul className={`mt-auto flex flex-col border-t border-emerald-200/30 pt-4 dark:border-emerald-800/20 ${
+              shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
+            }`}>
+              {customerV2FooterMenuItems.map(menuItem => (
+                <li key={menuItem.id || menuItem.label} className="list-none">
+                  {menuItem.action_id === 'trigger_user_logout' ? (
+                    <span
+                      className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gradient-to-r hover:from-red-50/80 hover:to-pink-50/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-red-400"
+                      onClick={logout}
+                    >
+                      {menuItem.Icon ? (
+                        <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                          <menuItem.Icon size={24} />
+                        </div>
+                      ) : null}
+                      {menuItem.label}
+                    </span>
+                  ) : (
+                    <Link
+                      href={menuItem.href || '#'}
+                      className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400 ${
+                        menuItem.isActive?.(pathname, activeTab)
+                          ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {menuItem.Icon ? (
+                        <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                          <menuItem.Icon size={24} />
+                        </div>
+                      ) : null}
+                      {menuItem.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {/* Legacy customer footer (v1 fallback) */}
+          {isCustomer && !hideLegacyCustomerFooter && (
             <li className="list-none mt-auto">
               <Link
                 className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400"
@@ -466,6 +539,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </Link>
             </li>
           )}
+          {!hideLegacyCustomerFooter && (
           <li className="list-none mt-auto">
             <span
               className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gradient-to-r hover:from-red-50/80 hover:to-pink-50/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-red-400"
@@ -477,6 +551,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               Logout
             </span>
           </li>
+          )}
           {/* Bottom padding to ensure scrollbar doesn't cover content */}
           <div className="pb-4"></div>
         </nav>

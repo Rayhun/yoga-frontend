@@ -20,3 +20,6 @@ export const API_V1_BASE_URL = stripTrailingSlashes(
 export const API_V2_BASE_URL = stripTrailingSlashes(
   process.env.NEXT_PUBLIC_API_V2_BASE_URL || `${API_ROOT_URL}/v2`
 );
+export const API_V2_WEB_CUSTOMER_BASE_URL = stripTrailingSlashes(
+  process.env.NEXT_PUBLIC_API_V2_WEB_CUSTOMER_BASE_URL || `${API_V2_BASE_URL}/web/customer`
+);

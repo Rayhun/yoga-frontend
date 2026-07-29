@@ -22,12 +22,28 @@ const copyToClipboard = async text => {
   if (!success) throw new Error('Copy failed');
 };
 
+const WhatsNextMessageBox = () => (
+  <div className="rounded-xl border border-[#E8DFD0] bg-[#F5EFE6] px-5 py-5 md:px-6 md:py-6">
+    <p className="text-sm font-semibold text-gray-900 md:text-base">💡 What&apos;s Next?</p>
+    <p className="mt-3 text-sm font-semibold text-gray-900 md:text-base">Your Circle is live!</p>
+    <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base">
+      Share your invitation link with current clients, past clients, your email list, WhatsApp,
+      social media, website, or newsletter.
+    </p>
+    <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base">
+      Everyone who joins using your link will automatically become a member of your Circle.
+    </p>
+    <p className="mt-4 text-sm leading-relaxed text-gray-700 md:text-base">
+      <span className="font-semibold">⭐ Tip:</span> Let people know they can join NourishDoc for
+      just $1 for their first month—it makes it easy for them to get started.
+    </p>
+  </div>
+);
+
 const SharingCardSection = ({ section }) => {
   const [copied, setCopied] = useState(false);
-  const referralCode = section?.referral_code;
   const actions = section?.actions || {};
   const copyButton = actions.copy_button;
-  const inviteButton = actions.invite_button;
   const inviteUrl = section?.invite_url || '';
 
   const handleCopyLink = async () => {
@@ -41,25 +57,6 @@ const SharingCardSection = ({ section }) => {
     } catch {
       toast.error('Failed to copy invite link');
     }
-  };
-
-  const handleInviteClients = async () => {
-    if (!inviteUrl) return;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: section?.title || 'Join my community circle',
-          text: section?.subtitle || 'Join my community circle on NourishDoc',
-          url: inviteUrl,
-        });
-        return;
-      } catch (error) {
-        if (error?.name === 'AbortError') return;
-      }
-    }
-
-    await handleCopyLink();
   };
 
   return (
@@ -109,36 +106,7 @@ const SharingCardSection = ({ section }) => {
         ) : null}
       </div>
 
-      {referralCode?.code ? (
-        <div className="mb-6">
-          {referralCode.label ? (
-            <p className="mb-2 text-sm text-gray-600 md:text-base">{referralCode.label}</p>
-          ) : null}
-          <div
-            className="inline-block rounded-lg border border-dashed px-5 py-2.5 font-mono text-base font-bold tracking-wide md:text-lg"
-            style={{
-              backgroundColor: getCommunityColor(referralCode.background_color, '#F0F7F2'),
-              borderColor: getCommunityColor(referralCode.border_color, '#B8D4C3'),
-              color: getCommunityColor(referralCode.text_color, '#1E4D35'),
-            }}
-          >
-            {referralCode.code}
-          </div>
-        </div>
-      ) : null}
-
-      {inviteButton?.label ? (
-        <button
-          type="button"
-          onClick={handleInviteClients}
-          className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white transition-all hover:brightness-95 md:text-base"
-          style={{
-            backgroundColor: getCommunityColor(inviteButton.cta_btn_color, '#E67E22'),
-          }}
-        >
-          {inviteButton.label}
-        </button>
-      ) : null}
+      <WhatsNextMessageBox />
     </div>
   );
 };

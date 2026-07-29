@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { API_BASE_URL } from '@/utils/config';
-import { logRequestFailure, isLogApiRequest } from '@/utils/logger';
+import { buildLoginUrl } from '@/utils/auth-redirect';
 import { getBrowserIANATimezone } from '@/utils/timezone';
+import { isLogApiRequest, logRequestFailure } from '@/utils/logger';
 import Cookies from 'js-cookie';
 
 /**
@@ -39,7 +40,7 @@ apiClient.interceptors.response.use(
       if (typeof detail === 'string' && detail.toLowerCase().includes('invalid token')) {
         Cookies.remove('token');
         if (typeof window !== 'undefined') {
-          window.location.replace('/auth/login');
+          window.location.replace(buildLoginUrl(window.location.pathname));
         }
         return Promise.reject(error);
       }

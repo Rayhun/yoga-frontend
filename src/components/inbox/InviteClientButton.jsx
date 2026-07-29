@@ -1,7 +1,7 @@
 'use client';
 
 import { FiUserPlus } from 'react-icons/fi';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import useAuthContext from '@/hooks/useAuthContext';
 
 const VARIANT_CLASSES = {
@@ -11,17 +11,20 @@ const VARIANT_CLASSES = {
     'inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60',
 };
 
+const COMMUNITY_DETAIL_PATH = '/portal/teacher/community';
+
 const InviteClientButton = ({ variant = 'outline', className = '', label = 'Invite Client' }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user } = useAuthContext();
   const hasChatGroup = Boolean(user?.profile?.is_chat_group);
 
+  if (!hasChatGroup || pathname === COMMUNITY_DETAIL_PATH) {
+    return null;
+  }
+
   const handleClick = () => {
-    if (hasChatGroup) {
-      router.push('/portal/teacher/community');
-    } else {
-      router.push('/portal/teacher/community/create');
-    }
+    router.push(COMMUNITY_DETAIL_PATH);
   };
 
   return (

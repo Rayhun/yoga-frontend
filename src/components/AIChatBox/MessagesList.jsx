@@ -6,7 +6,7 @@ import { useAIChatInbox } from '@/context/AIChatInboxContext';
 import StreamingMarkdown from '../chat/StreamingMarkdown';
 import TypingIndicator from '../chat/TypingIndicator';
 
-const Message = ({ isMyMessage, senderName, time, children, isStreaming }) => (
+const Message = ({ isMyMessage, senderName, time, children, isStreaming, isError }) => (
   <>
     {isMyMessage ? (
       <div className="ml-auto max-w-125 w-fit">
@@ -24,9 +24,13 @@ const Message = ({ isMyMessage, senderName, time, children, isStreaming }) => (
     ) : (
       <div className="max-w-125 w-fit min-w-[200px]">
         {senderName && <p className="text-sm mb-1 text-black">{senderName}</p>}
-        <div className="mb-2.5 rounded-2xl rounded-tl-none bg-white px-5 py-3 flex flex-col justify-between items-end gap-1 overflow-hidden">
+        <div className={`mb-2.5 rounded-2xl rounded-tl-none px-5 py-3 flex flex-col justify-between items-end gap-1 overflow-hidden ${isError ? 'bg-warning/10 border border-warning/30' : 'bg-white'}`}>
           <div className="w-full overflow-hidden">
-            <StreamingMarkdown content={children} isStreaming={isStreaming} />
+            {isError ? (
+              <p className="text-black whitespace-pre-wrap break-words">{children}</p>
+            ) : (
+              <StreamingMarkdown content={children} isStreaming={isStreaming} />
+            )}
           </div>
 
           {time && !isStreaming && (
@@ -45,6 +49,7 @@ const MessagesList = () => {
     messages: { isLoading: isLoadingMessages, data: messages },
     isAITyping,
     streamingMessage,
+    streamingIsError,
   } = useAIChatInbox();
 
   const lastMessageRef = useRef(null);
@@ -66,13 +71,14 @@ const MessagesList = () => {
               time={message?.created_at}
               senderName={undefined}
               isMyMessage={message?.isSentByMe}
+              isError={message?.isError}
             >
               {message?.message}
             </Message>
           ))}
 
           {streamingMessage && (
-            <Message isMyMessage={false} isStreaming>
+            <Message isMyMessage={false} isStreaming isError={streamingIsError}>
               {streamingMessage}
             </Message>
           )}

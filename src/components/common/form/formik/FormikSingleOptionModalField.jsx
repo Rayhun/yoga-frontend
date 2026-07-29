@@ -37,7 +37,7 @@ const FormikSingleOptionModalField = ({
   className = '',
   placeholder: _legacyPlaceholder,
   Icon: _Icon,
-  freeSolo: _freeSolo,
+  freeSolo = false,
   ...rest
 }) => {
   const { setFieldValue, submitCount } = useFormikContext();
@@ -83,6 +83,18 @@ const FormikSingleOptionModalField = ({
     if (!q) return rows;
     return rows.filter(r => r.primaryLabel.toLowerCase().includes(q));
   }, [filterOptionsLocally, rows, debouncedSearch]);
+
+  const trimmedSearch = searchInput.trim();
+  const hasExactMatch = useMemo(() => {
+    if (!trimmedSearch) return false;
+    const q = trimmedSearch.toLowerCase();
+    return rows.some(
+      row =>
+        String(row.primaryLabel).toLowerCase() === q || String(row.value).toLowerCase() === q
+    );
+  }, [rows, trimmedSearch]);
+
+  const showCreateOption = freeSolo && Boolean(trimmedSearch) && !hasExactMatch;
 
   const selectedValue =
     field.value === '' || field.value === null || field.value === undefined ? null : field.value;
@@ -199,7 +211,9 @@ const FormikSingleOptionModalField = ({
                 {modalTitle}
               </h2>
               <p className="mt-1 text-xs text-gray-500 dark:text-bodydark2">
-                Search and tap one option to select.
+                {freeSolo
+                  ? 'Search, pick an option, or type a new one to add it.'
+                  : 'Search and tap one option to select.'}
               </p>
             </div>
             <button
@@ -245,17 +259,35 @@ const FormikSingleOptionModalField = ({
                 <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 <p className="text-sm text-gray-500 dark:text-bodydark2">Loading…</p>
               </div>
-            ) : filteredRows.length === 0 ? (
+            ) : filteredRows.length === 0 && !showCreateOption ? (
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
                 <HiOutlineListBullet className="h-14 w-14 shrink-0 text-gray-200 dark:text-bodydark2" />
                 <p className="max-w-xs text-sm leading-relaxed text-gray-500 dark:text-bodydark2">
                   {searchInput.trim()
-                    ? 'No results match your search. Try different keywords.'
+                    ? freeSolo
+                      ? 'No matches found. Use the option below to add a new value.'
+                      : 'No results match your search. Try different keywords.'
                     : 'No options available.'}
                 </p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-100 dark:divide-strokedark">
+                {showCreateOption ? (
+                  <li key={`__create__${trimmedSearch}`}>
+                    <button
+                      type="button"
+                      onClick={() => selectValue(trimmedSearch)}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-meta-4"
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-primary">
+                        <HiPlus className="h-5 w-5" strokeWidth={2} />
+                      </span>
+                      <span className="min-w-0 flex-1 text-sm leading-snug text-gray-900 dark:text-white">
+                        Add <span className="font-semibold">&quot;{trimmedSearch}&quot;</span>
+                      </span>
+                    </button>
+                  </li>
+                ) : null}
                 {filteredRows.map(row => {
                   const checked = selectedValue != null && sameValue(selectedValue, row.value);
                   return (
@@ -297,6 +329,15 @@ const FormikSingleOptionModalField = ({
           </div>
 
           <footer className="shrink-0 border-t border-gray-100 bg-gray-50/80 px-5 pb-5 pt-4 dark:border-strokedark dark:bg-meta-4/50">
+            {showCreateOption ? (
+              <button
+                type="button"
+                onClick={() => selectValue(trimmedSearch)}
+                className="mb-3 w-full rounded-full border border-primary bg-white py-3.5 text-sm font-semibold text-primary transition hover:bg-primary/5 dark:border-primary dark:bg-boxdark dark:hover:bg-primary/10"
+              >
+                Use &quot;{trimmedSearch}&quot;
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setOpen(false)}

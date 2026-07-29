@@ -1,12 +1,13 @@
 'use client';
 import { createContext, useEffect } from 'react';
-import { redirect } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
 import { authenticateUser, updateUserTimezone } from '@/services/public/auth';
 import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
 import { USER_ROLE, USER_SUB_ROLE } from '@/utils/authorization';
+import { buildLoginUrl } from '@/utils/auth-redirect';
 
 const initialState = {
   user: {
@@ -36,8 +37,9 @@ const initialState = {
 export const AuthContext = createContext(initialState);
 
 function AuthProvider({ children }) {
+  const pathname = usePathname();
   const token = Cookies.get('token');
-  if (!token) redirect('/auth/login');
+  if (!token) redirect(buildLoginUrl(pathname));
 
   const {
     data: userAuthenticationResponse,
@@ -56,7 +58,7 @@ function AuthProvider({ children }) {
 
   if (isLoading) return <FullScreenLoader />;
 
-  if (isError) redirect('/auth/login');
+  if (isError) redirect(buildLoginUrl(pathname));
 
   const logout = () => {
     Cookies.remove('token');

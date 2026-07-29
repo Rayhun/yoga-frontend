@@ -55,6 +55,11 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/cycle_insights',
 ];
 
+const RELIEF_SUBMENU_ROUTES = [
+  '/portal/admin/relief/faq',
+  '/portal/admin/relief/quick-tools',
+];
+
 const SESSIONS_SUBMENU_ROUTES = [
   '/portal/admin/lms/session/video',
   '/portal/admin/lms/session/image',
@@ -76,6 +81,7 @@ const EXPERTS_ROUTES = [
   '/portal/admin/lms/expert/edit',
   '/portal/admin/lms/expert/dashboard',
   '/portal/admin/lms/expert/commission',
+  '/portal/admin/lms/expert/home-coach',
   '/portal/admin/lms/expert/payment',
   '/portal/admin/lms/expert/guided-experiences'
 ];
@@ -139,13 +145,18 @@ const ADMIN = [
       {
         label: 'Experts',
         href: '/portal/admin/lms/expert',
-        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard') && !pathname.includes('/guided-experiences'),
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/home-coach') && !pathname.includes('/payment') && !pathname.includes('/dashboard') && !pathname.includes('/guided-experiences'),
       },
       {
         label: 'Guided Experiences',
         href: '/portal/admin/lms/expert/guided-experiences',
         isActive: pathname => pathname.includes('/portal/admin/lms/expert/guided-experiences'),
         disabled: false,
+      },
+      {
+        label: 'Home Coach',
+        href: '/portal/admin/lms/expert/home-coach',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/home-coach'),
       },
       {
         label: 'Commission',
@@ -211,7 +222,16 @@ const ADMIN = [
     Icon: FaFileInvoice,
     label: 'Onboarding Quiz',
     href: '/portal/admin/onboarding/quiz',
-    isActive: pathname => pathname.includes('/portal/admin/onboarding/quiz'),
+    isActive: pathname =>
+      pathname.includes('/portal/admin/onboarding/quiz') &&
+      !pathname.includes('/portal/admin/onboarding/quiz/pages'),
+    disabled: false,
+  },
+  {
+    Icon: MdPages,
+    label: 'Quiz Pages',
+    href: '/portal/admin/onboarding/quiz/pages',
+    isActive: pathname => pathname.includes('/portal/admin/onboarding/quiz/pages'),
     disabled: false,
   },
   {
@@ -314,6 +334,25 @@ const ADMIN = [
     href: '/portal/admin/tracker',
     isActive: pathname => pathname.includes('/portal/admin/tracker'),
     disabled: false,
+  },
+  {
+    Icon: FiActivity,
+    label: 'Relief',
+    href: '/portal/admin/relief/faq',
+    disabled: false,
+    hasActiveSubMenu: pathname => RELIEF_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'FAQ',
+        href: '/portal/admin/relief/faq',
+        isActive: pathname => pathname.includes('/portal/admin/relief/faq'),
+      },
+      {
+        label: 'Quick Tools',
+        href: '/portal/admin/relief/quick-tools',
+        isActive: pathname => pathname.includes('/portal/admin/relief/quick-tools'),
+      },
+    ],
   },
   {
     Icon: FaQuestion,

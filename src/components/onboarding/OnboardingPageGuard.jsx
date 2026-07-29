@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import useAuthContext from '@/hooks/useAuthContext';
 import PageLoader from '@/components/common/loader/PageLoader';
 import Button from '@/components/common/Button';
+import { isHomeCoachPending } from '@/utils/onboarding-home-coach';
 
 const DONUT_R = 52;
 const DONUT_C = 2 * Math.PI * DONUT_R;
@@ -128,11 +129,21 @@ function OnboardingAlreadyCompleteView() {
 const OnboardingPageGuard = ({ children }) => {
   const router = useRouter();
   const { user } = useAuthContext();
+  const [homeCoachPending, setHomeCoachPending] = useState(false);
+
+  useEffect(() => {
+    setHomeCoachPending(isHomeCoachPending());
+  }, [user?.profile?.on_boarding_quiz]);
 
   // If user is admin, redirect to portal
   if (user?.isAdmin) {
     router.push('/portal');
     return <PageLoader />;
+  }
+
+  // Quiz done but home coach step still in progress — keep onboarding page open
+  if (user?.isCustomer && user?.profile?.on_boarding_quiz === true && homeCoachPending) {
+    return children;
   }
 
   // If user is customer and has completed onboarding, show completion + progress + redirect

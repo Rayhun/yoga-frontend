@@ -19,6 +19,11 @@ const FormikMultiSelect = ({
   loading = false,
   /** Scroll listbox to bottom → fetch more catalog tags */
   infiniteScroll,
+  /** When false, options are not filtered client-side (use with server search). */
+  filterOptionsLocally = true,
+  /** Controlled search text for server-side option loading. */
+  inputValue,
+  onInputChange,
   ...rest
 }) => {
   const { slotProps: incomingSlotProps, ...autocompleteRest } = rest;
@@ -126,7 +131,11 @@ const FormikMultiSelect = ({
           options={options}
           freeSolo={autocompleteRest.freeSolo}
           filterSelectedOptions
+          filterOptions={filterOptionsLocally ? undefined : opts => opts}
+          inputValue={inputValue}
+          onInputChange={onInputChange}
           loading={loading}
+          isOptionEqualToValue={(option, value) => String(option?.value) === String(value?.value)}
           getOptionLabel={option => (typeof option === 'string' ? option : option.label)}
           getOptionKey={(option, index) =>
             option?.value != null && option?.value !== ''

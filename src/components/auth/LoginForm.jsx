@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { FiMail, FiLock } from 'react-icons/fi';
@@ -11,9 +11,12 @@ import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
+import { getOnboardingRedirectPath } from '@/utils/auth-redirect';
 
 const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get('next');
   const { mutateAsync } = useMutation({
     mutationFn: loginUser,
   });
@@ -41,8 +44,10 @@ const LoginForm = () => {
           if (!email_verify) {
             sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
             sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
-            // sessionStorage.setItem('pendingVerificationPhone', mobile_number);
-            router.replace('/auth/verify-account?step=email');
+            const verifyUrl = nextPath
+              ? `/auth/verify-account?step=email&next=${encodeURIComponent(nextPath)}`
+              : '/auth/verify-account?step=email';
+            router.replace(verifyUrl);
           } else {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
@@ -68,7 +73,7 @@ const LoginForm = () => {
           }
         } else {
           Cookies.set('token', response?.data?.token);
-          router.replace('/onboarding');
+          router.replace(getOnboardingRedirectPath(nextPath));
         }
       }
     } catch (error) {

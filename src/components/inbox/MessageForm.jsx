@@ -198,6 +198,7 @@ const MessageForm = () => {
             <AttachmentButton onFileSelect={handleFileSelect} />
             <div className="flex-1">
               <input
+                id="circle-message-input"
                 type="text"
                 value={inputText}
                 onKeyDown={onKeyDown}

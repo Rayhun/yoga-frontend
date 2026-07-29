@@ -24,10 +24,10 @@ const Message = ({ isMyMessage, senderName, time, children, isStreaming, isError
     ) : (
       <div className="max-w-125 w-fit min-w-[200px]">
         {senderName && <p className="text-sm mb-1 text-black">{senderName}</p>}
-        <div className={`mb-2.5 rounded-2xl rounded-tl-none px-5 py-3 flex flex-col justify-between items-end gap-1 overflow-hidden ${isError ? 'bg-red-50 border border-red-200' : 'bg-white'}`}>
+        <div className={`mb-2.5 rounded-2xl rounded-tl-none px-5 py-3 flex flex-col justify-between items-end gap-1 overflow-hidden ${isError ? 'bg-warning/10 border border-warning/30' : 'bg-white'}`}>
           <div className="w-full overflow-hidden">
             {isError ? (
-              <p className="text-red-600 whitespace-pre-wrap break-words">{children}</p>
+              <p className="text-black whitespace-pre-wrap break-words">{children}</p>
             ) : (
               <StreamingMarkdown content={children} isStreaming={isStreaming} />
             )}
@@ -49,6 +49,7 @@ const MessagesList = () => {
     messages: { isLoading: isLoadingMessages, data: messages },
     isAITyping,
     streamingMessage,
+    streamingIsError,
   } = useAIFaq();
 
   const lastMessageRef = useRef(null);
@@ -77,7 +78,7 @@ const MessagesList = () => {
           ))}
 
           {streamingMessage && (
-            <Message isMyMessage={false} isStreaming>
+            <Message isMyMessage={false} isStreaming isError={streamingIsError}>
               {streamingMessage}
             </Message>
           )}

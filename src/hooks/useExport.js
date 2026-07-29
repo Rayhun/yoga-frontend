@@ -5,6 +5,16 @@ import { toast } from 'react-toastify';
 import useConfirm from './useConfirm';
 import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
+const isPlainParams = value => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  if (value.nativeEvent || typeof value.preventDefault === 'function') {
+    return false;
+  }
+  return true;
+};
+
 /**
  * Shared admin CSV export: confirm → fetch blob → download.
  *
@@ -25,15 +35,16 @@ const useExport = ({
 
   const handleExport = useCallback(
     async (params = {}) => {
+      const safeParams = isPlainParams(params) ? params : {};
       try {
         const message =
-          typeof confirmMessage === 'function' ? confirmMessage(params) : confirmMessage;
+          typeof confirmMessage === 'function' ? confirmMessage(safeParams) : confirmMessage;
         await confirm({ message });
-        const response = await mutateAsync(params);
+        const response = await mutateAsync(safeParams);
         const file =
-          typeof filename === 'function' ? filename(params) : filename;
+          typeof filename === 'function' ? filename(safeParams) : filename;
         const success =
-          typeof successMessage === 'function' ? successMessage(params) : successMessage;
+          typeof successMessage === 'function' ? successMessage(safeParams) : successMessage;
         downloadBlobAsCsv(response, file);
         toast.success(success);
       } catch (error) {

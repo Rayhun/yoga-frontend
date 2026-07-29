@@ -37,12 +37,21 @@ export const deleteOnboardingV2Question = async ({ id }) => {
   return axios.delete(`${QUESTIONS_BASE}/${id}/`);
 };
 
-export const getOnboardingV2FirstQuestion = async () => {
-  return runDeduped(DEDUPE_FIRST_QUESTION_KEY, () =>
-    axios.get(`${API_V2_BASE_URL}/onboarding/quiz/first-question/`)
-  );
+export const getOnboardingV2FirstQuestion = async ({ slug } = {}) => {
+  const dedupeKey = slug ? `${DEDUPE_FIRST_QUESTION_KEY}:${slug}` : DEDUPE_FIRST_QUESTION_KEY;
+  const path = slug
+    ? `${API_V2_BASE_URL}/onboarding/quiz/first-question/${encodeURIComponent(slug)}/`
+    : `${API_V2_BASE_URL}/onboarding/quiz/first-question/`;
+
+  return runDeduped(dedupeKey, () => axios.get(path));
 };
 
 export const submitOnboardingV2Answer = async ({ payload }) => {
   return axios.post(`${API_V2_BASE_URL}/onboarding/quiz/submit-answer/`, payload);
 };
+
+export const getOnboardHomeCoach = coachUrl =>
+  axios.get(coachUrl);
+
+export const saveOnboardHomeCoach = (submitUrl, payload) =>
+  axios.post(submitUrl, payload);

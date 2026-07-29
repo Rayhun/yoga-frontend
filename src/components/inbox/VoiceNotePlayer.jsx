@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import dayjs from 'dayjs';
+import { FaMicrophone, FaPause, FaPlay, FaUser } from 'react-icons/fa';
 import {
   formatDuration,
   getPlaybackUrl,
@@ -12,8 +13,35 @@ import {
 /** Ensures only one voice note plays at a time across the chat. */
 const STOP_OTHERS = 'yoga-voice-note-stop';
 
-const VoiceNotePlayer = ({ url, durationSeconds = 0, isMyMessage = false }) => {
+const BAR_COUNT = 34;
+const PROGRESS_DOT_COLOR = '#C45C00';
+
+const hashSeed = value => {
+  let hash = 0;
+  const str = String(value || '');
+  for (let i = 0; i < str.length; i += 1) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+};
+
+const buildWaveformBars = seed => {
+  const hash = hashSeed(seed);
+  return Array.from({ length: BAR_COUNT }, (_, index) => {
+    const wave = Math.abs(Math.sin((hash + index * 17) * 0.13) * 10000) % 1;
+    return 3 + wave * 13;
+  });
+};
+
+const VoiceNotePlayer = ({
+  url,
+  durationSeconds = 0,
+  isMyMessage = false,
+  messageTime = null,
+}) => {
   const audioRef = useRef(null);
+  const waveformRef = useRef(null);
   const playerIdRef = useRef(`vn-${Math.random().toString(36).slice(2)}`);
   const taggedDuration = Number(durationSeconds) > 0
     ? Number(durationSeconds)
@@ -27,6 +55,7 @@ const VoiceNotePlayer = ({ url, durationSeconds = 0, isMyMessage = false }) => {
 
   const playbackUrl = getPlaybackUrl(url);
   const mimeType = mimeTypeForVoiceUrl(url);
+  const barHeights = useMemo(() => buildWaveformBars(url || playbackUrl), [url, playbackUrl]);
 
   useEffect(() => {
     setDuration(prev => (prev > 0 ? prev : taggedDuration));
@@ -159,57 +188,105 @@ const VoiceNotePlayer = ({ url, durationSeconds = 0, isMyMessage = false }) => {
     }
   };
 
-  // WhatsApp: show total length before play; elapsed while playing / scrubbed
+  const seekToRatio = ratio => {
+    const audio = audioRef.current;
+    if (!audio || duration <= 0) return;
+    const clamped = Math.min(1, Math.max(0, ratio));
+    audio.currentTime = clamped * duration;
+    setCurrent(clamped * duration);
+  };
+
+  const handleWaveformClick = event => {
+    const rect = waveformRef.current?.getBoundingClientRect();
+    if (!rect?.width) return;
+    seekToRatio((event.clientX - rect.left) / rect.width);
+    if (!isPlaying) {
+      togglePlay();
+    }
+  };
+
   const displaySeconds =
     isPlaying || current > 0.05 ? current : duration > 0 ? duration : 0;
 
   const progress = duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
-  const trackClass = isMyMessage ? 'bg-green-700/20' : 'bg-gray-300';
-  const fillClass = isMyMessage ? 'bg-green-700' : 'bg-green-600';
-  const btnClass = isMyMessage
-    ? 'bg-green-700 text-white hover:bg-green-800'
-    : 'bg-green-600 text-white hover:bg-green-700';
-  const timeClass = isMyMessage ? 'text-green-900/70' : 'text-gray-500';
+  const playedBarCount = Math.round((progress / 100) * BAR_COUNT);
+  const labelClass = isMyMessage ? 'text-gray-600' : 'text-gray-500';
+  const barPlayedClass = isMyMessage ? 'bg-green-800/55' : 'bg-green-700/50';
+  const barUnplayedClass = isMyMessage ? 'bg-green-900/25' : 'bg-gray-400/55';
+  const avatarRingClass = isMyMessage ? 'border-green-700/35' : 'border-gray-300';
+  const avatarIconClass = isMyMessage ? 'text-green-800' : 'text-green-700';
 
   return (
-    <div className="mb-1 min-w-[200px] max-w-[260px] pr-8 pb-3 select-none">
+    <div className="mb-1 min-w-[230px] max-w-[280px] select-none">
       <audio ref={audioRef} preload="auto" playsInline>
         <source src={playbackUrl} type={mimeType || undefined} />
       </audio>
-      <div className="flex items-center gap-3">
+
+      <div className="flex items-center gap-2">
+        <div className="relative h-11 w-11 flex-shrink-0">
+          <div
+            className={`flex h-11 w-11 items-center justify-center rounded-full border ${avatarRingClass} bg-white/40`}
+          >
+            <FaUser size={20} className={avatarIconClass} aria-hidden />
+          </div>
+          <span
+            className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-white ${avatarIconClass}`}
+            aria-hidden
+          >
+            <FaMicrophone size={9} />
+          </span>
+        </div>
+
         <button
           type="button"
           onClick={togglePlay}
-          className={`h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-95 ${btnClass}`}
+          className="flex h-8 w-6 flex-shrink-0 items-center justify-center text-gray-900 transition-transform active:scale-95"
           aria-label={isPlaying ? 'Pause voice note' : 'Play voice note'}
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isLoading && !isPlaying ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-700 border-t-transparent" />
           ) : isPlaying ? (
-            <FaPause size={14} />
+            <FaPause size={15} />
           ) : (
-            <FaPlay size={14} className="ml-0.5" />
+            <FaPlay size={15} className="ml-0.5" />
           )}
         </button>
 
-        <div className="flex-1 min-w-0 pt-1">
+        <div className="min-w-0 flex-1">
           <button
+            ref={waveformRef}
             type="button"
-            className={`w-full h-1.5 rounded-full overflow-hidden ${trackClass}`}
-            onClick={togglePlay}
-            aria-label="Play voice note"
+            className="relative flex h-7 w-full items-center gap-[2px] px-0.5"
+            onClick={handleWaveformClick}
+            aria-label="Seek voice note"
           >
-            <div
-              className={`h-full rounded-full transition-[width] duration-100 ${fillClass}`}
-              style={{ width: `${progress}%` }}
+            {barHeights.map((height, index) => (
+              <span
+                key={index}
+                className={`w-[2px] flex-shrink-0 rounded-full transition-colors duration-100 ${
+                  index < playedBarCount ? barPlayedClass : barUnplayedClass
+                }`}
+                style={{ height: `${height}px` }}
+              />
+            ))}
+            <span
+              className="pointer-events-none absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-sm"
+              style={{
+                left: `${progress}%`,
+                backgroundColor: PROGRESS_DOT_COLOR,
+              }}
             />
           </button>
-          {/* WhatsApp-style: duration under the bar on the left */}
-          <div className={`mt-1.5 text-[11px] tabular-nums font-medium ${timeClass}`}>
-            {formatDuration(displaySeconds)}
+
+          <div className={`mt-0.5 flex items-center justify-between text-[11px] tabular-nums ${labelClass}`}>
+            <span className="font-medium">{formatDuration(displaySeconds)}</span>
+            {messageTime && (
+              <span className="text-[10px]">{dayjs(messageTime).format('h:mm A')}</span>
+            )}
           </div>
-          {error && <p className="text-[10px] text-red-600 mt-0.5">{error}</p>}
+
+          {error && <p className="mt-0.5 text-[10px] text-red-600">{error}</p>}
         </div>
       </div>
     </div>

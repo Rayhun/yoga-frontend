@@ -35,9 +35,7 @@ const CommunityIconBadge = ({
 const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
   if (!header) return null;
 
-  const logoIcon = header.logo_icon;
   const avatarSrc = header.avatar_url || header.avatar_icon;
-  const hasIconGroup = logoIcon || avatarSrc;
   const metrics = metricsRow?.items || [];
 
   return (
@@ -47,36 +45,19 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
     >
       <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-8 text-center sm:py-10 lg:px-12 lg:py-12">
         <div className="mx-auto w-full max-w-sm space-y-4">
-          {hasIconGroup ? (
-            <div className="hidden items-center justify-center lg:flex">
-              {logoIcon ? (
-                <CommunityIconBadge
-                  value={logoIcon}
-                  alt={`${header.title || 'Circle'} logo`}
-                  shape="rounded"
-                  className="relative z-0 h-12 w-12"
-                  backgroundColor={getCommunityColor(
-                    header.logo_background_color,
-                    'rgba(255, 255, 255, 0.2)'
-                  )}
-                />
-              ) : null}
-
-              {avatarSrc ? (
-                <CommunityIconBadge
-                  value={avatarSrc}
-                  alt={header.title || 'Coach'}
-                  shape="circle"
-                  className={`relative z-10 h-12 w-12 ring-2 ring-white/30 ${
-                    logoIcon ? '-ml-2.5' : ''
-                  }`}
-                  backgroundColor={getCommunityColor(
-                    header.avatar_background_color,
-                    '#F5F3ED'
-                  )}
-                  textClassName="text-xl"
-                />
-              ) : null}
+          {avatarSrc ? (
+            <div className="flex justify-center">
+              <CommunityIconBadge
+                value={avatarSrc}
+                alt={header.title || 'Coach'}
+                shape="circle"
+                className="h-24 w-24 ring-4 ring-white/30 sm:h-28 sm:w-28"
+                backgroundColor={getCommunityColor(
+                  header.avatar_background_color,
+                  '#F5F3ED'
+                )}
+                textClassName="text-3xl sm:text-4xl"
+              />
             </div>
           ) : null}
 

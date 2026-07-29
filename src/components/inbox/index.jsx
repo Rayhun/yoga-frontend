@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FiUsers } from 'react-icons/fi';
 import Image from 'next/image';
 import { useInbox } from '@/context/InboxContext';
@@ -25,6 +26,10 @@ const CoachesIcon = ({ className = 'w-4 h-4 md:w-5 md:h-5' }) => {
 };
 
 const Inbox = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationIdFromUrl = searchParams.get('conversation');
+  const openedFromUrlRef = useRef(null);
   const { user } = useAuthContext();
   const {
     conversations: { data: conversationsData, active: activeConversation, isLoading: isLoadingConversations },
@@ -32,12 +37,40 @@ const Inbox = () => {
   } = useInbox();
   const shouldShowCoachesTab = user?.profile?.role !== USER_ROLE.TEACHER;
   const isExpertPortal = user?.profile?.role === USER_ROLE.TEACHER;
+  const hasChatGroup = Boolean(user?.profile?.is_chat_group);
   const [activeTab, setActiveTab] = useState('circles');
   const [circlesSubTab, setCirclesSubTab] = useState('my-circles');
   const [coachesSubTab, setCoachesSubTab] = useState('my-chats');
 
   const circles = conversationsData.filter(conv => !conv.is_coach);
   const coaches = conversationsData.filter(conv => conv.is_coach === true);
+
+  useEffect(() => {
+    if (!conversationIdFromUrl || isLoadingConversations) return;
+    if (openedFromUrlRef.current === conversationIdFromUrl) return;
+
+    const matchingConversation = conversationsData.find(
+      conversation => String(conversation.id) === String(conversationIdFromUrl)
+    );
+
+    openedFromUrlRef.current = conversationIdFromUrl;
+
+    if (matchingConversation) {
+      setActiveTab(matchingConversation.is_coach ? 'coaches' : 'circles');
+      setActiveConversation(matchingConversation);
+    } else {
+      setActiveTab('circles');
+      setActiveConversation({ id: conversationIdFromUrl });
+    }
+
+    router.replace('/portal/inbox', { scroll: false });
+  }, [
+    conversationIdFromUrl,
+    conversationsData,
+    isLoadingConversations,
+    router,
+    setActiveConversation,
+  ]);
 
   const showMobileChat = Boolean(activeConversation);
   const handleMobileBack = () => setActiveConversation(null);
@@ -85,7 +118,7 @@ const Inbox = () => {
               activeSubTab={circlesSubTab}
               setActiveSubTab={setCirclesSubTab}
               showDiscover={!isExpertPortal}
-              showInviteClient={isExpertPortal}
+              showInviteClient={isExpertPortal && hasChatGroup}
             />
           ) : (
             <CoachesList

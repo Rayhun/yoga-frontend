@@ -23,10 +23,6 @@ const FormikSelect = ({
   const resolvedSearch = searchPlaceholder ?? `Search ${(label || 'options').toLowerCase()}…`;
   const resolvedTrigger = placeholder ?? 'Select';
 
-  if (freeSolo) {
-    // freeSolo is rare on LMS content forms; fall back to first option list only
-  }
-
   return (
     <FormikSingleOptionModalField
       name={name}

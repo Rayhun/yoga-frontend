@@ -15,8 +15,15 @@ import {
   resolveAttachmentKind,
 } from './chatMedia';
 import VoiceNotePlayer from './VoiceNotePlayer';
+import CircleChatEmptyState from './CircleChatEmptyState';
+import { USER_ROLE } from '@/utils/authorization';
 
-const Attachment = ({ attachment, isMyMessage = false }) => {
+const isVoiceAttachment = attachment => {
+  const kind = resolveAttachmentKind(attachment);
+  return kind === ATTACHMENT_TYPE.VOICE || kind === ATTACHMENT_TYPE.AUDIO;
+};
+
+const Attachment = ({ attachment, isMyMessage = false, messageTime = null }) => {
   const url = attachment?.file || attachment?.url || '';
   const kind = resolveAttachmentKind(attachment);
   const fileName = decodeURIComponent(url.split('/').pop().split('?')[0] || 'file');
@@ -42,6 +49,7 @@ const Attachment = ({ attachment, isMyMessage = false }) => {
         url={url}
         durationSeconds={durationSeconds}
         isMyMessage={isMyMessage}
+        messageTime={messageTime}
       />
     );
   }
@@ -78,49 +86,71 @@ const Attachment = ({ attachment, isMyMessage = false }) => {
   );
 };
 
-const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => (
-  <>
-    {isMyMessage ? (
-      <div className="flex justify-end mb-1">
-        <div className="max-w-[70%]">
-          <div
-            className="rounded-lg rounded-br-sm px-3 py-2 shadow-sm max-w-full relative"
-            style={{ backgroundColor: '#DBF8C6' }}
-          >
-            {attachments.map(att => (
-              <Attachment key={att.id || att.file} attachment={att} isMyMessage />
-            ))}
-            {typeof children === 'string' && children.trim() !== '' && (
-              <p className="text-sm leading-relaxed text-black pr-12 font-medium">{children}</p>
-            )}
-            <div className="absolute bottom-2 right-2">
-              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => {
+  const hasText = typeof children === 'string' && children.trim() !== '';
+  const isVoiceOnly =
+    attachments.length > 0 &&
+    attachments.every(isVoiceAttachment) &&
+    !hasText;
+
+  return (
+    <>
+      {isMyMessage ? (
+        <div className="flex justify-end mb-1">
+          <div className="max-w-[70%]">
+            <div
+              className="rounded-lg rounded-br-sm px-3 py-2 shadow-sm max-w-full relative"
+              style={{ backgroundColor: '#DBF8C6' }}
+            >
+              {attachments.map(att => (
+                <Attachment
+                  key={att.id || att.file}
+                  attachment={att}
+                  isMyMessage
+                  messageTime={time}
+                />
+              ))}
+              {hasText && (
+                <p className="text-sm leading-relaxed text-black pr-12 font-medium">{children}</p>
+              )}
+              {!isVoiceOnly && (
+                <div className="absolute bottom-2 right-2">
+                  <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    ) : (
-      <div className="flex justify-start mb-1">
-        <div className="max-w-[70%]">
-          <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2 shadow-sm border border-gray-200 max-w-full relative">
-            {senderName && (
-              <p className="text-xs font-semibold text-blue-600 mb-1">{senderName}</p>
-            )}
-            {attachments.map(att => (
-              <Attachment key={att.id || att.file} attachment={att} isMyMessage={false} />
-            ))}
-            {typeof children === 'string' && children.trim() !== '' && (
-              <p className="text-sm leading-relaxed text-gray-800 pr-12 font-medium">{children}</p>
-            )}
-            <div className="absolute bottom-2 right-2">
-              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+      ) : (
+        <div className="flex justify-start mb-1">
+          <div className="max-w-[70%]">
+            <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2 shadow-sm border border-gray-200 max-w-full relative">
+              {senderName && (
+                <p className="text-xs font-semibold text-blue-600 mb-1">{senderName}</p>
+              )}
+              {attachments.map(att => (
+                <Attachment
+                  key={att.id || att.file}
+                  attachment={att}
+                  isMyMessage={false}
+                  messageTime={time}
+                />
+              ))}
+              {hasText && (
+                <p className="text-sm leading-relaxed text-gray-800 pr-12 font-medium">{children}</p>
+              )}
+              {!isVoiceOnly && (
+                <div className="absolute bottom-2 right-2">
+                  <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </>
-);
+      )}
+    </>
+  );
+};
 
 const MessagesList = () => {
   const messagesEndRef = useRef(null);
@@ -130,11 +160,9 @@ const MessagesList = () => {
   const isInitialLoadRef = useRef(true);
   const animateIdsRef = useRef(new Set());
 
-  const {
-    user: {
-      profile: { id: loggedInUserID },
-    },
-  } = useAuthContext();
+  const { user } = useAuthContext();
+  const loggedInUserID = user?.profile?.id;
+  const isExpertPortal = user?.profile?.role === USER_ROLE.TEACHER;
   const {
     conversations: { active: activeConversation },
     messages: { isLoading: isLoadingMessages, data: messages },
@@ -195,6 +223,17 @@ const MessagesList = () => {
       end.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages, isLoadingMessages]);
+
+  const hasMessages = Array.isArray(messages) && messages.length > 0;
+  const isGroupCircle = Boolean(activeConversation?.is_group && !activeConversation?.is_coach);
+  const showExpertEmptyState =
+    !isLoadingMessages &&
+    !hasMessages &&
+    isGroupCircle &&
+    isExpertPortal &&
+    activeConversation?.can_view_detail;
+  const showMemberEmptyState =
+    !isLoadingMessages && !hasMessages && isGroupCircle && !isExpertPortal;
 
   return (
     <div
