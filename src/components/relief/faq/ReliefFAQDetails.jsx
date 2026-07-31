@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord } from '@/components/common/details';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
 
 const ReliefFAQDetails = ({ data = {} }) => {
   const router = useRouter();
@@ -19,11 +20,10 @@ const ReliefFAQDetails = ({ data = {} }) => {
           <ControllableRichText>{data?.answer || 'No answer provided'}</ControllableRichText>
         </DetailsRecord>
         <DetailsRecord label="Slug">{data?.slug || '—'}</DetailsRecord>
-        <DetailsRecord label="Sort Order">{data?.sort_order}</DetailsRecord>
         <DetailsRecord label="Active">{data?.is_active ? 'Yes' : 'No'}</DetailsRecord>
         <DetailsRecord label="Tags">
           {data?.tags?.length
-            ? data.tags.map(tag => tag.label).join(', ')
+            ? data.tags.map(tag => getCatalogTagChipLabel(tag)).join(', ')
             : 'No tags'}
         </DetailsRecord>
       </div>

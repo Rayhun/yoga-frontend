@@ -197,6 +197,83 @@ function MoodCard({ data, selectedMood, onSelect }) {
   );
 }
 
+function WellnessSummaryCard({ personalized, scored }) {
+  const hasPersonalized = Boolean(personalized?.title);
+  const hasScored = scored?.score != null;
+
+  if (!hasPersonalized && !hasScored) return null;
+
+  return (
+    <SectionShell className="h-full p-5 md:p-6">
+      <div className="flex h-full flex-col gap-6 lg:flex-row lg:items-center lg:gap-8">
+        {hasPersonalized ? (
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary/80">
+              {personalized.label || 'Personalized for you'}
+            </p>
+            <h2 className="mt-2 font-serif text-xl leading-snug text-gray-900 md:text-2xl">
+              {personalized.title}
+            </h2>
+            {personalized.trend?.text ? (
+              <span
+                className={`mt-3 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${chipPaletteClass(
+                  personalized.trend.palette
+                )}`}
+              >
+                {personalized.trend.icon} {personalized.trend.text}
+              </span>
+            ) : null}
+            {personalized.body ? (
+              <p className="mt-3 text-sm leading-relaxed text-gray-600 md:text-[15px]">
+                {personalized.body}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {hasPersonalized && hasScored ? (
+          <div className="hidden w-px self-stretch bg-stone-200 lg:block" aria-hidden />
+        ) : null}
+
+        {hasScored ? (
+          <div
+            className={`flex w-full flex-col gap-4 ${
+              hasPersonalized ? 'lg:w-[min(100%,20rem)] lg:shrink-0' : ''
+            }`}
+          >
+            <div className="flex items-center gap-4 sm:gap-5">
+              <WellnessScoreRing score={scored.score} size={hasPersonalized ? 108 : 120} />
+              <div className="min-w-0 flex-1">
+                <h3 className="font-serif text-lg leading-snug text-gray-900 md:text-xl">
+                  {scored.title}
+                </h3>
+                {scored.subtitle ? (
+                  <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{scored.subtitle}</p>
+                ) : null}
+              </div>
+            </div>
+            {scored.chips?.length ? (
+              <div className="flex flex-wrap gap-2">
+                {scored.chips.map(chip => (
+                  <span
+                    key={`${chip.label}-${chip.icon}`}
+                    className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${chipPaletteClass(
+                      chip.palette
+                    )}`}
+                  >
+                    {chip.icon} {chip.label}
+                    {chip.trend_indicator ? ` ${chip.trend_indicator}` : ''}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </SectionShell>
+  );
+}
+
 function PersonalizedCard({ data }) {
   if (!data?.title) return null;
   return (
@@ -457,6 +534,7 @@ const SKELETON_HEIGHT = {
   checkin: 'h-52',
   personalized: 'h-44',
   scored: 'h-52',
+  wellness_summary: 'h-56',
   coach: 'h-36',
   trend: 'h-24',
   today_plan: 'h-56',
@@ -604,8 +682,24 @@ export default function ReturningUserHome({ home }) {
   };
 
   const renderSection = key => {
-    if (isLoadingSections && key !== 'info' && !sectionData[key]) {
+    if (isLoadingSections && key !== 'info' && !sectionData[key] && key !== 'wellness_summary') {
       return <SectionSkeleton className={SKELETON_HEIGHT[key] || 'h-40'} />;
+    }
+    if (key === 'wellness_summary') {
+      if (isLoadingSections && !sectionData.personalized && !sectionData.scored) {
+        return <SectionSkeleton className={SKELETON_HEIGHT.wellness_summary} />;
+      }
+      const content = (
+        <WellnessSummaryCard
+          personalized={sectionData.personalized}
+          scored={sectionData.scored}
+        />
+      );
+      const hasContent =
+        sectionHasContent('personalized', sectionData.personalized, home) ||
+        sectionHasContent('scored', sectionData.scored, home);
+      if (!content && !hasContent) return null;
+      return content;
     }
     const content = renderSectionContent(key);
     if (!content && !sectionHasContent(key, sectionData[key], home)) return null;
@@ -619,6 +713,12 @@ export default function ReturningUserHome({ home }) {
           <HomeHeader home={home} onAskAi={handleAskAi} />
 
           {layoutGroups.map((group, groupIndex) => {
+            if (group.type === 'wellness_summary') {
+              const section = renderSection('wellness_summary');
+              if (!section) return null;
+              return <div key={`wellness-summary-${groupIndex}`}>{section}</div>;
+            }
+
             if (group.type === 'full') {
               const key = group.keys[0];
               const section = renderSection(key);

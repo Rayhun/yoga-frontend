@@ -6,7 +6,7 @@ import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 import IconButton from '@mui/material/IconButton';
 import { MdFileUpload, MdDelete, MdAttachFile } from 'react-icons/md';
-import { getFileFromURL } from '@/utils/helpers';
+import { getFileFromURL, createRemoteFilePlaceholder } from '@/utils/helpers';
 import { ONE_MB } from '@/utils/general';
 import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
@@ -71,12 +71,40 @@ function FormikDropzone({
 
   // Initialize files from fileURLs on component mount
   useEffect(() => {
-    if (fileURLs.length > 0) {
-      Promise.all(fileURLs.map(getFileFromURL)).then(initialFiles => {
-        setFiles(multiple ? initialFiles : [initialFiles[0]]);
-        helpers.setValue(multiple ? initialFiles : initialFiles[0]);
-      });
-    }
+    if (!fileURLs.length) return undefined;
+
+    let cancelled = false;
+
+    const loadInitialFiles = async () => {
+      const initialFiles = await Promise.all(
+        fileURLs.map(async url => {
+          const file = await getFileFromURL(url);
+          return file || createRemoteFilePlaceholder(url);
+        })
+      );
+
+      if (cancelled) return;
+
+      const resolvedFiles = initialFiles.filter(Boolean);
+      if (!resolvedFiles.length) return;
+
+      setFiles(multiple ? resolvedFiles : [resolvedFiles[0]]);
+
+      const downloadableFiles = resolvedFiles.filter(file => file instanceof File);
+      if (downloadableFiles.length) {
+        helpers.setValue(multiple ? downloadableFiles : downloadableFiles[0]);
+      }
+    };
+
+    loadInitialFiles().catch(() => {
+      if (cancelled) return;
+      const placeholders = fileURLs.map(createRemoteFilePlaceholder);
+      setFiles(multiple ? placeholders : [placeholders[0]]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,9 +156,12 @@ function FormikDropzone({
               {file?.type?.includes('image') ? (
                 <img src={URL.createObjectURL(file)} className="w-full h-full" alt="img" />
               ) : (
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-2 px-2 text-center">
                   <MdAttachFile size={24} />
-                  <p>{file?.name}</p>
+                  <p className="line-clamp-3 break-all text-xs">{file?.name}</p>
+                  {file?.isRemotePlaceholder ? (
+                    <p className="text-[11px] text-slate-500">Existing file attached</p>
+                  ) : null}
                 </div>
               )}
             </div>

@@ -27,7 +27,7 @@ import Button from '@/components/common/Button';
 import { FiFilter, FiSearch } from 'react-icons/fi';
 import useToggle from '@/hooks/useToggle';
 import useConfirm from '@/hooks/useConfirm';
-import { downloadBlobAsCsv, toastApiError, getDefaultPageSize } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError, getDefaultPageSize, formatSignupDate } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 
@@ -153,6 +153,11 @@ const ExpertsList = () => {
         header: 'Coaching',
         accessorKey: 'has_event_or_consult',
         cell: ({ row }) => (row?.original?.has_event_or_consult ? 'Yes' : 'No'),
+      },
+      {
+        header: 'Signed Up',
+        accessorKey: 'signed_up_at',
+        cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
       },
     ],
     []

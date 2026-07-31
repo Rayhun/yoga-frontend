@@ -37,6 +37,9 @@ import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
 import { normalizeEquipmentsForForm } from '@/utils/sessionQuizInitialValues';
 
+const parseReliefIndexValue = value =>
+  value === true || value === 'yes' || value === 1 || value === '1';
+
 const VideoSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -64,7 +67,7 @@ const VideoSession = ({ selected }) => {
     languages: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.languages),
     categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
-    relief_index: Boolean(selected?.relief_index),
+    relief_index: parseReliefIndexValue(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -93,29 +96,56 @@ const VideoSession = ({ selected }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     file: Yup.mixed()
-      .required('Required!')
+      .nullable()
+      .test('fileRequired', 'Required!', function validateFile(value) {
+        const hasUploadedFile = Boolean(value);
+        const hasExistingFile = isEditMode && Boolean(selected?.content_file);
+        return hasUploadedFile || hasExistingFile;
+      })
       .test(
         'fileType',
         'Unsupported file format. Only videos are allowed.',
-        value => value && value.type.includes('video')
+        value => !value || (value instanceof File && value.type.includes('video'))
       )
-      .test('fileSize', 'File size must be less than 10 MB', value => value && value.size <= 10 * ONE_MB),
+      .test(
+        'fileSize',
+        'File size must be less than 10 MB',
+        value => !value || (value instanceof File && value.size <= 10 * ONE_MB)
+      ),
     audio_file: Yup.mixed()
-      .required('Required!')
+      .nullable()
+      .test('fileRequired', 'Required!', function validateAudio(value) {
+        const hasUploadedFile = Boolean(value);
+        const hasExistingFile = isEditMode && Boolean(selected?.content_audio);
+        return hasUploadedFile || hasExistingFile;
+      })
       .test(
         'fileType',
         'Unsupported file format. Only audios are allowed.',
-        value => value && value.type.includes('audio')
+        value => !value || (value instanceof File && value.type.includes('audio'))
       )
-      .test('fileSize', 'File size must be less than 5 MB', value => value && value.size <= 5 * ONE_MB),
+      .test(
+        'fileSize',
+        'File size must be less than 5 MB',
+        value => !value || (value instanceof File && value.size <= 5 * ONE_MB)
+      ),
     thumbnail: Yup.mixed()
-      .required('Required!')
+      .nullable()
+      .test('fileRequired', 'Required!', function validateThumbnail(value) {
+        const hasUploadedFile = Boolean(value);
+        const hasExistingFile = isEditMode && Boolean(selected?.thumbnail_image);
+        return hasUploadedFile || hasExistingFile;
+      })
       .test(
         'fileType',
         'Unsupported file format. Only images are allowed.',
-        value => value && value.type.includes('image')
+        value => !value || (value instanceof File && value.type.includes('image'))
       )
-      .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
+      .test(
+        'fileSize',
+        'File size must be less than 1 MB',
+        value => !value || (value instanceof File && value.size <= 1 * ONE_MB)
+      ),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -272,7 +302,7 @@ const VideoSession = ({ selected }) => {
                 <FormikDropzone
                   name="audio_file"
                   label="Audio File"
-                  fileURLs={selected?.audio_file ? [selected?.audio_file] : []}
+                  fileURLs={selected?.content_audio ? [selected.content_audio] : []}
                   Icon={FaRegFileAudio}
                   accept={{
                     'audio/wav': [],

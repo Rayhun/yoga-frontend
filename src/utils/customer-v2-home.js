@@ -21,7 +21,7 @@ export const SECTION_LAYOUT_WIDTH = {
   period: 'full',
   checkin: 'half',
   checkin_info: 'half',
-  personalized: 'full',
+  personalized: 'half',
   scored: 'half',
   coach: 'full',
   getting_started: 'full',
@@ -57,6 +57,11 @@ export function sectionHasContent(key, data, home) {
       return Boolean(data?.title);
     case 'scored':
       return data?.score != null;
+    case 'wellness_summary':
+      return (
+        Boolean(data?.personalized?.title) ||
+        data?.scored?.score != null
+      );
     case 'coach':
       return Boolean(data?.title);
     case 'getting_started':
@@ -82,9 +87,33 @@ export function sectionHasContent(key, data, home) {
   }
 }
 
+const WELLNESS_SUMMARY_KEY = 'wellness_summary';
+
+function coalesceVisibleKeys(visibleKeys) {
+  const result = [];
+  let index = 0;
+
+  while (index < visibleKeys.length) {
+    const key = visibleKeys[index];
+    const nextKey = visibleKeys[index + 1];
+
+    if (key === 'personalized' && nextKey === 'scored') {
+      result.push(WELLNESS_SUMMARY_KEY);
+      index += 2;
+      continue;
+    }
+
+    result.push(key);
+    index += 1;
+  }
+
+  return result;
+}
+
 /**
  * Build render groups from backend sections_order + flags.
  * Removed sections collapse; lone half-width cards span the full row.
+ * Personalized + scored are merged into one full-width row when adjacent.
  */
 export function buildHomeLayoutGroups(home, { isLoading = false, sectionData = {} } = {}) {
   const order = home?.sections_order?.length ? home.sections_order : DEFAULT_SECTIONS_ORDER;
@@ -95,6 +124,8 @@ export function buildHomeLayoutGroups(home, { isLoading = false, sectionData = {
     return sectionHasContent(key, sectionData[key], home);
   });
 
+  const layoutKeys = coalesceVisibleKeys(visibleKeys);
+
   const groups = [];
   let halfBuffer = [];
 
@@ -104,7 +135,13 @@ export function buildHomeLayoutGroups(home, { isLoading = false, sectionData = {
     halfBuffer = [];
   };
 
-  for (const key of visibleKeys) {
+  for (const key of layoutKeys) {
+    if (key === WELLNESS_SUMMARY_KEY) {
+      flushHalf();
+      groups.push({ type: WELLNESS_SUMMARY_KEY, keys: ['personalized', 'scored'] });
+      continue;
+    }
+
     const width = SECTION_LAYOUT_WIDTH[key] || 'full';
     if (width === 'full') {
       flushHalf();

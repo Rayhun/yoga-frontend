@@ -20,7 +20,7 @@ import {
 import ApproveAffiliateForm from './ApproveAffiliateForm';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError, formatSignupDate } from '@/utils/helpers';
 import useConfirm from '@/hooks/useConfirm';
 import useImport from '@/hooks/useImport';
 
@@ -84,6 +84,11 @@ const AffiliateUsersList = () => {
       {
         header: 'Status',
         accessorKey: 'status',
+      },
+      {
+        header: 'Signed Up',
+        accessorKey: 'signed_up_at',
+        cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
       },
     ],
     []

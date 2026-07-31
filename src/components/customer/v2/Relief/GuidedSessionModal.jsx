@@ -44,6 +44,15 @@ function MediaContent({ contentType, link, title }) {
           className="max-h-[70vh] w-full rounded-xl object-contain"
         />
       );
+    case 'pdf':
+      return (
+        <iframe
+          key={link}
+          src={link}
+          title={title || 'Guide / lesson'}
+          className="h-[70vh] w-full rounded-xl border-0 bg-white"
+        />
+      );
     default:
       return (
         <div className="flex min-h-[200px] items-center justify-center p-8 text-center text-gray-500">

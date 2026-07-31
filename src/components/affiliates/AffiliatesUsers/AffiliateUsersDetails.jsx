@@ -8,7 +8,7 @@ import { Chip } from '@mui/material';
 import queryKeys from '@/utils/query-keys';
 import { approveAffiliateUser } from '@/services/private/affiliates/users';
 import useConfirm from '@/hooks/useConfirm';
-import { toastApiError } from '@/utils/helpers';
+import { toastApiError, formatSignupDate } from '@/utils/helpers';
 import ApproveAffiliateForm from './ApproveAffiliateForm';
 
 const DURATION_OPTIONS = {
@@ -103,6 +103,7 @@ const AffiliateUsersDetails = ({ data = {} }) => {
       >
         <div className="flex flex-col gap-5">
           <DetailsRecord label="Status">{data?.status || 'N/A'}</DetailsRecord>
+          <DetailsRecord label="Signed Up">{formatSignupDate(data?.signed_up_at || data?.created_at)}</DetailsRecord>
           <DetailsRecord label="Name">{`${data?.first_name} ${data?.last_name}`}</DetailsRecord>
           <DetailsRecord label="Email">{data?.email}</DetailsRecord>
           <DetailsRecord label="Pay Email">{data?.paypal_email}</DetailsRecord>

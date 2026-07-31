@@ -10,16 +10,16 @@ import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikMultiOptionsModalField from '@/components/common/form/formik/FormikMultiOptionsModalField';
+import FormikCatalogTagsModalField from '@/components/common/form/formik/FormikCatalogTagsModalField';
 import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
 import { toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
+import { seedExpertTagRows } from '@/utils/expertProfileTags';
 import {
   addReliefFAQ,
   getReliefFAQCategoryOptions,
   updateReliefFAQ,
 } from '@/services/private/relief/faq';
-import { getTagsList } from '@/services/private/lms/tag';
 
 const ReliefFAQForm = ({ selected }) => {
   const router = useRouter();
@@ -41,15 +41,7 @@ const ReliefFAQForm = ({ selected }) => {
     [categories]
   );
 
-  const { data: tagsResponse, isLoading: tagsLoading } = useQuery({
-    queryFn: () => getTagsList({ limit: 500, offset: 0, namespace: 'relief_faq', status: 'active' }),
-    queryKey: [queryKeys.lmsTags, 'relief-faq-form'],
-    select: response =>
-      (response?.data?.data?.results || response?.data?.data || []).map(tag => ({
-        label: tag.label,
-        value: tag.id,
-      })),
-  });
+  const tagSeedRows = useMemo(() => seedExpertTagRows(selected?.tags), [selected?.tags]);
 
   const { mutateAsync: createFAQ } = useMutation({
     mutationFn: addReliefFAQ,
@@ -64,7 +56,6 @@ const ReliefFAQForm = ({ selected }) => {
     answer: selected?.answer || '',
     icon: selected?.icon || '❓',
     slug: selected?.slug || '',
-    sort_order: selected?.sort_order ?? 0,
     is_active: selected?.is_active ?? true,
     tag_ids: selected?.tags?.map(tag => tag.id) || [],
   };
@@ -75,7 +66,6 @@ const ReliefFAQForm = ({ selected }) => {
     answer: Yup.string(),
     icon: Yup.string().required('Icon is required'),
     slug: Yup.string().nullable(),
-    sort_order: Yup.number().required('Sort order is required').min(0).max(999),
     is_active: Yup.boolean(),
     tag_ids: Yup.array().of(Yup.number()),
   });
@@ -142,32 +132,17 @@ const ReliefFAQForm = ({ selected }) => {
               placeholder="Write answer here..."
             />
 
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <FormikField name="slug" label="Slug" placeholder="Optional slug" />
-              </div>
-              <div className="w-full xl:w-1/2">
-                <FormikField
-                  name="sort_order"
-                  label="Sort Order"
-                  placeholder="Sort order"
-                  required
-                  min={0}
-                  max={999}
-                  type="number"
-                />
-              </div>
-            </div>
+            <FormikField name="slug" label="Slug" placeholder="Optional slug" />
 
-            <FormikMultiOptionsModalField
+            <FormikCatalogTagsModalField
               name="tag_ids"
               label="Tags"
-              options={tagsResponse || []}
-              chipKind="tag"
+              context="relief_faq"
+              surface="all"
+              seedRows={tagSeedRows}
               modalTitle="Select tags"
               triggerPlaceholder="Select tags"
               searchPlaceholder="Search tags…"
-              loading={tagsLoading}
             />
 
             <FormikCheckbox name="is_active" label="Active" />

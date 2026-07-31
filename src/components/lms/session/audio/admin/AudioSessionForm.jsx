@@ -37,6 +37,9 @@ import { SESSION_TYPE } from '@/utils/enums';
 import { ONE_MB } from '@/utils/general';
 import { normalizeEquipmentsForForm } from '@/utils/sessionQuizInitialValues';
 
+const parseReliefIndexValue = value =>
+  value === true || value === 'yes' || value === 1 || value === '1';
+
 const AudioSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -65,7 +68,7 @@ const AudioSession = ({ selected }) => {
     categories: mapSessionFieldTagIds(selected?.tags, SESSION_CATALOG_FIELD_NAMESPACES.categories),
     file: null,
     thumbnail: null,
-    relief_index: Boolean(selected?.relief_index),
+    relief_index: parseReliefIndexValue(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -94,21 +97,39 @@ const AudioSession = ({ selected }) => {
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
     file: Yup.mixed()
-      .required('Required!')
+      .nullable()
+      .test('fileRequired', 'Required!', function validateFile(value) {
+        const hasUploadedFile = Boolean(value);
+        const hasExistingFile = isEditMode && Boolean(selected?.content_file);
+        return hasUploadedFile || hasExistingFile;
+      })
       .test(
         'fileType',
         'Unsupported file format. Only audios are allowed.',
-        value => value && value.type.includes('audio')
+        value => !value || (value instanceof File && value.type.includes('audio'))
       )
-      .test('fileSize', 'File size must be less than 5 MB', value => value && value.size <= 5 * ONE_MB),
+      .test(
+        'fileSize',
+        'File size must be less than 5 MB',
+        value => !value || (value instanceof File && value.size <= 5 * ONE_MB)
+      ),
     thumbnail: Yup.mixed()
-      .required('Required!')
+      .nullable()
+      .test('fileRequired', 'Required!', function validateThumbnail(value) {
+        const hasUploadedFile = Boolean(value);
+        const hasExistingFile = isEditMode && Boolean(selected?.thumbnail_image);
+        return hasUploadedFile || hasExistingFile;
+      })
       .test(
         'fileType',
         'Unsupported file format. Only images are allowed.',
-        value => value && value.type.includes('image')
+        value => !value || (value instanceof File && value.type.includes('image'))
       )
-      .test('fileSize', 'File size must be less than 1 MB', value => value && value.size <= 1 * ONE_MB),
+      .test(
+        'fileSize',
+        'File size must be less than 1 MB',
+        value => !value || (value instanceof File && value.size <= 1 * ONE_MB)
+      ),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {

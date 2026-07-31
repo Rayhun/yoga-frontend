@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiArrowRight } from 'react-icons/fi';
 import {
@@ -9,6 +10,7 @@ import {
   getQuickDetailHref,
 } from '@/utils/customer-v2-relief';
 import { RELIEF_CARD_HOVER, SectionTitle } from './shared';
+import GuidedSessionModal from './GuidedSessionModal';
 
 function ActionCard({ item, index, onStart }) {
   const iconBg = getActionCardIconBackground(index);
@@ -78,8 +80,28 @@ function SuggestionCard({ item, onStart }) {
 
 export default function QuickToolsTab({ sections = [] }) {
   const router = useRouter();
+  const [activeSession, setActiveSession] = useState(null);
+  const [sessionModalOpen, setSessionModalOpen] = useState(false);
+
+  const openSessionModal = item => {
+    const { content_type: contentType, content_url: contentUrl } = item.cta || {};
+    if (!contentType || !contentUrl) return;
+
+    setActiveSession({
+      content_type: contentType,
+      link: contentUrl,
+      title: item.title,
+    });
+    setSessionModalOpen(true);
+  };
 
   const handleStart = item => {
+    const { content_type: contentType, content_url: contentUrl } = item.cta || {};
+    if (contentType && contentUrl) {
+      openSessionModal(item);
+      return;
+    }
+
     const category = extractQuickCategoryFromUrl(item.cta?.url);
     if (category) {
       router.push(getQuickDetailHref(category));
@@ -122,6 +144,13 @@ export default function QuickToolsTab({ sections = [] }) {
 
         return null;
       })}
+
+      <GuidedSessionModal
+        open={sessionModalOpen}
+        onClose={() => setSessionModalOpen(false)}
+        session={activeSession}
+        title={activeSession?.title}
+      />
     </div>
   );
 }

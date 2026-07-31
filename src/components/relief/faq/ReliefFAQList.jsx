@@ -70,10 +70,6 @@ const ReliefFAQList = () => {
         },
       },
       {
-        header: 'Order',
-        accessorKey: 'sort_order',
-      },
-      {
         header: 'Active',
         accessorKey: 'is_active',
         cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),

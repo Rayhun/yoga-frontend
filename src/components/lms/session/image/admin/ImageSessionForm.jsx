@@ -80,6 +80,9 @@ const isAllowedGuideDocument = file => {
   );
 };
 
+const parseReliefIndexValue = value =>
+  value === true || value === 'yes' || value === 1 || value === '1';
+
 const ImageSession = ({ selected }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -109,7 +112,7 @@ const ImageSession = ({ selected }) => {
     file: null,
     thumbnail: null,
     audio_file: null,
-    relief_index: Boolean(selected?.relief_index),
+    relief_index: parseReliefIndexValue(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({

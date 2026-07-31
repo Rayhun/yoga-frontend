@@ -7,6 +7,7 @@ import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import { getUsersList, exportUsers } from '@/services/private/user';
 import queryKeys from '@/utils/query-keys';
+import { formatSignupDate } from '@/utils/helpers';
 
 const UsersList = () => {
   const { isExporting, handleExport } = useExport({
@@ -33,6 +34,11 @@ const UsersList = () => {
       {
         header: 'Role',
         accessorKey: 'profile.role',
+      },
+      {
+        header: 'Signed Up',
+        accessorKey: 'signed_up_at',
+        cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
       },
     ],
     []
