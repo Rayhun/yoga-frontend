@@ -108,9 +108,9 @@ const DashboardBanner = ({ banner, onCtaClick, fallbackCtaLabel = 'View' }) => {
 };
 
 const ExpertHomeDashboard = ({ data }) => {
-  if (!data) return null;
-
   const { isOpen: isSnapshotOpen, setIsOpen: setSnapshotOpen } = useToggle();
+
+  if (!data) return null;
   const stats = data.stats || [];
   const growth = data.community_growth || {};
   const activity = data.recent_activity || {};
