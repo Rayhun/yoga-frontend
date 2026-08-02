@@ -24,3 +24,8 @@ export const savePublicOnboardHomeCoach = payload =>
 export const completePublicOnboardingSignup = async ({ payload }) => {
   return axios.post(`${PUBLIC_BASE}/complete-signup/`, payload);
 };
+
+export const getPublicOnboardingPaymentSuccess = guestSessionId =>
+  axios.get(`${PUBLIC_BASE}/payment-success/`, {
+    params: { guest_session_id: guestSessionId },
+  });

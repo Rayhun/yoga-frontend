@@ -36,7 +36,7 @@ const OnboardingQuizDetails = ({ data = {} }) => {
 
   return (
     <DetailsLayoutWrapper
-      title={data.key ? `Question · ${data.key}` : 'Onboarding question'}
+      title={data.sets_key ? `Question · ${data.sets_key}` : 'Onboarding question'}
       onEdit={() => router.push(`/portal/admin/onboarding/quiz/${data.id}/edit`)}
     >
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -64,10 +64,9 @@ const OnboardingQuizDetails = ({ data = {} }) => {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MetaItem label="Key">{data.key ?? '—'}</MetaItem>
-            <MetaItem label="Branch rule">{data.branch_rule ?? '—'}</MetaItem>
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <MetaItem label="Sets key">{data.sets_key ?? '—'}</MetaItem>
+            <MetaItem label="Branch rule">{data.branch_rule ?? '—'}</MetaItem>
             <MetaItem label="Tag emoji">{data.tag_emoji || '—'}</MetaItem>
           </div>
         </div>

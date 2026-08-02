@@ -53,7 +53,7 @@ const QuizPageForm = ({ selected }) => {
     const results = questionsResponse?.data?.data?.results || questionsResponse?.data?.data || [];
     const list = Array.isArray(results) ? results : [];
     return list.map(question => ({
-      label: `${question.key} — ${question.tag_text}`,
+      label: `${question.sets_key} — ${question.tag_text}`,
       value: question.id,
     }));
   }, [questionsResponse?.data?.data]);

@@ -50,25 +50,21 @@ const OnboardingQuizList = () => {
     mutationFn: deleteOnboardingV2Question,
     invalidateQueryKey: [queryKeys.onboardingQuizV2],
     onSuccess: () => toast.success('Step deleted successfully'),
-    getConfirmOptions: ({ key, tag_text: tagText }) => ({
+    getConfirmOptions: ({ sets_key: setsKey, tag_text: tagText }) => ({
       heading: 'Delete onboarding step?',
-      message: `You are about to delete "${key ?? 'this step'}"${tagText ? ` (${tagText})` : ''}. All variants and options for this step will be removed. This cannot be undone.`,
+      message: `You are about to delete "${setsKey ?? 'this step'}"${tagText ? ` (${tagText})` : ''}. All variants and options for this step will be removed. This cannot be undone.`,
     }),
   });
 
   const tableColumns = useMemo(
     () => [
       {
-        header: 'Key',
-        accessorKey: 'key',
+        header: 'Sets key',
+        accessorKey: 'sets_key',
       },
       {
         header: 'Tag',
         accessorKey: 'tag_text',
-      },
-      {
-        header: 'Sets key',
-        accessorKey: 'sets_key',
       },
       {
         header: 'Order',
@@ -104,7 +100,7 @@ const OnboardingQuizList = () => {
         onClick: row =>
           handleDeleteQuestion({
             id: row.original.id,
-            key: row.original.key,
+            sets_key: row.original.sets_key,
             tag_text: row.original.tag_text,
           }),
       },
@@ -198,7 +194,7 @@ const OnboardingQuizList = () => {
             </p>
             <TextField
               fullWidth
-              placeholder="Key, tag, sets key, branch rule"
+              placeholder="Sets key, tag, branch rule"
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
               InputProps={{

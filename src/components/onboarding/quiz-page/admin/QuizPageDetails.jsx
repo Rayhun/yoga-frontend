@@ -24,7 +24,7 @@ const QuizPageDetails = ({ data = {} }) => {
             <ul className="list-inside list-disc space-y-1">
               {data.questions.map(question => (
                 <li key={question.id}>
-                  {question.key} — {question.tag_text}
+                  {question.sets_key} — {question.tag_text}
                 </li>
               ))}
             </ul>

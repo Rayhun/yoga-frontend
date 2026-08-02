@@ -241,15 +241,20 @@ const MessagesList = () => {
       style={{ backgroundColor: '#EDE6DE' }}
     >
       <LoadingWrapper isLoading={isLoadingMessages}>
-        <div
-          ref={scrollContainerRef}
-          className={`h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-2 ${
-            isInitialLoadRef.current ? 'animate-chatThreadIn' : ''
-          }`}
-          style={{ scrollBehavior: 'auto' }}
-        >
-          <div className="space-y-0.5">
-            {[...messages].map(message => {
+        {showExpertEmptyState ? (
+          <CircleChatEmptyState variant="expert" />
+        ) : showMemberEmptyState ? (
+          <CircleChatEmptyState groupName={activeConversation?.name} />
+        ) : (
+          <div
+            ref={scrollContainerRef}
+            className={`h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-2 ${
+              isInitialLoadRef.current ? 'animate-chatThreadIn' : ''
+            }`}
+            style={{ scrollBehavior: 'auto' }}
+          >
+            <div className="space-y-0.5">
+              {[...messages].map(message => {
               const messageContent = message.content || message.message || '';
 
               if (isSystemMessage(message)) {
@@ -282,10 +287,11 @@ const MessagesList = () => {
                   </Message>
                 </div>
               );
-            })}
+              })}
+            </div>
+            <div ref={messagesEndRef} />
           </div>
-          <div ref={messagesEndRef} />
-        </div>
+        )}
       </LoadingWrapper>
     </div>
   );

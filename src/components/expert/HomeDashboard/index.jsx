@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { FiLink2, FiUsers } from 'react-icons/fi';
 import { HiOutlineAcademicCap } from 'react-icons/hi';
 import { MdOutlinePayments } from 'react-icons/md';
+import useToggle from '@/hooks/useToggle';
+import CircleCompositionSnapshotModal from './CircleCompositionSnapshotModal';
 
 const CommunityGrowthChart = dynamic(() => import('./CommunityGrowthChart'), { ssr: false });
 
@@ -66,13 +68,59 @@ const ActivityItem = ({ item }) => (
   </div>
 );
 
+const DashboardBanner = ({ banner, onCtaClick, fallbackCtaLabel = 'View' }) => {
+  if (!banner?.title) return null;
+
+  const handleCtaClick = event => {
+    if (banner.cta_action && onCtaClick) {
+      event.preventDefault();
+      onCtaClick(banner);
+    }
+  };
+
+  const ctaContent = (
+    <span className="shrink-0 text-sm font-semibold text-[#1E4D35] transition hover:underline">
+      {banner.cta_label || fallbackCtaLabel} →
+    </span>
+  );
+
+  return (
+    <div
+      className="flex flex-col gap-3 rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+      style={{ backgroundColor: banner.background_color || '#EAF5EE' }}
+    >
+      <p className="text-sm text-gray-700 sm:text-[15px]">
+        <span className="mr-1.5">{banner.icon || '🍀'}</span>
+        <span className="font-semibold text-gray-900">{banner.title}</span>
+        {banner.text ? <span className="text-gray-600"> — {banner.text}</span> : null}
+      </p>
+      {banner.cta_action ? (
+        <button type="button" onClick={handleCtaClick} className="text-left">
+          {ctaContent}
+        </button>
+      ) : banner.cta_url ? (
+        <Link href={banner.cta_url} className="shrink-0">
+          {ctaContent}
+        </Link>
+      ) : null}
+    </div>
+  );
+};
+
 const ExpertHomeDashboard = ({ data }) => {
   if (!data) return null;
 
+  const { isOpen: isSnapshotOpen, setIsOpen: setSnapshotOpen } = useToggle();
   const stats = data.stats || [];
-  const banner = data.snapshot_banner || {};
   const growth = data.community_growth || {};
   const activity = data.recent_activity || {};
+  const banners = [data.snapshot_banner, data.cycle_insight_banner].filter(Boolean);
+
+  const handleBannerCtaClick = banner => {
+    if (banner.cta_action === 'open_composition_snapshot') {
+      setSnapshotOpen(true);
+    }
+  };
 
   return (
     <div className="flex w-full flex-col gap-5 md:gap-6">
@@ -82,26 +130,18 @@ const ExpertHomeDashboard = ({ data }) => {
         ))}
       </div>
 
-      {banner.title ? (
-        <div
-          className="flex flex-col gap-3 rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
-          style={{ backgroundColor: banner.background_color || '#EAF5EE' }}
-        >
-          <p className="text-sm text-gray-700 sm:text-[15px]">
-            <span className="mr-1.5">{banner.icon || '🍀'}</span>
-            <span className="font-semibold text-gray-900">{banner.title}</span>
-            {banner.text ? <span className="text-gray-600"> — {banner.text}</span> : null}
-          </p>
-          {banner.cta_url ? (
-            <Link
-              href={banner.cta_url}
-              className="shrink-0 text-sm font-semibold text-[#1E4D35] transition hover:underline"
-            >
-              {banner.cta_label || 'View Snapshot'} →
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
+      {banners.map(banner => (
+        <DashboardBanner
+          key={banner.title}
+          banner={banner}
+          onCtaClick={handleBannerCtaClick}
+        />
+      ))}
+
+      <CircleCompositionSnapshotModal
+        open={isSnapshotOpen}
+        onClose={() => setSnapshotOpen(false)}
+      />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         <div className="min-w-0 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">

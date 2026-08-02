@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Button from '@/components/common/Button';
 import { extractApiErrorMessage, toastApiError } from '@/utils/helpers';
@@ -18,7 +19,7 @@ import {
   savePublicOnboardHomeCoach,
   completePublicOnboardingSignup,
 } from '@/services/public/onboarding/quiz-v2';
-import { getGuestSessionId, setGuestSessionId, clearGuestSessionId } from '@/utils/onboarding-guest-session';
+import { getGuestSessionId, setGuestSessionId, clearGuestSessionId, setOnboardingCheckoutClientSecret } from '@/utils/onboarding-guest-session';
 import PublicOnboardingSignupForm from './PublicOnboardingSignupForm';
 import Cookies from 'js-cookie';
 import HomeCoachOnboardingStep from './HomeCoachOnboardingStep';
@@ -67,6 +68,7 @@ function TypingIndicator() {
 }
 
 const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
+  const router = useRouter();
   const { user } = useAuthContext();
   const [guestSessionId, setGuestSessionIdState] = useState(() =>
     isPublic && pageSlug ? getGuestSessionId(pageSlug) : null
@@ -146,13 +148,13 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
 
   const currentQuestion = useMemo(() => {
     const q = currentAssistant?.question;
-    if (!q?.question_key) return null;
-    return questionCacheRef.current.get(q.question_key) || q;
+    if (!q?.sets_key) return null;
+    return questionCacheRef.current.get(q.sets_key) || q;
   }, [currentAssistant]);
 
   useLayoutEffect(() => {
     scrollChatToBottom(revealPhase === 'typing' ? 'auto' : 'smooth');
-  }, [messages, revealPhase, isSubmitting, currentQuestion?.question_key, scrollChatToBottom]);
+  }, [messages, revealPhase, isSubmitting, currentQuestion?.sets_key, scrollChatToBottom]);
 
   const startRevealForQuestionKey = useCallback(questionKey => {
     if (!questionKey) {
@@ -187,14 +189,14 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   }, []);
 
   useEffect(() => {
-    const key = currentQuestion?.question_key;
+    const key = currentQuestion?.sets_key;
     if (key) startRevealForQuestionKey(key);
-  }, [currentQuestion?.question_key, startRevealForQuestionKey]);
+  }, [currentQuestion?.sets_key, startRevealForQuestionKey]);
 
   const hydrateMessagesFromCache = useCallback(msgs => {
     return msgs.map(m => {
       if (m.type !== 'assistant') return m;
-      const key = m.question?.question_key;
+      const key = m.question?.sets_key;
       const cached = key ? questionCacheRef.current.get(key) : null;
       return {
         ...m,
@@ -243,7 +245,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
     if (question) {
       const forCache = cloneQuestion(question);
       const forMessage = cloneQuestion(question);
-      questionCacheRef.current.set(forCache.question_key, forCache);
+      questionCacheRef.current.set(forCache.sets_key, forCache);
       const totalQuestions = Number(data.total_questions) || 0;
       const questionIndex = Number(data.current_question_index) || 1;
       setMessages([
@@ -344,7 +346,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
     if (!currentQuestion || !selectedOption) return;
 
     const submittedOption = selectedOption;
-    const submittedQuestionKey = currentQuestion.question_key;
+    const submittedSetsKey = currentQuestion.sets_key;
 
     try {
       setIsSubmitting(true);
@@ -360,7 +362,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
 
       const response = await submitAnswer({
         payload: {
-          question_key: submittedQuestionKey,
+          sets_key: submittedSetsKey,
           option_id: submittedOption.id,
           ...(isPublic
             ? {
@@ -403,7 +405,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
 
       const forCache = cloneQuestion(data.question);
       const forMessage = cloneQuestion(data.question);
-      questionCacheRef.current.set(forCache.question_key, forCache);
+      questionCacheRef.current.set(forCache.sets_key, forCache);
       questionKeyRef.current = null;
 
       const totalQuestions = Number(data.total_questions) || 0;
@@ -418,7 +420,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
 
       setMessages(prev => [...prev, userBubble, nextAssistant]);
     } catch (error) {
-      questionKeyRef.current = submittedQuestionKey;
+      questionKeyRef.current = submittedSetsKey;
       setRevealPhase('content');
       setSelectedOptionId(submittedOption.id);
       toastApiError(error);
@@ -467,6 +469,19 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
       });
       const payload = response?.data?.data;
       if (payload) {
+        if (
+          isPublic &&
+          payload.requires_payment &&
+          payload.checkout_session_client_secret
+        ) {
+          setOnboardingCheckoutClientSecret(
+            payload.checkout_session_client_secret,
+            pageSlug,
+            payload.guest_session_id || guestSessionId
+          );
+          router.push('/payment/onboarding/checkout');
+          return;
+        }
         if (isPublic && payload.requires_signup) {
           setFlowPhase('signup');
           return;
@@ -641,7 +656,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
             if (isCurrentAssistant && revealPhase === 'typing') {
               return (
                 <div
-                  key={`typing-${item.question.question_key}`}
+                  key={`typing-${item.question.sets_key}`}
                   className="flex min-h-[2.75rem] justify-start py-0.5"
                 >
                   <TypingIndicator />
@@ -651,9 +666,9 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
 
             if (isCurrentAssistant && revealPhase === 'content') {
               const q =
-                questionCacheRef.current.get(item.question.question_key) || item.question;
+                questionCacheRef.current.get(item.question.sets_key) || item.question;
               return (
-                <div key={`asst-${item.question.question_key}`} className="question-reveal flex justify-start">
+                <div key={`asst-${item.question.sets_key}`} className="question-reveal flex justify-start">
                   <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                     <p className="text-sm font-medium sm:text-base">{q.variant.question_text}</p>
                   </div>
@@ -661,9 +676,9 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
               );
             }
 
-            const q = questionCacheRef.current.get(item.question.question_key) || item.question;
+            const q = questionCacheRef.current.get(item.question.sets_key) || item.question;
             return (
-              <div key={`asst-${index}-${item.question.question_key}`} className="fade-in-fast flex justify-start">
+              <div key={`asst-${index}-${item.question.sets_key}`} className="fade-in-fast flex justify-start">
                 <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                   <p className="text-base font-medium">{q.variant.question_text}</p>
                 </div>

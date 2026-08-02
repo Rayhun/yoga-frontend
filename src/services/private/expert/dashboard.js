@@ -28,6 +28,16 @@ export const getExpertHomeDashboard = async () => {
   return axios.get(`${API_V2_BASE_URL}/expert/dashboard/`);
 };
 
+export const getExpertCircleCompositionSnapshot = async () => {
+  return axios.get(`${API_V2_BASE_URL}/expert/dashboard/circle-composition/`);
+};
+
+export const getExpertCircleWellnessInsights = async (period = 'week') => {
+  return axios.get(`${API_V2_BASE_URL}/expert/dashboard/wellness-insights/`, {
+    params: { period },
+  });
+};
+
 export const getAdminDashboardHome = async ({ start_date, end_date } = {}) => {
   const params = new URLSearchParams();
   if (start_date) params.append('start_date', start_date);

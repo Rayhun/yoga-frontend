@@ -61,10 +61,9 @@ function OnboardingQuizPreview({ values }) {
           Summary of step 1 — confirm identity and ordering.
         </p>
         <div className="mt-4">
-          <PreviewField label="Key">{values.key || '—'}</PreviewField>
+          <PreviewField label="Sets key">{values.sets_key || '—'}</PreviewField>
           <PreviewField label="Tag text">{values.tag_text || '—'}</PreviewField>
           <PreviewField label="Tag emoji">{values.tag_emoji?.trim() ? values.tag_emoji : '—'}</PreviewField>
-          <PreviewField label="Sets key">{values.sets_key || '—'}</PreviewField>
           <PreviewField label="Branch rule">{values.branch_rule || '—'}</PreviewField>
           <PreviewField label="Order">{values.order ?? '—'}</PreviewField>
           <PreviewField label="Active">{values.is_active ? 'Yes' : 'No'}</PreviewField>
@@ -224,7 +223,6 @@ function buildPayload(values) {
   });
 
   return {
-    key: values.key.trim(),
     tag_text: values.tag_text.trim(),
     tag_emoji: (values.tag_emoji || '').trim(),
     sets_key: values.sets_key.trim(),
@@ -251,6 +249,23 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
         const taken = existingQuestions.some(q => {
           if (currentQuestionId != null && String(q.id) === String(currentQuestionId)) return false;
           return Number(q.order) === num;
+        });
+        return !taken;
+      }
+    );
+
+  const setsKeySchema = Yup.string()
+    .required('Required')
+    .max(100)
+    .test(
+      'unique-sets-key',
+      'This sets key is already used by another onboarding step.',
+      function setsKeyTakenTest(value) {
+        if (!remoteOrderCheckEnabled || !value) return true;
+        const normalized = value.trim().toLowerCase();
+        const taken = existingQuestions.some(q => {
+          if (currentQuestionId != null && String(q.id) === String(currentQuestionId)) return false;
+          return String(q.sets_key || '').trim().toLowerCase() === normalized;
         });
         return !taken;
       }
@@ -306,10 +321,9 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const validationSchema = Yup.object({
-    key: Yup.string().required('Required').max(20),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
-    sets_key: Yup.string().required('Required').max(100),
+    sets_key: setsKeySchema,
     branch_rule: Yup.string().required('Required').max(50),
     order: questionOrderSchema,
     is_active: Yup.boolean(),
@@ -343,10 +357,9 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const step1ValidationSchema = Yup.object({
-    key: Yup.string().required('Required').max(20),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
-    sets_key: Yup.string().required('Required').max(100),
+    sets_key: setsKeySchema,
     branch_rule: Yup.string().required('Required').max(50),
     order: questionOrderSchema,
     is_active: Yup.boolean(),
@@ -465,7 +478,6 @@ const OnboardingQuizForm = ({ selected }) => {
   });
 
   const initialValues = {
-    key: selected?.key ?? '',
     tag_text: selected?.tag_text ?? '',
     tag_emoji: selected?.tag_emoji ?? '',
     sets_key: selected?.sets_key ?? '',
@@ -594,7 +606,7 @@ const OnboardingQuizForm = ({ selected }) => {
                   <ul className="mt-6 space-y-2 text-sm text-slate-700 dark:text-bodydark1">
                     <li className="flex gap-2">
                       <span className="text-teal-600 dark:text-teal-400">✓</span>
-                      One stable key per question (locked after create).
+                      One stable sets key per question (locked after create).
                     </li>
                     <li className="flex gap-2">
                       <span className="text-teal-600 dark:text-teal-400">✓</span>
@@ -614,15 +626,14 @@ const OnboardingQuizForm = ({ selected }) => {
                   </p>
                   <div className="mt-6 grid gap-5 md:grid-cols-2">
                     <FormikField
-                      name="key"
-                      label="Key"
-                      placeholder='e.g. "q1"'
+                      name="sets_key"
+                      label="Sets key"
+                      placeholder="e.g. age_group"
                       required
                       disabled={isEditMode}
                     />
                     <FormikField name="tag_text" label="Tag text" placeholder="Section label" required />
                     <FormikField name="tag_emoji" label="Tag emoji" placeholder="👋" />
-                    <FormikField name="sets_key" label="Sets key" placeholder="e.g. age_group" required />
                     <FormikField name="branch_rule" label="Branch rule" placeholder="e.g. linear" required />
                     <FormikField name="order" label="Order" type="number" required />
                     <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-strokedark dark:bg-meta-4 md:col-span-2">
