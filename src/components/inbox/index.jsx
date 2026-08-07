@@ -46,7 +46,11 @@ const Inbox = () => {
   const coaches = conversationsData.filter(conv => conv.is_coach === true);
 
   useEffect(() => {
-    if (!conversationIdFromUrl || isLoadingConversations) return;
+    if (!conversationIdFromUrl) {
+      openedFromUrlRef.current = null;
+      return;
+    }
+    if (isLoadingConversations) return;
     if (openedFromUrlRef.current === conversationIdFromUrl) return;
 
     const matchingConversation = conversationsData.find(

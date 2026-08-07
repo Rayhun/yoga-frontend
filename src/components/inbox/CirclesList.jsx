@@ -14,6 +14,7 @@ import Spinner from '../common/loader/Spinner';
 import WelcomeMessage from './WelcomeMessage';
 import ExploreGroupsModal from './ExploreGroupsModal';
 import InviteClientButton from './InviteClientButton';
+import HomeCoachSidebarSection from './HomeCoachSidebarSection';
 
 const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab, showDiscover = true, showInviteClient = false }) => {
   const {
@@ -107,13 +108,13 @@ const CirclesList = ({ circles, isLoading, activeSubTab, setActiveSubTab, showDi
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {/* My Circles Header */}
-      <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg md:text-xl font-bold text-gray-900">My Circles</h2>
-          {showInviteClient && <InviteClientButton />}
+      {showInviteClient ? (
+        <div className="flex justify-end border-b border-gray-200 bg-white px-3 py-2 md:px-4 md:py-3">
+          <InviteClientButton />
         </div>
-      </div>
+      ) : null}
+
+      <HomeCoachSidebarSection />
 
       {/* Sub-navigation */}
       {showDiscover && (

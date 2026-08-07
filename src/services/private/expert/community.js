@@ -9,6 +9,14 @@ export const getExpertCommunityDetail = async () => {
   return axios.get(`${API_V2_BASE_URL}/expert/community/detail/`);
 };
 
+export const checkExpertCircleTitle = async title => {
+  return axios.post(`${API_V2_BASE_URL}/expert/community/circle-title/check/`, { title });
+};
+
+export const updateExpertCircleTitle = async title => {
+  return axios.post(`${API_V2_BASE_URL}/expert/community/circle-title/`, { title });
+};
+
 export const getExpertCommunityJoinDetail = async slug => {
   return axios.get(`${API_V2_BASE_URL}/expert/community/detail/join/${slug}/`);
 };

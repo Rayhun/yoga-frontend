@@ -2,6 +2,7 @@
 
 import { DEFAULT_COMMUNITY_COLORS, getCommunityColor } from './communityColors';
 import SharingCardSection from './SharingCardSection';
+import CircleTitleSection from './CircleTitleSection';
 import MetricsGridSection from './MetricsGridSection';
 
 const OrderedListSection = ({ steps = [], section }) => {
@@ -61,6 +62,8 @@ const CommunityPageSection = ({ section }) => {
       return <OrderedListSection steps={section.steps} section={section} />;
     case 'sharing_card':
       return <SharingCardSection section={section} />;
+    case 'circle_title_card':
+      return <CircleTitleSection section={section} />;
     case 'metrics_grid':
       return <MetricsGridSection section={section} />;
     default:

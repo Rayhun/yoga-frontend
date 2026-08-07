@@ -18,9 +18,13 @@ import {
   getPublicOnboardHomeCoach,
   savePublicOnboardHomeCoach,
   completePublicOnboardingSignup,
+  createPublicOnboardingCheckout,
+  getPublicOnboardingJoinFlowContent,
 } from '@/services/public/onboarding/quiz-v2';
 import { getGuestSessionId, setGuestSessionId, clearGuestSessionId, setOnboardingCheckoutClientSecret } from '@/utils/onboarding-guest-session';
 import PublicOnboardingSignupForm from './PublicOnboardingSignupForm';
+import OnboardingJoinDetailsStep from './OnboardingJoinDetailsStep';
+import OnboardingJoinPaymentStep from './OnboardingJoinPaymentStep';
 import Cookies from 'js-cookie';
 import HomeCoachOnboardingStep from './HomeCoachOnboardingStep';
 import OnboardingWelcomeSuccess from './OnboardingWelcomeSuccess';
@@ -31,6 +35,16 @@ import {
 } from '@/utils/onboarding-home-coach';
 import { API_V2_WEB_CUSTOMER_BASE_URL } from '@/utils/config';
 import useAuthContext from '@/hooks/useAuthContext';
+
+function splitFullName(fullName) {
+  const trimmed = (fullName || '').trim();
+  if (!trimmed) return { firstName: '', lastName: '' };
+  const parts = trimmed.split(/\s+/);
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ') || '',
+  };
+}
 
 function cloneQuestion(question) {
   try {
@@ -76,6 +90,9 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   const [bootstrapHydrated, setBootstrapHydrated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flowPhase, setFlowPhase] = useState('quiz');
+  const [joinFormData, setJoinFormData] = useState({ full_name: '', email: '' });
+  const [joinFlowContent, setJoinFlowContent] = useState(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [isCompletingSignup, setIsCompletingSignup] = useState(false);
   const [homeCoachFetchUrl, setHomeCoachFetchUrl] = useState(null);
   const [homeCoachData, setHomeCoachData] = useState(null);
@@ -284,6 +301,27 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
     if (payload) setHomeCoachData(payload);
   }, [homeCoachResponse]);
 
+  const isJoinFlowPhase = flowPhase === 'join-details' || flowPhase === 'join-payment';
+
+  const {
+    data: joinFlowContentResponse,
+    isPending: isJoinFlowContentPending,
+    isError: isJoinFlowContentError,
+    refetch: refetchJoinFlowContent,
+  } = useQuery({
+    queryKey: [queryKeys.onboardingJoinFlowContent],
+    queryFn: () => getPublicOnboardingJoinFlowContent(),
+    enabled: isPublic && isJoinFlowPhase && !joinFlowContent,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+
+  useEffect(() => {
+    if (!joinFlowContent && joinFlowContentResponse?.data?.data) {
+      setJoinFlowContent(joinFlowContentResponse.data.data);
+    }
+  }, [joinFlowContentResponse, joinFlowContent]);
+
   const showBootstrapLoader =
     flowPhase === 'quiz' &&
     !bootstrapHydrated &&
@@ -469,6 +507,16 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
       });
       const payload = response?.data?.data;
       if (payload) {
+        if (isPublic && payload.requires_join_flow) {
+          if (payload.join_flow_content) {
+            setJoinFlowContent(payload.join_flow_content);
+          }
+          if (payload.guest_session_id) {
+            persistGuestSessionId(payload.guest_session_id);
+          }
+          setFlowPhase('join-details');
+          return;
+        }
         if (
           isPublic &&
           payload.requires_payment &&
@@ -491,6 +539,56 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
       }
     } catch (error) {
       toastApiError(error);
+    }
+  };
+
+  const handleJoinDetailsContinue = values => {
+    setJoinFormData({
+      full_name: values.full_name.trim(),
+      email: values.email.trim().toLowerCase(),
+    });
+    setFlowPhase('join-payment');
+  };
+
+  const handleJoinPaymentBack = () => {
+    setFlowPhase('join-details');
+  };
+
+  const handleJoinDetailsBack = () => {
+    setFlowPhase('home-coach');
+  };
+
+  const handleJoinPayment = async () => {
+    if (!guestSessionId) {
+      toastApiError(new Error('Your onboarding session expired. Please refresh and try again.'));
+      return;
+    }
+
+    const { firstName, lastName } = splitFullName(joinFormData.full_name);
+
+    try {
+      setIsCreatingCheckout(true);
+      const response = await createPublicOnboardingCheckout({
+        guest_session_id: guestSessionId,
+        email: joinFormData.email,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: joinFormData.full_name,
+      });
+
+      const payload = response?.data?.data;
+      if (payload?.checkout_session_client_secret) {
+        setOnboardingCheckoutClientSecret(
+          payload.checkout_session_client_secret,
+          pageSlug,
+          payload.guest_session_id || guestSessionId
+        );
+        router.push('/payment/onboarding/checkout');
+      }
+    } catch (error) {
+      toastApiError(error);
+    } finally {
+      setIsCreatingCheckout(false);
     }
   };
 
@@ -532,6 +630,58 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
       setIsCompletingSignup(false);
     }
   };
+
+  if ((flowPhase === 'join-details' || flowPhase === 'join-payment') && isPublic) {
+    if (!joinFlowContent && (isJoinFlowContentPending || isJoinFlowContentError)) {
+      if (isJoinFlowContentError) {
+        return (
+          <div className="flex min-h-screen items-center justify-center px-4 py-8">
+            <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900">Could not load join flow</h2>
+              <p className="mt-2 text-sm text-gray-600">Please try again to continue.</p>
+              <Button className="mt-6" onClick={() => refetchJoinFlowContent()}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-200 border-t-green-600" />
+        </div>
+      );
+    }
+
+    if (!joinFlowContent) {
+      return null;
+    }
+  }
+
+  if (flowPhase === 'join-details' && isPublic) {
+    return (
+      <OnboardingJoinDetailsStep
+        content={joinFlowContent}
+        initialValues={joinFormData}
+        onContinue={handleJoinDetailsContinue}
+        onBack={handleJoinDetailsBack}
+        canGoBack={Boolean(homeCoachQuizSnapshot)}
+      />
+    );
+  }
+
+  if (flowPhase === 'join-payment' && isPublic) {
+    const { firstName } = splitFullName(joinFormData.full_name);
+    return (
+      <OnboardingJoinPaymentStep
+        content={joinFlowContent}
+        firstName={firstName}
+        onBack={handleJoinPaymentBack}
+        onPay={handleJoinPayment}
+        isSubmitting={isCreatingCheckout}
+      />
+    );
+  }
 
   if (flowPhase === 'signup' && isPublic) {
     return (

@@ -7,6 +7,7 @@ import Spinner from '@/components/common/loader/Spinner';
 import { getReliefFaq } from '@/services/private/customer/v2/relief';
 import queryKeys from '@/utils/query-keys';
 import { EmptyState, RELIEF_CARD, RELIEF_SECTION_LABEL } from './shared';
+import { getReliefListGridClass } from './reliefDashboardUi';
 
 function FaqQuestionCard({ question, categoryLabel, onToggle, isOpen }) {
   if (isOpen && question.answer_data) {
@@ -115,19 +116,19 @@ export default function FAQTab() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className={`${RELIEF_CARD} relative overflow-hidden`}>
-        <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+    <div className="space-y-6 lg:space-y-8">
+      <div className={`${RELIEF_CARD} relative overflow-hidden lg:shadow-[0_4px_24px_rgba(15,23,42,0.06)]`}>
+        <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 lg:left-5 lg:h-5 lg:w-5" />
         <input
           type="search"
           value={search}
           onChange={event => setSearch(event.target.value)}
           placeholder={payload?.search_bar?.placeholder || 'Search questions...'}
-          className="w-full bg-transparent py-4 pl-12 pr-4 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+          className="w-full bg-transparent py-4 pl-12 pr-4 text-sm text-gray-900 outline-none placeholder:text-gray-400 lg:py-5 lg:pl-14 lg:text-[15px]"
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] lg:flex-wrap lg:gap-2.5 [&::-webkit-scrollbar]:hidden">
         {filterTabs.map(tab => {
           const isActive = (activeFilter || serverActiveTab) === tab.id;
           return (
@@ -138,7 +139,7 @@ export default function FAQTab() {
                 setActiveFilter(tab.id);
                 setOpenQuestionId(null);
               }}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition lg:px-5 lg:py-2.5 lg:text-[15px] ${
                 isActive
                   ? 'border-primary bg-primary text-white shadow-sm'
                   : 'border-stone-200 bg-white text-gray-600 hover:border-stone-300 hover:bg-stone-50'
@@ -150,7 +151,7 @@ export default function FAQTab() {
         })}
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-8 lg:space-y-10">
         {categories.length === 0 ? (
           <EmptyState
             icon="🔍"
@@ -159,16 +160,22 @@ export default function FAQTab() {
           />
         ) : (
           categories.map(category => (
-            <section key={category.category_id} className="space-y-3">
+            <section key={category.category_id} className="space-y-3 lg:space-y-4">
               <h2
                 className={`flex items-center gap-2 ${RELIEF_SECTION_LABEL}`}
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-sm">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-sm lg:h-8 lg:w-8">
                   {category.icon}
                 </span>
                 {category.title}
               </h2>
-              <div className="space-y-3">
+              <div
+                className={
+                  openQuestionId
+                    ? 'space-y-3'
+                    : getReliefListGridClass((category.questions || []).length)
+                }
+              >
                 {(category.questions || []).map(question => (
                   <FaqQuestionCard
                     key={question.id}

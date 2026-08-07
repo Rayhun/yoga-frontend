@@ -13,6 +13,7 @@ import {
 import queryKeys from '@/utils/query-keys';
 import LoadingWrapper from '../common/loader/Wrapper';
 import DiscoverCoachCard from './DiscoverCoachCard';
+import HomeCoachSidebarSection from './HomeCoachSidebarSection';
 
 const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   const {
@@ -171,17 +172,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {/* My Coaches Header */}
-      <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
-        <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">My Coaches</h2>
-        {/* <button
-          onClick={() => setCurrentSubTab('find-coaches')}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 md:py-2.5 px-3 md:px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm md:text-base"
-        >
-          <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
-          <span>Find a Coach</span>
-        </button> */}
-      </div>
+      <HomeCoachSidebarSection />
 
       {/* Sub-navigation */}
       <div className="flex border-b border-gray-200 bg-white">

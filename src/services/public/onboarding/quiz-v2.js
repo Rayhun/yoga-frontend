@@ -18,8 +18,14 @@ export const submitPublicOnboardingAnswer = async ({ payload }) => {
 
 export const getPublicOnboardHomeCoach = () => axios.get(`${PUBLIC_BASE}/home-coach/`);
 
+export const getPublicOnboardingJoinFlowContent = () =>
+  axios.get(`${PUBLIC_BASE}/join-flow-content/`);
+
 export const savePublicOnboardHomeCoach = payload =>
   axios.post(`${PUBLIC_BASE}/home-coach/saved/`, payload);
+
+export const createPublicOnboardingCheckout = payload =>
+  axios.post(`${PUBLIC_BASE}/create-checkout/`, payload);
 
 export const completePublicOnboardingSignup = async ({ payload }) => {
   return axios.post(`${PUBLIC_BASE}/complete-signup/`, payload);

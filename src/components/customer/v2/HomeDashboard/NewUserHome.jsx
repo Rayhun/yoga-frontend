@@ -6,26 +6,61 @@ import { useQueries } from '@tanstack/react-query';
 import { FiArrowRight, FiCheck } from 'react-icons/fi';
 import Spinner from '@/components/common/loader/Spinner';
 import { fetchCustomerV2Section } from '@/services/private/customer/v2/home';
-import {
-  buildHomeLayoutGroups,
-  getEnabledHomeSections,
-  normalizeMoodOptions,
-  sectionHasContent,
-} from '@/utils/customer-v2-home';
 import queryKeys from '@/utils/query-keys';
 import { isExpertImageUrl } from '@/utils/expert-media';
 import CheckInModal from '@/components/customer/v2/CheckInModal';
 import PeriodLogModal from '@/components/customer/v2/PeriodLogModal';
+import SectionInfoModal, {
+  CARD_INFO_ICON_POSITION,
+  SectionInfoButton,
+  useSectionInfoModal,
+} from '@/components/customer/v2/SectionInfo';
+import {
+  buildHomeLayoutGroups,
+  getEnabledHomeSections,
+  hasSectionInfo,
+  normalizeMoodOptions,
+  sectionHasContent,
+} from '@/utils/customer-v2-home';
+import {
+  HOME_CARD,
+  HOME_BTN_PRIMARY,
+  HOME_BTN_OUTLINE,
+  HOME_PAGE_SHELL,
+  HOME_PAGE_CONTAINER,
+  HOME_PAGE_STACK,
+  HOME_SECTION_GRID,
+  HOME_HEADER,
+  HOME_SECTION_LABEL,
+  HOME_CARD_BTN_ROW,
+} from '@/components/customer/v2/HomeDashboard/homeDashboardUi';
 
-const CARD =
-  'rounded-2xl border border-stone-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.05)]';
-const BTN_PRIMARY =
-  'inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 hover:shadow-md';
-const BTN_OUTLINE =
-  'inline-flex items-center justify-center rounded-full border border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5';
+const CARD = HOME_CARD;
+const BTN_PRIMARY = HOME_BTN_PRIMARY;
+const BTN_OUTLINE = HOME_BTN_OUTLINE;
 
-function SectionShell({ children, className = '' }) {
-  return <div className={`${CARD} ${className}`}>{children}</div>;
+function SectionShell({ children, className = '', sectionData, onInfoOpen }) {
+  const showInfo = hasSectionInfo(sectionData);
+  const useFlexCol = /\bflex-col\b/.test(className);
+
+  return (
+    <div className={`relative ${CARD} ${className}`}>
+      {showInfo ? (
+        <SectionInfoButton
+          sectionData={sectionData}
+          onOpen={onInfoOpen}
+          className={CARD_INFO_ICON_POSITION}
+        />
+      ) : null}
+      <div
+        className={`min-w-0 ${showInfo ? 'pr-9 sm:pr-10' : ''} ${
+          useFlexCol ? 'flex min-h-0 flex-1 flex-col' : ''
+        }`}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function SectionSkeleton({ className = 'h-40' }) {
@@ -40,18 +75,22 @@ function SectionSkeleton({ className = 'h-40' }) {
 
 function HomeHeader({ home }) {
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-gradient-to-br from-white via-brownish to-amber-50/40 px-6 py-7 shadow-sm md:px-8 md:py-8">
+    <header className={HOME_HEADER}>
       <div
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
+        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl lg:-right-24 lg:-top-24 lg:h-72 lg:w-72 lg:bg-primary/12"
         aria-hidden
       />
-      <div className="relative max-w-2xl">
-        <p className="text-sm font-medium text-gray-500">{home.greetings}</p>
-        <h1 className="mt-1 font-serif text-3xl font-normal tracking-tight text-gray-900 md:text-[2.35rem] md:leading-tight">
+      <div
+        className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-amber-200/30 blur-3xl lg:h-56 lg:w-56"
+        aria-hidden
+      />
+      <div className="relative max-w-2xl lg:max-w-3xl">
+        <p className="text-sm font-medium text-gray-500 lg:text-[15px]">{home.greetings}</p>
+        <h1 className="mt-1 font-serif text-3xl font-normal tracking-tight text-gray-900 md:text-[2.35rem] md:leading-tight lg:text-4xl lg:leading-[1.15] xl:text-[2.75rem]">
           {home.heading}
         </h1>
         {home.subheading ? (
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600 md:text-[15px]">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600 md:text-[15px] lg:mt-3 lg:text-base lg:leading-relaxed">
             {home.subheading}
           </p>
         ) : null}
@@ -60,32 +99,49 @@ function HomeHeader({ home }) {
   );
 }
 
-function PeriodCard({ data, onClick }) {
+function PeriodCard({ data, onClick, onInfoOpen }) {
   if (!data?.title) return null;
+  const showInfo = hasSectionInfo(data);
+
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-rose-100 bg-gradient-to-r from-rose-50 via-rose-50/80 to-pink-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6 md:py-5">
-      <div className="flex items-start gap-3">
-        <span className="mt-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-        </span>
-        <div>
-          <p className="font-semibold text-gray-900">{data.title}</p>
-          <p className="mt-0.5 text-sm text-gray-600">{data.subtitle}</p>
+    <div className="relative rounded-2xl border border-rose-100 bg-gradient-to-r from-rose-50 via-rose-50/80 to-pink-50/50 px-5 py-4 md:px-6 md:py-5 lg:rounded-3xl lg:border-rose-100/80 lg:px-8 lg:py-6 lg:shadow-[0_4px_24px_rgba(244,63,94,0.08)]">
+      {showInfo ? (
+        <SectionInfoButton
+          sectionData={data}
+          onOpen={onInfoOpen}
+          className={CARD_INFO_ICON_POSITION}
+        />
+      ) : null}
+      <div className={showInfo ? 'pr-9 sm:pr-10' : undefined}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <span className="mt-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold text-gray-900">{data.title}</p>
+              <p className="mt-0.5 text-sm text-gray-600">{data.subtitle}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onClick} className={`${BTN_OUTLINE} shrink-0`}>
+            {data.btn_text}
+          </button>
         </div>
       </div>
-      <button type="button" onClick={onClick} className={`${BTN_OUTLINE} shrink-0`}>
-        {data.btn_text}
-      </button>
     </div>
   );
 }
 
-function MoodCard({ data, selectedMood, onSelect }) {
+function MoodCard({ data, selectedMood, onSelect, onInfoOpen }) {
   const options = normalizeMoodOptions(data?.tracker);
   if (!options.length) return null;
 
   return (
-    <SectionShell className="h-full bg-gradient-to-br from-amber-50/70 via-white to-orange-50/30 p-5 md:p-6">
+    <SectionShell
+      className="h-full bg-gradient-to-br from-amber-50/70 via-white to-orange-50/30 p-5 md:p-6 lg:p-8"
+      sectionData={data}
+      onInfoOpen={onInfoOpen}
+    >
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary/80">
         Daily check-in
       </p>
@@ -125,10 +181,14 @@ function MoodCard({ data, selectedMood, onSelect }) {
   );
 }
 
-function CheckinInfoCard({ data }) {
+function CheckinInfoCard({ data, onInfoOpen }) {
   if (!data?.title) return null;
   return (
-    <SectionShell className="flex h-full flex-col justify-center bg-gradient-to-br from-amber-50/50 via-white to-yellow-50/30 p-5 md:p-6">
+    <SectionShell
+      className="flex h-full flex-col justify-center bg-gradient-to-br from-amber-50/50 via-white to-yellow-50/30 p-5 md:p-6 lg:p-8"
+      sectionData={data}
+      onInfoOpen={onInfoOpen}
+    >
       <span className="text-2xl">{data.icon || '💛'}</span>
       <p className="mt-3 font-serif text-lg leading-snug text-gray-900 md:text-xl">{data.title}</p>
       {data.subtitle ? (
@@ -138,15 +198,24 @@ function CheckinInfoCard({ data }) {
   );
 }
 
-function CoachCard({ data, onClick, className = '' }) {
+function CoachCard({ data, onClick, onInfoOpen, className = '' }) {
   if (!data?.title) return null;
+  const showInfo = hasSectionInfo(data);
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`h-full w-full rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 to-brownish p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md md:p-6 ${className}`}
+      className={`relative h-full w-full rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 to-brownish p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md md:p-6 lg:rounded-3xl lg:p-8 lg:shadow-[0_4px_24px_rgba(115,95,162,0.12)] lg:hover:shadow-[0_8px_32px_rgba(115,95,162,0.16)] ${className}`}
     >
-      <div className="flex items-start gap-4">
+      {showInfo ? (
+        <SectionInfoButton
+          sectionData={data}
+          onOpen={onInfoOpen}
+          className={CARD_INFO_ICON_POSITION}
+        />
+      ) : null}
+      <div className={`flex items-start gap-4 ${showInfo ? 'pr-9 sm:pr-10' : ''}`}>
         <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-2xl">
           {typeof data.avatar_icon === 'string' && isExpertImageUrl(data.avatar_icon) ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -166,27 +235,27 @@ function CoachCard({ data, onClick, className = '' }) {
               </span>
             ) : null}
           </div>
-          <p className="mt-2 font-serif text-lg leading-snug text-gray-900">{data.title}</p>
-          <p className="mt-1 text-sm leading-relaxed text-gray-600">{data.subtitle}</p>
+          <p className="mt-2 font-serif text-lg leading-snug text-gray-900 lg:text-xl">{data.title}</p>
+          <p className="mt-1 text-sm leading-relaxed text-gray-600 lg:text-[15px]">{data.subtitle}</p>
         </div>
-        <FiArrowRight className="mt-1 h-5 w-5 shrink-0 text-primary" />
+        <FiArrowRight className="mt-1 h-5 w-5 shrink-0 self-start text-primary" />
       </div>
     </button>
   );
 }
 
-function GettingStartedCard({ data, onStepClick }) {
+function GettingStartedCard({ data, onStepClick, onInfoOpen }) {
   if (!data?.steps?.length) return null;
   const percentage = Math.min(100, Math.max(0, Number(data.percentage) || 0));
 
   return (
-    <SectionShell className="p-6 md:p-7">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <SectionShell className="p-6 md:p-7 lg:p-8" sectionData={data} onInfoOpen={onInfoOpen}>
+      <p className={`${HOME_SECTION_LABEL} text-gray-400`}>
+        {data.label || 'Getting started'}
+      </p>
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-            {data.label || 'Getting started'}
-          </p>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="text-sm text-gray-600">
             {data.stepsCompleted ?? 0} of {data.totalSteps ?? data.steps.length} steps complete
           </p>
         </div>
@@ -261,12 +330,12 @@ function GettingStartedCard({ data, onStepClick }) {
   );
 }
 
-function AutoTrackerCard({ data }) {
+function AutoTrackerCard({ data, onInfoOpen }) {
   if (!data?.metrics?.length) return null;
   const status = data.status || {};
 
   return (
-    <SectionShell className="p-6 md:p-7">
+    <SectionShell className="p-6 md:p-7 lg:p-8" sectionData={data} onInfoOpen={onInfoOpen}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-serif text-xl text-gray-900 md:text-2xl">{data.title}</h2>
@@ -306,15 +375,13 @@ function AutoTrackerCard({ data }) {
   );
 }
 
-function FeatureSectionCard({ data }) {
+function FeatureSectionCard({ data, onInfoOpen }) {
   if (!data?.items?.length) return null;
 
   return (
-    <SectionShell className="p-6 md:p-7">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-        Unlock as you go
-      </p>
-      <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <SectionShell className="p-6 md:p-7 lg:p-8" sectionData={data} onInfoOpen={onInfoOpen}>
+      <p className={`${HOME_SECTION_LABEL} text-gray-400`}>Unlock as you go</p>
+      <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3 lg:mt-6 lg:gap-5">
         {data.items.map(item => {
           const lock = item.lock_status || {};
           return (
@@ -342,28 +409,38 @@ function FeatureSectionCard({ data }) {
   );
 }
 
-function InfoCard({ data, onClick }) {
+function InfoCard({ data, onClick, onInfoOpen }) {
   if (!data?.text) return null;
   return (
-    <SectionShell className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between md:p-6">
-      <div className="flex items-center gap-4">
-        {data.avatars?.length ? (
-          <div className="flex -space-x-2">
-            {data.avatars.map(avatar => (
-              <span
-                key={avatar}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-sm ring-2 ring-white"
-              >
-                {avatar}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        <p className="text-sm font-medium text-gray-800 md:text-[15px]">{data.text}</p>
+    <SectionShell
+      className="border-amber-100/60 bg-gradient-to-r from-amber-50/40 via-white to-primary/[0.04] p-5 md:p-6 lg:rounded-3xl lg:px-8 lg:py-5"
+      sectionData={data}
+      onInfoOpen={onInfoOpen}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+          {data.avatars?.length ? (
+            <div className="flex shrink-0 -space-x-2">
+              {data.avatars.map(avatar => (
+                <span
+                  key={avatar}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-sm ring-2 ring-white"
+                >
+                  {avatar}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <p className="min-w-0 text-sm font-medium leading-snug text-gray-800 md:text-[15px] lg:text-base">
+            {data.text}
+          </p>
+        </div>
+        <div className="flex shrink-0 justify-end sm:justify-center">
+          <button type="button" onClick={onClick} className={BTN_PRIMARY}>
+            {data.btn_text || 'Say hi'}
+          </button>
+        </div>
       </div>
-      <button type="button" onClick={onClick} className={`${BTN_PRIMARY} shrink-0`}>
-        {data.btn_text || 'Say hi'}
-      </button>
     </SectionShell>
   );
 }
@@ -388,6 +465,8 @@ export default function NewUserHome({ home }) {
   const [checkinWizardUrl, setCheckinWizardUrl] = useState(null);
   const [checkinWizardKey, setCheckinWizardKey] = useState(0);
   const [selectedMood, setSelectedMood] = useState(null);
+  const { infoModalData, openSectionInfo, closeSectionInfo, isSectionInfoOpen } =
+    useSectionInfoModal();
 
   const enabledSections = useMemo(() => getEnabledHomeSections(home), [home]);
 
@@ -463,22 +542,26 @@ export default function NewUserHome({ home }) {
   const renderSectionContent = key => {
     switch (key) {
       case 'period':
-        return <PeriodCard data={sectionData.period} onClick={handlePeriodLog} />;
+        return (
+          <PeriodCard data={sectionData.period} onClick={handlePeriodLog} onInfoOpen={openSectionInfo} />
+        );
       case 'checkin':
         return (
           <MoodCard
             data={sectionData.checkin}
             selectedMood={selectedMood}
             onSelect={handleMoodSelect}
+            onInfoOpen={openSectionInfo}
           />
         );
       case 'checkin_info':
-        return <CheckinInfoCard data={sectionData.checkin_info} />;
+        return <CheckinInfoCard data={sectionData.checkin_info} onInfoOpen={openSectionInfo} />;
       case 'coach':
         return (
           <CoachCard
             data={sectionData.coach}
             onClick={() => goHomeCoachCircle(sectionData.coach)}
+            onInfoOpen={openSectionInfo}
           />
         );
       case 'getting_started':
@@ -486,17 +569,19 @@ export default function NewUserHome({ home }) {
           <GettingStartedCard
             data={sectionData.getting_started}
             onStepClick={handleGettingStartedStep}
+            onInfoOpen={openSectionInfo}
           />
         );
       case 'auto_tracker':
-        return <AutoTrackerCard data={sectionData.auto_tracker} />;
+        return <AutoTrackerCard data={sectionData.auto_tracker} onInfoOpen={openSectionInfo} />;
       case 'feature':
-        return <FeatureSectionCard data={sectionData.feature} />;
+        return <FeatureSectionCard data={sectionData.feature} onInfoOpen={openSectionInfo} />;
       case 'info':
         return (
           <InfoCard
             data={home.info_section_data}
             onClick={() => router.push('/portal/inbox')}
+            onInfoOpen={openSectionInfo}
           />
         );
       default:
@@ -514,9 +599,9 @@ export default function NewUserHome({ home }) {
   };
 
   return (
-    <div className="min-h-full w-full">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8 xl:px-8">
-        <div className="flex flex-col gap-6 lg:gap-7">
+    <div className={HOME_PAGE_SHELL}>
+      <div className={HOME_PAGE_CONTAINER}>
+        <div className={HOME_PAGE_STACK}>
           <HomeHeader home={home} />
 
           {layoutGroups.map((group, groupIndex) => {
@@ -543,7 +628,7 @@ export default function NewUserHome({ home }) {
             return (
               <div
                 key={`grid-${groupIndex}-${group.keys.join('-')}`}
-                className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 lg:gap-6"
+                className={HOME_SECTION_GRID}
               >
                 {cells}
               </div>
@@ -571,6 +656,12 @@ export default function NewUserHome({ home }) {
         wizardUrl={checkinWizardUrl}
         wizardKey={checkinWizardKey}
         selectedMood={selectedMood}
+      />
+
+      <SectionInfoModal
+        open={isSectionInfoOpen}
+        data={infoModalData}
+        onClose={closeSectionInfo}
       />
     </div>
   );

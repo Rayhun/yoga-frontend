@@ -13,6 +13,9 @@ const SimpleNavbar = () => {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isOnboardingPaymentSuccess = pathname === '/payment/success';
+  const isOnboardingQuiz =
+    pathname?.startsWith('/onboarding') || pathname?.startsWith('/payment/onboarding');
+  const isLargeLogo = isOnboardingPaymentSuccess || isOnboardingQuiz;
 
   const handleDrawerToggle = () => {
     setMobileOpen(prevState => !prevState);
@@ -46,14 +49,14 @@ const SimpleNavbar = () => {
           ) : null}
           <Link
             href="/"
-            className={isOnboardingPaymentSuccess ? 'mt-2 sm:mt-4' : undefined}
+            className={isLargeLogo ? 'mt-2 sm:mt-4' : undefined}
           >
             <Image
-              width={isOnboardingPaymentSuccess ? 220 : 176}
-              height={isOnboardingPaymentSuccess ? 40 : 32}
+              width={isLargeLogo ? 220 : 176}
+              height={isLargeLogo ? 40 : 32}
               src={'/images/logo/logo.png'}
               className={
-                isOnboardingPaymentSuccess
+                isLargeLogo
                   ? 'h-12 w-auto sm:h-16'
                   : 'h-7 w-auto sm:h-8'
               }

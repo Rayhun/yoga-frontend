@@ -8,6 +8,7 @@ import {
   getSavedItemCategory,
 } from '@/utils/customer-v2-relief';
 import { EmptyState, RELIEF_CARD_HOVER, SectionTitle } from './shared';
+import { getReliefListGridClass } from './reliefDashboardUi';
 
 export default function SavedTab({ data }) {
   const router = useRouter();
@@ -31,13 +32,13 @@ export default function SavedTab({ data }) {
   }
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 lg:space-y-5">
       <SectionTitle title={data?.title} />
-      <div className="space-y-3">
+      <div className={getReliefListGridClass(items.length)}>
         {items.map(item => (
           <article
             key={item.id || item.title}
-            className={`${RELIEF_CARD_HOVER} group flex cursor-pointer items-center gap-4 p-4 md:p-5`}
+            className={`${RELIEF_CARD_HOVER} group flex cursor-pointer items-center gap-4 p-4 md:p-5 lg:p-6`}
             onClick={() => handleOpen(item)}
             onKeyDown={event => {
               if (event.key === 'Enter' || event.key === ' ') {

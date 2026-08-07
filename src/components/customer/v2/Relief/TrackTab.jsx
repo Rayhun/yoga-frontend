@@ -10,7 +10,7 @@ function CycleTrackerSection({ section }) {
 
   return (
     <section className={`${RELIEF_CARD} overflow-hidden`}>
-      <div className="relative bg-gradient-to-br from-violet-800 via-purple-800 to-indigo-900 p-6 text-white md:p-7">
+      <div className="relative bg-gradient-to-br from-violet-800 via-purple-800 to-indigo-900 p-6 text-white md:p-7 lg:p-8 xl:p-10">
         <div
           className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl"
           aria-hidden
@@ -136,7 +136,7 @@ function HabitsSection({ section }) {
         </div>
       ) : null}
 
-      <div className="space-y-3">
+      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:gap-5">
         {(section.daily_habits || []).map(habit => {
           const isCompleted = habit.status === 'COMPLETED';
           return (
@@ -176,7 +176,7 @@ export default function TrackTab({ data }) {
   const sections = data?.sections || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8">
       {sections.map(section => {
         if (section.card_type === 'cycle_phase_overview') {
           return <CycleTrackerSection key={section.section_id} section={section} />;

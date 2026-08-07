@@ -547,15 +547,6 @@ const getTeacherSidebarMenuItems = (
       disabled: false,
     },
     {
-      Icon: FaInbox,
-      label: 'Circles',
-      href: circlesHref,
-      isActive: pathname =>
-        pathname === '/portal/inbox' ||
-        pathname.includes('/portal/teacher/community/create'),
-      disabled: !isDevelopmentEnvironment || !is_profile_complete,
-    },
-    {
       Icon: FaUser,
       label: 'Profile',
       href: '/portal/teacher/profile?active_tab=about',
@@ -563,6 +554,31 @@ const getTeacherSidebarMenuItems = (
         `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=about') ||
         pathname.includes('/portal/teacher/editProfile'),
       disabled: false,
+    },
+    {
+      Icon: FaInbox,
+      label: 'My Circle',
+      href: circlesHref,
+      isActive: pathname =>
+        pathname === '/portal/inbox' ||
+        pathname.includes('/portal/teacher/community/create'),
+      disabled: !isDevelopmentEnvironment || !is_profile_complete,
+    },
+    {
+      Icon: MdGroupAdd,
+      label: 'Referrals',
+      href: '/portal/teacher/referrals',
+      isActive: pathname => pathname.includes('/portal/teacher/referrals'),
+      disabled: !is_profile_complete,
+    },
+    {
+      Icon: MdOutlineEventNote,
+      label: 'Guided Experiences',
+      href: '/portal/teacher/profile?active_tab=group_coaching',
+      isActive: (pathname, tab) =>
+        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') ||
+        pathname.includes('/portal/teacher/group_coaching'),
+      disabled: !is_profile_complete,
     },
     // {
     //   Icon: PiFilmScriptBold,
@@ -573,15 +589,6 @@ const getTeacherSidebarMenuItems = (
     //     pathname.includes('/portal/teacher/program'),
     //   disabled: false,
     // },
-    {
-      Icon: MdOutlineEventNote,
-      label: 'Guided Experiences',
-      href: '/portal/teacher/profile?active_tab=group_coaching',
-      isActive: (pathname, tab) =>
-        `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=group_coaching') ||
-        pathname.includes('/portal/teacher/group_coaching'),
-      disabled: !is_profile_complete,
-    },
     // {
     //   Icon: PiUserSquareFill,
     //   label: 'Consult',
@@ -604,13 +611,6 @@ const getTeacherSidebarMenuItems = (
       href: '/portal/teacher/payments',
       isActive: pathname => pathname.includes('/portal/teacher/payments'),
       disabled: !is_profile_complete || !stripe_onboarded,
-    },
-    {
-      Icon: MdGroupAdd,
-      label: 'Referrals',
-      href: '/portal/teacher/referrals',
-      isActive: pathname => pathname.includes('/portal/teacher/referrals'),
-      disabled: !is_profile_complete,
     },
   ];
 }

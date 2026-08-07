@@ -14,6 +14,10 @@ import useAuthContext from '@/hooks/useAuthContext';
 import useStreamText from '@/hooks/useStreamText';
 import { getCustomerAiModal } from '@/services/private/customer/v2/home';
 import queryKeys from '@/utils/query-keys';
+import SectionInfoModal, {
+  SectionInfoButton,
+  useSectionInfoModal,
+} from '@/components/customer/v2/SectionInfo';
 
 function ChatBubble({ isMine, children, isStreaming, isError }) {
   if (isMine) {
@@ -52,6 +56,8 @@ function AIWellnessCoachModalChat({ modalData, onClose }) {
       profile: { ai_coach_id },
     },
   } = useAuthContext();
+  const { infoModalData, openSectionInfo, closeSectionInfo, isSectionInfoOpen } =
+    useSectionInfoModal();
   const {
     messages: { data: messages },
     isAITyping,
@@ -114,14 +120,17 @@ function AIWellnessCoachModalChat({ modalData, onClose }) {
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-body transition hover:bg-gray"
-          aria-label="Close"
-        >
-          <FiX className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <SectionInfoButton sectionData={modalData} onOpen={openSectionInfo} />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-body transition hover:bg-gray"
+            aria-label="Close"
+          >
+            <FiX className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {modalData?.header_msg ? (
@@ -214,6 +223,12 @@ function AIWellnessCoachModalChat({ modalData, onClose }) {
           </p>
         ) : null}
       </div>
+
+      <SectionInfoModal
+        open={isSectionInfoOpen}
+        data={infoModalData}
+        onClose={closeSectionInfo}
+      />
     </div>
   );
 }

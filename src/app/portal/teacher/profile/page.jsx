@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import PageLoader from '@/components/common/loader/PageLoader';
 import { useExpertContext } from '@/hooks/useExpert';
+import useAuthContext from '@/hooks/useAuthContext';
 import { RiEdit2Line } from "react-icons/ri";
 import { FiShare2 } from "react-icons/fi";
 import InfoNote from '@/components/common/CompleteProfileInfo';
@@ -12,16 +13,24 @@ import ShareProfileDialog from '@/components/expert/profile/ShareProfileDialog';
 
 const Page = () => {
   const { expertData, isLoading, failureReason } = useExpertContext();
+  const { user } = useAuthContext();
   const router = useRouter();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   useHandleApiResponse(failureReason);
+
+  const isChatGroup = Boolean(user?.profile?.is_chat_group);
+  const showQuickSteps =
+    !expertData?.is_profile_complete ||
+    !expertData?.has_event_or_consult ||
+    !expertData?.stripe_onboarded ||
+    !isChatGroup;
 
   if (isLoading) return <PageLoader />;
   const onEdit = () => router.push('/portal/teacher/editProfile');
 
   return (
     <React.Fragment>
-      {(!expertData?.is_profile_complete || !expertData?.has_event_or_consult || !expertData?.stripe_onboarded) && <InfoNote expertData={expertData} />}
+      {showQuickSteps && <InfoNote expertData={expertData} />}
       <div className='relative'>
         <div className="absolute right-6 top-6 z-20 flex items-center gap-3">
           {expertData?.is_profile_complete && (
