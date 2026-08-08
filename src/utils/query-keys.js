@@ -101,6 +101,7 @@ const queryKeys = {
   myQTEApplication: 'myQTEApplication',
   myInstitutionApplication: 'myInstitutionApplication',
   certificationApplicationsList: 'certificationApplicationsList',
+  certificationProgramDetail: 'certificationProgramDetail',
 };
 
 export default queryKeys;
