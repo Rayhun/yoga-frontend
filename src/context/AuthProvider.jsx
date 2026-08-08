@@ -65,6 +65,7 @@ function AuthProvider({ children }) {
   const isStaff = userProfile?.role === USER_ROLE.STAFF;
   const isCustomer = userProfile?.role === USER_ROLE.CUSTOMER;
   const isAffiliate = userProfile?.role === USER_ROLE.AFFILIATE;
+  const isInstitution = userProfile?.role === USER_ROLE.INSTITUTION;
   const isIndividualCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.INDIVIDUAL;
   const isBusinessCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.BUSINESS;
   
@@ -131,6 +132,7 @@ function AuthProvider({ children }) {
           isIndividualCustomer, 
           isBusinessCustomer, 
           isAffiliate,
+          isInstitution,
           isBusinessOwner,
           isEmployee
         },

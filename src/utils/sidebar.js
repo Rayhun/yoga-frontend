@@ -567,6 +567,16 @@ const AFFILIATE = [
   },
 ];
 
-const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
+const INSTITUTION = [
+  {
+    Icon: MdHome,
+    label: 'Dashboard',
+    href: '/portal/institution/dashboard',
+    isActive: pathname => pathname === '/portal/institution/dashboard',
+    disabled: false,
+  },
+];
+
+const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE, INSTITUTION };
 
 export default SIDEBAR;

@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import useAuthContext from '@/hooks/useAuthContext';
 import PageLoader from '@/components/common/loader/PageLoader';
 import Button from '@/components/common/Button';
+import LearnerTypeStep from '@/components/onboarding/LearnerTypeStep';
 
 const OnboardingPageGuard = ({ children }) => {
   const router = useRouter();
@@ -42,6 +43,11 @@ const OnboardingPageGuard = ({ children }) => {
         </div>
       </div>
     );
+  }
+
+  // If user is customer and hasn't picked a learner type yet, capture that first (KAN-86)
+  if (user?.isCustomer && !user?.profile?.learner_type) {
+    return <LearnerTypeStep />;
   }
 
   // If user is customer and hasn't completed onboarding (false, null, or undefined), show the onboarding quiz
