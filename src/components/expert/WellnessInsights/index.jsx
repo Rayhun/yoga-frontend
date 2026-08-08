@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -7,7 +8,8 @@ import { FiArrowLeft } from 'react-icons/fi';
 import PageLoader from '@/components/common/loader/PageLoader';
 import { getExpertCircleWellnessInsights } from '@/services/private/expert/dashboard';
 import queryKeys from '@/utils/query-keys';
-import WellnessInsightsChart from './WellnessInsightsChart';
+
+const WellnessInsightsChart = dynamic(() => import('./WellnessInsightsChart'), { ssr: false });
 
 const BAR_OPACITIES = [1, 0.85, 0.7, 0.55, 0.4];
 
