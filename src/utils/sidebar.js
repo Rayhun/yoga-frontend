@@ -9,7 +9,8 @@ import {
   MdOutlinePayments,
   MdTrackChanges,
   MdGroupAdd,
-  MdList
+  MdList,
+  MdVerified
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -183,6 +184,13 @@ const ADMIN = [
         isActive: pathname => pathname.includes('/portal/admin/affiliates/transactions'),
       },
     ],
+  },
+  {
+    Icon: MdVerified,
+    label: 'Certification Applications',
+    href: '/portal/admin/certification/applications',
+    isActive: pathname => pathname.includes('/portal/admin/certification/applications'),
+    disabled: false,
   },
   {
     Icon: FaUserFriends,
@@ -567,6 +575,16 @@ const AFFILIATE = [
   },
 ];
 
-const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE };
+const INSTITUTION = [
+  {
+    Icon: MdHome,
+    label: 'Dashboard',
+    href: '/portal/institution/dashboard',
+    isActive: pathname => pathname === '/portal/institution/dashboard',
+    disabled: false,
+  },
+];
+
+const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE, INSTITUTION };
 
 export default SIDEBAR;

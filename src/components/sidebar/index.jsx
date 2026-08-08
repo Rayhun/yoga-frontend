@@ -75,6 +75,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
     if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded);
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
+    if (userRole === USER_ROLE.INSTITUTION) return SIDEBAR.INSTITUTION;
     return SIDEBAR.CUSTOMER;
   }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
 

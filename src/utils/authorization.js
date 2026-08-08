@@ -3,7 +3,8 @@ export const USER_ROLE = {
   STAFF: 'Staff',
   TEACHER: 'Teacher',
   CUSTOMER: 'Customer',
-  AFFILIATE: "Affiliate"
+  AFFILIATE: "Affiliate",
+  INSTITUTION: 'Institution'
 };
 
 export const USER_SUB_ROLE = {

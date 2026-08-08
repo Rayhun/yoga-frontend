@@ -50,6 +50,9 @@ const LoginForm = () => {
         } else if (role?.toLowerCase() === 'affiliate') {
           Cookies.set('token', response?.data?.token);
           router.replace('/portal/affiliate/dashboard');
+        } else if (role?.toLowerCase() === 'institution') {
+          Cookies.set('token', response?.data?.token);
+          router.replace('/portal/institution/dashboard');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
           

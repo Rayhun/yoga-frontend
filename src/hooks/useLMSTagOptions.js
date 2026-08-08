@@ -2,26 +2,38 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTagsList } from '@/services/private/lms/tag';
+import { getExpertCatalogTags } from '@/services/private/lms/catalogTags';
 import queryKeys from '@/utils/query-keys';
 
-function useLMSTagOptions() {
+function useLMSTagOptions({ context, field } = {}) {
+  const useCatalog = Boolean(context && field);
+
+  const { data: catalogData } = useQuery({
+    queryFn: () => getExpertCatalogTags({ context, field }),
+    queryKey: [queryKeys.lmsTags, context, field],
+    enabled: useCatalog,
+  });
+
   const { data: tagsResponse } = useQuery({
     queryFn: getTagsList,
     queryKey: [queryKeys.lmsTags],
+    enabled: !useCatalog,
   });
 
-  const categoriesOptions = useMemo(
-    () =>
-      tagsResponse?.data?.map(option => ({
-        label: option.name,
+  const options = useMemo(() => {
+    if (useCatalog) {
+      return catalogData?.data?.data?.results?.map(option => ({
+        label: option.label,
         value: option.id,
-      })),
-    [tagsResponse?.data]
-  );
+      }));
+    }
+    return tagsResponse?.data?.map(option => ({
+      label: option.name,
+      value: option.id,
+    }));
+  }, [useCatalog, catalogData, tagsResponse]);
 
-  return {
-    options: categoriesOptions,
-  };
+  return { options };
 }
 
 export default useLMSTagOptions;

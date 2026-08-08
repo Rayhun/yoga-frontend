@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import ExpertDashboard from '@/components/expert/ExpertDashboard';
 import useAuthContext from '@/hooks/useAuthContext';
 import PageLoader from '@/components/common/loader/PageLoader';
+import TeacherQTEStatusBanner from '@/components/certification/apply/TeacherQTEStatusBanner';
 
 export default function Page() {
   const { user } = useAuthContext();
@@ -33,6 +34,7 @@ export default function Page() {
 
   return (
     <div>
+      <TeacherQTEStatusBanner />
       <ExpertDashboard />
     </div>
   );

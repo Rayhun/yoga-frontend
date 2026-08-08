@@ -98,6 +98,9 @@ const queryKeys = {
   publicExpertPrograms: 'publicExpertPrograms',
   publicExpertProgramDetails: 'publicExpertProgramDetails',
   guestCheckoutSession: 'guestCheckoutSession',
+  myQTEApplication: 'myQTEApplication',
+  myInstitutionApplication: 'myInstitutionApplication',
+  certificationApplicationsList: 'certificationApplicationsList',
 };
 
 export default queryKeys;
