@@ -99,6 +99,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   const [welcomeData, setWelcomeData] = useState(null);
   const [homeCoachProgress, setHomeCoachProgress] = useState({ stepIndex: 0, totalSteps: 0 });
   const [homeCoachQuizSnapshot, setHomeCoachQuizSnapshot] = useState(null);
+  const [skippedHomeCoach, setSkippedHomeCoach] = useState(false);
   const [messages, setMessages] = useState([]);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [revealPhase, setRevealPhase] = useState('content');
@@ -356,6 +357,7 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
     if (!isPublic) {
       markHomeCoachPending();
     }
+    setSkippedHomeCoach(false);
     setHomeCoachFetchUrl(
       isPublic ? 'public-home-coach' : resolveOnboardHomeCoachUrl(homeCoachUrl)
     );
@@ -417,7 +419,31 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
       if (data.guest_session_id) {
         persistGuestSessionId(data.guest_session_id);
       }
+
+      if (data.skip_home_coach) {
+        const quizSnapshot = {
+          messages: [...messages, userBubble],
+          selectedOptionId: submittedOption.id,
+        };
+        setHomeCoachQuizSnapshot(quizSnapshot);
+        setSkippedHomeCoach(true);
+        setMessages(prev => [...prev, userBubble]);
+        if (data.requires_join_flow) {
+          if (data.join_flow_content) {
+            setJoinFlowContent(data.join_flow_content);
+          }
+          setFlowPhase('join-details');
+          return;
+        }
+        if (data.page_id === 'welcome_success_screen') {
+          setWelcomeData(data);
+          setFlowPhase('welcome');
+          return;
+        }
+      }
+
       if (data.is_home_coach) {
+        setSkippedHomeCoach(false);
         const quizSnapshot = { messages: [...messages], selectedOptionId: submittedOption.id };
         setMessages(prev => [...prev, userBubble]);
         beginHomeCoachStep(
@@ -555,6 +581,13 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   };
 
   const handleJoinDetailsBack = () => {
+    if (skippedHomeCoach && homeCoachQuizSnapshot) {
+      setMessages(homeCoachQuizSnapshot.messages);
+      setSelectedOptionId(homeCoachQuizSnapshot.selectedOptionId);
+      questionKeyRef.current = null;
+      setFlowPhase('quiz');
+      return;
+    }
     setFlowPhase('home-coach');
   };
 
@@ -690,7 +723,13 @@ const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
   }
 
   if (flowPhase === 'welcome' && welcomeData) {
-    return <OnboardingWelcomeSuccess data={welcomeData} isPublic={false} pageSlug={pageSlug} />;
+    return (
+      <OnboardingWelcomeSuccess
+        data={welcomeData}
+        isPublic={isPublic}
+        pageSlug={pageSlug}
+      />
+    );
   }
 
   if (flowPhase === 'home-coach') {

@@ -44,9 +44,30 @@ export default function OnboardingWelcomeSuccess({
     router.push(path);
   };
 
+  const resolvePrimaryDestination = () => {
+    if (primaryAction?.frontend_url) {
+      return primaryAction.frontend_url;
+    }
+    if (primaryAction?.action_id === 'navigate_to_community_dashboard') {
+      return '/portal/inbox';
+    }
+    const conversationId = extractConversationIdFromApiUrl(primaryAction?.url);
+    if (conversationId) {
+      return `/portal/inbox?conversation=${conversationId}`;
+    }
+    return '/portal/inbox';
+  };
+
   const handlePrimary = () => {
     if (isPublic && isPaymentComplete) {
       router.push(primaryAction?.frontend_url || '/auth/login?next=/portal/inbox');
+      return;
+    }
+    if (
+      isPublic &&
+      primaryAction?.action_id === 'navigate_to_community_dashboard'
+    ) {
+      finishAndNavigate(resolvePrimaryDestination());
       return;
     }
     if (isPublic) {
@@ -56,12 +77,7 @@ export default function OnboardingWelcomeSuccess({
       router.push(signupPath);
       return;
     }
-    const conversationId = extractConversationIdFromApiUrl(primaryAction?.url);
-    if (conversationId) {
-      finishAndNavigate(`/portal/inbox?conversation=${conversationId}`);
-      return;
-    }
-    finishAndNavigate('/portal/inbox');
+    finishAndNavigate(resolvePrimaryDestination());
   };
 
   const handleSecondary = () => {
@@ -76,7 +92,7 @@ export default function OnboardingWelcomeSuccess({
       router.push(loginPath);
       return;
     }
-    finishAndNavigate('/portal');
+    finishAndNavigate(secondaryAction?.frontend_url || '/portal');
   };
 
   const card = (
