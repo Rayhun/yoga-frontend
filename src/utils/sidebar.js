@@ -9,7 +9,8 @@ import {
   MdOutlinePayments,
   MdTrackChanges,
   MdGroupAdd,
-  MdList
+  MdList,
+  MdVerified
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -183,6 +184,13 @@ const ADMIN = [
         isActive: pathname => pathname.includes('/portal/admin/affiliates/transactions'),
       },
     ],
+  },
+  {
+    Icon: MdVerified,
+    label: 'Certification Applications',
+    href: '/portal/admin/certification/applications',
+    isActive: pathname => pathname.includes('/portal/admin/certification/applications'),
+    disabled: false,
   },
   {
     Icon: FaUserFriends,

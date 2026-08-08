@@ -1,6 +1,7 @@
 'use client';
 import React, { useMemo, useState, useCallback } from 'react';
 import { BsPersonCheck, BsPersonX } from 'react-icons/bs';
+import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
@@ -12,6 +13,7 @@ import useConfirm from '@/hooks/useConfirm';
 import { toastApiError } from '@/utils/helpers';
 import { approveApplication, getApplicationsList, rejectApplication } from '@/services/private/certification/applications';
 import RejectApplicationModal from './RejectApplicationModal';
+import ApplicationReviewDrawer from './ApplicationReviewDrawer';
 
 // List endpoint filters by 'qte'/'institution'; approve/reject URLs use 'expert'/'institution'
 // as the type segment (Expert model backs QTE applications) — mapped here at the call sites.
@@ -26,6 +28,7 @@ const ApplicationReviewTable = () => {
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [statusFilter, setStatusFilter] = useState('submitted');
   const [rejectTarget, setRejectTarget] = useState(null);
+  const [viewedApplication, setViewedApplication] = useState(null);
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
@@ -44,6 +47,7 @@ const ApplicationReviewTable = () => {
           await approveMutate({ type: activeTab.actionType, id: row.id });
           toast.success('Application approved');
           await invalidateList();
+          setViewedApplication(null);
         })
         .catch(error => {
           if (error?.response) toastApiError(error);
@@ -51,6 +55,11 @@ const ApplicationReviewTable = () => {
     },
     [confirm, approveMutate, activeTab, invalidateList]
   );
+
+  const handleOpenReject = useCallback(row => {
+    setViewedApplication(null);
+    setRejectTarget(row);
+  }, []);
 
   const handleRejectSubmit = async (values, { setSubmitting }) => {
     try {
@@ -88,6 +97,11 @@ const ApplicationReviewTable = () => {
   const rowActions = useMemo(
     () => [
       {
+        id: 'view',
+        Icon: MdOutlineRemoveRedEye,
+        onClick: row => setViewedApplication(row?.original),
+      },
+      {
         id: 'approve',
         render: row => row?.original?.application_status === 'submitted',
         Icon: BsPersonCheck,
@@ -97,10 +111,10 @@ const ApplicationReviewTable = () => {
         id: 'reject',
         render: row => row?.original?.application_status === 'submitted',
         Icon: BsPersonX,
-        onClick: row => setRejectTarget(row?.original),
+        onClick: row => handleOpenReject(row?.original),
       },
     ],
-    [handleApprove]
+    [handleApprove, handleOpenReject]
   );
 
   const { isLoading, columns, data } = useTable({
@@ -152,6 +166,14 @@ const ApplicationReviewTable = () => {
         show={!!rejectTarget}
         onClose={() => setRejectTarget(null)}
         onSubmit={handleRejectSubmit}
+      />
+
+      <ApplicationReviewDrawer
+        application={viewedApplication}
+        applicationType={activeTab.key}
+        onClose={() => setViewedApplication(null)}
+        onApprove={handleApprove}
+        onReject={handleOpenReject}
       />
     </React.Fragment>
   );

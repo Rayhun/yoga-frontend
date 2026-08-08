@@ -103,7 +103,7 @@ const InstitutionApplyForm = () => {
           sample_curriculum: values.sample_curriculum,
           sample_lecture_link: values.sample_lecture_link,
           prior_student_count: values.prior_student_count,
-          incorporation_document: uploadedFile?.file_link,
+          incorporation_document: uploadedFile?.file_key,
           agreement_accepted: values.terms,
         },
       };

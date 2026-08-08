@@ -102,8 +102,8 @@ const QTEApplyForm = () => {
         sample_lecture_link: values.sample_lecture_link,
         prior_student_count: values.prior_student_count,
         certifications: values.certifications,
-        government_id_file: govIdUpload?.file_link,
-        resume_file: resumeUpload?.file_link,
+        government_id_file: govIdUpload?.file_key,
+        resume_file: resumeUpload?.file_key,
         agreement_accepted: values.agreement_accepted,
       };
 
