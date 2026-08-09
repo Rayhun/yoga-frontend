@@ -356,6 +356,13 @@ const CUSTOMER = [
     disabled: false,
   },
   {
+    Icon: MdVerified,
+    label: 'Certifications',
+    href: '/portal/customer/certification',
+    isActive: pathname => pathname.includes('/portal/customer/certification'),
+    disabled: false,
+  },
+  {
     Icon: GiTeacher,
     label: 'Guided Experiences',
     href: '/portal/customer/lms/group_coaching',

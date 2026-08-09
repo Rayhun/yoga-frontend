@@ -47,7 +47,14 @@ const ProgramCard = ({ program, onClick }) => {
           <span className="text-lg font-bold text-green-600">
             {isFree ? 'Free' : `${program.currency} ${program.price}`}
           </span>
-          {isFull ? (
+          {program.is_enrolled ? (
+            <button
+              disabled
+              className="py-2 px-4 rounded-xl font-semibold text-sm bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200"
+            >
+              Enrolled
+            </button>
+          ) : isFull ? (
             <span className="text-sm font-semibold text-red-500">Full</span>
           ) : (
             <button
