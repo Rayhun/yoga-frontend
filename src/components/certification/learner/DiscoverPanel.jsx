@@ -1,15 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
+import { useQuery } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Spinner from '@/components/common/loader/Spinner';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import { toastApiError } from '@/utils/helpers';
 import ProgramCard from './ProgramCard';
 import { getCertificationCatalog } from '@/services/private/certification/catalog';
-import { checkoutCertificationProgram } from '@/services/private/certification/enrollment';
 import queryKeys from '@/utils/query-keys';
 
 const AUDIENCE_FILTERS = [
@@ -28,7 +25,6 @@ const DiscoverPanel = () => {
     data: response,
     isFetching,
     failureReason,
-    refetch,
   } = useQuery({
     queryFn: () => getCertificationCatalog({ target_audience: selectedAudience }),
     queryKey: [queryKeys.certificationCatalog, selectedAudience],
@@ -36,29 +32,7 @@ const DiscoverPanel = () => {
 
   useHandleApiResponse(failureReason);
 
-  const { mutateAsync: checkout, isPending: isEnrolling } = useMutation({
-    mutationFn: checkoutCertificationProgram,
-  });
-
   const programs = response?.data || [];
-
-  const handleEnroll = async program => {
-    if (isEnrolling) return;
-
-    if (program.payment_type === 'free') {
-      try {
-        await checkout({ id: program.id });
-        toast.success('Enrolled successfully!');
-        refetch();
-        router.push(`/portal/customer/certification?enrolled=${program.id}`);
-      } catch (error) {
-        toastApiError(error);
-      }
-      return;
-    }
-
-    router.push(`/payment/certification/${program.id}`);
-  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -91,7 +65,11 @@ const DiscoverPanel = () => {
       ) : programs.length > 0 ? (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {programs.map(program => (
-            <ProgramCard key={program.id} program={program} onClick={() => handleEnroll(program)} />
+            <ProgramCard
+              key={program.id}
+              program={program}
+              onClick={() => router.push(`/portal/customer/certification/${program.id}`)}
+            />
           ))}
         </div>
       ) : (

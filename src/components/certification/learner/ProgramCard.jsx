@@ -16,10 +16,10 @@ const ProgramCard = ({ program, onClick }) => {
 
   return (
     <div
-      className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 h-full flex flex-col ${
-        isFull ? 'opacity-70' : 'hover:shadow-2xl hover:scale-[1.01] cursor-pointer'
+      className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 h-full flex flex-col cursor-pointer ${
+        isFull ? 'opacity-70' : 'hover:shadow-2xl hover:scale-[1.01]'
       }`}
-      onClick={!isFull ? onClick : undefined}
+      onClick={onClick}
     >
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ const ProgramCard = ({ program, onClick }) => {
               }}
               className="py-2 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-colors"
             >
-              Enroll
+              View Details
             </button>
           )}
         </div>

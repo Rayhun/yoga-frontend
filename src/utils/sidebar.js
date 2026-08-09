@@ -379,6 +379,13 @@ const CUSTOMER = [
     disabled: false,
   },
   {
+    Icon: MdVerified,
+    label: 'Certifications',
+    href: '/portal/customer/certification',
+    isActive: pathname => pathname.includes('/portal/customer/certification'),
+    disabled: false,
+  },
+  {
     Icon: LuClipboardCheck,
     label: 'Habits',
     href: '/portal/customer/goal-tracking/goals', // Default to goals

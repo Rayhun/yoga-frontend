@@ -14,10 +14,7 @@ const STATUS_BADGE = {
 
 const MyProgramCard = ({ program }) => {
   return (
-    <Link
-      href={`/portal/teacher/certification/programs/builder/${program.id}`}
-      className="bg-white dark:bg-boxdark rounded-2xl shadow-lg border border-gray-100 dark:border-strokedark overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] flex flex-col"
-    >
+    <div className="bg-white dark:bg-boxdark rounded-2xl shadow-lg border border-gray-100 dark:border-strokedark overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] flex flex-col">
       <div className="h-36 w-full bg-gray-100 dark:bg-form-input flex items-center justify-center overflow-hidden">
         {program.thumbnail ? (
           <img src={program.thumbnail} alt={program.title} className="w-full h-full object-cover" />
@@ -33,8 +30,22 @@ const MyProgramCard = ({ program }) => {
           {program.title || 'Untitled program'}
         </h4>
         <p className="text-xs text-gray-400 mt-auto">Updated {dayjs(program.updated_at).format('MMM D, YYYY')}</p>
+        <div className="flex gap-2 pt-1">
+          <Link
+            href={`/portal/teacher/certification/programs/builder/${program.id}`}
+            className="flex-1 text-center text-sm font-medium border border-gray-200 dark:border-strokedark rounded-lg px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-form-input"
+          >
+            Edit
+          </Link>
+          <Link
+            href={`/portal/teacher/certification/programs/${program.id}/preview`}
+            className="flex-1 text-center text-sm font-medium border border-gray-200 dark:border-strokedark rounded-lg px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-form-input"
+          >
+            Preview
+          </Link>
+        </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
