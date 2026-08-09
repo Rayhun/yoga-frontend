@@ -481,8 +481,8 @@ const STAFF = [
   },
 ];
 
-const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded) => {
-  
+const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE) => {
+
   return [
     {
       Icon: FiTarget,
@@ -507,6 +507,17 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
         pathname.includes('/portal/teacher/editProfile'),
       disabled: false,
     },
+    ...(isApprovedQTE
+      ? [
+          {
+            Icon: MdVerified,
+            label: 'Certification Programs',
+            href: '/portal/teacher/certification/programs',
+            isActive: pathname => pathname.includes('/portal/teacher/certification/programs'),
+            disabled: false,
+          },
+        ]
+      : []),
     // {
     //   Icon: PiFilmScriptBold,
     //   label: 'Programs',

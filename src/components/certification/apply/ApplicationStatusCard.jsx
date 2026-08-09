@@ -36,10 +36,10 @@ const STATUS_CONFIG = {
 
 /**
  * Pending-review / approved / rejected status card for a QTE or Institution creator
- * application (KAN-88). ``rejectedReason`` and ``reapplyHref`` only apply to the
- * rejected state.
+ * application (KAN-88). ``rejectedReason`` and ``reapplyHref`` only apply to the rejected
+ * state; ``approvedCtaHref``/``approvedCtaLabel`` only apply to the approved state.
  */
-const ApplicationStatusCard = ({ applicationStatus, rejectedReason, reapplyHref }) => {
+const ApplicationStatusCard = ({ applicationStatus, rejectedReason, reapplyHref, approvedCtaHref, approvedCtaLabel }) => {
   const config = STATUS_CONFIG[applicationStatus];
   if (!config) return null;
 
@@ -62,6 +62,14 @@ const ApplicationStatusCard = ({ applicationStatus, rejectedReason, reapplyHref 
             className="inline-block mt-3 text-sm font-medium text-green-700 hover:text-green-800 underline"
           >
             Update and re-apply
+          </Link>
+        ) : null}
+        {applicationStatus === 'approved' && approvedCtaHref ? (
+          <Link
+            href={approvedCtaHref}
+            className="inline-block mt-3 text-sm font-medium bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800"
+          >
+            {approvedCtaLabel || 'Get started'}
           </Link>
         ) : null}
       </div>

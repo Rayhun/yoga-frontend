@@ -50,6 +50,8 @@ const TeacherQTEStatusBanner = () => {
         applicationStatus={data.application_status}
         rejectedReason={data.rejected_reason}
         reapplyHref="/portal/teacher/apply-qte"
+        approvedCtaHref="/portal/teacher/certification/programs/builder/new"
+        approvedCtaLabel="Create your first program"
       />
     </div>
   );

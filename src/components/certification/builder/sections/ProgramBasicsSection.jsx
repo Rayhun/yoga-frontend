@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { toast } from 'react-toastify';
 import { FaRegFileImage } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
@@ -60,7 +61,7 @@ const toPayload = values => ({
  */
 const ProgramBasicsSection = ({ initialValues, onSave, disabled = false }) => {
   const { options: categoryOptions } = useLMSCategoryOptions();
-  const { notifyBlur, markSaved, status } = useSectionAutosave(onSave);
+  const { notifyBlur, flush, markSaved, status } = useSectionAutosave(onSave);
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
 
   useEffect(() => {
@@ -79,18 +80,31 @@ const ProgramBasicsSection = ({ initialValues, onSave, disabled = false }) => {
     async (files, values, setFieldValue) => {
       const file = files?.[0];
       if (!file) return;
+      // Basics' own save creates the program on its first call (see ProgramBuilderModal); with
+      // no title yet that create 400s ("This field may not be blank."), and — since notifyBlur
+      // only *schedules* a save 700ms out — that failure previously surfaced nowhere but a
+      // small "Could not save" label, so the upload looked like it silently did nothing.
+      if (!values.title?.trim()) {
+        toast.error('Add a title first, then upload a thumbnail.');
+        return;
+      }
       setIsUploadingThumbnail(true);
       try {
         const { data } = await uploadLMSFile({ file });
         setFieldValue('thumbnail', data?.file_link);
         handleBlur({ ...values, thumbnail: data?.file_link });
+        // Flush immediately rather than waiting out the usual debounce — a dropped file is
+        // already a discrete, resolved action (same "explicit save" treatment described above
+        // for Target Learner Type), and flushing now means a save failure lands in this
+        // try/catch instead of only setting SectionCard's easy-to-miss status text.
+        await flush();
       } catch (error) {
         toastApiError(error);
       } finally {
         setIsUploadingThumbnail(false);
       }
     },
-    [handleBlur]
+    [handleBlur, flush]
   );
 
   return (

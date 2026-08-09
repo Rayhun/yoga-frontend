@@ -8,6 +8,10 @@ export const getProgram = async ({ id }) => {
   return axios.get(`/certification/programs/${id}/`);
 };
 
+export const getMyPrograms = async () => {
+  return axios.get('/certification/programs/mine/');
+};
+
 export const updateProgramBasics = async ({ id, payload }) => {
   return axios.patch(`/certification/programs/${id}/basics/`, payload);
 };

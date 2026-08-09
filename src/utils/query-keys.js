@@ -103,6 +103,7 @@ const queryKeys = {
   certificationApplicationsList: 'certificationApplicationsList',
   certificationProgramDetail: 'certificationProgramDetail',
   certificationCatalog: 'certificationCatalog',
+  certificationMyPrograms: 'certificationMyPrograms',
 };
 
 export default queryKeys;

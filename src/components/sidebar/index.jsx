@@ -3,10 +3,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 import useAuthContext from '@/hooks/useAuthContext';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
+import queryKeys from '@/utils/query-keys';
+import { getMyQTEApplication } from '@/services/private/certification/application';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
@@ -70,14 +73,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     }
   }, [sidebarExpanded]);
 
+  // Same check as TeacherQTEStatusBanner / the program-builder layout guard — "approved QTE"
+  // isn't part of useAuthContext, so it takes a real fetch; queryKey is shared so this stays
+  // deduped against those.
+  const { data: qteApplication } = useQuery({
+    queryKey: [queryKeys.myQTEApplication],
+    queryFn: getMyQTEApplication,
+    select: res => res?.data,
+    retry: false,
+    enabled: userRole === USER_ROLE.TEACHER,
+  });
+  const isApprovedQTE = qteApplication?.creator_type === 'qte' && qteApplication?.application_status === 'approved';
+
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded);
+    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE);
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     if (userRole === USER_ROLE.INSTITUTION) return SIDEBAR.INSTITUTION;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded]);
+  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE]);
 
   // Remove unused isTeacher variable - design is now universal
 
