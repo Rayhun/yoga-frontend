@@ -594,6 +594,20 @@ const INSTITUTION = [
     isActive: pathname => pathname === '/portal/institution/dashboard',
     disabled: false,
   },
+  {
+    Icon: FaBuilding,
+    label: 'My Application',
+    href: '/portal/institution/application',
+    isActive: pathname => pathname.includes('/portal/institution/application'),
+    disabled: false,
+  },
+  {
+    Icon: MdVerified,
+    label: 'Certification Programs',
+    href: '/portal/institution/programs',
+    isActive: pathname => pathname.includes('/portal/institution/programs'),
+    disabled: false,
+  },
 ];
 
 const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE, INSTITUTION };
