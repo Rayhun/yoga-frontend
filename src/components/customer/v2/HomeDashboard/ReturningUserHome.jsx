@@ -448,9 +448,17 @@ function TodayPlanCard({ data, onClick, onInfoOpen }) {
 function ProgressCard({ data, onInfoOpen }) {
   if (!data?.title) return null;
   const tracker = data.weekly_tracker || {};
+  const outcomeLabel = data.outcome_label;
   return (
     <SectionShell className="h-full p-6 md:p-7 lg:p-8" sectionData={data} onInfoOpen={onInfoOpen}>
-      <h2 className="font-serif text-xl text-gray-900 md:text-2xl lg:text-[1.65rem]">{data.title}</h2>
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-serif text-xl text-gray-900 md:text-2xl lg:text-[1.65rem]">{data.title}</h2>
+        {outcomeLabel && data.outcome_status && data.outcome_status !== 'insufficient_data' ? (
+          <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+            {outcomeLabel}
+          </span>
+        ) : null}
+      </div>
       <p className="mt-2 text-sm text-gray-600">{data.subtitle}</p>
       {data.chips?.length ? (
         <div className="mt-4 flex flex-wrap gap-2">

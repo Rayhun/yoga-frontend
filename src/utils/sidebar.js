@@ -29,7 +29,7 @@ import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
 import { PiFilmScriptBold, PiUserSquareFill, PiChartLine } from 'react-icons/pi';
 import { LuClipboardCheck } from 'react-icons/lu';
-import { FiTarget, FiActivity, FiSettings } from 'react-icons/fi';
+import { FiTarget, FiActivity, FiSettings, FiBarChart2 } from 'react-icons/fi';
 import { LiaBookSolid } from 'react-icons/lia';
 // import { FiDroplet } from "react-icons/fi";
 // import { TbGenderTransgender } from "react-icons/tb";
@@ -118,6 +118,13 @@ const ADMIN = [
     label: 'Inbox',
     href: '/portal/inbox',
     isActive: pathname => pathname.includes('/portal/inbox'),
+    disabled: false,
+  },
+  {
+    Icon: FiBarChart2,
+    label: 'Outcomes',
+    href: '/portal/admin/outcomes',
+    isActive: pathname => pathname.includes('/portal/admin/outcomes'),
     disabled: false,
   },
   {

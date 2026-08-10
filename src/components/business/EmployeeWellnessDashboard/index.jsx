@@ -1,48 +1,62 @@
 'use client';
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { FiUsers, FiTrendingUp, FiActivity, FiBarChart2 } from 'react-icons/fi';
+import { FaHeartbeat } from 'react-icons/fa';
 import { getBusinessWellnessDashboard } from '@/services/private/business/wellness';
 import queryKeys from '@/utils/query-keys';
-import { 
-  FiUsers, 
-  FiTrendingUp, 
-  FiActivity, 
-  FiTarget,
-  FiHeart,
-  FiBarChart,
-  FiAward,
-  FiAlertCircle
-} from 'react-icons/fi';
-import { 
-  FaHeartbeat, 
-  FaChartPie, 
-  FaUserCheck,
-  FaExclamationTriangle
-} from 'react-icons/fa';
+
+const OUTCOME_COLORS = {
+  improving: 'text-emerald-700 bg-emerald-100',
+  stable: 'text-amber-800 bg-amber-100',
+  worsening: 'text-rose-700 bg-rose-100',
+  insufficient_data: 'text-gray-600 bg-gray-100',
+};
+
+const OUTCOME_LABELS = {
+  improving: 'Improving',
+  stable: 'Stable',
+  worsening: 'Worsening',
+  insufficient_data: 'Insufficient data',
+};
+
+function OutcomeBar({ label, percent, count, barColor }) {
+  return (
+    <div>
+      <div className="mb-1 flex justify-between text-sm">
+        <span className="font-medium text-gray-700">{label}</span>
+        <span className="text-gray-600">
+          {percent}% <span className="text-gray-400">({count})</span>
+        </span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-200">
+        <div className={`h-2.5 rounded-full ${barColor}`} style={{ width: `${Math.min(100, percent)}%` }} />
+      </div>
+    </div>
+  );
+}
 
 const EmployeeWellnessDashboard = () => {
-  const { 
-    data: wellnessResponse, 
-    isLoading, 
-    error 
-  } = useQuery({
+  const { data: wellnessResponse, isLoading, error } = useQuery({
     queryKey: [queryKeys.businessWellnessDashboard],
     queryFn: getBusinessWellnessDashboard,
   });
 
   const wellnessData = wellnessResponse?.data?.data;
+  const dist = wellnessData?.outcome_distribution || {};
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
         <p className="text-red-600">Error loading wellness data: {error.message}</p>
       </div>
     );
@@ -50,359 +64,134 @@ const EmployeeWellnessDashboard = () => {
 
   if (!wellnessData) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-        <FiActivity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">No Wellness Data Available</h3>
-        <p className="text-gray-500">Wellness data will appear here once employees start using wellness tracking features.</p>
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+        <FiActivity className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+        <h3 className="mb-2 text-lg font-semibold text-gray-700">No Wellness Data Available</h3>
+        <p className="text-gray-500">
+          Outcomes appear once employees complete v2 daily check-ins.
+        </p>
       </div>
     );
   }
 
-  const getWellnessColor = (score) => {
-    if (score >= 80) return 'text-green-600 bg-green-100';
-    if (score >= 60) return 'text-blue-600 bg-blue-100';
-    if (score >= 40) return 'text-yellow-600 bg-yellow-100';
-    if (score > 0) return 'text-orange-600 bg-orange-100';
-    return 'text-gray-600 bg-gray-100';
-  };
-
-  const getWellnessStatusColor = (status) => {
-    switch (status) {
-      case 'Excellent': return 'text-green-600 bg-green-100';
-      case 'Good': return 'text-blue-600 bg-blue-100';
-      case 'Fair': return 'text-yellow-600 bg-yellow-100';
-      case 'Needs Improvement': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
+  const employees = wellnessData.employee_outcome_details || [];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+      <div className="rounded-2xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
         <div className="flex items-center space-x-4">
-          <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
+          <div className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 p-3">
             <FaHeartbeat className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Employee Wellness Dashboard
-            </h2>
-            <p className="text-gray-600 mt-1">
-              Combined wellness insights for your team
+            <h2 className="text-2xl font-bold text-gray-900">Employee Outcomes</h2>
+            <p className="mt-1 text-gray-600">
+              Weekly PRO-style trends from daily check-ins ({wellnessData.cohort_days || 28}-day window)
             </p>
           </div>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Employees */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Employees</p>
-              <p className="text-3xl font-bold text-gray-900">{wellnessData.total_employees}</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
-              <FiUsers className="h-6 w-6 text-white" />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-gray-600">Total employees</p>
+          <p className="text-3xl font-bold text-gray-900">{wellnessData.total_employees}</p>
+          <FiUsers className="mt-2 text-primary" />
         </div>
-
-        {/* Employees with Wellness Data */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">With Wellness Data</p>
-              <p className="text-3xl font-bold text-gray-900">{wellnessData.employees_with_wellness_data}</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
-              <FaUserCheck className="h-6 w-6 text-white" />
-            </div>
-          </div>
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-gray-600">Classified this week</p>
+          <p className="text-3xl font-bold text-gray-900">{wellnessData.employees_with_wellness_data}</p>
+          <FiBarChart2 className="mt-2 text-primary" />
         </div>
-
-        {/* Average Wellness Score */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Average Score</p>
-              <p className="text-3xl font-bold text-gray-900">{wellnessData.average_wellness_score}%</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
-              <FiTrendingUp className="h-6 w-6 text-white" />
-            </div>
-          </div>
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-gray-600">Engagement rate</p>
+          <p className="text-3xl font-bold text-gray-900">{wellnessData.engagement_rate ?? 0}%</p>
+          <FiActivity className="mt-2 text-primary" />
         </div>
-
-        {/* Wellness Distribution */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Excellent Health</p>
-              <p className="text-3xl font-bold text-gray-900">{wellnessData.wellness_distribution.excellent}</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl">
-              <FiAward className="h-6 w-6 text-white" />
-            </div>
-          </div>
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-gray-600">Improving</p>
+          <p className="text-3xl font-bold text-emerald-700">{dist.improving?.percent ?? 0}%</p>
+          <FiTrendingUp className="mt-2 text-emerald-600" />
         </div>
       </div>
 
-      {/* Wellness Distribution Chart */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg">
-            <FaChartPie className="h-5 w-5 text-white" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900">Wellness Distribution</h3>
+      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900">Team outcome breakdown</h3>
+        <div className="mt-4 space-y-4">
+          <OutcomeBar
+            label="Improving"
+            percent={dist.improving?.percent ?? 0}
+            count={dist.improving?.count ?? 0}
+            barColor="bg-emerald-500"
+          />
+          <OutcomeBar
+            label="Stable"
+            percent={dist.stable?.percent ?? 0}
+            count={dist.stable?.count ?? 0}
+            barColor="bg-amber-400"
+          />
+          <OutcomeBar
+            label="Worsening"
+            percent={dist.worsening?.percent ?? 0}
+            count={dist.worsening?.count ?? 0}
+            barColor="bg-rose-400"
+          />
         </div>
-        
-        {/* Progress Bars for each category */}
-        <div className="space-y-4">
-          {[
-            { key: 'excellent', label: 'Excellent', color: 'green', range: '80-100%', count: wellnessData.wellness_distribution.excellent },
-            { key: 'good', label: 'Good', color: 'blue', range: '60-79%', count: wellnessData.wellness_distribution.good },
-            { key: 'fair', label: 'Fair', color: 'yellow', range: '40-59%', count: wellnessData.wellness_distribution.fair },
-            { key: 'needs_improvement', label: 'Needs Improvement', color: 'orange', range: '1-39%', count: wellnessData.wellness_distribution.needs_improvement },
-            { key: 'no_data', label: 'No Data', color: 'gray', range: '0%', count: wellnessData.wellness_distribution.no_data }
-          ].map((category) => {
-            const percentage = wellnessData.total_employees > 0 ? (category.count / wellnessData.total_employees) * 100 : 0;
-            const colorClasses = {
-              green: 'bg-green-500',
-              blue: 'bg-blue-500',
-              yellow: 'bg-yellow-500',
-              orange: 'bg-orange-500',
-              gray: 'bg-gray-500'
-            };
-            
-            return (
-              <div key={category.key} className="flex items-center space-x-4">
-                <div className="w-20 text-sm font-medium text-gray-700">{category.label}</div>
-                <div className="flex-1 bg-gray-200 rounded-full h-3">
-                  <div 
-                    className={`h-3 rounded-full transition-all duration-500 ${colorClasses[category.color]}`}
-                    style={{ width: `${percentage}%` }}
-                  ></div>
-                </div>
-                <div className="w-16 text-right">
-                  <span className="text-sm font-semibold text-gray-900">{category.count}</span>
-                  <span className="text-xs text-gray-500 ml-1">({Math.round(percentage)}%)</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        
-        {/* Circular Progress Chart */}
-        <div className="mt-8 flex justify-center">
-          <div className="relative w-48 h-48">
-            <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="#e5e7eb"
-                strokeWidth="8"
-                fill="none"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="#10b981"
-                strokeWidth="8"
-                fill="none"
-                strokeDasharray={`${(wellnessData.average_wellness_score / 100) * 251.2} 251.2`}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">{wellnessData.average_wellness_score}%</div>
-                <div className="text-sm text-gray-600">Average Score</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {wellnessData.avg_wellbeing_change != null ? (
+          <p className="mt-4 text-sm text-gray-600">
+            Average wellbeing change:{' '}
+            <strong>
+              {wellnessData.avg_wellbeing_change > 0 ? '+' : ''}
+              {wellnessData.avg_wellbeing_change}
+            </strong>
+          </p>
+        ) : null}
       </div>
 
-      {/* Tracking Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Period Tracking Summary */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-pink-500 to-pink-600 rounded-lg">
-              <FiHeart className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">Period Tracking</h3>
+      {employees.length > 0 ? (
+        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+          <div className="border-b px-6 py-4">
+            <h3 className="text-lg font-semibold text-gray-900">Employee details</h3>
           </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Employees Tracking</span>
-              <span className="font-semibold text-gray-900">{wellnessData.period_tracking_summary.total_tracking}</span>
-            </div>
-            
-            {/* Progress bar for tracking participation */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Participation Rate</span>
-                <span className="font-semibold text-gray-900">
-                  {wellnessData.total_employees > 0 ? Math.round((wellnessData.period_tracking_summary.total_tracking / wellnessData.total_employees) * 100) : 0}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-pink-500 to-pink-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${wellnessData.total_employees > 0 ? (wellnessData.period_tracking_summary.total_tracking / wellnessData.total_employees) * 100 : 0}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Average Score</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getWellnessColor(wellnessData.period_tracking_summary.average_score)}`}>
-                {wellnessData.period_tracking_summary.average_score}%
-              </span>
-            </div>
-            
-            {/* Score progress bar */}
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-pink-400 to-pink-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${wellnessData.period_tracking_summary.average_score}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Goal Tracking Summary */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
-              <FiTarget className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">Goal Tracking</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Employees Tracking</span>
-              <span className="font-semibold text-gray-900">{wellnessData.goal_tracking_summary.total_tracking}</span>
-            </div>
-            
-            {/* Progress bar for tracking participation */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Participation Rate</span>
-                <span className="font-semibold text-gray-900">
-                  {wellnessData.total_employees > 0 ? Math.round((wellnessData.goal_tracking_summary.total_tracking / wellnessData.total_employees) * 100) : 0}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${wellnessData.total_employees > 0 ? (wellnessData.goal_tracking_summary.total_tracking / wellnessData.total_employees) * 100 : 0}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Average Score</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getWellnessColor(wellnessData.goal_tracking_summary.average_score)}`}>
-                {wellnessData.goal_tracking_summary.average_score}%
-              </span>
-            </div>
-            
-            {/* Score progress bar */}
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${wellnessData.goal_tracking_summary.average_score}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Employee Wellness Details */}
-      {wellnessData.employee_wellness_details && wellnessData.employee_wellness_details.length > 0 && (
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg">
-              <FiBarChart className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">Employee Wellness Details</h3>
-          </div>
-          
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Employee</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Overall Score</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Period Tracking</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Goal Tracking</th>
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="px-4 py-3">Employee</th>
+                  <th className="px-4 py-3">Outcome</th>
+                  <th className="px-4 py-3">Confidence</th>
+                  <th className="px-4 py-3">Check-ins (week)</th>
+                  <th className="px-4 py-3">Good days</th>
                 </tr>
               </thead>
-              <tbody>
-                {wellnessData.employee_wellness_details.map((employee, index) => (
-                  <tr key={employee.employee_id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{employee.employee_name}</p>
-                        <p className="text-sm text-gray-500">{employee.employee_email}</p>
-                      </div>
+              <tbody className="divide-y divide-gray-100">
+                {employees.map(emp => (
+                  <tr key={emp.employee_id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{emp.employee_name}</div>
+                      <div className="text-xs text-gray-500">{emp.employee_email}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getWellnessColor(employee.overall_wellness_score)}`}>
-                        {employee.overall_wellness_score}%
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          OUTCOME_COLORS[emp.outcome_status] || OUTCOME_COLORS.insufficient_data
+                        }`}
+                      >
+                        {emp.outcome_label || OUTCOME_LABELS[emp.outcome_status]}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
-                      {employee.period_tracking.wellness_score > 0 ? (
-                        <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getWellnessStatusColor(employee.period_tracking.overall_status)}`}>
-                            {employee.period_tracking.overall_status}
-                          </span>
-                          <p className="text-xs text-gray-500 mt-1">{employee.period_tracking.tracker_name}</p>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-sm">No data</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      {employee.goal_tracking.wellness_score > 0 ? (
-                        <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getWellnessStatusColor(employee.goal_tracking.overall_status)}`}>
-                            {employee.goal_tracking.overall_status}
-                          </span>
-                          <p className="text-xs text-gray-500 mt-1">{employee.goal_tracking.tracker_title}</p>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-sm">No data</span>
-                      )}
-                    </td>
+                    <td className="px-4 py-3 capitalize text-gray-600">{emp.confidence || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">{emp.checkins_this_week}</td>
+                    <td className="px-4 py-3 text-gray-600">{emp.good_days}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      )}
-
-      {/* No Data Message */}
-      {wellnessData.employees_with_wellness_data === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
-          <FiAlertCircle className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-blue-700 mb-2">Encourage Wellness Tracking</h3>
-          <p className="text-blue-600">
-            None of your employees have started wellness tracking yet. Encourage them to use the wellness features to see insights here.
-          </p>
+      ) : (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800">
+          No employees have enough check-in data yet. Encourage daily v2 check-ins on the home screen.
         </div>
       )}
     </div>
