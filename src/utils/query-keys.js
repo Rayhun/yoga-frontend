@@ -19,6 +19,7 @@ const queryKeys = {
   expertCatalogTags: 'expertCatalogTags',
   expertCommissions: 'expertCommissions',
   homeCoachConfigs: 'homeCoachConfigs',
+  homeCardsConfig: 'homeCardsConfig',
   expertPayments: 'expertPayments',
   lmsQuizes: 'lmsQuizes',
   lmsImageSessions: 'lmsImageSessions',
