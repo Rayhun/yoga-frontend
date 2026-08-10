@@ -30,11 +30,6 @@ const ClientPortalPage = () => {
       router.replace('/portal/admin/lms/program');
     }
 
-    // Redirect admin users to admin dashboard
-    if (userRole === 'Admin') {
-      router.replace('/portal/admin/dashboard');
-    }
-
     // Business owners and employees can access the regular portal
     // Business owners can also access the Business Dashboard via sidebar
     // Business employees have the same experience as individual users
@@ -52,7 +47,6 @@ const ClientPortalPage = () => {
         // This should redirect to dashboard, but fallback just in case
         return <ExpertQuickSteps />;
       case 'Staff':
-      case 'Admin':
       case 'Institution':
         // These roles are handled by useEffect redirects above — show a
         // spinner while the navigation resolves to avoid a flash of wrong UI.
