@@ -113,7 +113,9 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
         const { data: updated } = await updateProgramBasics({ id: created.id, payload: values });
         queryClient.setQueryData([queryKeys.certificationProgramDetail, created.id], { data: updated });
         setLiveId(created.id);
-        router.replace(`/portal/teacher/certification/programs/builder/${created.id}`);
+        // Use the current pathname to preserve whether we're in /portal/teacher/... or /portal/institution/...
+        const basePath = window.location.pathname.replace('/new', '');
+        router.replace(`${basePath}/${created.id}`);
         return updated;
       }
       const { data } = await updateProgramBasics({ id: liveId, payload: values });
