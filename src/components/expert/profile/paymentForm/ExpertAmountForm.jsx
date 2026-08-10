@@ -15,7 +15,7 @@ const validationSchema = Yup.object({
   expert_amount: Yup.number()
     .typeError('Please enter a valid amount')
     .integer('Amount must be a whole number')
-    .min(0, 'Amount must be zero or greater')
+    .min(30, 'Monthly rate must be $30 or greater')
     .required('Monthly rate is required'),
 });
 
@@ -51,13 +51,13 @@ const ExpertAmountForm = ({ expertData }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm overflow-hidden">
       {isExpertAmountConfigured && (
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-blue-200/50 dark:border-blue-800/30 px-6 py-4">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-b border-green-200/50 dark:border-green-800/30 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
               <FiCheckCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="font-semibold text-blue-700 dark:text-blue-400">Membership Investment Set</p>
+              <p className="font-semibold text-green-600 dark:text-green-400">Membership Investment Set</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Current Monthly Rate: <span className="font-medium">${expertData?.expert_amount}</span>
               </p>
@@ -73,7 +73,7 @@ const ExpertAmountForm = ({ expertData }) => {
               <FiInfo className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Membership Pricing</h3>
+              <h3 className="font-semibold text-green-600 dark:text-green-400 mb-1">Membership Pricing</h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 Set the monthly investment for your guidance, content, and coaching services. This
                 amount will be displayed to clients when they join your membership.
@@ -96,13 +96,13 @@ const ExpertAmountForm = ({ expertData }) => {
                   label="Monthly Rate ($)"
                   placeholder="e.g. 50"
                   type="number"
-                  min={0}
+                  min={30}
                   step={1}
                   Icon={FiDollarSign}
                   required
                 />
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  USD whole dollars — update anytime
+                  Must be $30 or greater — USD whole dollars, update anytime
                 </p>
               </div>
 
@@ -111,7 +111,7 @@ const ExpertAmountForm = ({ expertData }) => {
                   type="submit"
                   size="lg"
                   isLoading={isSubmitting}
-                  className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full sm:w-auto min-w-[200px] bg-green-700 hover:bg-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Membership Rate'}
                 </Button>
