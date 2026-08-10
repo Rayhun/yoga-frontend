@@ -2,7 +2,7 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import {
   FaRegClock,
@@ -62,6 +62,7 @@ const DetailSection = ({ title, children }) => (
  */
 const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     data: response,
@@ -88,6 +89,8 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
     if (program.payment_type === 'free') {
       try {
         await checkout({ id: program.id });
+        queryClient.invalidateQueries({ queryKey: [queryKeys.certificationCatalog] });
+        queryClient.invalidateQueries({ queryKey: [queryKeys.certificationProgramCatalogDetail, program.id] });
         toast.success('Enrolled successfully!');
         router.push(`/portal/customer/certification?enrolled=${program.id}`);
       } catch (error) {
