@@ -1,7 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { FaBuilding, FaCheckCircle, FaRegClock, FaTimesCircle, FaSearch, FaRegEdit } from 'react-icons/fa';
-import Link from 'next/link';
+import { FaBuilding, FaCheckCircle, FaRegClock, FaTimesCircle, FaSearch } from 'react-icons/fa';
 import queryKeys from '@/utils/query-keys';
 import { getMyInstitutionApplication } from '@/services/private/certification/application';
 import PageLoader from '@/components/common/loader/PageLoader';
@@ -85,12 +84,9 @@ const ApplicationStatusContent = () => {
                   </p>
                 </div>
               )}
-              <Link
-                href="/certification/apply-institution"
-                className="inline-flex items-center gap-2 mt-4 text-sm font-medium bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <FaRegEdit /> Update & Re-apply
-              </Link>
+              <p className="mt-4 text-sm text-gray-600">
+                Please contact support or await further guidance on re-submitting your application.
+              </p>
             </div>
           </div>
         </div>

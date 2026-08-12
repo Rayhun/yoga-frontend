@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FiTrendingUp, FiAward } from 'react-icons/fi';
 import { updateUser } from '@/services/private/user';
@@ -22,6 +23,7 @@ const LEARNER_TYPE_OPTIONS = [
 ];
 
 const LearnerTypeStep = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedValue, setSelectedValue] = useState(null);
   const { mutateAsync, isPending } = useMutation({ mutationFn: updateUser });
@@ -31,7 +33,10 @@ const LearnerTypeStep = () => {
     setSelectedValue(value);
     try {
       await mutateAsync({ learner_type: value });
-      await queryClient.invalidateQueries([queryKeys.loggedInUser]);
+      // TanStack Query v5 requires object syntax for invalidateQueries
+      await queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] });
+      // Explicitly navigate to onboarding so the guard re-evaluates with fresh user data
+      router.push('/onboarding');
     } catch (error) {
       setSelectedValue(null);
       toastApiError(error);
