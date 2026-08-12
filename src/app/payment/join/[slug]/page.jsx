@@ -58,6 +58,8 @@ const Page = () => {
       stripeUrl,
       guest.email,
       guest.full_name,
+      guest.first_name,
+      guest.last_name,
     ],
     enabled: !!slug && !isGeoLoading && isAllowed && !!joinDetailResponse,
   });
