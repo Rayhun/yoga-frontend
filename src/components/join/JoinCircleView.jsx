@@ -4,44 +4,67 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { LuLightbulb, LuLock, LuShield, LuVideo } from 'react-icons/lu';
 import {
   DEFAULT_COMMUNITY_COLORS,
   getCommunityColor,
 } from '@/components/inbox/community/communityColors';
 import { executeCommunityAction, toAppPath } from '@/services/private/expert/community';
 import JoinCircleBrandingPanel from '@/components/join/JoinCircleBrandingPanel';
+import JoinCircleCheckoutFlow from '@/components/join/JoinCircleCheckoutFlow';
+
+const FEATURE_ICON_MAP = {
+  lightbulb: LuLightbulb,
+  '💡': LuLightbulb,
+  video: LuVideo,
+  camera: LuVideo,
+  '🎥': LuVideo,
+  shield: LuShield,
+  lock: LuLock,
+  '🔒': LuLock,
+  '🎓': LuShield,
+};
 
 const JoinCircleFeaturesSection = ({ section }) => {
   const items = section?.items || [];
   if (!items.length) return null;
 
   return (
-    <div className="w-full lg:text-left">
+    <div className="w-full">
       {section.title ? (
-        <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 lg:text-left">
-          {section.title}
-        </p>
+        <div className="mb-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
+            {section.title}
+          </p>
+          <div className="mt-2 h-px w-full bg-gray-200" />
+        </div>
       ) : null}
 
-      <ul className="space-y-3.5">
-        {items.map((item, index) => (
-          <li key={item.bold_text || index} className="flex items-start gap-3">
-            {item.icon ? (
+      <ul className="space-y-5">
+        {items.map((item, index) => {
+          const Icon = FEATURE_ICON_MAP[item.icon];
+
+          return (
+            <li key={item.bold_text || index} className="flex items-start gap-3.5">
               <span
-                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm"
+                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                 style={{ backgroundColor: DEFAULT_COMMUNITY_COLORS.iconBackground }}
               >
-                {item.icon}
+                {Icon ? (
+                  <Icon className="h-5 w-5 text-[#1E4D35]" strokeWidth={1.75} />
+                ) : item.icon ? (
+                  <span className="text-base">{item.icon}</span>
+                ) : null}
               </span>
-            ) : null}
-            <p className="min-w-0 flex-1 pt-0.5 text-left text-sm leading-relaxed text-gray-600">
-              {item.bold_text ? (
-                <span className="font-semibold text-gray-800">{item.bold_text} </span>
-              ) : null}
-              {item.normal_text}
-            </p>
-          </li>
-        ))}
+              <p className="min-w-0 flex-1 pt-1.5 text-left text-[15px] leading-relaxed text-gray-500">
+                {item.bold_text ? (
+                  <span className="font-semibold text-[#1E4D35]">{item.bold_text} </span>
+                ) : null}
+                {item.normal_text}
+              </p>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -50,17 +73,19 @@ const JoinCircleFeaturesSection = ({ section }) => {
 const JoinCirclePrivacyBanner = ({ banner }) => {
   if (!banner?.text) return null;
 
+  const iconKey = banner.icon;
+  const LockIcon = FEATURE_ICON_MAP[iconKey] || LuLock;
+
   return (
     <div
-      className="w-full rounded-xl border px-4 py-3.5 text-center text-sm leading-relaxed lg:text-left"
+      className="flex w-full items-start gap-3 rounded-2xl px-4 py-3.5 text-sm leading-relaxed"
       style={{
-        backgroundColor: getCommunityColor(banner.background_color, '#FFF8E7'),
-        borderColor: getCommunityColor(banner.border_color, '#F5D78E'),
-        color: getCommunityColor(banner.text_color, '#6B5B3E'),
+        backgroundColor: getCommunityColor(banner.background_color, '#F6E6D8'),
+        color: getCommunityColor(banner.text_color, '#6B5344'),
       }}
     >
-      {banner.icon ? <span className="mr-1.5">{banner.icon}</span> : null}
-      {banner.text}
+      <LockIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#C17A3C]" strokeWidth={2} />
+      <p>{banner.text}</p>
     </div>
   );
 };
@@ -68,6 +93,7 @@ const JoinCirclePrivacyBanner = ({ banner }) => {
 const JoinCircleView = ({ pageData, slug }) => {
   const router = useRouter();
   const [isJoining, setIsJoining] = useState(false);
+  const [showJoinFlow, setShowJoinFlow] = useState(false);
 
   if (!pageData) return null;
 
@@ -82,15 +108,31 @@ const JoinCircleView = ({ pageData, slug }) => {
     DEFAULT_COMMUNITY_COLORS.ctaButton
   );
 
+  const joinFlowContent = pageData.join_flow_content;
+
+  if (showJoinFlow && joinFlowContent) {
+    return (
+      <JoinCircleCheckoutFlow
+        slug={slug}
+        content={joinFlowContent}
+        onBackToInvite={() => setShowJoinFlow(false)}
+      />
+    );
+  }
+
   const handleJoin = async () => {
     const method = (primaryButton?.method || 'post').toLowerCase();
+
+    if (primaryButton?.is_stripe && joinFlowContent) {
+      setShowJoinFlow(true);
+      return;
+    }
 
     if (primaryButton?.is_stripe && primaryButton?.stripe_url) {
       router.push(`/payment/join/${slug}`);
       return;
     }
 
-    // Backend sends method: "get" for free join → open onboard UI
     if (method === 'get') {
       const joinPath =
         toAppPath(primaryButton?.frontend_url) || `/auth/join/${slug}`;
@@ -122,16 +164,9 @@ const JoinCircleView = ({ pageData, slug }) => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 lg:h-screen lg:min-h-0 lg:overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-40 -top-40 h-80 w-80 animate-pulse rounded-full bg-green-200 opacity-20 mix-blend-multiply blur-xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 animate-pulse rounded-full bg-emerald-200 opacity-20 mix-blend-multiply blur-xl delay-1000" />
-        <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-teal-200 opacity-20 mix-blend-multiply blur-xl delay-500" />
-      </div>
-
-      <div className="relative w-full max-w-6xl overflow-hidden rounded-3xl border border-white/40 bg-white shadow-2xl">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#F4F1EC] p-4 lg:h-screen lg:min-h-0 lg:overflow-hidden">
+      <div className="relative w-full max-w-6xl overflow-hidden rounded-[28px] bg-white shadow-[0_20px_50px_rgba(30,77,53,0.12)]">
         <div className="flex min-h-[600px] flex-col lg:max-h-[calc(100vh-2rem)] lg:flex-row">
-          {/* Left — full-height green branding panel */}
           <div className="w-full lg:flex lg:w-1/2 lg:flex-col">
             <JoinCircleBrandingPanel
               header={pageData.header}
@@ -139,28 +174,23 @@ const JoinCircleView = ({ pageData, slug }) => {
             />
           </div>
 
-          {/* Right — full-height white content panel */}
-          <div className="flex w-full flex-1 items-center justify-center bg-white p-6 sm:p-8 lg:w-1/2 lg:justify-start lg:p-12">
-            <div className="w-full max-w-[300px] space-y-5 sm:max-w-[320px] lg:max-w-md">
+          <div className="flex w-full flex-1 items-center justify-center bg-white p-6 sm:p-8 lg:w-1/2 lg:p-12">
+            <div className="w-full max-w-[360px] space-y-6 sm:max-w-[400px]">
               <JoinCircleFeaturesSection section={whatsInsideSection} />
 
               <JoinCirclePrivacyBanner banner={pageData.privacy_banner} />
 
-              <div className="space-y-2.5 pt-1">
+              <div className="space-y-3 pt-1">
                 {primaryButton?.label ? (
                   <button
                     type="button"
                     onClick={handleJoin}
                     disabled={isJoining}
-                    className="w-full rounded-xl px-6 py-3.5 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_20px_rgba(30,77,53,0.28)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                     style={{ backgroundColor: ctaColor }}
                   >
                     {isJoining ? 'Joining...' : primaryButton.label}
                   </button>
-                ) : null}
-
-                {footerActions?.hint_text && !primaryButton?.is_stripe ? (
-                  <p className="text-center text-xs text-gray-400">{footerActions.hint_text}</p>
                 ) : null}
 
                 {secondaryAction ? (
@@ -168,7 +198,7 @@ const JoinCircleView = ({ pageData, slug }) => {
                     {secondaryAction.text}{' '}
                     <Link
                       href="/auth/login"
-                      className="font-semibold text-green-700 underline-offset-2 hover:text-green-800 hover:underline"
+                      className="font-semibold text-gray-800 hover:text-[#1E4D35]"
                     >
                       {secondaryAction.link_label || 'Log in'}
                     </Link>

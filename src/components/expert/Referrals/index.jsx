@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FiCheck, FiEye, FiLink2, FiTrendingUp } from 'react-icons/fi';
 import { MdOutlinePayments } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -63,17 +64,31 @@ const Avatar = ({ name, avatarUrl }) => {
 };
 
 const ExpertReferralsView = ({ data }) => {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   if (!data) return null;
 
   const banner = data.banner || {};
   const inviteUrl = banner?.cta?.invite_url || data.invite_url || '';
+  const isLocked = Boolean(data.is_locked) || !inviteUrl;
+  const setupPath =
+    banner?.cta?.frontend_url ||
+    data.setup_path ||
+    (data.has_community_circle ? '/portal/teacher/community' : '/portal/teacher/community/create');
   const stats = data.stats || [];
   const table = data.table || {};
   const rows = table.rows || [];
 
   const handleCopy = async () => {
+    if (isLocked) {
+      toast.info(
+        data.locked_message || 'Create your Community Circle first to get a referral link.'
+      );
+      router.push(setupPath);
+      return;
+    }
+
     try {
       await copyToClipboard(inviteUrl);
       setCopied(true);
@@ -105,8 +120,7 @@ const ExpertReferralsView = ({ data }) => {
         <button
           type="button"
           onClick={handleCopy}
-          disabled={!inviteUrl}
-          className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#C17A3C] shadow-sm transition hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#C17A3C] shadow-sm transition hover:bg-white/95 sm:w-auto"
         >
           {copied ? <FiCheck className="h-4 w-4" /> : <FiLink2 className="h-4 w-4" />}
           {copied ? 'Copied!' : banner?.cta?.label || 'Copy Referral Link'}

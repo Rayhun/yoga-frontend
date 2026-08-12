@@ -45,9 +45,12 @@ const SharingCardSection = ({ section }) => {
   const actions = section?.actions || {};
   const copyButton = actions.copy_button;
   const inviteUrl = section?.invite_url || '';
+  const isLocked = Boolean(section?.is_locked) || !inviteUrl;
+  const placeholder =
+    section?.invite_url_placeholder || 'Save your Circle title to generate your invite link';
 
   const handleCopyLink = async () => {
-    if (!inviteUrl) return;
+    if (!inviteUrl || isLocked) return;
 
     try {
       await copyToClipboard(inviteUrl);
@@ -84,20 +87,31 @@ const SharingCardSection = ({ section }) => {
         </p>
       ) : null}
 
-      <div className="mb-6 flex flex-col gap-3 lg:flex-row">
+      {isLocked && section?.locked_message ? (
+        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {section.locked_message}
+        </p>
+      ) : null}
+
+      <div className={`flex flex-col gap-3 lg:flex-row ${isLocked ? '' : 'mb-6'}`}>
         <input
           type="text"
           readOnly
           value={inviteUrl}
-          className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none md:text-base"
+          placeholder={placeholder}
+          className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none placeholder:text-gray-400 md:text-base"
         />
         {copyButton?.label ? (
           <button
             type="button"
             onClick={handleCopyLink}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-all hover:brightness-95 md:text-base"
+            disabled={isLocked || copyButton?.disabled}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-all hover:brightness-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-white md:text-base"
             style={{
-              backgroundColor: getCommunityColor(copyButton.cta_btn_color, '#1E4D35'),
+              backgroundColor:
+                isLocked || copyButton?.disabled
+                  ? undefined
+                  : getCommunityColor(copyButton.cta_btn_color, '#1E4D35'),
             }}
           >
             {copied ? <FiCheck className="h-4 w-4" /> : <FiCopy className="h-4 w-4" />}
@@ -106,7 +120,7 @@ const SharingCardSection = ({ section }) => {
         ) : null}
       </div>
 
-      <WhatsNextMessageBox />
+      {isLocked ? null : <WhatsNextMessageBox />}
     </div>
   );
 };

@@ -11,19 +11,14 @@ const Page = () => {
   const router = useRouter();
   const { user } = useAuthContext();
   const isExpert = user?.profile?.role === USER_ROLE.TEACHER;
-  const hasChatGroup = Boolean(user?.profile?.is_chat_group);
 
   useEffect(() => {
     if (!isExpert) {
       router.replace('/portal/inbox');
-      return;
     }
-    if (hasChatGroup) {
-      router.replace('/portal/inbox');
-    }
-  }, [isExpert, hasChatGroup, router]);
+  }, [isExpert, router]);
 
-  if (!isExpert || hasChatGroup) {
+  if (!isExpert) {
     return <FullScreenLoader />;
   }
 

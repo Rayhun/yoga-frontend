@@ -12,6 +12,7 @@ import {
   createCommunityJoinCheckoutSession,
   getExpertCommunityJoinDetail,
 } from '@/services/private/expert/community';
+import { getCircleJoinGuest } from '@/utils/circle-join-guest';
 
 const ALLOWED_COUNTRIES = ['US', 'CA', 'IN'];
 
@@ -33,6 +34,8 @@ const Page = () => {
   const checkoutMethod = primaryButton?.method || 'post';
   const stripeUrl = primaryButton?.stripe_url;
 
+  const guest = getCircleJoinGuest(slug);
+
   const {
     data: response,
     isLoading,
@@ -43,8 +46,19 @@ const Page = () => {
         slug,
         stripeUrl,
         method: checkoutMethod,
+        email: guest.email,
+        full_name: guest.full_name,
+        first_name: guest.first_name,
+        last_name: guest.last_name,
       }),
-    queryKey: [queryKeys.communityJoinCheckout, slug, checkoutMethod, stripeUrl],
+    queryKey: [
+      queryKeys.communityJoinCheckout,
+      slug,
+      checkoutMethod,
+      stripeUrl,
+      guest.email,
+      guest.full_name,
+    ],
     enabled: !!slug && !isGeoLoading && isAllowed && !!joinDetailResponse,
   });
 

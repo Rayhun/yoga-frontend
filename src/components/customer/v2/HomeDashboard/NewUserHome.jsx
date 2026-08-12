@@ -238,7 +238,14 @@ function CoachCard({ data, onClick, onInfoOpen, className = '' }) {
           <p className="mt-2 font-serif text-lg leading-snug text-gray-900 lg:text-xl">{data.title}</p>
           <p className="mt-1 text-sm leading-relaxed text-gray-600 lg:text-[15px]">{data.subtitle}</p>
         </div>
-        <FiArrowRight className="mt-1 h-5 w-5 shrink-0 self-start text-primary" />
+        {data.action?.arrow_icon ? (
+          <span
+            className="mt-1 shrink-0 self-start text-lg font-medium text-primary"
+            style={data.action.arrow_color_hex ? { color: data.action.arrow_color_hex } : undefined}
+          >
+            {data.action.arrow_icon}
+          </span>
+        ) : null}
       </div>
     </button>
   );

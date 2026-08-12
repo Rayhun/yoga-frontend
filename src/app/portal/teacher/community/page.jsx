@@ -17,30 +17,32 @@ const Page = () => {
   const router = useRouter();
   const { user } = useAuthContext();
   const isExpert = user?.profile?.role === USER_ROLE.TEACHER;
-  const hasChatGroup = Boolean(user?.profile?.is_chat_group);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryFn: getExpertCommunityDetail,
     queryKey: [queryKeys.expertCommunityDetail],
     refetchOnMount: 'always',
-    enabled: isExpert && hasChatGroup,
+    enabled: isExpert,
+    retry: false,
   });
+
+  const pageData = data?.data?.data;
+  const isCommunityMissing =
+    error?.response?.status === 404 || pageData?.has_community_circle === false;
 
   useEffect(() => {
     if (!isExpert) {
       router.replace('/portal/inbox');
       return;
     }
-    if (!hasChatGroup) {
+    if (!isLoading && isCommunityMissing) {
       router.replace('/portal/teacher/community/create');
     }
-  }, [isExpert, hasChatGroup, router]);
+  }, [isExpert, isLoading, isCommunityMissing, router]);
 
-  if (!isExpert || !hasChatGroup) {
+  if (!isExpert || (!isLoading && isCommunityMissing)) {
     return <FullScreenLoader />;
   }
-
-  const pageData = data?.data?.data;
 
   if (isLoading) return <PageLoader />;
 

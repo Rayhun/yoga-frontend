@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueries } from '@tanstack/react-query';
-import { FiArrowRight, FiTrendingUp } from 'react-icons/fi';
+import { FiTrendingUp } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi2';
 import Spinner from '@/components/common/loader/Spinner';
 import { fetchCustomerV2Section } from '@/services/private/customer/v2/home';
@@ -376,7 +376,14 @@ function CoachCard({ data, onClick, onInfoOpen, className = '' }) {
           <p className="mt-2 font-serif text-lg leading-snug text-gray-900 lg:text-xl">{data.title}</p>
           <p className="mt-1 text-sm leading-relaxed text-gray-600 lg:text-[15px]">{data.subtitle}</p>
         </div>
-        <FiArrowRight className="mt-1 h-5 w-5 shrink-0 self-start text-primary" />
+        {data.action?.arrow_icon ? (
+          <span
+            className="mt-1 shrink-0 self-start text-lg font-medium text-primary"
+            style={data.action.arrow_color_hex ? { color: data.action.arrow_color_hex } : undefined}
+          >
+            {data.action.arrow_icon}
+          </span>
+        ) : null}
       </div>
     </button>
   );
@@ -409,7 +416,14 @@ function TrendCard({ data, onClick, onInfoOpen, className = '' }) {
           <p className="font-semibold text-gray-900">{data.title}</p>
           <p className="mt-0.5 text-sm text-gray-600">{data.subtitle}</p>
         </div>
-        <FiArrowRight className="h-5 w-5 shrink-0 text-primary" />
+        {data.action?.arrow_icon ? (
+          <span
+            className="shrink-0 text-lg font-medium text-primary"
+            style={data.action.arrow_color_hex ? { color: data.action.arrow_color_hex } : undefined}
+          >
+            {data.action.arrow_icon}
+          </span>
+        ) : null}
       </div>
     </button>
   );
@@ -438,7 +452,6 @@ function TodayPlanCard({ data, onClick, onInfoOpen }) {
       <div className={`${HOME_CARD_BTN_ROW} lg:pt-8`}>
         <button type="button" onClick={onClick} className={BTN_PRIMARY}>
           {data.btn_text || 'Start Now'}
-          <FiArrowRight className="h-4 w-4" />
         </button>
       </div>
     </SectionShell>
@@ -519,7 +532,6 @@ function ProgramCard({ data, onClick, onInfoOpen }) {
       <div className={HOME_CARD_BTN_ROW}>
         <button type="button" onClick={onClick} className={BTN_PRIMARY}>
           {data.btn_text || 'Resume'}
-          <FiArrowRight className="h-4 w-4" />
         </button>
       </div>
     </SectionShell>
@@ -537,7 +549,6 @@ function ExploreCard({ data, onClick, onInfoOpen }) {
       <div className={HOME_CARD_BTN_ROW}>
         <button type="button" onClick={onClick} className={`${BTN_OUTLINE} inline-flex items-center gap-1`}>
           {data.btn_text || 'Explore'}
-          <FiArrowRight className="h-4 w-4" />
         </button>
       </div>
     </SectionShell>

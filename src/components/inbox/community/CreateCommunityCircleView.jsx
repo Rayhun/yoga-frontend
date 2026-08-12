@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -68,10 +68,17 @@ const CreateCommunityCircleView = () => {
   });
 
   const pageData = response?.data?.data;
+  const hasCommunityCircle = Boolean(pageData?.has_community_circle);
   const header = pageData?.header;
   const sections = pageData?.sections || [];
   const footerActions = pageData?.footer_actions;
   const footerNote = footerActions?.footer_note;
+
+  useEffect(() => {
+    if (hasCommunityCircle) {
+      router.replace('/portal/teacher/community');
+    }
+  }, [hasCommunityCircle, router]);
 
   const footerButtons = useMemo(() => {
     if (Array.isArray(footerActions?.buttons) && footerActions.buttons.length) {
@@ -85,12 +92,16 @@ const CreateCommunityCircleView = () => {
 
   const actionMutation = useMutation({
     mutationFn: executeCommunityAction,
-    onSuccess: res => {
+    onSuccess: async res => {
       toast.success(res?.data?.message || 'Community circle created successfully');
-      queryClient.invalidateQueries([queryKeys.expertCommunityData]);
-      queryClient.invalidateQueries([queryKeys.expertCommunityDetail]);
-      queryClient.invalidateQueries([queryKeys.inboxConversations]);
-      queryClient.invalidateQueries([queryKeys.loggedInUser]);
+      if (res?.data) {
+        queryClient.setQueryData([queryKeys.expertCommunityDetail], res);
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [queryKeys.expertCommunityData] }),
+        queryClient.invalidateQueries({ queryKey: [queryKeys.inboxConversations] }),
+        queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] }),
+      ]);
       router.push('/portal/teacher/community');
     },
     onError: error => {
@@ -125,7 +136,7 @@ const CreateCommunityCircleView = () => {
     });
   };
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading || hasCommunityCircle) return <PageLoader />;
 
   if (isError || !pageData) {
     return (

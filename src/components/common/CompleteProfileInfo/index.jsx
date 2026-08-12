@@ -45,19 +45,10 @@ const InfoNote = ({ expertData }) => {
       });
     }
 
-    if (expertData?.expert_amount == null || expertData?.expert_amount === '') {
-      items.push({
-        id: 'expert-amount',
-        text: 'Set your expert amount so students know your pricing.',
-        buttonText: 'Set Amount',
-        onClick: handlePayPalSetup,
-      });
-    }
-
     if (!expertData?.has_event_or_consult) {
       items.push({
         id: 'guided-experiences',
-        text: 'Add a guided experiences to get started.',
+        text: 'Add Guided Experiences (workshops, bootcamps, masterclasses, live events)',
         buttonText: 'Add Guided Experiences',
         onClick: () => handleRequiresProfile('/portal/teacher/group_coaching/add'),
       });
@@ -76,7 +67,6 @@ const InfoNote = ({ expertData }) => {
   }, [
     expertData?.is_profile_complete,
     expertData?.stripe_onboarded,
-    expertData?.expert_amount,
     expertData?.has_event_or_consult,
     isChatGroup,
   ]);

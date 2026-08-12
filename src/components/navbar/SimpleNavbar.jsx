@@ -14,7 +14,9 @@ const SimpleNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isOnboardingPaymentSuccess = pathname === '/payment/success';
   const isOnboardingQuiz =
-    pathname?.startsWith('/onboarding') || pathname?.startsWith('/payment/onboarding');
+    pathname?.startsWith('/onboarding') ||
+    pathname?.startsWith('/payment/onboarding') ||
+    pathname?.startsWith('/join/');
   const isLargeLogo = isOnboardingPaymentSuccess || isOnboardingQuiz;
 
   const handleDrawerToggle = () => {

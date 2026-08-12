@@ -1,5 +1,7 @@
 'use client';
 
+import { FaStar } from 'react-icons/fa';
+import { FiUser } from 'react-icons/fi';
 import {
   getCommunityColor,
   getHeaderBackgroundStyle,
@@ -25,8 +27,10 @@ const CommunityIconBadge = ({
     >
       {isImage ? (
         <img src={value} alt={alt || ''} className="h-full w-full object-cover" />
-      ) : (
+      ) : value ? (
         <span className={textClassName}>{value}</span>
+      ) : (
+        <FiUser className="h-10 w-10 text-gray-300 sm:h-12 sm:w-12" strokeWidth={1.4} />
       )}
     </div>
   );
@@ -37,34 +41,39 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
 
   const avatarSrc = header.avatar_url || header.avatar_icon;
   const metrics = metricsRow?.items || [];
+  const badgeIcon = header.badge?.icon;
+  const showStar =
+    !badgeIcon || badgeIcon === 'star' || badgeIcon === '⭐' || badgeIcon === '★';
 
   return (
     <div
-      className="relative flex h-full min-h-[320px] flex-col overflow-hidden sm:min-h-[360px] lg:min-h-0"
-      style={getHeaderBackgroundStyle(header)}
+      className="relative flex h-full min-h-[360px] flex-col overflow-hidden sm:min-h-[400px] lg:min-h-0"
+      style={
+        header.background_color
+          ? { backgroundColor: header.background_color }
+          : getHeaderBackgroundStyle(header)
+      }
     >
-      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-8 text-center sm:py-10 lg:px-12 lg:py-12">
-        <div className="mx-auto w-full max-w-sm space-y-4">
-          {avatarSrc ? (
-            <div className="flex justify-center">
-              <CommunityIconBadge
-                value={avatarSrc}
-                alt={header.title || 'Coach'}
-                shape="circle"
-                className="h-24 w-24 ring-4 ring-white/30 sm:h-28 sm:w-28"
-                backgroundColor={getCommunityColor(
-                  header.avatar_background_color,
-                  '#F5F3ED'
-                )}
-                textClassName="text-3xl sm:text-4xl"
-              />
-            </div>
-          ) : null}
+      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-10 text-center sm:py-12 lg:px-12">
+        <div className="mx-auto w-full max-w-md space-y-4">
+          <div className="flex justify-center">
+            <CommunityIconBadge
+              value={isCommunityMediaUrl(avatarSrc) ? avatarSrc : ''}
+              alt={header.title || 'Coach'}
+              shape="circle"
+              className="h-[88px] w-[88px] shadow-sm sm:h-24 sm:w-24"
+              backgroundColor={getCommunityColor(
+                header.avatar_background_color,
+                '#FFFFFF'
+              )}
+              textClassName="text-3xl sm:text-4xl"
+            />
+          </div>
 
           {header.eyebrow ? (
             <p
-              className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: getCommunityColor(header.eyebrow_color, 'rgba(255,255,255,0.8)') }}
+              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: getCommunityColor(header.eyebrow_color, '#E8C547') }}
             >
               {header.eyebrow}
             </p>
@@ -72,7 +81,7 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
 
           {header.title ? (
             <h1
-              className="font-serif text-[1.65rem] font-bold leading-tight text-white sm:text-[1.75rem] lg:text-[2rem]"
+              className="font-serif text-[1.85rem] font-bold leading-tight text-white sm:text-[2.1rem] lg:text-[2.35rem]"
               style={{ color: getCommunityColor(header.title_color, '#FFFFFF') }}
             >
               {header.title}
@@ -81,8 +90,8 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
 
           {header.subtitle ? (
             <p
-              className="mx-auto max-w-xs text-sm leading-relaxed"
-              style={{ color: getCommunityColor(header.subtitle_color, '#C8E6D4') }}
+              className="mx-auto max-w-xs text-sm leading-relaxed text-white sm:text-[15px]"
+              style={{ color: getCommunityColor(header.subtitle_color, '#FFFFFF') }}
             >
               {header.subtitle}
             </p>
@@ -91,16 +100,20 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
           {header.badge?.text ? (
             <div className="flex justify-center pt-1">
               <div
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-medium"
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium"
                 style={{
                   backgroundColor: getCommunityColor(
                     header.badge.background_color,
-                    'rgba(0, 0, 0, 0.25)'
+                    'rgba(0, 0, 0, 0.28)'
                   ),
                   color: getCommunityColor(header.badge.text_color, '#FFFFFF'),
                 }}
               >
-                {header.badge.icon ? <span>{header.badge.icon}</span> : null}
+                {showStar ? (
+                  <FaStar className="h-3 w-3 text-[#E8C547]" />
+                ) : (
+                  <span>{badgeIcon}</span>
+                )}
                 <span>{header.badge.text}</span>
               </div>
             </div>
@@ -109,8 +122,8 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
       </div>
 
       {metrics.length > 0 ? (
-        <div className="relative z-10 shrink-0 px-6 pb-6 sm:pb-8 lg:px-12 lg:pb-10">
-          <div className="mx-auto w-full max-w-sm">
+        <div className="relative z-10 shrink-0 px-5 pb-7 sm:px-8 sm:pb-9 lg:px-10 lg:pb-10">
+          <div className="mx-auto w-full max-w-md">
             <JoinCircleMetrics items={metrics} />
           </div>
         </div>

@@ -29,11 +29,21 @@ export const createCommunityJoinCheckoutSession = async ({
   slug,
   stripeUrl,
   method = 'post',
+  email,
+  full_name,
+  first_name,
+  last_name,
 } = {}) => {
   return executeCommunityAction({
     url: stripeUrl || `${API_V2_BASE_URL}/expert/community/join/subscription/`,
     method,
-    payload: { group_slug: slug },
+    payload: {
+      group_slug: slug,
+      ...(email ? { email } : {}),
+      ...(full_name ? { full_name } : {}),
+      ...(first_name ? { first_name } : {}),
+      ...(last_name ? { last_name } : {}),
+    },
   });
 };
 

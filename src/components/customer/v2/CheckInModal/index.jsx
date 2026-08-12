@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiCheck, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Spinner from '@/components/common/loader/Spinner';
 import {
@@ -506,7 +506,6 @@ function CheckInWizard({ wizard, selectedMood, onClose }) {
               className={`${BTN_PRIMARY} flex-[1.4]`}
             >
               {saveMutation.isPending ? 'Saving…' : primaryLabel}
-              {!saveMutation.isPending && !isLastStep ? <FiArrowRight className="h-4 w-4" /> : null}
             </button>
           </div>
         ) : (
@@ -517,7 +516,6 @@ function CheckInWizard({ wizard, selectedMood, onClose }) {
             className={`${BTN_PRIMARY} w-full`}
           >
             {saveMutation.isPending ? 'Saving…' : primaryLabel}
-            {!saveMutation.isPending && !isLastStep ? <FiArrowRight className="h-4 w-4" /> : null}
           </button>
         )}
       </div>

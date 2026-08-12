@@ -11,6 +11,7 @@ const config = {
   theme: {
     fontFamily: {
       satoshi: ['Satoshi', 'sans-serif'],
+      serif: ['Georgia', '"Times New Roman"', 'serif'],
     },
     screens: {
       '2xsm': '375px',

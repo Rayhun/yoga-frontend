@@ -598,7 +598,7 @@ const getTeacherSidebarMenuItems = (
       href: circlesHref,
       isActive: pathname =>
         pathname === '/portal/inbox' ||
-        pathname.includes('/portal/teacher/community/create'),
+        pathname.includes('/portal/teacher/community'),
       disabled: !isDevelopmentEnvironment || !is_profile_complete,
     },
     {
