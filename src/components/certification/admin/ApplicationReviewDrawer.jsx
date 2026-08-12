@@ -118,7 +118,7 @@ const ApplicationReviewDrawer = ({ application, applicationType, onClose, onAppr
           </div>
         ) : null}
 
-        {application && status === 'submitted' ? (
+        {application && ['submitted', 'under_review'].includes(status) ? (
           <div className="flex gap-3 px-5 py-4 border-t border-gray-200">
             <Button variant="secondary" onClick={() => onReject(application)} className="flex-1">
               <BsPersonX className="mr-1" /> Reject

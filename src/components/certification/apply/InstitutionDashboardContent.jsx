@@ -25,7 +25,7 @@ const InstitutionDashboardContent = () => {
           <ApplicationStatusCard
             applicationStatus={data?.application_status || 'submitted'}
             rejectedReason={data?.rejected_reason}
-            reapplyHref="/certification/apply-institution"
+            // reapplyHref="/certification/apply-institution" // Backend update endpoint is deferred to a future phase
           />
         </div>
       </div>

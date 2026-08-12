@@ -62,8 +62,8 @@ const QTEApplyForm = () => {
     sample_lecture_link: application?.sample_lecture_link || '',
     prior_student_count: application?.prior_student_count || '',
     certifications: application?.certifications || [],
-    government_id_file: null,
-    resume_file: null,
+    government_id_file: application?.government_id_file || null,
+    resume_file: application?.resume_file || null,
     agreement_accepted: false,
   };
 
@@ -84,11 +84,19 @@ const QTEApplyForm = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      setUploadingField('government_id_file');
-      const { data: govIdUpload } = await uploadCertificationFile({ file: values.government_id_file });
+      let govIdKey = typeof values.government_id_file === 'string' ? values.government_id_file : null;
+      if (values.government_id_file && typeof values.government_id_file !== 'string') {
+        setUploadingField('government_id_file');
+        const { data: govIdUpload } = await uploadCertificationFile({ file: values.government_id_file });
+        govIdKey = govIdUpload?.file_key;
+      }
 
-      setUploadingField('resume_file');
-      const { data: resumeUpload } = await uploadCertificationFile({ file: values.resume_file });
+      let resumeKey = typeof values.resume_file === 'string' ? values.resume_file : null;
+      if (values.resume_file && typeof values.resume_file !== 'string') {
+        setUploadingField('resume_file');
+        const { data: resumeUpload } = await uploadCertificationFile({ file: values.resume_file });
+        resumeKey = resumeUpload?.file_key;
+      }
       setUploadingField(null);
 
       const payload = {
@@ -102,8 +110,8 @@ const QTEApplyForm = () => {
         sample_lecture_link: values.sample_lecture_link,
         prior_student_count: values.prior_student_count,
         certifications: values.certifications,
-        government_id_file: govIdUpload?.file_key,
-        resume_file: resumeUpload?.file_key,
+        government_id_file: govIdKey,
+        resume_file: resumeKey,
         agreement_accepted: values.agreement_accepted,
       };
 
