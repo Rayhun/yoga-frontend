@@ -1,10 +1,6 @@
 'use client';
 
-import ExpertAvatar, { ExpertEmojiAvatar } from '@/components/common/ExpertAvatar';
-import {
-  DEFAULT_EXPERT_EMOJI,
-  isExpertImageUrl,
-} from '@/utils/expert-media';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 
 /** Home coach sidebar card — peach → cream → warm sand gradient */
 const HOME_COACH_CARD = {
@@ -16,7 +12,6 @@ const HOME_COACH_CARD = {
   badge:
     'inline-flex items-center gap-1.5 rounded-full border border-[#C9B08A]/70 bg-[#F1E8D9] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8B7344]',
   avatarRing: 'ring-2 ring-[#D4B896] bg-white',
-  avatarBadge: 'bg-[#E8D4A8] ring-2 ring-[#F3ECDC]',
   name: 'font-serif text-lg font-semibold leading-snug text-gray-900 md:text-xl',
   subtitle: 'mt-0.5 line-clamp-2 text-sm text-[#666666]',
   meta: 'mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#999999]',
@@ -43,8 +38,7 @@ export default function HomeCircleSidebarCard({ card, onMessage, onViewProfile }
 
   const { badge, circle_info: info, actions } = card.data;
   const avatar = info?.avatar_image || info?.avatar_icon;
-  const showEmojiAvatar = avatar && !isExpertImageUrl(avatar);
-  const badgeIcon = info?.avatar_badge_image || info?.avatar_badge_icon;
+  const logo = info?.avatar_badge_image || info?.avatar_badge_icon;
 
   const handleViewProfile = () => {
     const coachId = extractCoachIdFromUrl(actions?.secondary_button?.url);
@@ -83,42 +77,31 @@ export default function HomeCircleSidebarCard({ card, onMessage, onViewProfile }
         ) : null}
 
         <div className="flex items-start gap-3">
-          <div className="relative shrink-0">
-            <div
-              className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full md:h-16 md:w-16 ${HOME_COACH_CARD.avatarRing}`}
-            >
-              {showEmojiAvatar ? (
-                <ExpertEmojiAvatar emoji={avatar} className="text-2xl md:text-3xl" />
-              ) : (
-                <ExpertAvatar
-                  src={avatar}
-                  name={info?.host_name}
-                  size={64}
-                  tone="light"
-                  imageClassName="h-full w-full rounded-full object-cover"
-                  fallbackClassName="h-full w-full rounded-full"
-                  emoji={DEFAULT_EXPERT_EMOJI}
-                />
-              )}
-            </div>
-            {badgeIcon ? (
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full text-sm ${HOME_COACH_CARD.avatarBadge}`}
-              >
-                {isExpertImageUrl(badgeIcon) ? (
-                  <ExpertAvatar
-                    src={badgeIcon}
-                    name=""
-                    size={20}
-                    imageClassName="h-full w-full rounded-full object-cover"
-                    fallbackClassName="text-xs"
-                    emoji={info?.avatar_badge_icon || '🌿'}
-                  />
-                ) : (
-                  badgeIcon
-                )}
-              </span>
-            ) : null}
+          <div className="md:hidden">
+            <ExpertProfileWithLogo
+              src={avatar}
+              logo={logo}
+              name={info?.host_name}
+              size={56}
+              logoSize={26}
+              ringClassName={HOME_COACH_CARD.avatarRing}
+              logoBackgroundColor="#E8D4A8"
+              logoRingClassName="ring-2 ring-[#F3ECDC]"
+              alt={info?.host_name || 'Coach'}
+            />
+          </div>
+          <div className="hidden md:block">
+            <ExpertProfileWithLogo
+              src={avatar}
+              logo={logo}
+              name={info?.host_name}
+              size={64}
+              logoSize={28}
+              ringClassName={HOME_COACH_CARD.avatarRing}
+              logoBackgroundColor="#E8D4A8"
+              logoRingClassName="ring-2 ring-[#F3ECDC]"
+              alt={info?.host_name || 'Coach'}
+            />
           </div>
 
           <div className="min-w-0 flex-1">

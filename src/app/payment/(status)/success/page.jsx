@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import SubscriptionStatus from '@/components/subscription/common/SubscriptionStatus';
 import JoinCircleSuccessView from '@/components/join/JoinCircleSuccessView';
@@ -12,9 +12,17 @@ const ONBOARDING_SUCCESS_BG =
   'bg-gradient-to-b from-emerald-50/80 via-[#faf9f7] to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950';
 
 const PaymentSuccessContent = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const communitySlug = searchParams.get('exp-ref');
   const isOnboardingGuest = searchParams.get('onboarding-guest') === '1';
+  const isRenewal = searchParams.get('renew') === '1';
+
+  useEffect(() => {
+    if (isRenewal) {
+      router.replace('/portal/customer/subscriptions?renewed=1');
+    }
+  }, [isRenewal, router]);
 
   useEffect(() => {
     if (!isOnboardingGuest) return undefined;
@@ -30,6 +38,10 @@ const PaymentSuccessContent = () => {
       document.documentElement.style.overflowX = previousHtmlOverflowX;
     };
   }, [isOnboardingGuest]);
+
+  if (isRenewal) {
+    return <PageLoader />;
+  }
 
   if (isOnboardingGuest) {
     return (

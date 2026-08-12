@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FiArrowLeft, FiArrowRight, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Spinner from '@/components/common/loader/Spinner';
 import {
@@ -343,10 +343,7 @@ function PeriodLogWizard({ wizard, onClose }) {
             >
               {saveMutation.isPending
                 ? 'Saving…'
-                : navigation.button_label || (isLastStep ? 'Save' : 'Next')}
-              {!saveMutation.isPending && !isLastStep ? (
-                <FiArrowRight className="h-4 w-4" />
-              ) : null}
+                : navigation.button_label || (isLastStep ? 'Save' : 'Next →')}
             </button>
           </div>
         ) : (
@@ -357,9 +354,6 @@ function PeriodLogWizard({ wizard, onClose }) {
             className={`${BTN_PRIMARY} w-full`}
           >
             {saveMutation.isPending ? 'Saving…' : navigation.button_label || 'Next →'}
-            {!saveMutation.isPending && !isLastStep ? (
-              <FiArrowRight className="h-4 w-4" />
-            ) : null}
           </button>
         )}
       </div>

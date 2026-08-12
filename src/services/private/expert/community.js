@@ -47,6 +47,12 @@ export const createCommunityJoinCheckoutSession = async ({
   });
 };
 
+export const createCommunityRenewCheckoutSession = async ({ slug } = {}) => {
+  return axios.post(`${API_V2_BASE_URL}/expert/community/renew/subscription/`, {
+    group_slug: slug,
+  });
+};
+
 export const getExpertCommunityJoinedSuccess = async slug => {
   return axios.get(`${API_V2_BASE_URL}/expert/community/joined/${slug}/success/`);
 };

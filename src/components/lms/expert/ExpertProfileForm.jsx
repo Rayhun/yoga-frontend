@@ -630,7 +630,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       <FormikImageInput name="business_logo" label="" size={128} />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                      Upload your business or brand logo. This will appear on your profile alongside your business name.
+                      Upload your business or brand logo. This appears as a badge on your profile photo across the portal, Circle pages, and public join links.
                     </p>
                   </div>
                 </div>

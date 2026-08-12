@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import ExpertAvatar from '@/components/common/ExpertAvatar';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
@@ -105,20 +105,16 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         
         {/* Content */}
         <div className="relative z-10 flex items-center gap-4">
-          <div className="relative flex-shrink-0">
-            <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
-              <div className="relative h-full w-full overflow-hidden rounded-full">
-                <ExpertAvatar
-                  src={userProfileDetails?.file}
-                  name={expertName}
-                  size={64}
-                  tone="dark"
-                  imageClassName="h-full w-full rounded-full object-cover"
-                  fallbackClassName="h-full w-full rounded-full"
-                  placeholderImage="/images/user/user-06.png"
-                />
-              </div>
-            </div>
+          <div className="relative flex-shrink-0 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
+            <ExpertProfileWithLogo
+              src={userProfileDetails?.file}
+              logo={userProfileDetails?.business_logo}
+              name={expertName}
+              size={64}
+              logoSize={28}
+              logoRingClassName="ring-2 ring-white"
+              alt={expertName || 'Coach'}
+            />
           </div>
           
           <div className="flex-1 min-w-0">

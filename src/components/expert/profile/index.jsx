@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ExpertProfilePrograms from './programs';
 import ExpertProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
 import ExpertConsultations from './consultation';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const TABS = {
@@ -37,21 +37,16 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         
         {/* Content */}
         <div className="relative z-10 flex items-center gap-4">
-          <div className="relative flex-shrink-0">
-            <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
-              <div className="relative w-full h-full rounded-full overflow-hidden">
-                <Image
-                  src={userProfileDetails?.file || '/images/user/placeholder_profile.png'}
-                  width={64}
-                  height={64}
-                  sizes="64px"
-                  alt="profile"
-                  className="w-full h-full rounded-full object-cover"
-                  quality={95}
-                  priority
-                />
-              </div>
-            </div>
+          <div className="relative flex-shrink-0 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
+            <ExpertProfileWithLogo
+              src={userProfileDetails?.file || '/images/user/placeholder_profile.png'}
+              logo={userProfileDetails?.business_logo}
+              name={`${userProfileDetails?.first_name || ''} ${userProfileDetails?.last_name || ''}`}
+              size={64}
+              logoSize={28}
+              logoRingClassName="ring-2 ring-white"
+              alt="profile"
+            />
           </div>
           
           <div className="flex-1 min-w-0">

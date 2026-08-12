@@ -1,42 +1,22 @@
 'use client';
 
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 import {
   getCommunityColor,
   getHeaderBackgroundStyle,
   isCommunityMediaUrl,
 } from './communityColors';
 
-const CommunityIconBadge = ({
-  value,
-  alt,
-  shape = 'rounded',
-  className = '',
-  backgroundColor,
-  textClassName = 'text-base md:text-lg',
-}) => {
-  const isImage = isCommunityMediaUrl(value);
-  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
-
-  return (
-    <div
-      className={`relative flex shrink-0 items-center justify-center overflow-hidden ${shapeClass} ${className}`}
-      style={{ backgroundColor }}
-    >
-      {isImage ? (
-        <img src={value} alt={alt || ''} className="h-full w-full object-cover" />
-      ) : (
-        <span className={textClassName}>{value}</span>
-      )}
-    </div>
-  );
-};
-
 const CommunityDetailHeader = ({ header }) => {
   if (!header) return null;
 
   const logoIcon = header.logo_icon;
   const avatarSrc = header.avatar_url || header.avatar_icon;
-  const hasIconGroup = logoIcon || avatarSrc;
+  const hasAvatar = Boolean(avatarSrc);
+  const logo =
+    logoIcon && (isCommunityMediaUrl(logoIcon) || typeof logoIcon === 'string')
+      ? logoIcon
+      : null;
 
   return (
     <div
@@ -45,37 +25,24 @@ const CommunityDetailHeader = ({ header }) => {
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-5">
-          {hasIconGroup ? (
-            <div className="relative flex shrink-0 items-center">
-              {logoIcon ? (
-                <CommunityIconBadge
-                  value={logoIcon}
-                  alt={`${header.title || 'Circle'} logo`}
-                  shape="rounded"
-                  className="relative z-0 h-11 w-11 md:h-12 md:w-12"
-                  backgroundColor={getCommunityColor(
-                    header.logo_background_color,
-                    'rgba(255, 255, 255, 0.14)'
-                  )}
-                />
-              ) : null}
-
-              {avatarSrc ? (
-                <CommunityIconBadge
-                  value={avatarSrc}
-                  alt={header.title || 'Expert'}
-                  shape="circle"
-                  className={`relative z-10 h-12 w-12 md:h-14 md:w-14 ${
-                    logoIcon ? '-ml-2.5 md:-ml-3' : ''
-                  }`}
-                  backgroundColor={getCommunityColor(
-                    header.avatar_background_color,
-                    '#F5F3ED'
-                  )}
-                  textClassName="text-xl md:text-2xl"
-                />
-              ) : null}
-            </div>
+          {hasAvatar ? (
+            <ExpertProfileWithLogo
+              src={avatarSrc}
+              logo={logo}
+              name={header.title || ''}
+              size={56}
+              logoSize={26}
+              avatarBackgroundColor={getCommunityColor(
+                header.avatar_background_color,
+                '#F5F3ED'
+              )}
+              logoBackgroundColor={getCommunityColor(
+                header.logo_background_color,
+                'rgba(255, 255, 255, 0.95)'
+              )}
+              logoRingClassName="ring-2 ring-white/90"
+              alt={header.title || 'Expert'}
+            />
           ) : null}
 
           <div className="min-w-0 text-left">

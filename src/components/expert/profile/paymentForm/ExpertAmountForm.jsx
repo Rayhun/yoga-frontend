@@ -15,7 +15,7 @@ const validationSchema = Yup.object({
   expert_amount: Yup.number()
     .typeError('Please enter a valid amount')
     .integer('Amount must be a whole number')
-    .min(30, 'Monthly rate must be $30 or greater')
+    .min(2, 'Monthly rate must be $2 or greater')
     .required('Monthly rate is required'),
 });
 
@@ -96,13 +96,13 @@ const ExpertAmountForm = ({ expertData }) => {
                   label="Monthly Rate ($)"
                   placeholder="e.g. 50"
                   type="number"
-                  min={30}
+                  min={2}
                   step={1}
                   Icon={FiDollarSign}
                   required
                 />
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Must be $30 or greater — USD whole dollars, update anytime
+                  Must be $2 or greater — USD whole dollars, update anytime
                 </p>
               </div>
 

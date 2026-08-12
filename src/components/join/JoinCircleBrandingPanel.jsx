@@ -1,40 +1,13 @@
 'use client';
 
 import { FaStar } from 'react-icons/fa';
-import { FiUser } from 'react-icons/fi';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 import {
   getCommunityColor,
   getHeaderBackgroundStyle,
   isCommunityMediaUrl,
 } from '@/components/inbox/community/communityColors';
 import JoinCircleMetrics from '@/components/join/JoinCircleMetrics';
-
-const CommunityIconBadge = ({
-  value,
-  alt,
-  shape = 'rounded',
-  className = '',
-  backgroundColor,
-  textClassName = 'text-lg',
-}) => {
-  const isImage = isCommunityMediaUrl(value);
-  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
-
-  return (
-    <div
-      className={`relative flex shrink-0 items-center justify-center overflow-hidden ${shapeClass} ${className}`}
-      style={{ backgroundColor }}
-    >
-      {isImage ? (
-        <img src={value} alt={alt || ''} className="h-full w-full object-cover" />
-      ) : value ? (
-        <span className={textClassName}>{value}</span>
-      ) : (
-        <FiUser className="h-10 w-10 text-gray-300 sm:h-12 sm:w-12" strokeWidth={1.4} />
-      )}
-    </div>
-  );
-};
 
 const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
   if (!header) return null;
@@ -44,6 +17,11 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
   const badgeIcon = header.badge?.icon;
   const showStar =
     !badgeIcon || badgeIcon === 'star' || badgeIcon === '⭐' || badgeIcon === '★';
+  const logo =
+    header.logo_icon &&
+    (isCommunityMediaUrl(header.logo_icon) || typeof header.logo_icon === 'string')
+      ? header.logo_icon
+      : null;
 
   return (
     <div
@@ -57,17 +35,40 @@ const JoinCircleBrandingPanel = ({ header, metricsRow }) => {
       <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-10 text-center sm:py-12 lg:px-12">
         <div className="mx-auto w-full max-w-md space-y-4">
           <div className="flex justify-center">
-            <CommunityIconBadge
-              value={isCommunityMediaUrl(avatarSrc) ? avatarSrc : ''}
-              alt={header.title || 'Coach'}
-              shape="circle"
-              className="h-[88px] w-[88px] shadow-sm sm:h-24 sm:w-24"
-              backgroundColor={getCommunityColor(
-                header.avatar_background_color,
-                '#FFFFFF'
-              )}
-              textClassName="text-3xl sm:text-4xl"
-            />
+            <div className="sm:hidden">
+              <ExpertProfileWithLogo
+                src={avatarSrc || ''}
+                logo={logo}
+                name={header.title || 'Coach'}
+                size={88}
+                logoSize={34}
+                avatarBackgroundColor={getCommunityColor(
+                  header.avatar_background_color,
+                  '#FFFFFF'
+                )}
+                logoBackgroundColor="#FFFFFF"
+                logoRingClassName="ring-2 ring-white shadow-sm"
+                ringClassName="shadow-sm"
+                alt={header.title || 'Coach'}
+              />
+            </div>
+            <div className="hidden sm:block">
+              <ExpertProfileWithLogo
+                src={avatarSrc || ''}
+                logo={logo}
+                name={header.title || 'Coach'}
+                size={96}
+                logoSize={38}
+                avatarBackgroundColor={getCommunityColor(
+                  header.avatar_background_color,
+                  '#FFFFFF'
+                )}
+                logoBackgroundColor="#FFFFFF"
+                logoRingClassName="ring-2 ring-white shadow-sm"
+                ringClassName="shadow-sm"
+                alt={header.title || 'Coach'}
+              />
+            </div>
           </div>
 
           {header.eyebrow ? (

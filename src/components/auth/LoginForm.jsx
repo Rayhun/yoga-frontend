@@ -12,6 +12,7 @@ import { loginUser } from '@/services/public/auth';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
 import { getOnboardingRedirectPath } from '@/utils/auth-redirect';
+import { toast } from 'react-toastify';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -39,6 +40,10 @@ const LoginForm = () => {
       if (response?.data?.token) {
         const userDetails = response?.data?.user;
         const { email_verify, on_boarding_quiz, role } = userDetails?.profile;
+        const subscriptionExpired =
+          response?.data?.subscription_expired === true ||
+          userDetails?.profile?.has_active_subscription === false;
+
         if (role?.toLowerCase() === 'teacher') {
           // Only email verification is required on the frontend (mobile OTP flow disabled)
           if (!email_verify) {
@@ -55,6 +60,10 @@ const LoginForm = () => {
         } else if (role?.toLowerCase() === 'affiliate') {
           Cookies.set('token', response?.data?.token);
           router.replace('/portal/affiliate/dashboard');
+        } else if (subscriptionExpired && role?.toLowerCase() === 'customer') {
+          Cookies.set('token', response?.data?.token);
+          toast.info('Your subscription has expired. Please renew to continue.');
+          router.replace('/portal/customer/subscriptions');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
           

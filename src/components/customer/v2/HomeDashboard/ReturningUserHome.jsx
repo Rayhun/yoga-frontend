@@ -12,6 +12,7 @@ import { isExpertImageUrl } from '@/utils/expert-media';
 import AIWellnessCoachModal from '@/components/customer/v2/AIWellnessCoachModal';
 import CheckInModal from '@/components/customer/v2/CheckInModal';
 import PeriodLogModal from '@/components/customer/v2/PeriodLogModal';
+import GuidedSessionModal from '@/components/customer/v2/Relief/GuidedSessionModal';
 import SectionInfoModal, {
   CARD_INFO_ICON_POSITION,
   SectionInfoButton,
@@ -44,12 +45,28 @@ const CARD_INTERACTIVE = HOME_CARD_INTERACTIVE;
 const BTN_PRIMARY = HOME_BTN_PRIMARY;
 const BTN_OUTLINE = HOME_BTN_OUTLINE;
 
-function SectionShell({ children, className = '', sectionData, onInfoOpen }) {
+function SectionShell({ children, className = '', sectionData, onInfoOpen, onClick }) {
   const showInfo = hasSectionInfo(sectionData);
   const useFlexCol = /\bflex-col\b/.test(className);
+  const interactive = typeof onClick === 'function';
 
   return (
-    <div className={`relative ${CARD} ${className}`}>
+    <div
+      className={`relative ${CARD} ${className}`}
+      onClick={onClick}
+      onKeyDown={
+        interactive
+          ? event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick(event);
+              }
+            }
+          : undefined
+      }
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+    >
       {showInfo ? (
         <SectionInfoButton
           sectionData={sectionData}
@@ -433,9 +450,10 @@ function TodayPlanCard({ data, onClick, onInfoOpen }) {
   if (!data?.title) return null;
   return (
     <SectionShell
-      className="flex h-full flex-col border-primary/10 bg-gradient-to-br from-white via-primary/[0.04] to-amber-50/30 p-6 md:p-7 lg:p-8 lg:ring-1 lg:ring-primary/10"
+      className={`${CARD_INTERACTIVE} flex h-full cursor-pointer flex-col border-primary/10 bg-gradient-to-br from-white via-primary/[0.04] to-amber-50/30 p-6 md:p-7 lg:p-8 lg:ring-1 lg:ring-primary/10`}
       sectionData={data}
       onInfoOpen={onInfoOpen}
+      onClick={onClick}
     >
       <div className="flex flex-wrap items-center gap-2">
         <p className={`${HOME_SECTION_LABEL} text-gray-400`}>
@@ -450,9 +468,9 @@ function TodayPlanCard({ data, onClick, onInfoOpen }) {
       <h2 className="mt-4 font-serif text-2xl text-gray-900 lg:text-[1.75rem]">{data.title}</h2>
       <p className="mt-2 text-sm text-gray-600 lg:text-[15px]">{data.subtitle}</p>
       <div className={`${HOME_CARD_BTN_ROW} lg:pt-8`}>
-        <button type="button" onClick={onClick} className={BTN_PRIMARY}>
+        <span className={BTN_PRIMARY}>
           {data.btn_text || 'Start Now'}
-        </button>
+        </span>
       </div>
     </SectionShell>
   );
@@ -616,6 +634,8 @@ export default function ReturningUserHome({ home }) {
   const [checkinWizardUrl, setCheckinWizardUrl] = useState(null);
   const [checkinWizardKey, setCheckinWizardKey] = useState(0);
   const [selectedMood, setSelectedMood] = useState(null);
+  const [sessionModalOpen, setSessionModalOpen] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
   const { infoModalData, openSectionInfo, closeSectionInfo, isSectionInfoOpen } =
     useSectionInfoModal();
   const enabledSections = useMemo(() => getEnabledHomeSections(home), [home]);
@@ -666,7 +686,19 @@ export default function ReturningUserHome({ home }) {
   };
 
   const goTrends = () => router.push('/portal/customer/checkin/daily_insights');
-  const goTodayPlan = () => router.push('/portal/customer/checkin/sleep_tracker');
+  const openTodayPlanSession = () => {
+    const guidedSession = sectionData.today_plan?.guided_session;
+    if (guidedSession?.content_type && guidedSession?.link) {
+      setActiveSession({
+        content_type: guidedSession.content_type,
+        link: guidedSession.link,
+        title: guidedSession.title || sectionData.today_plan?.title,
+      });
+      setSessionModalOpen(true);
+      return;
+    }
+    router.push('/portal/customer/checkin/sleep_tracker');
+  };
   const goPrograms = () => router.push('/portal/customer/lms/program');
   const goHomeCoachCircle = coachData => {
     const conversationId = coachData?.id;
@@ -725,7 +757,11 @@ export default function ReturningUserHome({ home }) {
         return <TrendCard data={sectionData.trend} onClick={goTrends} onInfoOpen={openSectionInfo} />;
       case 'today_plan':
         return (
-          <TodayPlanCard data={sectionData.today_plan} onClick={goTodayPlan} onInfoOpen={openSectionInfo} />
+          <TodayPlanCard
+            data={sectionData.today_plan}
+            onClick={openTodayPlanSession}
+            onInfoOpen={openSectionInfo}
+          />
         );
       case 'progress':
         return <ProgressCard data={sectionData.progress} onInfoOpen={openSectionInfo} />;
@@ -831,6 +867,13 @@ export default function ReturningUserHome({ home }) {
         wizardUrl={checkinWizardUrl}
         wizardKey={checkinWizardKey}
         selectedMood={selectedMood}
+      />
+
+      <GuidedSessionModal
+        open={sessionModalOpen}
+        onClose={() => setSessionModalOpen(false)}
+        session={activeSession}
+        title={activeSession?.title}
       />
 
       <SectionInfoModal

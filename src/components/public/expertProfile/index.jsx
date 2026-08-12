@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import PublicExpertPrograms from './programs';
 import PublicExpertAbout from './about';
 import PublicExpertGroupCoaching from './groupCoaching';
 import PublicExpertConsultations from './consultations';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -27,17 +27,27 @@ const PublicExpertProfile = ({ data: expertData }) => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <div className="px-6 sm:px-8 pb-6">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="relative">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                <Image
+            <div className="relative rounded-full border-4 border-white shadow-lg bg-white">
+              <div className="sm:hidden">
+                <ExpertProfileWithLogo
                   src={expertData?.file || '/images/user/placeholder_profile.png'}
-                  width={144}
-                  height={144}
-                  sizes="(max-width: 640px) 112px, 144px"
+                  logo={expertData?.business_logo}
+                  name={`${expertData?.first_name || ''} ${expertData?.last_name || ''}`}
+                  size={112}
+                  logoSize={44}
+                  logoRingClassName="ring-2 ring-white"
                   alt={`${expertData?.first_name || ''} ${expertData?.last_name || ''}`}
-                  className="w-full h-full object-cover"
-                  quality={95}
-                  priority
+                />
+              </div>
+              <div className="hidden sm:block">
+                <ExpertProfileWithLogo
+                  src={expertData?.file || '/images/user/placeholder_profile.png'}
+                  logo={expertData?.business_logo}
+                  name={`${expertData?.first_name || ''} ${expertData?.last_name || ''}`}
+                  size={144}
+                  logoSize={52}
+                  logoRingClassName="ring-2 ring-white"
+                  alt={`${expertData?.first_name || ''} ${expertData?.last_name || ''}`}
                 />
               </div>
             </div>
