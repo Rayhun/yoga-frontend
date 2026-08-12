@@ -103,13 +103,13 @@ const ApplicationReviewTable = () => {
       },
       {
         id: 'approve',
-        render: row => row?.original?.application_status === 'submitted',
+        render: row => ['submitted', 'under_review'].includes(row?.original?.application_status),
         Icon: BsPersonCheck,
         onClick: row => handleApprove(row?.original),
       },
       {
         id: 'reject',
-        render: row => row?.original?.application_status === 'submitted',
+        render: row => ['submitted', 'under_review'].includes(row?.original?.application_status),
         Icon: BsPersonX,
         onClick: row => handleOpenReject(row?.original),
       },
