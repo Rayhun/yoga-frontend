@@ -10,6 +10,7 @@ export const CUSTOMER_V2_HOME_SECTIONS = {
   feature: { flag: 'is_feature_section', urlKey: 'feature_section_url' },
   trend: { flag: 'is_trend_section', urlKey: 'trend_section_url' },
   today_plan: { flag: 'is_today_plan_section', urlKey: 'today_section_url' },
+  quick_relief: { flag: 'is_quick_relief_section', urlKey: 'quick_relief_section_url' },
   progress: { flag: 'is_progress_section', urlKey: 'progress_section_url' },
   program: { flag: 'is_program_section', urlKey: 'program_section_url' },
   explore: { flag: 'is_explore_section', urlKey: 'explore_section_url' },
@@ -29,6 +30,7 @@ export const SECTION_LAYOUT_WIDTH = {
   feature: 'full',
   trend: 'half',
   today_plan: 'half',
+  quick_relief: 'half',
   progress: 'half',
   program: 'half',
   explore: 'half',
@@ -73,6 +75,8 @@ export function sectionHasContent(key, data, home) {
       return Boolean(data?.title);
     case 'today_plan':
       return Boolean(data?.title);
+    case 'quick_relief':
+      return Boolean(data?.title);
     case 'progress':
       return Boolean(data?.title);
     case 'program':
@@ -87,11 +91,34 @@ export function sectionHasContent(key, data, home) {
 }
 
 /**
+ * Use backend sections_order, then append enabled sections older configs omit.
+ */
+export function resolveHomeSectionsOrder(home) {
+  const order = home?.sections_order?.length
+    ? [...home.sections_order]
+    : [...DEFAULT_SECTIONS_ORDER];
+  const present = new Set(order);
+
+  Object.keys(CUSTOMER_V2_HOME_SECTIONS).forEach(key => {
+    if (present.has(key) || !isHomeSectionFlagEnabled(home, key)) return;
+    const infoIndex = order.indexOf('info');
+    if (infoIndex >= 0) {
+      order.splice(infoIndex, 0, key);
+    } else {
+      order.push(key);
+    }
+    present.add(key);
+  });
+
+  return order;
+}
+
+/**
  * Build render groups from backend sections_order + flags.
  * Removed sections collapse; lone half-width cards span the full row.
  */
 export function buildHomeLayoutGroups(home, { isLoading = false, sectionData = {} } = {}) {
-  const order = home?.sections_order?.length ? home.sections_order : DEFAULT_SECTIONS_ORDER;
+  const order = resolveHomeSectionsOrder(home);
 
   const visibleKeys = order.filter(key => {
     if (!isHomeSectionFlagEnabled(home, key)) return false;
@@ -126,7 +153,7 @@ export function buildHomeLayoutGroups(home, { isLoading = false, sectionData = {
 export function getEnabledHomeSections(home) {
   if (!home) return [];
 
-  const order = home.sections_order?.length ? home.sections_order : DEFAULT_SECTIONS_ORDER;
+  const order = resolveHomeSectionsOrder(home);
 
   return order
     .filter(key => {

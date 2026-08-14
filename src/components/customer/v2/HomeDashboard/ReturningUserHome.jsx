@@ -573,6 +573,45 @@ function ExploreCard({ data, onClick, onInfoOpen }) {
   );
 }
 
+function QuickReliefCard({ data, onClick, onInfoOpen }) {
+  if (!data?.title) return null;
+  return (
+    <SectionShell
+      className={`${CARD_INTERACTIVE} flex h-full cursor-pointer flex-col border-primary/10 bg-gradient-to-br from-emerald-50/70 via-white to-primary/[0.05] p-6 md:p-7 lg:p-8 lg:ring-1 lg:ring-primary/10`}
+      sectionData={data}
+      onInfoOpen={onInfoOpen}
+      onClick={onClick}
+    >
+      <p className={`${HOME_SECTION_LABEL} text-primary/80`}>
+        {data.eyebrow || 'Try this today'}
+      </p>
+      <div className="mt-4 flex items-start gap-3">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-primary/10">
+          {data.icon || '🌿'}
+        </span>
+        <h2 className="min-w-0 flex-1 font-serif text-xl leading-snug text-gray-900 md:text-2xl lg:text-[1.5rem]">
+          {data.title}
+        </h2>
+      </div>
+      {data.chips?.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {data.chips.map(chip => (
+            <span
+              key={chip.symptom || chip.label}
+              className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-gray-700"
+            >
+              {chip.emoji} {chip.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div className={HOME_CARD_BTN_ROW}>
+        <span className={BTN_PRIMARY}>{data.cta?.label || 'Quick Relief'}</span>
+      </div>
+    </SectionShell>
+  );
+}
+
 function InfoCard({ data, onClick, onInfoOpen }) {
   if (!data?.text) return null;
   return (
@@ -617,6 +656,7 @@ const SKELETON_HEIGHT = {
   coach: 'h-36',
   trend: 'h-24',
   today_plan: 'h-56',
+  quick_relief: 'h-56',
   progress: 'h-56',
   program: 'h-48',
   explore: 'h-48',
@@ -700,6 +740,7 @@ export default function ReturningUserHome({ home }) {
     router.push('/portal/customer/checkin/sleep_tracker');
   };
   const goPrograms = () => router.push('/portal/customer/lms/program');
+  const goQuickRelief = () => router.push('/portal/customer/relief');
   const goHomeCoachCircle = coachData => {
     const conversationId = coachData?.id;
     if (!conversationId) {
@@ -760,6 +801,14 @@ export default function ReturningUserHome({ home }) {
           <TodayPlanCard
             data={sectionData.today_plan}
             onClick={openTodayPlanSession}
+            onInfoOpen={openSectionInfo}
+          />
+        );
+      case 'quick_relief':
+        return (
+          <QuickReliefCard
+            data={sectionData.quick_relief}
+            onClick={goQuickRelief}
             onInfoOpen={openSectionInfo}
           />
         );

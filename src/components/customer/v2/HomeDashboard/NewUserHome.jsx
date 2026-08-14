@@ -416,6 +416,46 @@ function FeatureSectionCard({ data, onInfoOpen }) {
   );
 }
 
+function QuickReliefCard({ data, onClick, onInfoOpen }) {
+  if (!data?.title) return null;
+  return (
+    <SectionShell
+      className="flex h-full flex-col border-primary/10 bg-gradient-to-br from-emerald-50/70 via-white to-primary/[0.05] p-6 md:p-7 lg:p-8"
+      sectionData={data}
+      onInfoOpen={onInfoOpen}
+    >
+      <p className={`${HOME_SECTION_LABEL} text-primary/80`}>
+        {data.eyebrow || 'Try this today'}
+      </p>
+      <div className="mt-4 flex items-start gap-3">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-primary/10">
+          {data.icon || '🌿'}
+        </span>
+        <h2 className="min-w-0 flex-1 font-serif text-xl leading-snug text-gray-900 md:text-2xl lg:text-[1.5rem]">
+          {data.title}
+        </h2>
+      </div>
+      {data.chips?.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {data.chips.map(chip => (
+            <span
+              key={chip.symptom || chip.label}
+              className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-gray-700"
+            >
+              {chip.emoji} {chip.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div className={HOME_CARD_BTN_ROW}>
+        <button type="button" onClick={onClick} className={BTN_PRIMARY}>
+          {data.cta?.label || 'Quick Relief'}
+        </button>
+      </div>
+    </SectionShell>
+  );
+}
+
 function InfoCard({ data, onClick, onInfoOpen }) {
   if (!data?.text) return null;
   return (
@@ -458,6 +498,7 @@ const SKELETON_HEIGHT = {
   checkin_info: 'h-52',
   coach: 'h-36',
   getting_started: 'h-64',
+  quick_relief: 'h-56',
   auto_tracker: 'h-72',
   feature: 'h-56',
   info: 'h-20',
@@ -531,6 +572,8 @@ export default function NewUserHome({ home }) {
     router.push(`/portal/inbox?conversation=${conversationId}`);
   };
 
+  const goQuickRelief = () => router.push('/portal/customer/relief');
+
   const handleGettingStartedStep = step => {
     if (step.step_id === 'cycle_phase') {
       handlePeriodLog();
@@ -568,6 +611,14 @@ export default function NewUserHome({ home }) {
           <CoachCard
             data={sectionData.coach}
             onClick={() => goHomeCoachCircle(sectionData.coach)}
+            onInfoOpen={openSectionInfo}
+          />
+        );
+      case 'quick_relief':
+        return (
+          <QuickReliefCard
+            data={sectionData.quick_relief}
+            onClick={goQuickRelief}
             onInfoOpen={openSectionInfo}
           />
         );

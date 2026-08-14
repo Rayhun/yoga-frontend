@@ -60,26 +60,33 @@ export default function OnboardingJoinPaymentStep({
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/60 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+      <div className="mt-6 flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/80 px-6 py-6 dark:border-emerald-900/40 dark:bg-emerald-950/30 md:px-7 md:py-7">
         <div>
-          <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-300">
+          <p className="text-4xl font-bold leading-none text-emerald-900 dark:text-emerald-300 md:text-[2.75rem]">
             {priceCard.amount}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{priceCard.label}</p>
+          <p className="mt-2 text-base text-gray-600 dark:text-gray-400">{priceCard.label}</p>
         </div>
-        <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+        <span className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-bold text-white">
           {priceCard.badge}
         </span>
       </div>
 
       <Button
-        className="mt-6 w-full"
+        className="mt-6 w-full !rounded-2xl px-6 py-4 text-base font-semibold"
+        size="3xl"
         onClick={onPay}
         isLoading={isSubmitting}
         disabled={isSubmitting}
       >
         {isSubmitting ? page.button_loading : page.button}
       </Button>
+
+      {page.thereafter_text ? (
+        <p className="mt-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+          {page.thereafter_text}
+        </p>
+      ) : null}
 
       {trustRow.length > 0 ? (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
