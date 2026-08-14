@@ -84,8 +84,8 @@ const ADMIN = [
   {
     Icon: MdOutlineHome,
     label: 'Home',
-    href: '/portal',
-    isActive: pathname => pathname === '/portal',
+    href: '/portal/admin/dashboard',
+    isActive: pathname => pathname === '/portal/admin/dashboard',
     disabled: false,
   },
   {
@@ -329,8 +329,8 @@ const CUSTOMER = [
   {
     Icon: MdHome,
     label: 'Home',
-    href: '/portal',
-    isActive: pathname => pathname === '/portal',
+    href: '/portal/customer/dashboard',
+    isActive: pathname => pathname === '/portal/customer/dashboard',
     disabled: false,
   },
   {
