@@ -1,5 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { FaBuilding, FaCheckCircle, FaRegClock, FaTimesCircle, FaSearch } from 'react-icons/fa';
 import queryKeys from '@/utils/query-keys';
 import { getMyInstitutionApplication } from '@/services/private/certification/application';
