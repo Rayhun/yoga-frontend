@@ -1,7 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import CustomerDashboard from '@/components/dashboard/Customer';
 import ECommerce from '@/components/dashboard/E-commerce/E-commerce';
 import ExpertQuickSteps from '@/components/expert/ExpertQuickSteps';
 import useAuthContext from '@/hooks/useAuthContext';
@@ -30,6 +29,21 @@ const ClientPortalPage = () => {
       router.replace('/portal/admin/lms/program');
     }
 
+    // Redirect customers to their dedicated dashboard
+    if (userRole === 'Customer') {
+      router.replace('/portal/customer/dashboard');
+    }
+
+    // Redirect affiliate users to their dedicated dashboard
+    if (userRole === 'Affiliate') {
+      router.replace('/portal/affiliate/dashboard');
+    }
+
+    // Redirect admin users to admin dashboard
+    if (userRole === 'Admin') {
+      router.replace('/portal/admin/dashboard');
+    }
+
     // Business owners and employees can access the regular portal
     // Business owners can also access the Business Dashboard via sidebar
     // Business employees have the same experience as individual users
@@ -37,8 +51,6 @@ const ClientPortalPage = () => {
 
   const renderDashboard = () => {
     switch (userRole) {
-      case 'Customer':
-        return <CustomerDashboard />;
       case 'Teacher':
         // Show quick steps if any condition is not met
         if (!isProfileComplete || !hasEventOrConsult || !stripeOnboarded) {
@@ -46,7 +58,10 @@ const ClientPortalPage = () => {
         }
         // This should redirect to dashboard, but fallback just in case
         return <ExpertQuickSteps />;
+      case 'Customer':
+      case 'Affiliate':
       case 'Staff':
+      case 'Admin':
       case 'Institution':
         // These roles are handled by useEffect redirects above — show a
         // spinner while the navigation resolves to avoid a flash of wrong UI.

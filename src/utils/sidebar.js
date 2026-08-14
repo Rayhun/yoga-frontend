@@ -84,8 +84,8 @@ const ADMIN = [
   {
     Icon: MdOutlineHome,
     label: 'Home',
-    href: '/portal',
-    isActive: pathname => pathname === '/portal',
+    href: '/portal/admin/dashboard',
+    isActive: pathname => pathname === '/portal/admin/dashboard',
     disabled: false,
   },
   {
@@ -329,8 +329,8 @@ const CUSTOMER = [
   {
     Icon: MdHome,
     label: 'Home',
-    href: '/portal',
-    isActive: pathname => pathname === '/portal',
+    href: '/portal/customer/dashboard',
+    isActive: pathname => pathname === '/portal/customer/dashboard',
     disabled: false,
   },
   {
@@ -383,13 +383,6 @@ const CUSTOMER = [
     label: 'Coaches',
     href: '/portal/customer/lms/expert',
     isActive: pathname => pathname.includes('/portal/customer/lms/expert'),
-    disabled: false,
-  },
-  {
-    Icon: MdVerified,
-    label: 'Certifications',
-    href: '/portal/customer/certification',
-    isActive: pathname => pathname.includes('/portal/customer/certification'),
     disabled: false,
   },
   {
