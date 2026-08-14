@@ -82,12 +82,6 @@ export default function OnboardingJoinPaymentStep({
         {isSubmitting ? page.button_loading : page.button}
       </Button>
 
-      {page.thereafter_text ? (
-        <p className="mt-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-          {page.thereafter_text}
-        </p>
-      ) : null}
-
       {trustRow.length > 0 ? (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           {trustRow.map(item => <span key={item}>{item}</span>)}
