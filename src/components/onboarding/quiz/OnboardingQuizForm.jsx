@@ -223,7 +223,7 @@ function buildPayload(values) {
   });
 
   return {
-    question_id: values.question_id.trim(),
+    question_id: Number(values.question_id),
     tag_text: values.tag_text.trim(),
     tag_emoji: (values.tag_emoji || '').trim(),
     sets_key: values.sets_key.trim(),
@@ -322,7 +322,7 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const validationSchema = Yup.object({
-    question_id: Yup.string().required('Required').max(100),
+    question_id: Yup.number().typeError('Must be a number').required('Required').integer(),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
     sets_key: setsKeySchema,
@@ -359,7 +359,7 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const step1ValidationSchema = Yup.object({
-    question_id: Yup.string().required('Required').max(100),
+    question_id: Yup.number().typeError('Must be a number').required('Required').integer(),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
     sets_key: setsKeySchema,
@@ -632,7 +632,8 @@ const OnboardingQuizForm = ({ selected }) => {
                     <FormikField
                       name="question_id"
                       label="Question ID"
-                      placeholder="e.g. q_age_group"
+                      placeholder="e.g. 1"
+                      type="number"
                       required
                     />
                     <FormikField
