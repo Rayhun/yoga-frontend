@@ -223,6 +223,7 @@ function buildPayload(values) {
   });
 
   return {
+    question_id: values.question_id.trim(),
     tag_text: values.tag_text.trim(),
     tag_emoji: (values.tag_emoji || '').trim(),
     sets_key: values.sets_key.trim(),
@@ -321,6 +322,7 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const validationSchema = Yup.object({
+    question_id: Yup.string().required('Required').max(100),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
     sets_key: setsKeySchema,
@@ -357,6 +359,7 @@ function buildValidationSchemas({ existingQuestions, currentQuestionId, remoteOr
   });
 
   const step1ValidationSchema = Yup.object({
+    question_id: Yup.string().required('Required').max(100),
     tag_text: Yup.string().required('Required').max(100),
     tag_emoji: Yup.string().max(10),
     sets_key: setsKeySchema,
@@ -478,6 +481,7 @@ const OnboardingQuizForm = ({ selected }) => {
   });
 
   const initialValues = {
+    question_id: selected?.question_id ?? '',
     tag_text: selected?.tag_text ?? '',
     tag_emoji: selected?.tag_emoji ?? '',
     sets_key: selected?.sets_key ?? '',
@@ -625,6 +629,12 @@ const OnboardingQuizForm = ({ selected }) => {
                     Identity and ordering for this step in the onboarding sequence.
                   </p>
                   <div className="mt-6 grid gap-5 md:grid-cols-2">
+                    <FormikField
+                      name="question_id"
+                      label="Question ID"
+                      placeholder="e.g. q_age_group"
+                      required
+                    />
                     <FormikField
                       name="sets_key"
                       label="Sets key"

@@ -14,6 +14,7 @@ export default function OnboardingJoinPaymentStep({
   onBack,
   onPay,
   isSubmitting = false,
+  showStepDots = true,
 }) {
   const page = content?.page_2 || {};
   const priceCard = page.price_card || {};
@@ -21,15 +22,21 @@ export default function OnboardingJoinPaymentStep({
   const trustRow = page.trust_row || [];
 
   return (
-    <OnboardingJoinFlowLayout step={2} stepLabel={page.progress_label}>
-      <button
-        type="button"
-        onClick={onBack}
-        disabled={isSubmitting}
-        className="mb-4 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50 dark:text-gray-400 dark:hover:text-white"
-      >
-        ← {page.back_link}
-      </button>
+    <OnboardingJoinFlowLayout
+      step={2}
+      stepLabel={page.progress_label}
+      showStepDots={showStepDots}
+    >
+      {onBack ? (
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isSubmitting}
+          className="mb-4 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50 dark:text-gray-400 dark:hover:text-white"
+        >
+          ← {page.back_link}
+        </button>
+      ) : null}
 
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">
         {formatEyebrow(page.eyebrow_template, firstName, page.eyebrow_fallback_name)}

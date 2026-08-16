@@ -93,7 +93,7 @@ const JoinCirclePrivacyBanner = ({ banner }) => {
 const JoinCircleView = ({ pageData, slug }) => {
   const router = useRouter();
   const [isJoining, setIsJoining] = useState(false);
-  const [showJoinFlow, setShowJoinFlow] = useState(false);
+  // const [showJoinFlow, setShowJoinFlow] = useState(false);
 
   if (!pageData) return null;
 
@@ -110,23 +110,29 @@ const JoinCircleView = ({ pageData, slug }) => {
 
   const joinFlowContent = pageData.join_flow_content;
 
-  if (showJoinFlow && joinFlowContent) {
-    return (
-      <JoinCircleCheckoutFlow
-        slug={slug}
-        content={joinFlowContent}
-        onBackToInvite={() => setShowJoinFlow(false)}
-      />
-    );
+  // Expert referral links skip the join-circle landing + details form
+  // and open the payment step (step 2) directly.
+  if (joinFlowContent) {
+    return <JoinCircleCheckoutFlow slug={slug} content={joinFlowContent} />;
   }
+
+  // if (showJoinFlow && joinFlowContent) {
+  //   return (
+  //     <JoinCircleCheckoutFlow
+  //       slug={slug}
+  //       content={joinFlowContent}
+  //       onBackToInvite={() => setShowJoinFlow(false)}
+  //     />
+  //   );
+  // }
 
   const handleJoin = async () => {
     const method = (primaryButton?.method || 'post').toLowerCase();
 
-    if (primaryButton?.is_stripe && joinFlowContent) {
-      setShowJoinFlow(true);
-      return;
-    }
+    // if (primaryButton?.is_stripe && joinFlowContent) {
+    //   setShowJoinFlow(true);
+    //   return;
+    // }
 
     if (primaryButton?.is_stripe && primaryButton?.stripe_url) {
       router.push(`/payment/join/${slug}`);

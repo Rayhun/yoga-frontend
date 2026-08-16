@@ -1,9 +1,16 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getReliefPage } from '@/services/private/customer/v2/relief';
 import queryKeys from '@/utils/query-keys';
+import {
+  getActiveReliefTabSlug,
+  getReliefPathSlug,
+  getReliefTabHref,
+  getVisibleReliefTabs,
+} from '@/utils/customer-v2-relief';
 import ReliefTabNav from './ReliefTabNav';
 import {
   RELIEF_DETAIL_CONTAINER,
@@ -16,6 +23,7 @@ import {
 
 export default function ReliefLayoutShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isQuickDetail = pathname.includes('/portal/customer/relief/quick/');
 
   const { data: response, isLoading } = useQuery({
@@ -25,7 +33,16 @@ export default function ReliefLayoutShell({ children }) {
     enabled: !isQuickDetail,
   });
 
-  const tabs = response?.data?.data || [];
+  const tabs = getVisibleReliefTabs(response?.data?.data || []);
+  const activeSlug = getActiveReliefTabSlug(tabs, pathname);
+  const pathSlug = getReliefPathSlug(pathname);
+  const needsTabRedirect =
+    !isLoading && !isQuickDetail && tabs.length > 0 && pathSlug !== activeSlug;
+
+  useEffect(() => {
+    if (!needsTabRedirect) return;
+    router.replace(getReliefTabHref(activeSlug));
+  }, [needsTabRedirect, activeSlug, router]);
 
   if (isQuickDetail) {
     return (
@@ -82,7 +99,7 @@ export default function ReliefLayoutShell({ children }) {
           </div>
         )}
 
-        <div>{children}</div>
+        <div>{needsTabRedirect ? null : children}</div>
       </div>
     </div>
   );

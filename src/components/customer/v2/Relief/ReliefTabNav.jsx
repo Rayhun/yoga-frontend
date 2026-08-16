@@ -2,24 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { getReliefTabHref, getReliefTabLabel, getReliefTabSlug } from '@/utils/customer-v2-relief';
+import {
+  getActiveReliefTabSlug,
+  getReliefTabHref,
+  getReliefTabLabel,
+  getReliefTabSlug,
+  getVisibleReliefTabs,
+} from '@/utils/customer-v2-relief';
 
 export default function ReliefTabNav({ tabs = [], variant = 'default' }) {
   const pathname = usePathname();
+  const visibleTabs = getVisibleReliefTabs(tabs);
 
-  if (!tabs.length) return null;
+  if (!visibleTabs.length) return null;
 
-  const activeSlug = (() => {
-    const base = '/portal/customer/relief';
-    if (pathname === base) return '';
-    if (pathname.startsWith(`${base}/quick/`)) return '';
-    if (pathname.startsWith(`${base}/`)) {
-      const segment = pathname.slice(base.length + 1).split('/')[0];
-      if (['track', 'faq', 'saved'].includes(segment)) return segment;
-    }
-    return '';
-  })();
-
+  const activeSlug = getActiveReliefTabSlug(visibleTabs, pathname);
   const isInline = variant === 'desktop-inline';
 
   return (
@@ -31,7 +28,7 @@ export default function ReliefTabNav({ tabs = [], variant = 'default' }) {
       }`}
       aria-label="Relief sections"
     >
-      {tabs.map(tab => {
+      {visibleTabs.map(tab => {
         const slug = getReliefTabSlug(tab.title);
         const href = getReliefTabHref(slug);
         const isActive = slug === activeSlug;

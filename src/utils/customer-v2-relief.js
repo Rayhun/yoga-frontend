@@ -28,6 +28,33 @@ export const getReliefTabHref = slug => {
   return `/portal/customer/relief/${slug}`;
 };
 
+export const getVisibleReliefTabs = (tabs = []) =>
+  (tabs || []).filter(tab => tab?.is_visible !== false);
+
+export const getReliefPathSlug = pathname => {
+  const base = '/portal/customer/relief';
+  if (!pathname || pathname === base) return '';
+  if (pathname.startsWith(`${base}/quick/`)) return '';
+  if (pathname.startsWith(`${base}/`)) {
+    const segment = pathname.slice(base.length + 1).split('/')[0];
+    if (['track', 'faq', 'saved'].includes(segment)) return segment;
+  }
+  return '';
+};
+
+export const getActiveReliefTabSlug = (tabs = [], pathname) => {
+  const visibleTabs = getVisibleReliefTabs(tabs);
+  const pathSlug = getReliefPathSlug(pathname);
+  const visibleSlugs = visibleTabs.map(tab => getReliefTabSlug(tab.title));
+
+  if (visibleSlugs.includes(pathSlug)) return pathSlug;
+
+  const flagged = visibleTabs.find(tab => tab.is_active);
+  if (flagged) return getReliefTabSlug(flagged.title);
+
+  return visibleSlugs[0] ?? '';
+};
+
 export const extractQuickCategoryFromUrl = url => {
   if (!url) return null;
   const match = String(url).match(/\/quick\/([^/?#]+)/i);
