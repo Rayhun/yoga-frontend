@@ -1,8 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import Alert from '@mui/material/Alert';
 import Spinner from '@/components/common/loader/Spinner';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import ProgramCard from './ProgramCard';
@@ -17,8 +16,6 @@ const AUDIENCE_FILTERS = [
 
 const DiscoverPanel = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const enrolledProgramId = searchParams.get('enrolled');
   const [selectedAudience, setSelectedAudience] = useState('');
 
   const {
@@ -36,12 +33,6 @@ const DiscoverPanel = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      {enrolledProgramId && (
-        <Alert severity="success" onClose={() => router.replace('/portal/customer/certification')}>
-          {"You're enrolled! Head to My Certifications to get started."}
-        </Alert>
-      )}
-
       <div className="flex gap-2">
         {AUDIENCE_FILTERS.map(filter => (
           <button

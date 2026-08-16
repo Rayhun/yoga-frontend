@@ -1,3 +1,4 @@
+'use client';
 import { useMemo } from 'react';
 import Spinner from '@/components/common/loader/Spinner';
 import { useUI } from '@/context/UIProvider';

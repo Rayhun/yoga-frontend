@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DiscoverPanel from './DiscoverPanel';
@@ -11,7 +12,9 @@ const TABS = {
 };
 
 const CertificationHub = () => {
-  const [selectedTab, setSelectedTab] = useState(TABS.DISCOVER);
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') === TABS.MY_CERTIFICATIONS ? TABS.MY_CERTIFICATIONS : TABS.DISCOVER;
+  const [selectedTab, setSelectedTab] = useState(initialTab);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);

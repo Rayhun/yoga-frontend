@@ -1,3 +1,4 @@
+'use client';
 import { useUI } from '@/context/UIProvider';
 import CircularProgress from '@mui/material/CircularProgress';
 

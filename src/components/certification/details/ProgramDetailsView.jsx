@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
 import {
   FaRegClock,
   FaPlayCircle,
@@ -83,6 +82,8 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
 
   const program = response?.data;
 
+  const goToLearn = () => router.push(`/portal/customer/certification/${program.id}/learn`);
+
   const handleEnroll = async () => {
     if (isEnrolling || !program) return;
 
@@ -91,8 +92,8 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
         await checkout({ id: program.id });
         queryClient.invalidateQueries({ queryKey: [queryKeys.certificationCatalog] });
         queryClient.invalidateQueries({ queryKey: [queryKeys.certificationProgramCatalogDetail, program.id] });
-        toast.success('Enrolled successfully!');
-        router.push(`/portal/customer/certification?enrolled=${program.id}`);
+        queryClient.invalidateQueries({ queryKey: [queryKeys.certificationDashboard] });
+        goToLearn();
       } catch (error) {
         toastApiError(error);
       }
@@ -183,7 +184,14 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
               <span className="text-xl font-bold text-green-600">
                 {isFree ? 'Free' : `${program.currency} ${program.price}`}
               </span>
-              {isFull ? (
+              {program.is_enrolled ? (
+                <button
+                  onClick={goToLearn}
+                  className="py-2.5 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-colors"
+                >
+                  Continue Learning
+                </button>
+              ) : isFull ? (
                 <span className="text-sm font-semibold text-red-500">Full</span>
               ) : (
                 <button
@@ -191,7 +199,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
                   disabled={isEnrolling}
                   className="py-2.5 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-colors disabled:opacity-60"
                 >
-                  {isEnrolling ? 'Processing…' : 'Enroll'}
+                  {isEnrolling ? 'Processing…' : isFree ? 'Start Learning' : 'Enroll'}
                 </button>
               )}
             </div>
