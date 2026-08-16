@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import dayjs from 'dayjs';
 import Dialog from '@mui/material/Dialog';
 import { useQuery } from '@tanstack/react-query';
 import { FiSend, FiX } from 'react-icons/fi';
@@ -197,29 +196,29 @@ function AIWellnessCoachModalChat({ modalData, onClose }) {
       </div>
 
       <div className="border-t border-stroke bg-white px-5 py-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 rounded-full border border-stroke bg-white p-1.5 pl-5 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
           <input
             type="text"
             value={inputText}
             onChange={event => setInputText(event.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={modalData?.placeholder || 'Ask anything about your wellness...'}
+            placeholder={modalData?.placeholder || 'Ask anything about your wellness journey...'}
             disabled={!ai_coach_id || !isConnected}
-            className="h-12 flex-1 rounded-full border border-stroke bg-gray px-5 text-sm text-black outline-none transition placeholder:text-body focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-10 min-w-0 flex-1 bg-transparent text-sm text-black outline-none placeholder:text-body disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="button"
             onClick={() => handleSend()}
             disabled={!inputText.trim() || !ai_coach_id || !isConnected}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-meta-10"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-meta-10"
             aria-label="Send message"
           >
-            <FiSend className="h-5 w-5" />
+            <FiSend className="h-4 w-4" />
           </button>
         </div>
-        {ai_coach_id ? (
-          <p className="mt-2 text-center text-[11px] text-body">
-            {isConnected ? 'Connected' : 'Connecting…'} · {dayjs().format('hh:mm A')}
+        {modalData?.medical_info ? (
+          <p className="mt-3 text-center text-[11px] leading-relaxed text-body">
+            {modalData.medical_info}
           </p>
         ) : null}
       </div>
