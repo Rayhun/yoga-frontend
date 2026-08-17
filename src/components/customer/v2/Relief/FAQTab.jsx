@@ -74,7 +74,7 @@ function FaqQuestionCard({ question, categoryLabel, onToggle, isOpen }) {
 
 export default function FAQTab() {
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(null);
   const [openQuestionId, setOpenQuestionId] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -88,14 +88,14 @@ export default function FAQTab() {
     queryFn: () =>
       getReliefFaq({
         search: debouncedSearch || undefined,
-        filter: activeFilter,
+        filter: activeFilter || undefined,
       }),
   });
 
   const payload = response?.data?.data;
   const filterTabs = payload?.filter_tabs?.tabs || [];
   const categories = payload?.data || [];
-  const serverActiveTab = payload?.filter_tabs?.active_tab_id || 'all';
+  const serverActiveTab = payload?.filter_tabs?.active_tab_id || null;
 
   if (isLoading) {
     return (
@@ -130,13 +130,13 @@ export default function FAQTab() {
 
       <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] lg:flex-wrap lg:gap-2.5 [&::-webkit-scrollbar]:hidden">
         {filterTabs.map(tab => {
-          const isActive = (activeFilter || serverActiveTab) === tab.id;
+          const isActive = (activeFilter ?? serverActiveTab) === tab.id;
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => {
-                setActiveFilter(tab.id);
+                setActiveFilter(current => (current === tab.id ? null : tab.id));
                 setOpenQuestionId(null);
               }}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition lg:px-5 lg:py-2.5 lg:text-[15px] ${

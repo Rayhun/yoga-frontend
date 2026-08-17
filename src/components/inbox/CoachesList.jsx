@@ -27,7 +27,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   const setCurrentSubTab = setActiveSubTab || setLocalSubTab;
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(null);
   const [followOverrides, setFollowOverrides] = useState({});
 
   // Debounce search
@@ -50,7 +50,9 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   });
 
   const discoverPayload = coachesResponse?.data?.data;
-  const filterItems = discoverPayload?.filter_bar?.items || [];
+  const filterItems = (discoverPayload?.filter_bar?.items || []).filter(
+    item => item.value !== 'all' && item.id !== 'filter_all'
+  );
 
   const discoverCoaches = useMemo(() => {
     const section =
@@ -323,7 +325,11 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
                       <button
                         key={filter.id}
                         type="button"
-                        onClick={() => setActiveFilter(filter.value)}
+                        onClick={() =>
+                          setActiveFilter(current =>
+                            current === filter.value ? null : filter.value
+                          )
+                        }
                         className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                           isActive
                             ? 'border-primary bg-primary text-white'
