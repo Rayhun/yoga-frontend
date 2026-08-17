@@ -11,7 +11,7 @@ import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
-import { getOnboardingRedirectPath } from '@/utils/auth-redirect';
+import { getOnboardingRedirectPath, getSafeRedirectPath } from '@/utils/auth-redirect';
 import { toast } from 'react-toastify';
 
 const LoginForm = () => {
@@ -78,7 +78,8 @@ const LoginForm = () => {
             } catch (error) {
               console.error('Failed to fetch recommendations:', error);
             }
-            router.replace('/');
+            const safeNext = getSafeRedirectPath(nextPath);
+            router.replace(safeNext || '/');
           }
         } else {
           Cookies.set('token', response?.data?.token);

@@ -114,7 +114,8 @@ export const toAppPath = url => {
   if (!url) return null;
   if (url.startsWith('http')) {
     try {
-      return new URL(url).pathname;
+      const parsed = new URL(url);
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
     } catch {
       return url;
     }

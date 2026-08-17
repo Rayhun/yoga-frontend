@@ -11,8 +11,29 @@ export function resolveOnboardHomeCoachUrl(url) {
 
 export function extractConversationIdFromApiUrl(url) {
   if (!url || typeof url !== 'string') return null;
-  const match = url.match(/conversations\/([^/]+)\/messages/i);
-  return match?.[1] || null;
+  const apiMatch = url.match(/conversations\/([^/?#]+)\/messages/i);
+  if (apiMatch?.[1]) return apiMatch[1];
+  try {
+    const parsed = url.startsWith('http') ? new URL(url) : new URL(url, 'http://local.invalid');
+    return parsed.searchParams.get('conversation');
+  } catch {
+    const queryMatch = url.match(/[?&]conversation=([^&]+)/i);
+    return queryMatch?.[1] ? decodeURIComponent(queryMatch[1]) : null;
+  }
+}
+
+export function resolveHomeCoachCommunityPath(primaryAction) {
+  const conversationId =
+    primaryAction?.conversation_id ||
+    extractConversationIdFromApiUrl(primaryAction?.frontend_url) ||
+    extractConversationIdFromApiUrl(primaryAction?.url);
+  if (conversationId) {
+    return `/portal/inbox?conversation=${conversationId}`;
+  }
+  if (typeof primaryAction?.frontend_url === 'string' && primaryAction.frontend_url.startsWith('/portal/')) {
+    return primaryAction.frontend_url;
+  }
+  return '/portal/inbox';
 }
 
 export function markHomeCoachPending() {

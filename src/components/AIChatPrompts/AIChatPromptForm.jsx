@@ -96,6 +96,7 @@ const AIChatPromptsForm = ({ selected }) => {
     day_of_week: selected?.day_of_week || '',
     schedule_time: selected?.schedule_time || '08:00',
     file: null,
+    is_active: selected?.is_active ?? true,
   };
 
   const validationSchema = Yup.object({
@@ -169,6 +170,10 @@ const AIChatPromptsForm = ({ selected }) => {
           values[key].forEach(trackerId => {
             formData.append('all_trackers', trackerId);
           });
+        } else if (key === 'is_active') {
+          if (isEditMode) {
+            formData.append('is_active', values[key] ? 'true' : 'false');
+          }
         } else if (values[key] !== undefined && values[key] !== '' && values[key] !== null) {
           formData.append(key, values[key]);
         }

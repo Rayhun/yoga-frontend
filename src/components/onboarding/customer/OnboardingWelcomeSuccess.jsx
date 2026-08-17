@@ -4,7 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import Button from '@/components/common/Button';
 import queryKeys from '@/utils/query-keys';
-import { clearHomeCoachPending, extractConversationIdFromApiUrl } from '@/utils/onboarding-home-coach';
+import {
+  clearHomeCoachPending,
+  resolveHomeCoachCommunityPath,
+} from '@/utils/onboarding-home-coach';
+import { buildLoginUrl } from '@/utils/auth-redirect';
 
 function renderFooterText(text) {
   if (!text) return null;
@@ -41,33 +45,23 @@ export default function OnboardingWelcomeSuccess({
     clearHomeCoachPending();
     queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] });
     queryClient.invalidateQueries({ queryKey: [queryKeys.customerV2HomePage] });
+    queryClient.invalidateQueries({ queryKey: [queryKeys.inboxConversations] });
     router.push(path);
   };
 
-  const resolvePrimaryDestination = () => {
-    if (primaryAction?.frontend_url) {
-      return primaryAction.frontend_url;
-    }
-    if (primaryAction?.action_id === 'navigate_to_community_dashboard') {
-      return '/portal/inbox';
-    }
-    const conversationId = extractConversationIdFromApiUrl(primaryAction?.url);
-    if (conversationId) {
-      return `/portal/inbox?conversation=${conversationId}`;
-    }
-    return '/portal/inbox';
-  };
+  const resolvePrimaryDestination = () => resolveHomeCoachCommunityPath(primaryAction);
 
   const handlePrimary = () => {
+    const communityPath = resolvePrimaryDestination();
     if (isPublic && isPaymentComplete) {
-      router.push(primaryAction?.frontend_url || '/auth/login?next=/portal/inbox');
+      router.push(buildLoginUrl(communityPath));
       return;
     }
     if (
       isPublic &&
       primaryAction?.action_id === 'navigate_to_community_dashboard'
     ) {
-      finishAndNavigate(resolvePrimaryDestination());
+      finishAndNavigate(communityPath);
       return;
     }
     if (isPublic) {
@@ -77,7 +71,7 @@ export default function OnboardingWelcomeSuccess({
       router.push(signupPath);
       return;
     }
-    finishAndNavigate(resolvePrimaryDestination());
+    finishAndNavigate(communityPath);
   };
 
   const handleSecondary = () => {
