@@ -1,16 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Dialog from '@mui/material/Dialog';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
 import { FiArrowLeft } from 'react-icons/fi';
 import ExpertAvatar, { ExpertEmojiAvatar } from '@/components/common/ExpertAvatar';
+import ControllableRichText from '@/components/common/details/ControllableRichText';
 import { getCustomerCoachDetail } from '@/services/private/customer/v2/coaches';
 import { DEFAULT_EXPERT_EMOJI, isExpertImageUrl } from '@/utils/expert-media';
 import queryKeys from '@/utils/query-keys';
 
-const ABOUT_PREVIEW_LENGTH = 220;
 const VISIBLE_TAG_COUNT = 3;
 
 function PillTags({ items, className = '' }) {
@@ -66,8 +66,6 @@ function buildSubtitle(coach) {
 }
 
 export default function CoachProfileModal({ open, coachId, onClose }) {
-  const [aboutExpanded, setAboutExpanded] = useState(false);
-
   const { data, isLoading, isError } = useQuery({
     queryKey: [queryKeys.customerV2CoachDetail, coachId],
     queryFn: () => getCustomerCoachDetail(coachId),
@@ -84,17 +82,11 @@ export default function CoachProfileModal({ open, coachId, onClose }) {
   const subtitle = useMemo(() => buildSubtitle(coach), [coach]);
 
   const aboutText = coach?.about?.text || '';
-  const showAboutPreview =
-    !aboutExpanded && aboutText.length > ABOUT_PREVIEW_LENGTH;
-  const aboutDisplay = showAboutPreview
-    ? `${aboutText.slice(0, ABOUT_PREVIEW_LENGTH).trim()}…`
-    : aboutText;
 
   const avatar = coach?.avatar;
   const showEmojiAvatar = avatar && !isExpertImageUrl(avatar);
 
   const handleClose = () => {
-    setAboutExpanded(false);
     onClose?.();
   };
 
@@ -171,18 +163,11 @@ export default function CoachProfileModal({ open, coachId, onClose }) {
 
           {coach.about?.is_visible && aboutText ? (
             <ProfileSection title={coach.about.section_title || 'ABOUT'}>
-              <p className="text-sm leading-relaxed text-gray-700">
-                {aboutDisplay}
-                {showAboutPreview ? (
-                  <button
-                    type="button"
-                    onClick={() => setAboutExpanded(true)}
-                    className="ml-1 font-semibold text-[#1D4D36] hover:underline"
-                  >
-                    more
-                  </button>
-                ) : null}
-              </p>
+              <div className="prose prose-sm max-w-none text-sm leading-relaxed text-gray-700">
+                <ControllableRichText disableLinks numberOfWords={50}>
+                  {aboutText}
+                </ControllableRichText>
+              </div>
             </ProfileSection>
           ) : null}
 
