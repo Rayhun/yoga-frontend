@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -59,7 +59,7 @@ const LessonPlayer = ({ programId }) => {
 
   const {
     data: response,
-    isFetching,
+    isLoading,
     failureReason,
   } = useQuery({
     queryFn: () => getProgramContent({ id: programId }),
@@ -87,7 +87,26 @@ const LessonPlayer = ({ programId }) => {
     },
   });
 
-  if (isFetching) {
+  // Stable across re-renders (only changes when the selected lesson actually changes) — this is
+  // VideoLesson's onComplete prop, and an unstable reference here was invalidating its debounced
+  // watch-percent reporter's useMemo on every render, tearing down and recreating the debounce
+  // timer instead of letting it actually debounce.
+  const handleComplete = useCallback(
+    async payload => {
+      try {
+        await submitCompletion({ id: selectedLessonId, payload });
+      } catch (error) {
+        toastApiError(error);
+      }
+    },
+    [selectedLessonId, submitCompletion]
+  );
+
+  // isLoading (not isFetching): a progress-report mutation invalidates this query on every
+  // debounce tick, which triggers a background refetch — isFetching would go true then too,
+  // unmounting the whole tree (including the playing video) every few seconds. isLoading only
+  // fires once, before there's any cached data to show.
+  if (isLoading) {
     return (
       <div className="flex justify-center py-16">
         <Spinner />
@@ -130,14 +149,6 @@ const LessonPlayer = ({ programId }) => {
 
   const selectedLesson = modules.flatMap(m => m.lessons).find(l => l.id === selectedLessonId);
   const LessonComponent = selectedLesson ? LESSON_COMPONENT[selectedLesson.lesson_type] : null;
-
-  const handleComplete = async payload => {
-    try {
-      await submitCompletion({ id: selectedLesson.id, payload });
-    } catch (error) {
-      toastApiError(error);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-4">
