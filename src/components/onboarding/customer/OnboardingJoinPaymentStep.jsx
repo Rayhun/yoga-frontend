@@ -38,28 +38,28 @@ export default function OnboardingJoinPaymentStep({
         </button>
       ) : null}
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">
         {formatEyebrow(page.eyebrow_template, firstName, page.eyebrow_fallback_name)}
       </p>
-      <h1 className="mt-2 font-serif text-2xl font-bold leading-tight text-gray-900 dark:text-white md:text-[1.65rem]">
+      <h1 className="mt-1.5 font-serif text-xl font-bold leading-tight text-gray-900 dark:text-white md:text-[1.4rem]">
         {page.headline}
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
         {page.subhead}
       </p>
 
-      <ul className="mt-6 space-y-4">
+      <ul className="mt-4 space-y-3">
         {benefits.map(benefit => (
-          <li key={benefit.title} className="flex gap-3">
+          <li key={benefit.title} className="flex gap-2.5">
             <span
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg dark:bg-gray-800"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-base dark:bg-gray-800"
               aria-hidden
             >
               {benefit.icon}
             </span>
             <div>
-              <p className="font-semibold text-gray-900 dark:text-white">{benefit.title}</p>
-              <p className="mt-0.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">{benefit.title}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
                 {benefit.description}
               </p>
             </div>
@@ -67,20 +67,20 @@ export default function OnboardingJoinPaymentStep({
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/80 px-6 py-6 dark:border-emerald-900/40 dark:bg-emerald-950/30 md:px-7 md:py-7">
+      <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-3.5 dark:border-emerald-900/40 dark:bg-emerald-950/30">
         <div>
-          <p className="text-4xl font-bold leading-none text-emerald-900 dark:text-emerald-300 md:text-[2.75rem]">
+          <p className="text-3xl font-bold leading-none text-emerald-900 dark:text-emerald-300">
             {priceCard.amount}
           </p>
-          <p className="mt-2 text-base text-gray-600 dark:text-gray-400">{priceCard.label}</p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{priceCard.label}</p>
         </div>
-        <span className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-bold text-white">
+        <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
           {priceCard.badge}
         </span>
       </div>
 
       <Button
-        className="mt-6 w-full !rounded-2xl px-6 py-4 text-base font-semibold"
+        className="mt-4 w-full !rounded-xl px-5 py-3 text-sm font-semibold"
         size="3xl"
         onClick={onPay}
         isLoading={isSubmitting}

@@ -10,8 +10,8 @@ export default function OnboardingJoinFlowLayout({
   const stepTwoActive = step >= 2;
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="mx-auto w-full max-w-lg">
+    <div className="min-h-screen px-4 py-6">
+      <div className="mx-auto w-full max-w-md">
         {showStepDots ? (
           <div className="mb-4 flex items-center justify-center gap-2">
             <span
@@ -34,7 +34,7 @@ export default function OnboardingJoinFlowLayout({
 
         <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
           <div className="h-1 bg-gradient-to-r from-emerald-500 via-lime-400 to-amber-400" />
-          <div className="p-6 md:p-8">{children}</div>
+          <div className="p-5 md:p-6">{children}</div>
         </div>
       </div>
     </div>
