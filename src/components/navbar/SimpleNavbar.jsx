@@ -12,6 +12,12 @@ import Toolbar from '@mui/material/Toolbar';
 const SimpleNavbar = () => {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isOnboardingPaymentSuccess = pathname === '/payment/success';
+  const isOnboardingQuiz =
+    pathname?.startsWith('/onboarding') ||
+    pathname?.startsWith('/payment/onboarding') ||
+    pathname?.startsWith('/join/');
+  const isLargeLogo = isOnboardingPaymentSuccess || isOnboardingQuiz;
 
   const handleDrawerToggle = () => {
     setMobileOpen(prevState => !prevState);
@@ -19,18 +25,43 @@ const SimpleNavbar = () => {
 
   return (
     <div>
-      <AppBar component="nav">
-        <Toolbar className="w-full h-full bg-white dark:bg-boxdark flex justify-center">
-          <IconButton edge="start" onClick={handleDrawerToggle} className="mr-3 sm:!hidden">
-            <MdMenu className="text-bodydark dark:text-white" />
-          </IconButton>
-          {/* Logo */}
-          <Link href="/">
+      <AppBar
+        component="nav"
+        elevation={0}
+        sx={{
+          backgroundColor: isOnboardingPaymentSuccess ? '#f6fbf9' : undefined,
+          backgroundImage: isOnboardingPaymentSuccess ? 'none' : undefined,
+        }}
+      >
+        <Toolbar
+          className={`relative w-full h-full flex justify-center ${
+            isOnboardingPaymentSuccess
+              ? 'bg-[#f6fbf9] !pt-4 dark:bg-gray-950'
+              : 'bg-white dark:bg-boxdark'
+          }`}
+        >
+          {!isOnboardingPaymentSuccess ? (
+            <IconButton
+              edge="start"
+              onClick={handleDrawerToggle}
+              className="absolute left-2 sm:!hidden"
+            >
+              <MdMenu className="text-bodydark dark:text-white" />
+            </IconButton>
+          ) : null}
+          <Link
+            href="/"
+            className={isLargeLogo ? 'mt-2 sm:mt-4' : undefined}
+          >
             <Image
-              width={176}
-              height={32}
+              width={isLargeLogo ? 220 : 176}
+              height={isLargeLogo ? 40 : 32}
               src={'/images/logo/logo.png'}
-              className="hidden sm:block"
+              className={
+                isLargeLogo
+                  ? 'h-12 w-auto sm:h-16'
+                  : 'h-7 w-auto sm:h-8'
+              }
               alt="Logo"
               priority
               quality={95}
@@ -51,53 +82,41 @@ const SimpleNavbar = () => {
           </div> */}
         </Toolbar>
       </AppBar>
-      <nav>
-        <Drawer
-          container={document.body}
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          PaperProps={{
-            className: 'bg-white dark:bg-boxdark p-3',
-          }}
-          className="sm:!hidden"
-          sx={{
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 300 },
-          }}
-        >
-          <div onClick={handleDrawerToggle} className="flex flex-col items-center gap-3">
-            <Link href="/">
-              <Image
-                width={176}
-                height={32}
-                src={'/images/logo/logo.png'}
-                className="my-3"
-                alt="Logo"
-                priority
-                quality={95}
-              />
-            </Link>
-            <br />
-            {/* <div className="w-full flex flex-col items-center text-center">
-              {NAVBAR.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`w-full p-3 hover:bg-primary/5 ${
-                    item.isActive(pathname) ? 'bg-primary/20 hover:bg-primary/20' : ''
-                  }`}
-                  inlist
-                >
-                  <p className="text-body dark:text-white">{item.label}</p>
-                </Link>
-              ))}
-            </div> */}
-          </div>
-        </Drawer>
-      </nav>
+      {!isOnboardingPaymentSuccess ? (
+        <nav>
+          <Drawer
+            container={document.body}
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true,
+            }}
+            PaperProps={{
+              className: 'bg-white dark:bg-boxdark p-3',
+            }}
+            className="sm:!hidden"
+            sx={{
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 300 },
+            }}
+          >
+            <div onClick={handleDrawerToggle} className="flex flex-col items-center gap-3">
+              <Link href="/">
+                <Image
+                  width={176}
+                  height={32}
+                  src={'/images/logo/logo.png'}
+                  className="my-3"
+                  alt="Logo"
+                  priority
+                  quality={95}
+                />
+              </Link>
+              <br />
+            </div>
+          </Drawer>
+        </nav>
+      ) : null}
     </div>
   );
 };

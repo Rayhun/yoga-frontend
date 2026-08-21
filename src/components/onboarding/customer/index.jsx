@@ -1,222 +1,972 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
-import { toast } from 'react-toastify';
-import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import PageLoader from '@/components/common/loader/PageLoader';
-import OnboardingQuizQuestion from './OnboardingQuizQuestion';
-import { getQuizesList, submitQuiz } from '@/services/private/onboarding/quiz';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import Button from '@/components/common/Button';
+import { extractApiErrorMessage, toastApiError } from '@/utils/helpers';
 import queryKeys from '@/utils/query-keys';
-import { toastApiError } from '@/utils/helpers';
+import {
+  getOnboardingV2FirstQuestion,
+  submitOnboardingV2Answer,
+  getOnboardHomeCoach,
+  saveOnboardHomeCoach,
+} from '@/services/private/onboarding/quiz-v2';
+import {
+  getPublicOnboardingFirstQuestion,
+  submitPublicOnboardingAnswer,
+  getPublicOnboardHomeCoach,
+  savePublicOnboardHomeCoach,
+  completePublicOnboardingSignup,
+  createPublicOnboardingCheckout,
+  getPublicOnboardingJoinFlowContent,
+} from '@/services/public/onboarding/quiz-v2';
+import { getGuestSessionId, setGuestSessionId, clearGuestSessionId, setOnboardingCheckoutClientSecret } from '@/utils/onboarding-guest-session';
+import PublicOnboardingSignupForm from './PublicOnboardingSignupForm';
+import OnboardingJoinDetailsStep from './OnboardingJoinDetailsStep';
+import OnboardingJoinPaymentStep from './OnboardingJoinPaymentStep';
+import Cookies from 'js-cookie';
+import HomeCoachOnboardingStep from './HomeCoachOnboardingStep';
+import OnboardingWelcomeSuccess from './OnboardingWelcomeSuccess';
+import {
+  isHomeCoachPending,
+  markHomeCoachPending,
+  resolveOnboardHomeCoachUrl,
+} from '@/utils/onboarding-home-coach';
+import { API_V2_WEB_CUSTOMER_BASE_URL } from '@/utils/config';
+import useAuthContext from '@/hooks/useAuthContext';
 
-const CustomerOnboarding = () => {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const {
-    isLoading: isLoadingOnboardingQuiz,
-    data: onboardingQuizResponse,
-    failureReason: onboardingQuizFailureReason,
-    isSuccess: isOnboardingQuizSuccess,
-  } = useQuery({
-    queryFn: getQuizesList,
-    queryKey: [queryKeys.onboardingQuiz],
-  });
-  const { mutateAsync: submitOnboardingQuiz } = useMutation({
-    mutationFn: submitQuiz,
-  });
+function splitFullName(fullName) {
+  const trimmed = (fullName || '').trim();
+  if (!trimmed) return { firstName: '', lastName: '' };
+  const parts = trimmed.split(/\s+/);
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ') || '',
+  };
+}
 
-  useHandleApiResponse(onboardingQuizFailureReason, isOnboardingQuizSuccess);
+function cloneQuestion(question) {
+  try {
+    return structuredClone(question);
+  } catch {
+    return JSON.parse(JSON.stringify(question));
+  }
+}
 
-  const quizQuestions = useMemo(
-    () => onboardingQuizResponse?.data?.onboarding_get?.quiz || onboardingQuizResponse?.data || [],
-    [onboardingQuizResponse]
-  );
-  const initialValues = useMemo(
-    () => quizQuestions.reduce((acc, item) => ({ ...acc, [item.id]: '' }), {}),
-    [quizQuestions]
-  );
-  const validationSchema = useMemo(
-    () =>
-      Yup.object().shape({
-        ...quizQuestions.reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item.required ? Yup.string().required('Required') : Yup.string(),
-          }),
-          {}
-        ),
-      }),
-    [quizQuestions]
-  );
+/** Cycles: Typing. → Typing.. → Typing... → repeat (same rhythm as chat apps). */
+function TypingIndicator() {
+  const [step, setStep] = useState(0);
 
-  const goToPreviousQuestion = useCallback(() => setSelectedQuestionIndex(prevState => prevState - 1), []);
-  const goToNextQuestion = useCallback(() => setSelectedQuestionIndex(prevState => prevState + 1), []);
-
-  // Reset selectedQuestionIndex if it's out of bounds
   useEffect(() => {
-    if (quizQuestions.length > 0 && selectedQuestionIndex >= quizQuestions.length) {
-      setSelectedQuestionIndex(0);
-    }
-  }, [quizQuestions.length, selectedQuestionIndex]);
+    const id = setInterval(() => {
+      setStep(s => (s + 1) % 3);
+    }, 450);
+    return () => clearInterval(id);
+  }, []);
 
-  const handleSubmitOnboardingQuiz = async values => {
+  const suffix = step === 0 ? '.' : step === 1 ? '..' : '...';
+
+  return (
+    <div className="flex justify-start py-1">
+      <div className="typing-pill inline-flex min-w-[5.75rem] items-center rounded-full bg-gray-200 px-3.5 py-2 shadow-sm dark:bg-gray-600">
+        <span
+          key={step}
+          className="typing-cycle-text text-sm font-medium tracking-tight text-gray-700 dark:text-gray-100"
+        >
+          Typing{suffix}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const CustomerOnboarding = ({ pageSlug, isPublic = false } = {}) => {
+  const router = useRouter();
+  const { user } = useAuthContext();
+  const [guestSessionId, setGuestSessionIdState] = useState(() =>
+    isPublic && pageSlug ? getGuestSessionId(pageSlug) : null
+  );
+  const [bootstrapHydrated, setBootstrapHydrated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [flowPhase, setFlowPhase] = useState('quiz');
+  const [joinFormData, setJoinFormData] = useState({ full_name: '', email: '' });
+  const [joinFlowContent, setJoinFlowContent] = useState(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [isCompletingSignup, setIsCompletingSignup] = useState(false);
+  const [homeCoachFetchUrl, setHomeCoachFetchUrl] = useState(null);
+  const [homeCoachData, setHomeCoachData] = useState(null);
+  const [welcomeData, setWelcomeData] = useState(null);
+  const [homeCoachProgress, setHomeCoachProgress] = useState({ stepIndex: 0, totalSteps: 0 });
+  const [homeCoachQuizSnapshot, setHomeCoachQuizSnapshot] = useState(null);
+  const [skippedHomeCoach, setSkippedHomeCoach] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
+  const [revealPhase, setRevealPhase] = useState('content');
+  const revealTimerRef = useRef(null);
+  const questionKeyRef = useRef(null);
+  const questionCacheRef = useRef(new Map());
+  const chatScrollRef = useRef(null);
+
+  const resumeHomeCoachIfNeeded = useCallback(async () => {
+    if (isPublic) return false;
+    if (!user?.profile?.on_boarding_quiz) return false;
+    if (!isHomeCoachPending()) return false;
+
+    const coachUrl = resolveOnboardHomeCoachUrl(
+      `${API_V2_WEB_CUSTOMER_BASE_URL}/onboard/home/coach/`
+    );
+    setHomeCoachFetchUrl(coachUrl);
+    setFlowPhase('home-coach');
+    return true;
+  }, [user?.profile?.on_boarding_quiz, isPublic]);
+
+  const persistGuestSessionId = useCallback(
+    sessionId => {
+      if (!isPublic || !pageSlug || !sessionId) return;
+      setGuestSessionIdState(sessionId);
+      setGuestSessionId(pageSlug, sessionId);
+    },
+    [isPublic, pageSlug]
+  );
+
+  useEffect(() => {
+    if (isPublic || !user) return;
+    resumeHomeCoachIfNeeded().then(resumed => {
+      if (resumed) {
+        setBootstrapHydrated(true);
+      }
+    });
+  }, [user, resumeHomeCoachIfNeeded, isPublic]);
+
+  const scrollChatToBottom = useCallback((behavior = 'smooth') => {
+    const el = chatScrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior });
+      });
+    });
+  }, []);
+
+  const lockOptionsDuringTransition = useCallback(() => {
+    if (revealTimerRef.current) {
+      clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    setRevealPhase('typing');
+  }, []);
+
+  const currentAssistant = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      if (messages[i].type === 'assistant') return messages[i];
+    }
+    return null;
+  }, [messages]);
+
+  const currentQuestion = useMemo(() => {
+    const q = currentAssistant?.question;
+    if (!q?.sets_key) return null;
+    return questionCacheRef.current.get(q.sets_key) || q;
+  }, [currentAssistant]);
+
+  useLayoutEffect(() => {
+    scrollChatToBottom(revealPhase === 'typing' ? 'auto' : 'smooth');
+  }, [messages, revealPhase, isSubmitting, currentQuestion?.sets_key, scrollChatToBottom]);
+
+  const startRevealForQuestionKey = useCallback(questionKey => {
+    if (!questionKey) {
+      if (revealTimerRef.current) {
+        clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      questionKeyRef.current = null;
+      setRevealPhase('content');
+      return;
+    }
+    // Same key: keep existing timer/phase (prevents useEffect from wiping timer after Back).
+    if (questionKeyRef.current === questionKey) {
+      return;
+    }
+    if (revealTimerRef.current) {
+      clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    questionKeyRef.current = questionKey;
+    setRevealPhase('typing');
+    revealTimerRef.current = setTimeout(() => {
+      setRevealPhase('content');
+      revealTimerRef.current = null;
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const key = currentQuestion?.sets_key;
+    if (key) startRevealForQuestionKey(key);
+  }, [currentQuestion?.sets_key, startRevealForQuestionKey]);
+
+  const hydrateMessagesFromCache = useCallback(msgs => {
+    return msgs.map(m => {
+      if (m.type !== 'assistant') return m;
+      const key = m.question?.sets_key;
+      const cached = key ? questionCacheRef.current.get(key) : null;
+      return {
+        ...m,
+        question: cached ? cloneQuestion(cached) : cloneQuestion(m.question),
+      };
+    });
+  }, []);
+
+  const {
+    data: firstQuestionResponse,
+    isPending: firstQuestionPending,
+    isFetching: firstQuestionFetching,
+    isError: firstQuestionError,
+    error: firstQuestionErrorDetail,
+    refetch: refetchFirstQuestion,
+  } = useQuery({
+    queryKey: [
+      queryKeys.onboardingQuizV2,
+      'first-question',
+      isPublic,
+      pageSlug,
+    ],
+    queryFn: () =>
+      isPublic
+        ? getPublicOnboardingFirstQuestion({
+            slug: pageSlug,
+            guestSessionId: getGuestSessionId(pageSlug),
+          })
+        : getOnboardingV2FirstQuestion(),
+    enabled: isPublic ? Boolean(pageSlug) : true,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 15,
+    retry: 1,
+  });
+
+  useLayoutEffect(() => {
+    if (flowPhase !== 'quiz' || bootstrapHydrated) return;
+    if (!firstQuestionResponse) return;
+
+    const data = firstQuestionResponse?.data?.data || {};
+    if (data.guest_session_id) {
+      persistGuestSessionId(data.guest_session_id);
+    }
+    const question = data.question;
+    questionKeyRef.current = null;
+    if (question) {
+      const forCache = cloneQuestion(question);
+      const forMessage = cloneQuestion(question);
+      questionCacheRef.current.set(forCache.sets_key, forCache);
+      const totalQuestions = Number(data.total_questions) || 0;
+      const questionIndex = Number(data.current_question_index) || 1;
+      setMessages([
+        {
+          type: 'assistant',
+          question: forMessage,
+          isLast: Boolean(data.is_last),
+          totalQuestions,
+          questionIndex,
+        },
+      ]);
+      setSelectedOptionId(null);
+    } else {
+      setMessages([]);
+    }
+    setBootstrapHydrated(true);
+  }, [firstQuestionResponse, bootstrapHydrated, flowPhase, persistGuestSessionId]);
+
+  const {
+    data: homeCoachResponse,
+    isLoading: isLoadingHomeCoach,
+    isError: isHomeCoachError,
+    refetch: refetchHomeCoach,
+  } = useQuery({
+    queryKey: [queryKeys.onboardingHomeCoach, homeCoachFetchUrl, isPublic],
+    queryFn: () =>
+      isPublic || homeCoachFetchUrl === 'public-home-coach'
+        ? getPublicOnboardHomeCoach()
+        : getOnboardHomeCoach(homeCoachFetchUrl),
+    enabled: flowPhase === 'home-coach' && Boolean(homeCoachFetchUrl) && !homeCoachData,
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    const payload = homeCoachResponse?.data?.data;
+    if (payload) setHomeCoachData(payload);
+  }, [homeCoachResponse]);
+
+  const isJoinFlowPhase = flowPhase === 'join-details' || flowPhase === 'join-payment';
+
+  const {
+    data: joinFlowContentResponse,
+    isPending: isJoinFlowContentPending,
+    isError: isJoinFlowContentError,
+    refetch: refetchJoinFlowContent,
+  } = useQuery({
+    queryKey: [queryKeys.onboardingJoinFlowContent],
+    queryFn: () => getPublicOnboardingJoinFlowContent(),
+    enabled: isPublic && isJoinFlowPhase && !joinFlowContent,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+
+  useEffect(() => {
+    if (!joinFlowContent && joinFlowContentResponse?.data?.data) {
+      setJoinFlowContent(joinFlowContentResponse.data.data);
+    }
+  }, [joinFlowContentResponse, joinFlowContent]);
+
+  const showBootstrapLoader =
+    flowPhase === 'quiz' &&
+    !bootstrapHydrated &&
+    (!firstQuestionError || firstQuestionFetching) &&
+    (firstQuestionPending || firstQuestionFetching || Boolean(firstQuestionResponse));
+
+  const retryBootstrap = useCallback(async () => {
+    setBootstrapHydrated(false);
+    setMessages([]);
+    questionCacheRef.current = new Map();
+    questionKeyRef.current = null;
+    await refetchFirstQuestion();
+  }, [refetchFirstQuestion]);
+
+  const { mutateAsync: submitAnswer } = useMutation({
+    mutationFn: isPublic ? submitPublicOnboardingAnswer : submitOnboardingV2Answer,
+  });
+
+  const { mutateAsync: saveHomeCoach, isPending: isSavingHomeCoach } = useMutation({
+    mutationFn: ({ submitUrl, expertId, guestSession }) => {
+      if (isPublic) {
+        return savePublicOnboardHomeCoach({
+          guest_session_id: guestSession,
+          selected_expert_id: expertId,
+        });
+      }
+      return saveOnboardHomeCoach(submitUrl, { selected_expert_id: expertId });
+    },
+  });
+
+  const beginHomeCoachStep = useCallback((homeCoachUrl, progressMeta, quizSnapshot) => {
+    if (!isPublic) {
+      markHomeCoachPending();
+    }
+    setSkippedHomeCoach(false);
+    setHomeCoachFetchUrl(
+      isPublic ? 'public-home-coach' : resolveOnboardHomeCoachUrl(homeCoachUrl)
+    );
+    setHomeCoachData(null);
+    setHomeCoachProgress({
+      stepIndex: Number(progressMeta?.current_question_index) || 0,
+      totalSteps: Number(progressMeta?.total_questions) || 0,
+    });
+    setHomeCoachQuizSnapshot(quizSnapshot || null);
+    setFlowPhase('home-coach');
+  }, [isPublic]);
+
+  const selectedOption = useMemo(
+    () => currentQuestion?.variant?.options?.find(option => option.id === selectedOptionId) || null,
+    [currentQuestion, selectedOptionId]
+  );
+
+  const progressPercent = useMemo(() => {
+    const total = Number(currentAssistant?.totalQuestions) || 0;
+    const idx = Number(currentAssistant?.questionIndex) || 0;
+    if (total <= 0 || idx <= 0) return 0;
+    return Math.min(100, (idx / total) * 100);
+  }, [currentAssistant?.totalQuestions, currentAssistant?.questionIndex]);
+
+  const handleContinue = async () => {
+    if (!currentQuestion || !selectedOption) return;
+
+    const submittedOption = selectedOption;
+    const submittedSetsKey = currentQuestion.sets_key;
+
     try {
       setIsSubmitting(true);
-      const answers = Object.entries(values).map(([questionId, selectedOptionText]) => {
-        // Find the question to get the selected option details
-        const question = quizQuestions.find(q => q.id.toString() === questionId);
-        const selectedOption = question?.options?.find(opt => opt.text === selectedOptionText);
-        
-        return {
-          id: questionId,
-          option_text: selectedOptionText,
-          option_id: selectedOption?.id || null,
-        };
+      setSelectedOptionId(null);
+      lockOptionsDuringTransition();
+
+      const userBubble = {
+        type: 'user',
+        optionId: submittedOption.id,
+        label: submittedOption.label,
+        subText: submittedOption.sub_label || '',
+      };
+
+      const response = await submitAnswer({
+        payload: {
+          sets_key: submittedSetsKey,
+          option_id: submittedOption.id,
+          ...(isPublic
+            ? {
+                page_slug: pageSlug,
+                guest_session_id: guestSessionId,
+              }
+            : pageSlug
+              ? { page_slug: pageSlug }
+              : {}),
+        },
       });
 
-      await submitOnboardingQuiz({ payload: { answers } });
+      const data = response?.data?.data || {};
+      if (data.guest_session_id) {
+        persistGuestSessionId(data.guest_session_id);
+      }
 
-      // Refresh user data to update on_boarding_quiz status
-      await queryClient.invalidateQueries([queryKeys.loggedInUser]);
-      
-      // Refetch user data to ensure it's updated
-      await queryClient.refetchQueries([queryKeys.loggedInUser]);
+      if (data.skip_home_coach) {
+        const quizSnapshot = {
+          messages: [...messages, userBubble],
+          selectedOptionId: submittedOption.id,
+        };
+        setHomeCoachQuizSnapshot(quizSnapshot);
+        setSkippedHomeCoach(true);
+        setMessages(prev => [...prev, userBubble]);
+        if (data.requires_join_flow) {
+          if (data.join_flow_content) {
+            setJoinFlowContent(data.join_flow_content);
+          }
+          setFlowPhase('join-details');
+          return;
+        }
+        if (data.page_id === 'welcome_success_screen') {
+          setWelcomeData(data);
+          setFlowPhase('welcome');
+          return;
+        }
+      }
 
-      toast.success('🎉 Welcome! Your onboarding is complete');
-      router.push('/portal');
+      if (data.is_home_coach) {
+        setSkippedHomeCoach(false);
+        const quizSnapshot = { messages: [...messages], selectedOptionId: submittedOption.id };
+        setMessages(prev => [...prev, userBubble]);
+        beginHomeCoachStep(
+          isPublic ? 'public-home-coach' : data.home_coach_url,
+          data,
+          quizSnapshot
+        );
+        return;
+      }
+
+      if (!data.question) {
+        const quizSnapshot = { messages: [...messages], selectedOptionId: submittedOption.id };
+        setMessages(prev => [...prev, userBubble]);
+        beginHomeCoachStep(
+          isPublic
+            ? 'public-home-coach'
+            : `${API_V2_WEB_CUSTOMER_BASE_URL}/onboard/home/coach/`,
+          data,
+          quizSnapshot
+        );
+        return;
+      }
+
+      const forCache = cloneQuestion(data.question);
+      const forMessage = cloneQuestion(data.question);
+      questionCacheRef.current.set(forCache.sets_key, forCache);
+      questionKeyRef.current = null;
+
+      const totalQuestions = Number(data.total_questions) || 0;
+      const questionIndex = Number(data.current_question_index) || 1;
+      const nextAssistant = {
+        type: 'assistant',
+        question: forMessage,
+        isLast: Boolean(data.is_last),
+        totalQuestions,
+        questionIndex,
+      };
+
+      setMessages(prev => [...prev, userBubble, nextAssistant]);
     } catch (error) {
+      questionKeyRef.current = submittedSetsKey;
+      setRevealPhase('content');
+      setSelectedOptionId(submittedOption.id);
       toastApiError(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const hasPreviousQuestion = selectedQuestionIndex > 0;
-  const hasNextQuestion = selectedQuestionIndex < quizQuestions.length - 1;
+  const handleBack = () => {
+    if (messages.length < 3) return;
+    const last = messages[messages.length - 1];
+    if (last.type !== 'assistant') return;
 
-  // Modern loading state
-  if (isLoadingOnboardingQuiz) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-green-200 dark:border-gray-600 rounded-full animate-pulse"></div>
-            <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-green-600 rounded-full animate-spin"></div>
+    const withoutCurrentAssistant = messages.slice(0, -1);
+    const lastUser = withoutCurrentAssistant[withoutCurrentAssistant.length - 1];
+    if (!lastUser || lastUser.type !== 'user') return;
+
+    const priorMessages = withoutCurrentAssistant.slice(0, -1);
+    const restored = hydrateMessagesFromCache(priorMessages);
+
+    setMessages(restored);
+    setSelectedOptionId(lastUser.optionId);
+    questionKeyRef.current = null;
+  };
+
+  const canGoBack = flowPhase === 'quiz' && messages.length >= 3 && messages[messages.length - 1]?.type === 'assistant';
+
+  const handleHomeCoachBack = () => {
+    if (homeCoachQuizSnapshot) {
+      setMessages(homeCoachQuizSnapshot.messages);
+      setSelectedOptionId(homeCoachQuizSnapshot.selectedOptionId);
+      questionKeyRef.current = null;
+    }
+    setFlowPhase('quiz');
+  };
+
+  const handleHomeCoachSubmit = async expertId => {
+    const submitUrl = homeCoachData?.url;
+    if (!submitUrl || !expertId) return;
+
+    try {
+      const response = await saveHomeCoach({
+        submitUrl,
+        expertId,
+        guestSession: guestSessionId,
+      });
+      const payload = response?.data?.data;
+      if (payload) {
+        if (isPublic && payload.requires_join_flow) {
+          if (payload.join_flow_content) {
+            setJoinFlowContent(payload.join_flow_content);
+          }
+          if (payload.guest_session_id) {
+            persistGuestSessionId(payload.guest_session_id);
+          }
+          setFlowPhase('join-details');
+          return;
+        }
+        if (
+          isPublic &&
+          payload.requires_payment &&
+          payload.checkout_session_client_secret
+        ) {
+          setOnboardingCheckoutClientSecret(
+            payload.checkout_session_client_secret,
+            pageSlug,
+            payload.guest_session_id || guestSessionId
+          );
+          router.push('/payment/onboarding/checkout');
+          return;
+        }
+        if (isPublic && payload.requires_signup) {
+          setFlowPhase('signup');
+          return;
+        }
+        setWelcomeData(payload);
+        setFlowPhase('welcome');
+      }
+    } catch (error) {
+      toastApiError(error);
+    }
+  };
+
+  const handleJoinDetailsContinue = values => {
+    setJoinFormData({
+      full_name: values.full_name.trim(),
+      email: values.email.trim().toLowerCase(),
+    });
+    setFlowPhase('join-payment');
+  };
+
+  const handleJoinPaymentBack = () => {
+    setFlowPhase('join-details');
+  };
+
+  const handleJoinDetailsBack = () => {
+    if (skippedHomeCoach && homeCoachQuizSnapshot) {
+      setMessages(homeCoachQuizSnapshot.messages);
+      setSelectedOptionId(homeCoachQuizSnapshot.selectedOptionId);
+      questionKeyRef.current = null;
+      setFlowPhase('quiz');
+      return;
+    }
+    setFlowPhase('home-coach');
+  };
+
+  const handleJoinPayment = async () => {
+    if (!guestSessionId) {
+      toastApiError(new Error('Your onboarding session expired. Please refresh and try again.'));
+      return;
+    }
+
+    const { firstName, lastName } = splitFullName(joinFormData.full_name);
+
+    try {
+      setIsCreatingCheckout(true);
+      const response = await createPublicOnboardingCheckout({
+        guest_session_id: guestSessionId,
+        email: joinFormData.email,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: joinFormData.full_name,
+      });
+
+      const payload = response?.data?.data;
+      if (payload?.checkout_session_client_secret) {
+        setOnboardingCheckoutClientSecret(
+          payload.checkout_session_client_secret,
+          pageSlug,
+          payload.guest_session_id || guestSessionId
+        );
+        router.push('/payment/onboarding/checkout');
+      }
+    } catch (error) {
+      toastApiError(error);
+    } finally {
+      setIsCreatingCheckout(false);
+    }
+  };
+
+  const handlePublicSignup = async values => {
+    if (!guestSessionId) {
+      toastApiError(new Error('Your onboarding session expired. Please refresh and try again.'));
+      return;
+    }
+
+    try {
+      setIsCompletingSignup(true);
+      const response = await completePublicOnboardingSignup({
+        payload: {
+          guest_session_id: guestSessionId,
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+        },
+      });
+
+      const data = response?.data?.data || {};
+      const token = data.token;
+      if (token) {
+        Cookies.set('token', token);
+      }
+
+      if (pageSlug) {
+        clearGuestSessionId(pageSlug);
+      }
+
+      const welcomePayload = data.welcome_success_screen;
+      if (welcomePayload) {
+        setWelcomeData(welcomePayload);
+        setFlowPhase('welcome');
+      }
+    } catch (error) {
+      toastApiError(error);
+    } finally {
+      setIsCompletingSignup(false);
+    }
+  };
+
+  if ((flowPhase === 'join-details' || flowPhase === 'join-payment') && isPublic) {
+    if (!joinFlowContent && (isJoinFlowContentPending || isJoinFlowContentError)) {
+      if (isJoinFlowContentError) {
+        return (
+          <div className="flex min-h-screen items-center justify-center px-4 py-8">
+            <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900">Could not load join flow</h2>
+              <p className="mt-2 text-sm text-gray-600">Please try again to continue.</p>
+              <Button className="mt-6" onClick={() => refetchJoinFlowContent()}>
+                Retry
+              </Button>
+            </div>
           </div>
-          <p className="mt-6 text-lg font-medium text-gray-600 dark:text-gray-400 animate-pulse">
-            Preparing your personalized quiz...
-          </p>
+        );
+      }
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-200 border-t-green-600" />
+        </div>
+      );
+    }
+
+    if (!joinFlowContent) {
+      return null;
+    }
+  }
+
+  if (flowPhase === 'join-details' && isPublic) {
+    return (
+      <OnboardingJoinDetailsStep
+        content={joinFlowContent}
+        initialValues={joinFormData}
+        onContinue={handleJoinDetailsContinue}
+        onBack={handleJoinDetailsBack}
+        canGoBack={Boolean(homeCoachQuizSnapshot)}
+      />
+    );
+  }
+
+  if (flowPhase === 'join-payment' && isPublic) {
+    const { firstName } = splitFullName(joinFormData.full_name);
+    return (
+      <OnboardingJoinPaymentStep
+        content={joinFlowContent}
+        firstName={firstName}
+        onBack={handleJoinPaymentBack}
+        onPay={handleJoinPayment}
+        isSubmitting={isCreatingCheckout}
+      />
+    );
+  }
+
+  if (flowPhase === 'signup' && isPublic) {
+    return (
+      <PublicOnboardingSignupForm onSubmit={handlePublicSignup} isSubmitting={isCompletingSignup} />
+    );
+  }
+
+  if (flowPhase === 'welcome' && welcomeData) {
+    return (
+      <OnboardingWelcomeSuccess
+        data={welcomeData}
+        isPublic={isPublic}
+        pageSlug={pageSlug}
+      />
+    );
+  }
+
+  if (flowPhase === 'home-coach') {
+    if (isLoadingHomeCoach && !homeCoachData) {
+      return (
+        <div className="flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-200 border-t-green-600 dark:border-gray-600 dark:border-t-green-400" />
+        </div>
+      );
+    }
+
+    if (isHomeCoachError || !homeCoachData) {
+      return (
+        <div className="flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-900">Could not load coaches</h2>
+            <p className="mt-2 text-sm text-gray-600">Please try again to choose your home coach.</p>
+            <Button className="mt-6" onClick={() => refetchHomeCoach()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <HomeCoachOnboardingStep
+        data={homeCoachData}
+        stepIndex={homeCoachProgress.stepIndex}
+        totalSteps={homeCoachProgress.totalSteps}
+        canGoBack={Boolean(homeCoachQuizSnapshot)}
+        onBack={handleHomeCoachBack}
+        isSubmitting={isSavingHomeCoach}
+        onSubmit={handleHomeCoachSubmit}
+      />
+    );
+  }
+
+  if (firstQuestionError && !firstQuestionFetching && !bootstrapHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center dark:border-red-900/50 dark:bg-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Could not load onboarding</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{extractApiErrorMessage(firstQuestionErrorDetail)}</p>
+          <Button className="mt-6" onClick={() => retryBootstrap()}>
+            Retry
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Enhanced empty state
-  if (!quizQuestions || quizQuestions.length === 0) {
+  if (showBootstrapLoader) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="p-12 max-w-md mx-auto text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-            No Quiz Available
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            We&apos;re currently preparing your personalized onboarding experience. Please check back soon or contact our support team for assistance.
-          </p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 hover:scale-105"
-          >
-            Refresh Page
-          </button>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-200 border-t-green-600 dark:border-gray-600 dark:border-t-green-400" />
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">No onboarding questions found</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Please try again in a moment.</p>
+          <Button className="mt-6" onClick={() => retryBootstrap()}>
+            Retry
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative">
-      {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                </svg>
+    <div className="min-h-screen px-4 py-8">
+      <div className="mx-auto w-full max-w-3xl rounded-3xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-900 md:p-8">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-green-700 dark:bg-green-900/40 dark:text-green-300">
+            <span>{currentQuestion.tag_emoji || '✨'}</span>
+            <span>{currentQuestion.tag_text || 'About you'}</span>
+          </div>
+          {currentAssistant?.totalQuestions > 0 ? (
+            <p className="shrink-0 text-sm font-medium tabular-nums text-gray-600 dark:text-gray-300">
+              ({currentAssistant.questionIndex}/{currentAssistant.totalQuestions})
+            </p>
+          ) : null}
+        </div>
+
+        <div className="mb-5 h-1 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+          <div className="h-1 rounded-full bg-green-500 dark:bg-green-400" style={{ width: `${progressPercent}%` }} />
+        </div>
+
+        <div
+          ref={chatScrollRef}
+          className="max-h-[26vh] space-y-1.5 overflow-y-auto scroll-smooth pr-1 sm:max-h-[28vh]"
+        >
+          {messages.map((item, index) => {
+            const isLastMessage = index === messages.length - 1;
+            const isCurrentAssistant = item.type === 'assistant' && isLastMessage;
+
+            if (item.type === 'user') {
+              return (
+                <div key={`user-${index}-${item.optionId}`} className="fade-in-fast flex justify-end">
+                  <div className="max-w-[85%] rounded-2xl bg-green-600 px-3.5 py-2.5 text-white dark:bg-green-500">
+                    <p className="text-sm font-medium sm:text-base">{item.label}</p>
+                    {item.subText ? <p className="mt-0.5 text-xs opacity-90 sm:text-sm">{item.subText}</p> : null}
+                  </div>
+                </div>
+              );
+            }
+
+            if (isCurrentAssistant && revealPhase === 'typing') {
+              return (
+                <div
+                  key={`typing-${item.question.sets_key}`}
+                  className="flex min-h-[2.75rem] justify-start py-0.5"
+                >
+                  <TypingIndicator />
+                </div>
+              );
+            }
+
+            if (isCurrentAssistant && revealPhase === 'content') {
+              const q =
+                questionCacheRef.current.get(item.question.sets_key) || item.question;
+              return (
+                <div key={`asst-${item.question.sets_key}`} className="question-reveal flex justify-start">
+                  <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    <p className="text-sm font-medium sm:text-base">{q.variant.question_text}</p>
+                  </div>
+                </div>
+              );
+            }
+
+            const q = questionCacheRef.current.get(item.question.sets_key) || item.question;
+            return (
+              <div key={`asst-${index}-${item.question.sets_key}`} className="fade-in-fast flex justify-start">
+                <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                  <p className="text-base font-medium">{q.variant.question_text}</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  Onboarding Quiz
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Question {selectedQuestionIndex + 1} of {quizQuestions.length}
-                </p>
+            );
+          })}
+        </div>
+
+        <div
+          className={`mt-3 transition-opacity duration-500 ease-out ${
+            revealPhase === 'typing' || isSubmitting
+              ? 'pointer-events-none opacity-0'
+              : 'opacity-100'
+          }`}
+        >
+          {currentQuestion?.variant?.sub_text ? (
+            <div className="fade-in-fast mb-3 flex justify-start">
+              <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                {currentQuestion.variant.sub_text}
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {Math.round(((selectedQuestionIndex + 1) / quizQuestions.length) * 100)}% Complete
-              </div>
-            </div>
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {currentQuestion.variant.options?.map(option => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setSelectedOptionId(option.id)}
+                disabled={revealPhase === 'typing' || isSubmitting}
+                className={`fade-in-fast rounded-2xl border px-4 py-3 text-left transition-all ${
+                  selectedOptionId === option.id
+                    ? 'border-green-500 bg-green-50 text-gray-900 dark:border-green-400 dark:bg-green-900/20 dark:text-white'
+                    : 'border-gray-200 bg-white text-gray-900 hover:border-green-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-lg dark:bg-gray-800">
+                    {option.emoji || '•'}
+                  </div>
+                  <div>
+                    <p className="font-semibold">{option.label}</p>
+                    {option.sub_label ? (
+                      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-300">{option.sub_label}</p>
+                    ) : null}
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-green-600 to-emerald-600 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${((selectedQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
-            />
-          </div>
+        </div>
+
+        <div className={`mt-6 flex items-center gap-3 ${canGoBack ? 'justify-between' : 'justify-end'}`}>
+          {canGoBack ? (
+            <Button type="button" variant="secondary" onClick={handleBack} disabled={isSubmitting}>
+              Back
+            </Button>
+          ) : null}
+          <Button
+            onClick={handleContinue}
+            disabled={!selectedOptionId || isSubmitting || revealPhase === 'typing'}
+            isLoading={isSubmitting}
+          >
+            Continue
+          </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="pt-18">
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmitOnboardingQuiz}
-          enableReinitialize
-        >
-          {({ isSubmitting: formikSubmitting }) => (
-            <div className="relative">
-              {(isSubmitting || formikSubmitting) && (
-                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl text-center">
-                    <div className="w-16 h-16 border-4 border-green-200 dark:border-gray-600 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                      Submitting Your Responses
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Please wait while we process your quiz...
-                    </p>
-                  </div>
-                </div>
-              )}
-              
-              <OnboardingQuizQuestion
-                question={quizQuestions[selectedQuestionIndex]}
-                hasPreviousQuestion={hasPreviousQuestion}
-                hasNextQuestion={hasNextQuestion}
-                onBack={goToPreviousQuestion}
-                onNext={goToNextQuestion}
-              />
-            </div>
-          )}
-        </Formik>
-      </div>
+      <style jsx>{`
+        .fade-in-fast {
+          animation: quickFade 0.5s ease forwards;
+        }
+        .question-reveal {
+          animation: quickFade 0.5s ease forwards;
+        }
+        @keyframes quickFade {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .typing-pill {
+          will-change: opacity;
+        }
+        .typing-cycle-text {
+          display: inline-block;
+          animation: typingStepFade 0.22s ease-out both;
+        }
+        @keyframes typingStepFade {
+          from {
+            opacity: 0.35;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -10,13 +10,21 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import { FiType, FiFileText, FiDollarSign } from 'react-icons/fi';
 import {
   AccessSettingField,
   VisibilitySettingField,
-  CategoriesField,
-  TagsField,
+  CatalogTagsField,
 } from '@/components/lms/general/fields';
+import {
+  CONTENT_CATALOG_FIELDS,
+  CONTENT_CATALOG_FIELD_NAMESPACES,
+  mapContentFieldTagIds,
+  mapContentCultureExperienceIds,
+  seedCatalogRowsFromTags,
+  seedCultureExperienceRows,
+} from '@/utils/contentCatalogTags';
 import Button from '@/components/common/Button';
 import ProgramFormContentOptions from './ProgramFormContentOptions';
 import { addNewProgram, updateExistingProgram } from '@/services/private/lms/program';
@@ -51,19 +59,22 @@ const ProgramForm = ({ selected }) => {
     // Map "open" from backend to "free" in the form
     access_setting: selected?.access_setting === ACCESS_SETTING.open ? ACCESS_SETTING.free : (selected?.access_setting || ''),
     visibility_setting: selected?.visibility_setting || '',
-    categories: selected?.categories.map(i => i.id) || [],
-    tags: selected?.tags.map(i => i.id) || [],
+    categories: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories),
+    focus_areas: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas),
+    culture_experience: mapContentCultureExperienceIds(selected),
+    languages: mapContentFieldTagIds(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages),
     linked_program: selected?.linked_program || '',
-    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '', order: '' }]).map(
-      ({ content_id, content_type, drip, order, order_by, title }) => ({
+    program_content: (selected?.program || [{ content_id: '', content_type: '', drip: '' }])
+      .slice()
+      .sort((a, b) => (a.order_by ?? a.order ?? 0) - (b.order_by ?? b.order ?? 0))
+      .map(({ content_id, content_type, drip, title }) => ({
         content_id,
         content_type,
         drip,
-        order: order_by || order || '', // Prioritize order_by from API response (edit mode)
-        title: title || '', // Preserve the title from API response for display
-      })
-    ),
+        title: title || '',
+      })),
     price: selected?.price || 0,
+    relief_index: Boolean(selected?.relief_index),
   };
 
   const validationSchema = Yup.object({
@@ -83,23 +94,24 @@ const ProgramForm = ({ selected }) => {
     categories: Yup.array()
       .of(Yup.number().required('Required!'))
       .min(1, 'At least one category is required'),
-    tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least 1 tag is required'),
+    focus_areas: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 focus & approach is required'),
+    culture_experience: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least one culture experience is required'),
+    languages: Yup.array()
+      .of(Yup.number().required('Required!'))
+      .min(1, 'At least 1 language is required'),
     program_content: Yup.array()
       .of(
         Yup.object({
           content_id: Yup.string().trim().required('Required!'),
           content_type: Yup.string().trim().required('Required!'),
           drip: Yup.number('Must be a number').min(0, 'Must be a non-negative number').required('Required!'),
-          order: Yup.number('Must be a number').min(1, 'Must be a positive number').required('Required!'),
         })
       )
-      .min(1, 'At least 1 option is required.')
-      .test('uniqueOrder', 'Order numbers must be unique', function(value) {
-        if (!value) return true;
-        const orders = value.map(item => item.order).filter(order => order !== '');
-        const uniqueOrders = new Set(orders);
-        return orders.length === uniqueOrders.size;
-      }),
+      .min(1, 'At least 1 option is required.'),
     price: Yup.number().when('access_setting', {
       is: ACCESS_SETTING.buy_now,
       then: schema =>
@@ -115,16 +127,10 @@ const ProgramForm = ({ selected }) => {
     try {
       const { file, linked_program, program_content, ...payload } = values;
 
-      // Transform program_content to remove title and change order to order_by
-      const transformedProgramContent = program_content.map(({ title, order, ...content }) => ({
+      payload.program_content = program_content.map(({ title, ...content }, index) => ({
         ...content,
-        order_by: order,
+        order_by: index + 1,
       }));
-
-      payload.program_content = transformedProgramContent;
-      
-      // Debug: Log the transformed payload to confirm order_by is included
-      console.log('Transformed program_content payload:', transformedProgramContent);
 
       // Only include linked_program in payload if it's not empty
       if (linked_program && linked_program !== '') {
@@ -209,21 +215,69 @@ const ProgramForm = ({ selected }) => {
                 <VisibilitySettingField required />
               </div>
             </div>
-            <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
-              <div className="md:w-1/2">
-                <CategoriesField required />
-              </div>
-              <div className="md:w-1/2">
-                <TagsField required />
-              </div>
-            </div>
-            <div className="w-full xl:w-1/2">
-              <FormikSelect
-                name="linked_program"
-                label="Linked Program"
-                placeholder="Select Linked Program"
-                options={programOptions}
+            
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.categories)}
+                name="categories"
+                field={CONTENT_CATALOG_FIELDS.categories.field}
+                label={CONTENT_CATALOG_FIELDS.categories.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.categories.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.categories.triggerPlaceholder}
+                required
               />
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas)}
+                name="focus_areas"
+                field={CONTENT_CATALOG_FIELDS.focus_areas.field}
+                label={CONTENT_CATALOG_FIELDS.focus_areas.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.focus_areas.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.focus_areas.triggerPlaceholder}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCultureExperienceRows(selected)}
+                name="culture_experience"
+                field={CONTENT_CATALOG_FIELDS.culture_experience.field}
+                label={CONTENT_CATALOG_FIELDS.culture_experience.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.culture_experience.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                required
+              />
+              <CatalogTagsField
+                context="program"
+                seedRows={seedCatalogRowsFromTags(selected?.tags, CONTENT_CATALOG_FIELD_NAMESPACES.languages)}
+                name="languages"
+                field={CONTENT_CATALOG_FIELDS.languages.field}
+                label={CONTENT_CATALOG_FIELDS.languages.label}
+                modalTitle={CONTENT_CATALOG_FIELDS.languages.modalTitle}
+                triggerPlaceholder={CONTENT_CATALOG_FIELDS.languages.triggerPlaceholder}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:items-start">
+              <div className="min-w-0">
+                <FormikSwitch
+                  name="relief_index"
+                  variant="card"
+                  elevateCardLabel
+                  label="Relief index"
+                  description="Turn on to surface this program in the Relief index."
+                />
+              </div>
+              <div className="min-w-0">
+                <FormikSelect
+                  name="linked_program"
+                  label="Linked Program"
+                  placeholder="Select Linked Program"
+                  options={programOptions}
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-x-6 gap-y-3 md:flex-row">
               <div className="w-full md:w-1/2">

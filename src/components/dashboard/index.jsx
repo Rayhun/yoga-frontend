@@ -14,7 +14,7 @@ const ClientPortalPage = () => {
   const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
 
   useEffect(() => {
-    // Redirect teachers to dashboard if all conditions are met
+    // Redirect teachers to the new home dashboard once onboarding is complete
     if (userRole === 'Teacher' && isProfileComplete && hasEventOrConsult && stripeOnboarded) {
       router.replace('/portal/teacher/dashboard');
     }

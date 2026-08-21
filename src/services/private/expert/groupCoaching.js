@@ -18,26 +18,54 @@ export const getExpertGroupCoachingDetails = async ({ id }) => {
   return axios.get(`/LMS/events/${id}`);
 };
 
-export const createNewGroupCoaching = async ({ payload: { categories, tags, ...payload } }) => {
+const EVENT_TAG_ID_FIELDS = ['culture_experience', 'categories', 'tags', 'languages'];
+
+export const createNewGroupCoaching = async ({ payload }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
+    if (value === null || value === undefined || value === '') return;
+    if (EVENT_TAG_ID_FIELDS.includes(key)) {
+      if (Array.isArray(value) && value.length > 0) {
+        formData.set(key, value.join(','));
+      }
+      return;
+    }
+    if (key === 'recurring_dates') {
+      formData.set(key, JSON.stringify(value));
+    } else {
+      formData.set(key, value);
+    }
   });
-  formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
 
   return axios.post('/LMS/events/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
-export const updateGroupCoaching = async ({ payload: { categories, tags, ...payload }, id }) => {
+export const updateGroupCoaching = async ({ payload, id }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
+    if (value === null || value === undefined || value === '') return;
+    if (EVENT_TAG_ID_FIELDS.includes(key)) {
+      if (Array.isArray(value) && value.length > 0) {
+        formData.set(key, value.join(','));
+      }
+      return;
+    }
+    if (key === 'recurring_dates') {
+      formData.set(key, JSON.stringify(value));
+    } else {
+      formData.set(key, value);
+    }
   });
-  formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
 
   return axios.patch(`/LMS/events/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
+export const duplicateGroupCoaching = async ({ id }) => {
+  return axios.post(`/LMS/events/${id}/duplicate/`);
+};
+
+export const deleteGroupCoaching = async ({ id }) => {
+  return axios.delete(`/LMS/events/${id}/`);
 };
 
 export const cancelGroupCoaching = async ({ id }) => {

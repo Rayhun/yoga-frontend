@@ -3,9 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaGear, FaUser } from 'react-icons/fa6';
 import { MdLogout } from 'react-icons/md';
 import Link from 'next/link';
-import Image from 'next/image';
 import useAuthContext from '@/hooks/useAuthContext';
 import { USER_ROLE } from '@/utils/authorization';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 
 const getRoleBaseTitle = (role) => {
 
@@ -87,6 +87,13 @@ const DropdownUser = () => {
     setDropdownOpen(prev => !prev);
   };
 
+  const isExpert = loggedInUser?.profile?.role === USER_ROLE.TEACHER;
+  const profileSrc =
+    loggedInUser?.profile?.image ||
+    loggedInUser?.profile?.profile_image ||
+    '/images/user/placeholder_profile.png';
+  const displayName = loggedInUser?.profile?.first_name || '';
+
   return (
     <div className="relative">
       <Link
@@ -97,22 +104,34 @@ const DropdownUser = () => {
       >
         <span className="hidden text-center lg:block">
           <span className="block text-sm font-medium text-gray-800 dark:text-gray-200">
-            Hi {loggedInUser?.profile?.first_name}
+            Hi {displayName}
           </span>
           {/* <span className="block text-xs">{getRoleBaseTitle(loggedInUser?.profile?.role)}</span> */}
         </span>
 
-        <span className="h-12 w-12 rounded-full overflow-hidden transition-all duration-300 ring-2 ring-emerald-200/50 dark:ring-emerald-800/30 hover:ring-emerald-400/60 dark:hover:ring-emerald-600/50 shadow-md shadow-emerald-200/20 dark:shadow-emerald-900/20">
-          <Image
-            width={48}
-            height={48}
-            src={loggedInUser?.profile?.image || loggedInUser?.profile?.profile_image || '/images/user/placeholder_profile.png'}
-            alt="User"
-            className="rounded-full object-cover w-full h-full"
-            quality={95}
-            priority
+        {isExpert ? (
+          <ExpertProfileWithLogo
+            src={profileSrc}
+            logo={loggedInUser?.profile?.business_logo}
+            name={displayName}
+            size={48}
+            logoSize={22}
+            ringClassName="ring-2 ring-emerald-200/50 dark:ring-emerald-800/30 shadow-md shadow-emerald-200/20 dark:shadow-emerald-900/20"
+            logoRingClassName="ring-2 ring-white dark:ring-gray-800"
+            alt={displayName || 'Expert'}
           />
-        </span>
+        ) : (
+          <span className="h-12 w-12 rounded-full overflow-hidden transition-all duration-300 ring-2 ring-emerald-200/50 dark:ring-emerald-800/30 hover:ring-emerald-400/60 dark:hover:ring-emerald-600/50 shadow-md shadow-emerald-200/20 dark:shadow-emerald-900/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={profileSrc}
+              alt="User"
+              width={48}
+              height={48}
+              className="rounded-full object-cover w-full h-full"
+            />
+          </span>
+        )}
 
         <svg
           className="hidden fill-current sm:block"
@@ -125,7 +144,7 @@ const DropdownUser = () => {
           <path
             fillRule="evenodd"
             clipRule="evenodd"
-            d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z"
+            d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z"
             fill=""
           />
         </svg>

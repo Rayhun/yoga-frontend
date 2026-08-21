@@ -10,6 +10,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 dayjs.extend(utc);
 
@@ -33,6 +34,7 @@ const TIME_SLOTS = buildTimeSlots();
 const FormikDateTimePicker = ({ label, required, minDate, ...props }) => {
   const [field, meta, helpers] = useField(props.name);
   const { setValue, setTouched } = helpers;
+  const containerRef = useScrollToFirstErrorField(props.name);
 
   const parsed = field.value
     ? typeof field.value === 'string'
@@ -66,7 +68,7 @@ const FormikDateTimePicker = ({ label, required, minDate, ...props }) => {
   const isErrorField = meta.touched && meta.error;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       {label ? (
         <label
           className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}

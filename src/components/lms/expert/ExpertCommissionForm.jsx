@@ -32,7 +32,8 @@ const ExpertCommissionForm = ({ selected }) => {
   const commissionTypeOptions = [
     { value: 'Program', label: 'Program' },
     { value: 'Consultation', label: 'Consultation' },
-    { value: 'Group Coaching', label: 'Group Coaching' },
+    { value: 'Event', label: 'Event' },
+    { value: 'ExpertUsers', label: 'Expert Users' },
   ];
 
   const commissionValueTypeOptions = [

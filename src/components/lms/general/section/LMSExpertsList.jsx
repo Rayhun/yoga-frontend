@@ -11,7 +11,6 @@ const LMSExpertsList = ({ experts = [], handleExpertClick }) => {
             <Avatar src={expert.image} alt={expert.name} />
             <div>
               <h3 className="text-sm font-semibold text-gray-800 dark:text-white">{expert.name}</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">{expert.title}</p>
             </div>
           </div>
         </Grid>

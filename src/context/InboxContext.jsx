@@ -65,6 +65,8 @@ function InboxProvider({ children }) {
         coach_status: conversation.coach_status,
         coach_title: conversation.coach_title,
         other_user_id: conversation.other_user_id,
+        can_view_detail: conversation.can_view_detail || false,
+        detail_url: conversation.detail_url || null,
       }));
 
       setConversations(prevState => {
@@ -115,6 +117,8 @@ function InboxProvider({ children }) {
           coach_status: targetConversation.coach_status ?? existingConversation.coach_status ?? null,
           coach_title: targetConversation.coach_title ?? existingConversation.coach_title ?? null,
           other_user_id: targetConversation.other_user_id ?? existingConversation.other_user_id ?? null,
+          can_view_detail: targetConversation.can_view_detail ?? existingConversation.can_view_detail ?? false,
+          detail_url: targetConversation.detail_url ?? existingConversation.detail_url ?? null,
         } : {
           // If conversation doesn't exist yet, create it with defaults
           id: targetConversation.conversation_id,
@@ -128,6 +132,8 @@ function InboxProvider({ children }) {
           coach_status: targetConversation.coach_status ?? null,
           coach_title: targetConversation.coach_title ?? null,
           other_user_id: targetConversation.other_user_id ?? null,
+          can_view_detail: targetConversation.can_view_detail ?? false,
+          detail_url: targetConversation.detail_url ?? null,
         };
         
         const restConversations = prevState.data.filter(i => i.id !== targetConversation.conversation_id);
@@ -156,12 +162,17 @@ function InboxProvider({ children }) {
     }
   }, [chatRoomMessage]);
 
-  useEffect(() => {
-    const emptyMessage = document.getElementById('empty-message');
-    emptyMessage?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.data]);
-
   const setActiveConversation = useCallback(async selected => {
+    if (!selected) {
+      setConversations(prevState => ({
+        ...prevState,
+        active: null,
+      }));
+      setRoomID('');
+      setMessages({ isLoading: false, data: [] });
+      return;
+    }
+
     setConversations(prevState => ({
       ...prevState,
       active: selected,

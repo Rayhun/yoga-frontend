@@ -32,6 +32,12 @@ export const getDailyInsights = async () => {
   return axios.get('/goal/insight/');
 };
 
+export const getInsightStatisticsHelp = async (type) => {
+  return axios.get('/goal/insight/statistics-help/', {
+    params: type ? { type } : undefined,
+  });
+};
+
 // Admin Side tracker APIs 
 export const adminGetInsightsGoals = async () => {
   return axios.get('/goal/tracker/insight/');

@@ -1,23 +1,29 @@
 'use client';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+
+import FormikMultiOptionsModalField from '@/components/common/form/formik/FormikMultiOptionsModalField';
 import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const CertificationsField = ({
   name = 'certifications',
   label = 'Certifications',
-  placeholder = 'Certifications',
+  placeholder = 'Select certifications (max 5)',
   ...props
 }) => {
-  const { options: tagsOptions } = useLMSCoachingAreas('Certifications');
+  const { isLoading, isError, options } = useLMSCoachingAreas('Certifications');
 
   return (
-    <FormikMultiSelect
+    <FormikMultiOptionsModalField
       {...props}
       name={name}
       label={label}
-      placeholder={placeholder}
-      options={tagsOptions}
+      triggerPlaceholder={placeholder}
+      options={options}
+      loading={isLoading}
+      loadError={isError}
       max={5}
+      chipKind="certification"
+      modalTitle="Certifications"
+      searchPlaceholder="Search certifications…"
     />
   );
 };

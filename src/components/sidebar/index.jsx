@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
@@ -13,10 +13,16 @@ import { getMyQTEApplication } from '@/services/private/certification/applicatio
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
+import { getCustomerSidebarNavigation } from '@/services/private/customer/v2/navigation';
+import { buildCustomerV2SidebarMenu, customerV2MenuHasFooterActions } from '@/utils/customer-v2-navigation';
+
+const DISABLED_NAV_INFO_ITEMS = ['Dashboard', 'Circles'];
+const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_APP_ENVRONMENT === 'development';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const activeTab = searchParams.get('active_tab');
   const {
     user,
@@ -28,9 +34,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const is_profile_complete = user?.profile?.is_profile_complete ?? false;
   const has_event_or_consult = user?.profile?.has_event_or_consult ?? false;
   const stripe_onboarded = user?.profile?.stripe_onboarded ?? false;
+  const is_chat_group = Boolean(user?.profile?.is_chat_group);
   const isCustomer = user?.isCustomer ?? false;
   const isAffiliate = userRole === USER_ROLE.AFFILIATE;
+  const isCustomerPortal = userRole === USER_ROLE.CUSTOMER;
   const shouldUseCustomerStyle = isCustomer || isAffiliate;
+
+  const { data: customerV2NavResponse } = useQuery({
+    queryFn: getCustomerSidebarNavigation,
+    queryKey: [queryKeys.customerV2SidebarNavigation],
+    enabled: isCustomerPortal,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const customerV2NavigationData = customerV2NavResponse?.data?.data;
+  const usesCustomerV2Sidebar = isCustomerPortal && Boolean(customerV2NavigationData);
+  const hideLegacyCustomerFooter = usesCustomerV2Sidebar && customerV2MenuHasFooterActions(customerV2NavigationData);
 
   const trigger = useRef();
   const sidebar = useRef();
@@ -40,7 +59,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
-  const [showDashboardInfo, setShowDashboardInfo] = useState(false);
+  const [showDisabledNavInfo, setShowDisabledNavInfo] = useState(false);
+  const [disabledNavLabel, setDisabledNavLabel] = useState('');
   const [modalAnimation, setModalAnimation] = useState(false);
 
   // close on click outside
@@ -85,14 +105,40 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   });
   const isApprovedQTE = qteApplication?.creator_type === 'qte' && qteApplication?.application_status === 'approved';
 
+  const customerV2Menu = useMemo(() => {
+    if (!usesCustomerV2Sidebar) return null;
+    return buildCustomerV2SidebarMenu(customerV2NavigationData, {
+      isBusinessOwner: user?.isBusinessOwner,
+    });
+  }, [usesCustomerV2Sidebar, customerV2NavigationData, user?.isBusinessOwner]);
+
   const roleBasedSidebarMenuItems = useMemo(() => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
-    if (userRole === USER_ROLE.TEACHER) return SIDEBAR.getTeacherSidebarMenuItems(is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE);
+    if (userRole === USER_ROLE.TEACHER) {
+      return SIDEBAR.getTeacherSidebarMenuItems(
+        is_profile_complete,
+        has_event_or_consult,
+        stripe_onboarded,
+        isApprovedQTE,
+        is_chat_group
+      );
+    }
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
     if (userRole === USER_ROLE.INSTITUTION) return SIDEBAR.INSTITUTION;
+    if (customerV2Menu) return customerV2Menu.mainItems;
     return SIDEBAR.CUSTOMER;
-  }, [userRole, is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE]);
+  }, [
+    userRole,
+    is_profile_complete,
+    has_event_or_consult,
+    stripe_onboarded,
+    isApprovedQTE,
+    is_chat_group,
+    customerV2Menu,
+  ]);
+
+  const customerV2FooterMenuItems = customerV2Menu?.footerItems ?? [];
 
   // Remove unused isTeacher variable - design is now universal
 
@@ -126,47 +172,80 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     [roleBasedSidebarMenuItems, userSubRole, user?.isBusinessOwner]
   );
 
-  const handleDisabledDashboardClick = (e) => {
+  const handleDisabledNavClick = (e, label) => {
     e.preventDefault();
-    setShowDashboardInfo(true);
-    // Trigger animation after modal is shown
+    setDisabledNavLabel(label);
+    setShowDisabledNavInfo(true);
     setTimeout(() => setModalAnimation(true), 10);
   };
 
   const closeModal = () => {
     setModalAnimation(false);
-    setTimeout(() => setShowDashboardInfo(false), 200);
+    setTimeout(() => {
+      setShowDisabledNavInfo(false);
+      setDisabledNavLabel('');
+    }, 200);
   };
 
-  const getMissingRequirements = () => {
+  const getMissingRequirements = (navLabel) => {
     const missing = [];
-    if (!is_profile_complete) missing.push({ text: 'Complete your profile', icon: FiUser });
-    if (!has_event_or_consult) missing.push({ text: 'Add guided experiences', icon: FiCalendar });
-    if (!stripe_onboarded) missing.push({ text: 'Set up your PayPal account', icon: FiCreditCard });
+    if (!is_profile_complete) {
+      missing.push({
+        text: 'Complete your profile',
+        icon: FiUser,
+        action: () => router.push('/portal/teacher/profile?active_tab=about'),
+        actionText: 'Complete Profile',
+      });
+    }
+    if (!has_event_or_consult && navLabel === 'Dashboard') {
+      missing.push({
+        text: 'Add guided experiences',
+        icon: FiCalendar,
+        action: () => router.push('/portal/teacher/group_coaching/add'),
+        actionText: 'Add Guided Experiences',
+      });
+    }
+    if (navLabel === 'Dashboard' && !stripe_onboarded) {
+      missing.push({
+        text: 'Set up your PayPal account',
+        icon: FiCreditCard,
+        action: () => router.push('/portal/teacher/payments'),
+        actionText: 'Link Account',
+      });
+    }
+    if (navLabel === 'Circles' && !isDevelopmentEnvironment && is_profile_complete) {
+      missing.push({
+        text: 'Circles is coming soon',
+        icon: HiOutlineInformationCircle,
+      });
+    }
     return missing;
   };
+
+  const missingRequirements = disabledNavLabel ? getMissingRequirements(disabledNavLabel) : [];
 
   // Handle escape key to close modal
   useEffect(() => {
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && showDashboardInfo) {
+      if (event.key === 'Escape' && showDisabledNavInfo) {
         closeModal();
       }
     };
 
-    if (showDashboardInfo) {
+    if (showDisabledNavInfo) {
       document.addEventListener('keydown', handleEscapeKey);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
       document.body.style.overflow = 'unset';
     };
-  }, [showDashboardInfo]);
+  }, [showDisabledNavInfo]);
 
 
   return (
+    <>
     <aside
       ref={sidebar}
       className={`absolute left-0 top-0 z-999 flex h-screen w-62.5 flex-col overflow-y-hidden duration-300 ease-linear lg:static lg:translate-x-0 ${
@@ -227,7 +306,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
           }`}>
             {subRoleBasedSidebarMenuItems.map(menuItem => (
-              <React.Fragment key={menuItem.label}>
+              <React.Fragment key={menuItem.id || menuItem.label}>
                 {menuItem.sub_menu ? (
                   <ul className="flex flex-col gap-2">
                     <SidebarLinkGroup activeCondition={menuItem?.hasActiveSubMenu(pathname)}>
@@ -382,11 +461,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </ul>
                 ) : (
                   <li className="list-none">
-                    {menuItem.label === 'Dashboard' && menuItem.disabled ? (
+                    {menuItem.disabled && DISABLED_NAV_INFO_ITEMS.includes(menuItem.label) ? (
                       <button
-                        onClick={handleDisabledDashboardClick}
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out w-full text-left
-                          cursor-pointer opacity-50 text-gray-400 hover:opacity-70`}
+                        type="button"
+                        onClick={e => handleDisabledNavClick(e, menuItem.label)}
+                        className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out w-full text-left cursor-pointer opacity-50 text-gray-400 hover:opacity-70 hover:bg-emerald-50/50"
                         aria-disabled={true}
                       >
                         {menuItem.Icon && <menuItem.Icon size={24} />}
@@ -422,8 +501,48 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             ))}
           </ul>
 
-          {/* Logout */}
-          {isCustomer && (
+          {usesCustomerV2Sidebar && customerV2FooterMenuItems.length > 0 ? (
+            <ul className={`mt-auto flex flex-col border-t border-emerald-200/30 pt-4 dark:border-emerald-800/20 ${
+              shouldUseCustomerStyle ? 'gap-1' : 'gap-2'
+            }`}>
+              {customerV2FooterMenuItems.map(menuItem => (
+                <li key={menuItem.id || menuItem.label} className="list-none">
+                  {menuItem.action_id === 'trigger_user_logout' ? (
+                    <span
+                      className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gradient-to-r hover:from-red-50/80 hover:to-pink-50/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-red-400"
+                      onClick={logout}
+                    >
+                      {menuItem.Icon ? (
+                        <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                          <menuItem.Icon size={24} />
+                        </div>
+                      ) : null}
+                      {menuItem.label}
+                    </span>
+                  ) : (
+                    <Link
+                      href={menuItem.href || '#'}
+                      className={`group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out transition-all hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400 ${
+                        menuItem.isActive?.(pathname, activeTab)
+                          ? 'text-emerald-700 dark:text-emerald-400 bg-gradient-to-r from-emerald-50/90 to-green-50/90 dark:from-emerald-900/30 dark:to-green-900/20 shadow-[0_2px_8px_rgba(16,185,129,0.2)] scale-[1.01] border-l-2 border-emerald-500'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {menuItem.Icon ? (
+                        <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                          <menuItem.Icon size={24} />
+                        </div>
+                      ) : null}
+                      {menuItem.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {/* Legacy customer footer (v1 fallback) */}
+          {isCustomer && !hideLegacyCustomerFooter && (
             <li className="list-none mt-auto">
               <Link
                 className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400"
@@ -436,6 +555,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </Link>
             </li>
           )}
+          {!hideLegacyCustomerFooter && (
           <li className="list-none mt-auto">
             <span
               className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gradient-to-r hover:from-red-50/80 hover:to-pink-50/80 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-red-400"
@@ -447,13 +567,90 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               Logout
             </span>
           </li>
+          )}
           {/* Bottom padding to ensure scrollbar doesn't cover content */}
           <div className="pb-4"></div>
         </nav>
       </div>
 
-      {/* Dashboard Info Modal */}
     </aside>
+
+    {showDisabledNavInfo && (
+      <div
+        className={`fixed inset-0 z-[10000] flex items-center justify-center p-4 transition-opacity duration-200 ${
+          modalAnimation ? 'bg-black/60 opacity-100' : 'bg-black/0 opacity-0'
+        }`}
+        onClick={closeModal}
+      >
+        <div
+          className={`bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-md w-full mx-4 transform transition-all duration-200 ${
+            modalAnimation ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          }`}
+          onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="disabled-nav-info-title"
+        >
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                <HiOutlineInformationCircle className="text-emerald-600 dark:text-emerald-400 text-2xl" />
+              </div>
+              <div>
+                <h3 id="disabled-nav-info-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {disabledNavLabel} Unavailable
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Complete the following steps to unlock {disabledNavLabel.toLowerCase()}.
+                </p>
+              </div>
+            </div>
+
+            <ul className="space-y-3 mb-6">
+              {missingRequirements.map((requirement, index) => {
+                const Icon = requirement.icon;
+                return (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="text-emerald-600 dark:text-emerald-400 shrink-0" size={20} />
+                      <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
+                        {requirement.text}
+                      </span>
+                    </div>
+                    {requirement.action && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeModal();
+                          requirement.action();
+                        }}
+                        className="shrink-0 px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                      >
+                        {requirement.actionText}
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

@@ -1,13 +1,26 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
 import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
 import ExpertProfileConsultations from './consultations';
+import {
+  getCustomerCoachDetail,
+  toggleFollowCoach,
+} from '@/services/private/customer/v2/coaches';
+import queryKeys from '@/utils/query-keys';
+
+const getPracticeTypeLabel = profile =>
+  profile?.practice_type?.label?.trim() ||
+  profile?.practice_type?.canonical_tag?.trim() ||
+  profile?.title?.trim() ||
+  '';
 
 const TABS = {
   PROGRAMS: 'programs',
@@ -19,7 +32,56 @@ const TABS = {
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const activeTab = searchParams.get('active_tab');
+  const expertId = userProfileDetails?.id;
+
+  const { data: coachDetailResponse } = useQuery({
+    queryKey: [queryKeys.customerV2CoachDetail, expertId],
+    queryFn: () => getCustomerCoachDetail(expertId),
+    enabled: Boolean(expertId),
+    staleTime: 30_000,
+  });
+
+  const coachFollowButton = coachDetailResponse?.data?.data?.coach?.follow_button;
+  const coachTitle = coachDetailResponse?.data?.data?.coach?.title;
+
+  const [followState, setFollowState] = useState({
+    isFollow: false,
+    label: '+ Follow',
+  });
+
+  useEffect(() => {
+    if (!coachFollowButton) return;
+    setFollowState({
+      isFollow: Boolean(coachFollowButton.is_follow),
+      label: coachFollowButton.label || (coachFollowButton.is_follow ? 'Following' : '+ Follow'),
+    });
+  }, [coachFollowButton]);
+
+  const followMutation = useMutation({
+    mutationFn: () => toggleFollowCoach(expertId),
+    onSuccess: response => {
+      const payload = response?.data?.data;
+      setFollowState({
+        isFollow: Boolean(payload?.is_follow),
+        label: payload?.label || (payload?.is_follow ? 'Following' : '+ Follow'),
+      });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.customerV2CoachDetail, expertId] });
+      toast.success(
+        payload?.is_follow ? 'You are now following this coach.' : 'You unfollowed this coach.'
+      );
+    },
+    onError: () => {
+      toast.error('Could not update follow status. Please try again.');
+    },
+  });
+
+  const practiceType = useMemo(
+    () => getPracticeTypeLabel(userProfileDetails) || coachTitle || '',
+    [userProfileDetails, coachTitle]
+  );
+  const expertName = `${userProfileDetails?.first_name || ''} ${userProfileDetails?.last_name || ''}`.trim();
   
   const [selectedTab, setSelectedTab] = useState(() => {
     // Set initial tab based on URL parameter
@@ -43,31 +105,41 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         
         {/* Content */}
         <div className="relative z-10 flex items-center gap-4">
-          <div className="relative flex-shrink-0">
-            <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
-              <div className="relative w-full h-full rounded-full overflow-hidden">
-                <Image
-                  src={userProfileDetails?.file || '/images/user/user-06.png'}
-                  width={64}
-                  height={64}
-                  sizes="64px"
-                  alt="profile"
-                  className="w-full h-full rounded-full object-cover"
-                  quality={95}
-                  priority
-                />
-              </div>
-            </div>
+          <div className="relative flex-shrink-0 rounded-full bg-white/20 backdrop-blur-sm p-0.5 ring-2 ring-white/30">
+            <ExpertProfileWithLogo
+              src={userProfileDetails?.file}
+              logo={userProfileDetails?.business_logo}
+              name={expertName}
+              size={64}
+              logoSize={28}
+              logoRingClassName="ring-2 ring-white"
+              alt={expertName || 'Coach'}
+            />
           </div>
           
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-white truncate">
               {`${userProfileDetails?.first_name || ''} ${userProfileDetails?.last_name || ''}`}
             </h3>
-            <p className="text-sm text-white/90 font-medium truncate">
-              {userProfileDetails?.title || 'Wellness Expert'}
-            </p>
+            {practiceType ? (
+              <p className="mt-0.5 truncate text-sm text-white/85">{practiceType}</p>
+            ) : null}
           </div>
+
+          {expertId ? (
+            <button
+              type="button"
+              onClick={() => followMutation.mutate()}
+              disabled={followMutation.isPending}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                followState.isFollow
+                  ? 'border border-white/70 bg-white/10 text-white hover:bg-white/20'
+                  : 'bg-white text-primary hover:bg-white/90'
+              }`}
+            >
+              {followMutation.isPending ? 'Saving…' : followState.label}
+            </button>
+          ) : null}
         </div>
       </div>
 

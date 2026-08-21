@@ -4,6 +4,7 @@ import { useField, useFormikContext } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 const FormikMultiSelect = ({
   name,
@@ -14,16 +15,27 @@ const FormikMultiSelect = ({
   required,
   max,
   onChange = () => null,
+  /** MUI Autocomplete: show loading indicator (e.g. next page loading) */
+  loading = false,
+  /** Scroll listbox to bottom → fetch more catalog tags */
+  infiniteScroll,
+  /** When false, options are not filtered client-side (use with server search). */
+  filterOptionsLocally = true,
+  /** Controlled search text for server-side option loading. */
+  inputValue,
+  onInputChange,
   ...rest
 }) => {
-  const { setFieldValue } = useFormikContext();
+  const { slotProps: incomingSlotProps, ...autocompleteRest } = rest;
+  const { setFieldValue, submitCount } = useFormikContext();
   const [field, meta] = useField(name);
+  const containerRef = useScrollToFirstErrorField(name);
 
   const handleChange = useCallback(
     (_, value) => {
       const raw = Array.isArray(value) ? value : [];
       const arrayValue = raw
-        .map(i => i.value)
+        .map(i => (typeof i === 'string' ? i : i?.value))
         .filter(v => v != null && v !== '');
       setFieldValue(name, arrayValue, true);
       onChange(raw);
@@ -48,17 +60,65 @@ const FormikMultiSelect = ({
 
   const selectedOptions = useMemo(
     () =>
-      fieldValueArray
-        .map(fv => options.find(opt => opt.value != null && opt.value !== '' && fv == opt.value))
-        .filter(Boolean),
+      fieldValueArray.map(fv => {
+        const matched = options.find(
+          opt => opt.value != null && opt.value !== '' && String(opt.value) === String(fv)
+        );
+        return matched || { label: String(fv), value: fv };
+      }),
     [fieldValueArray, options]
   );
 
-  // Show error whenever validation fails (e.g. over max) so user sees it without blurring
-  const isErrorField = Boolean(meta.error);
+  // Show error only after user interaction or form submit.
+  const isErrorField = Boolean(meta.error) && (meta.touched || submitCount > 0);
+
+  const handleListboxScroll = useCallback(
+    e => {
+      if (!infiniteScroll?.onFetchMore || !infiniteScroll?.hasMore) return;
+      if (infiniteScroll?.isLoadingMore) return;
+      const el = e.currentTarget;
+      const threshold = 48;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - threshold) {
+        infiniteScroll.onFetchMore();
+      }
+    },
+    [infiniteScroll]
+  );
+
+  const mergedListboxProps = useMemo(() => {
+    const fromRest = incomingSlotProps?.listbox;
+    return {
+      ...fromRest,
+      onScroll: e => {
+        fromRest?.onScroll?.(e);
+        handleListboxScroll(e);
+      },
+      sx: {
+        maxHeight: 320,
+        ...fromRest?.sx,
+      },
+    };
+  }, [incomingSlotProps?.listbox, handleListboxScroll]);
+
+  const mergedSlotProps = useMemo(
+    () => ({
+      ...incomingSlotProps,
+      listbox: mergedListboxProps,
+      paper: {
+        elevation: 4,
+        sx: {
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
+          borderWidth: '2px',
+          borderColor: '#e2e8f0',
+        },
+        ...incomingSlotProps?.paper,
+      },
+    }),
+    [incomingSlotProps, mergedListboxProps]
+  );
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       {label && (
         <label className={`mb-1 block font-medium text-black dark:text-white ${required ? 'required' : ''}`}>
           {label}
@@ -66,10 +126,17 @@ const FormikMultiSelect = ({
       )}
       <div className="relative rounded-xl">
         <Autocomplete
-          {...rest}
+          {...autocompleteRest}
           id={name}
           options={options}
-          getOptionLabel={option => option.label}
+          freeSolo={autocompleteRest.freeSolo}
+          filterSelectedOptions
+          filterOptions={filterOptionsLocally ? undefined : opts => opts}
+          inputValue={inputValue}
+          onInputChange={onInputChange}
+          loading={loading}
+          isOptionEqualToValue={(option, value) => String(option?.value) === String(value?.value)}
+          getOptionLabel={option => (typeof option === 'string' ? option : option.label)}
           getOptionKey={(option, index) =>
             option?.value != null && option?.value !== ''
               ? option.value
@@ -93,16 +160,7 @@ const FormikMultiSelect = ({
             </div>
           )}
           multiple
-          slotProps={{
-            paper: {
-              elevation: 4,
-              sx: {
-                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
-                borderWidth: '2px',
-                borderColor: '#e2e8f0'
-              }
-            }
-          }}
+          slotProps={mergedSlotProps}
         />
         {Icon && (
           <span className="absolute right-4 top-4">

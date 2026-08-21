@@ -1,16 +1,16 @@
 import {
   MdOutlineHome,
-  MdViewModule,
-  MdCategory,
   MdHome,
   MdSubscriptions,
-  MdPages,
+  MdLocalOffer,
   MdOutlineEventNote,
   MdOutlinePayments,
   MdTrackChanges,
   MdGroupAdd,
   MdList,
-  MdVerified
+  MdVerified,
+  MdOutlineNotifications,
+  MdViewCarousel,
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -19,7 +19,6 @@ import {
   FaFileInvoice,
   FaNewspaper,
   FaTv,
-  FaTags,
   FaUser,
   FaChalkboardTeacher,
   FaQuestion,
@@ -27,13 +26,12 @@ import {
 } from 'react-icons/fa';
 import { TbPrompt } from "react-icons/tb";
 
-import { GiPapers } from 'react-icons/gi';
+import { GiTeacher, GiNightSleep } from 'react-icons/gi';
 import { GrUserExpert } from 'react-icons/gr';
 import { USER_SUB_ROLE } from './authorization';
-import { GiTeacher, GiNightSleep } from 'react-icons/gi';
 import { PiFilmScriptBold, PiUserSquareFill, PiChartLine } from 'react-icons/pi';
 import { LuClipboardCheck } from 'react-icons/lu';
-import { FiTarget, FiActivity } from 'react-icons/fi';
+import { FiTarget, FiActivity, FiSettings, FiBarChart2 } from 'react-icons/fi';
 import { LiaBookSolid } from 'react-icons/lia';
 // import { FiDroplet } from "react-icons/fi";
 // import { TbGenderTransgender } from "react-icons/tb";
@@ -54,10 +52,38 @@ const GOALS_SUBMENU_ROUTES = [
   '/portal/customer/checkin/cycle_insights',
 ];
 
+const RELIEF_SUBMENU_ROUTES = [
+  '/portal/admin/relief/faq',
+  '/portal/admin/relief/quick-tools',
+];
+
 const SESSIONS_SUBMENU_ROUTES = [
   '/portal/admin/lms/session/video',
   '/portal/admin/lms/session/image',
   '/portal/admin/lms/session/audio',
+];
+
+const LMS_SUBMENU_ROUTES = [
+  '/portal/admin/lms/program',
+  '/portal/admin/lms/module',
+  ...SESSIONS_SUBMENU_ROUTES,
+  '/portal/admin/lms/quiz',
+];
+
+const ONBOARDING_SUBMENU_ROUTES = [
+  '/portal/admin/onboarding/quiz',
+  '/portal/admin/onboarding/quiz/pages',
+];
+
+const SUBSCRIPTION_SUBMENU_ROUTES = [
+  '/portal/admin/subscription/plan',
+  '/portal/admin/subscription/page',
+];
+
+const SETTINGS_SUBMENU_ROUTES = [
+  '/portal/admin/lookup',
+  '/portal/admin/lms/tag',
+  '/portal/admin/lms/category',
 ];
 
 const AFFILIATES_USERS_ROUTES = [
@@ -75,6 +101,7 @@ const EXPERTS_ROUTES = [
   '/portal/admin/lms/expert/edit',
   '/portal/admin/lms/expert/dashboard',
   '/portal/admin/lms/expert/commission',
+  '/portal/admin/lms/expert/home-coach',
   '/portal/admin/lms/expert/payment',
   '/portal/admin/lms/expert/guided-experiences'
 ];
@@ -93,6 +120,13 @@ const ADMIN = [
     label: 'Inbox',
     href: '/portal/inbox',
     isActive: pathname => pathname.includes('/portal/inbox'),
+    disabled: false,
+  },
+  {
+    Icon: FiBarChart2,
+    label: 'Outcomes',
+    href: '/portal/admin/outcomes',
+    isActive: pathname => pathname.includes('/portal/admin/outcomes'),
     disabled: false,
   },
   {
@@ -117,6 +151,13 @@ const ADMIN = [
     disabled: false,
   },
   {
+    Icon: MdOutlineNotifications,
+    label: 'Notifications',
+    href: '/portal/admin/notifications',
+    isActive: pathname => pathname.includes('/portal/admin/notifications'),
+    disabled: false,
+  },
+  {
     Icon: GrUserExpert,
     label: 'Experts',
     href: '/portal/admin/lms/expert', // Default to experts list
@@ -131,13 +172,18 @@ const ADMIN = [
       {
         label: 'Experts',
         href: '/portal/admin/lms/expert',
-        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/payment') && !pathname.includes('/dashboard') && !pathname.includes('/guided-experiences'),
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert') && !pathname.includes('/add') && !pathname.includes('/details') && !pathname.includes('/edit') && !pathname.includes('/commission') && !pathname.includes('/home-coach') && !pathname.includes('/payment') && !pathname.includes('/dashboard') && !pathname.includes('/guided-experiences'),
       },
       {
         label: 'Guided Experiences',
         href: '/portal/admin/lms/expert/guided-experiences',
         isActive: pathname => pathname.includes('/portal/admin/lms/expert/guided-experiences'),
         disabled: false,
+      },
+      {
+        label: 'Home Coach',
+        href: '/portal/admin/lms/expert/home-coach',
+        isActive: pathname => pathname.includes('/portal/admin/lms/expert/home-coach'),
       },
       {
         label: 'Commission',
@@ -208,89 +254,95 @@ const ADMIN = [
   },
   {
     Icon: FaFileInvoice,
-    label: 'Onboarding Quiz',
+    label: 'Onboarding',
     href: '/portal/admin/onboarding/quiz',
-    isActive: pathname => pathname.includes('/portal/admin/onboarding/quiz'),
     disabled: false,
-  },
-  {
-    Icon: FaNewspaper,
-    label: 'Programs',
-    href: '/portal/admin/lms/program',
-    isActive: pathname => pathname.includes('/portal/admin/lms/program'),
-    disabled: false,
-  },
-  {
-    Icon: MdViewModule,
-    label: 'Modules',
-    href: '/portal/admin/lms/module',
-    isActive: pathname => pathname.includes('/portal/admin/lms/module'),
-    disabled: false,
-  },
-  {
-    Icon: FaTv,
-    label: 'Sessions',
-    href: '/portal/admin/lms/session/video', // Default to video sessions
-    disabled: false,
-    hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    hasActiveSubMenu: pathname => ONBOARDING_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
       {
-        label: 'Video Sessions',
-        href: '/portal/admin/lms/session/video',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
+        label: 'Onboarding Quiz',
+        href: '/portal/admin/onboarding/quiz',
+        isActive: pathname =>
+          pathname.includes('/portal/admin/onboarding/quiz') &&
+          !pathname.includes('/portal/admin/onboarding/quiz/pages'),
       },
       {
-        label: 'Image Sessions',
-        href: '/portal/admin/lms/session/image',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
-      },
-      {
-        label: 'Audio Sessions',
-        href: '/portal/admin/lms/session/audio',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+        label: 'Quiz Pages',
+        href: '/portal/admin/onboarding/quiz/pages',
+        isActive: pathname => pathname.includes('/portal/admin/onboarding/quiz/pages'),
       },
     ],
   },
   {
-    Icon: GiPapers,
-    label: 'Quiz',
-    href: '/portal/admin/lms/quiz',
-    isActive: pathname => pathname.includes('/portal/admin/lms/quiz'),
+    Icon: LiaBookSolid,
+    label: 'LMS',
+    href: '/portal/admin/lms/program',
     disabled: false,
-  },
-  {
-    Icon: MdCategory,
-    label: 'Categories',
-    href: '/portal/admin/lms/category',
-    isActive: pathname => pathname.includes('/portal/admin/lms/category'),
-    disabled: false,
-  },
-  {
-    Icon: FaTags,
-    label: 'Tags',
-    href: '/portal/admin/lms/tag',
-    isActive: pathname => pathname.includes('/portal/admin/lms/tag'),
-    disabled: false,
-  },
-  {
-    Icon: MdList,
-    label: 'Lookup',
-    href: '/portal/admin/lookup',
-    isActive: pathname => pathname.includes('/portal/admin/lookup'),
-    disabled: false,
+    hasActiveSubMenu: pathname => LMS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Programs',
+        href: '/portal/admin/lms/program',
+        isActive: pathname => pathname.includes('/portal/admin/lms/program'),
+      },
+      {
+        label: 'Modules',
+        href: '/portal/admin/lms/module',
+        isActive: pathname => pathname.includes('/portal/admin/lms/module'),
+      },
+      {
+        label: 'Sessions',
+        href: '/portal/admin/lms/session/video',
+        hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+        sub_menu: [
+          {
+            label: 'Video Sessions',
+            href: '/portal/admin/lms/session/video',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
+          },
+          {
+            label: 'Guides / Lessons',
+            href: '/portal/admin/lms/session/image',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
+          },
+          {
+            label: 'Audio Sessions',
+            href: '/portal/admin/lms/session/audio',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+          },
+        ],
+      },
+      {
+        label: 'Quiz',
+        href: '/portal/admin/lms/quiz',
+        isActive: pathname => pathname.includes('/portal/admin/lms/quiz'),
+      },
+    ],
   },
   {
     Icon: MdSubscriptions,
-    label: 'Subscription Plans',
+    label: 'Subscription',
     href: '/portal/admin/subscription/plan',
-    isActive: pathname => pathname.includes('/portal/admin/subscription/plan'),
     disabled: false,
+    hasActiveSubMenu: pathname => SUBSCRIPTION_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Subscription Plans',
+        href: '/portal/admin/subscription/plan',
+        isActive: pathname => pathname.includes('/portal/admin/subscription/plan'),
+      },
+      {
+        label: 'Subscription Pages',
+        href: '/portal/admin/subscription/page',
+        isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
+      },
+    ],
   },
   {
-    Icon: MdPages,
-    label: 'Subscription Pages',
-    href: '/portal/admin/subscription/page',
-    isActive: pathname => pathname.includes('/portal/admin/subscription/page'),
+    Icon: MdLocalOffer,
+    label: 'Coupons',
+    href: '/portal/admin/subscription/coupon',
+    isActive: pathname => pathname.includes('/portal/admin/subscription/coupon'),
     disabled: false,
   },
   {
@@ -309,11 +361,49 @@ const ADMIN = [
   },
   {
     Icon: FaQuestion,
+    label: 'Relief FAQs',
+    href: '/portal/admin/relief/faq',
+    isActive: pathname => pathname.includes('/portal/admin/relief/faq'),
+    disabled: false,
+  },
+  {
+    Icon: FaQuestion,
     label: 'FAQs',
     href: '/portal/admin/faq',
     isActive: pathname => pathname.includes('/portal/admin/faq'),
     disabled: false,
-  }
+  },
+  {
+    Icon: MdViewCarousel,
+    label: 'Home Cards',
+    href: '/portal/admin/home-cards',
+    isActive: pathname => pathname.includes('/portal/admin/home-cards'),
+    disabled: false,
+  },
+  {
+    Icon: FiSettings,
+    label: 'Settings',
+    href: '/portal/admin/lookup',
+    disabled: false,
+    hasActiveSubMenu: pathname => SETTINGS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    sub_menu: [
+      {
+        label: 'Lookup',
+        href: '/portal/admin/lookup',
+        isActive: pathname => pathname.includes('/portal/admin/lookup'),
+      },
+      {
+        label: 'Tags',
+        href: '/portal/admin/lms/tag',
+        isActive: pathname => pathname.includes('/portal/admin/lms/tag'),
+      },
+      {
+        label: 'Categories',
+        href: '/portal/admin/lms/category',
+        isActive: pathname => pathname.includes('/portal/admin/lms/category'),
+      },
+    ],
+  },
 ];
 
 const CUSTOMER = [
@@ -449,46 +539,58 @@ const CUSTOMER = [
 
 const STAFF = [
   {
-    Icon: FaNewspaper,
-    label: 'Programs',
+    Icon: LiaBookSolid,
+    label: 'LMS',
     href: '/portal/admin/lms/program',
-    isActive: pathname => pathname.includes('/portal/admin/lms/program'),
     disabled: false,
-  },
-  {
-    Icon: MdViewModule,
-    label: 'Modules',
-    href: '/portal/admin/lms/module',
-    isActive: pathname => pathname.includes('/portal/admin/lms/module'),
-    disabled: false,
-  },
-  {
-    Icon: FaTv,
-    label: 'Sessions',
-    href: '/portal/admin/lms/session/video', // Default to video sessions
-    disabled: false,
-    hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+    hasActiveSubMenu: pathname => LMS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
     sub_menu: [
       {
-        label: 'Video Sessions',
+        label: 'Programs',
+        href: '/portal/admin/lms/program',
+        isActive: pathname => pathname.includes('/portal/admin/lms/program'),
+      },
+      {
+        label: 'Modules',
+        href: '/portal/admin/lms/module',
+        isActive: pathname => pathname.includes('/portal/admin/lms/module'),
+      },
+      {
+        label: 'Sessions',
         href: '/portal/admin/lms/session/video',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
-      },
-      {
-        label: 'Image Sessions',
-        href: '/portal/admin/lms/session/image',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
-      },
-      {
-        label: 'Audio Sessions',
-        href: '/portal/admin/lms/session/audio',
-        isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+        hasActiveSubMenu: pathname => SESSIONS_SUBMENU_ROUTES.some(route => pathname.includes(route)),
+        sub_menu: [
+          {
+            label: 'Video Sessions',
+            href: '/portal/admin/lms/session/video',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/video'),
+          },
+          {
+            label: 'Guides / Lessons',
+            href: '/portal/admin/lms/session/image',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/image'),
+          },
+          {
+            label: 'Audio Sessions',
+            href: '/portal/admin/lms/session/audio',
+            isActive: pathname => pathname.includes('/portal/admin/lms/session/audio'),
+          },
+        ],
       },
     ],
   },
 ];
 
-const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, stripe_onboarded, isApprovedQTE) => {
+const getTeacherSidebarMenuItems = (
+  is_profile_complete,
+  has_event_or_consult,
+  stripe_onboarded,
+  isApprovedQTE,
+  is_chat_group = false
+) => {
+  const circlesHref = is_chat_group
+    ? '/portal/inbox'
+    : '/portal/teacher/community/create';
 
   return [
     {
@@ -496,14 +598,7 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
       label: 'Dashboard',
       href: '/portal/teacher/dashboard',
       isActive: pathname => pathname.includes('/portal/teacher/dashboard'),
-      disabled: !is_profile_complete || !has_event_or_consult || !stripe_onboarded,
-    },
-    {
-      Icon: FaInbox,
-      label: 'Circles',
-      href: '/portal/inbox',
-      isActive: pathname => pathname === '/portal/inbox',
-      disabled: !isDevelopmentEnvironment || !is_profile_complete || !has_event_or_consult,
+      disabled: false,
     },
     {
       Icon: FaUser,
@@ -535,6 +630,22 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
     //   disabled: false,
     // },
     {
+      Icon: FaInbox,
+      label: 'My Circle',
+      href: circlesHref,
+      isActive: pathname =>
+        pathname === '/portal/inbox' ||
+        pathname.includes('/portal/teacher/community'),
+      disabled: !isDevelopmentEnvironment || !is_profile_complete,
+    },
+    {
+      Icon: MdGroupAdd,
+      label: 'Referrals',
+      href: '/portal/teacher/referrals',
+      isActive: pathname => pathname.includes('/portal/teacher/referrals'),
+      disabled: !is_profile_complete,
+    },
+    {
       Icon: MdOutlineEventNote,
       label: 'Guided Experiences',
       href: '/portal/teacher/profile?active_tab=group_coaching',
@@ -543,6 +654,15 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
         pathname.includes('/portal/teacher/group_coaching'),
       disabled: !is_profile_complete,
     },
+    // {
+    //   Icon: PiFilmScriptBold,
+    //   label: 'Programs',
+    //   href: '/portal/teacher/profile?active_tab=programs',
+    //   isActive: (pathname, tab) =>
+    //     `${pathname}?active_tab=${tab}`.includes('/portal/teacher/profile?active_tab=programs') ||
+    //     pathname.includes('/portal/teacher/program'),
+    //   disabled: false,
+    // },
     // {
     //   Icon: PiUserSquareFill,
     //   label: 'Consult',

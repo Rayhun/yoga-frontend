@@ -8,7 +8,7 @@ import { PiLightningLight } from 'react-icons/pi';
 import { PiChartLine } from 'react-icons/pi';
 
 const Section = ({ children, className = "" }) => (
-  <div className={`bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
+  <div className={`bg-white portal-section rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
     <div>{children}</div>
   </div>
 );
@@ -43,7 +43,7 @@ const MonthlyGoal = () => {
       </div>
 
       {/* Process Flow Information */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-6 relative">
+      <div className="bg-white portal-section rounded-2xl shadow-lg border border-gray-100 mb-6 relative">
         {/* Info Button - Top Right */}
         <div className="absolute top-4 right-4">
           <button

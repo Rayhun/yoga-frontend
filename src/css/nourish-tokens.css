@@ -1,0 +1,79 @@
+/*
+  NourishDoc design tokens (Web UI Spec v1).
+  Change values here — Tailwind (`nd-*`) and `.nd-*` classes all read these variables.
+*/
+
+:root {
+  /* Neutrals */
+  --nd-white: #ffffff;
+  --nd-off-white: #faf9f7;
+  --nd-bg: #f4f3f1;
+  --nd-surface: #f7f7f6;
+  --nd-divider: #f0f0f0;
+  --nd-border: rgba(30, 77, 53, 0.09);
+
+  /* Text */
+  --nd-text-dark: #1a2920;
+  --nd-text-mid: #55685f;
+  --nd-text-light: #8a9e96;
+  --nd-text-faint: #b8c8c0;
+
+  /* Brand green (canonical / coach) */
+  --nd-green-dark: #1e4d35;
+  --nd-green-mid: #2d6a4a;
+  --nd-green-soft: #e6f0eb;
+  --nd-green-border: #c2d9cc;
+
+  /* Orange */
+  --nd-orange-dark: #c4521a;
+  --nd-orange-mid: #e0692b;
+  --nd-orange-soft: #fdf0e8;
+  --nd-orange-border: #f5c9a8;
+
+  /* Gold */
+  --nd-gold: #c9962e;
+  --nd-gold-soft: #fbf3e1;
+  --nd-gold-border: #efe0b0;
+
+  /* Status */
+  --nd-red: #d3453c;
+  --nd-red-soft: #fbeae9;
+
+  /* Track / issuer badges */
+  --nd-track-career-bg: #fdf0f3;
+  --nd-track-career-text: #b85070;
+  --nd-track-career-border: #f2d5dc;
+  --nd-issuer-qte-bg: #efe7fa;
+  --nd-issuer-qte-text: #6b4fa0;
+  --nd-issuer-institution-bg: #e4eefa;
+  --nd-issuer-institution-text: #2e6da4;
+
+  /* Overlay / toast */
+  --nd-overlay: rgba(0, 0, 0, 0.45);
+  --nd-toast-bg: #1c1c1c;
+
+  /* Radius */
+  --nd-radius: 16px;
+  --nd-radius-sm: 10px;
+  --nd-radius-pill: 22px;
+  --nd-radius-icon: 12px;
+
+  /* Shadow */
+  --nd-shadow-sm: 0 2px 12px rgba(30, 77, 53, 0.06);
+  --nd-shadow-md: 0 8px 30px rgba(30, 77, 53, 0.1);
+
+  /* Layout */
+  --nd-sidebar-width: 244px;
+  --nd-page-max: 1000px;
+  --nd-page-pad: 36px;
+  --nd-card-pad: 22px;
+  --nd-gap: 18px;
+  --nd-gap-lg: 32px;
+
+  /* Motion */
+  --nd-ease: 0.2s ease;
+
+  /* Type */
+  --nd-font-display: 'Playfair Display', Georgia, serif;
+  --nd-font-body: 'DM Sans', system-ui, sans-serif;
+}

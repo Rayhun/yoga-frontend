@@ -96,6 +96,7 @@ const AIChatPromptsForm = ({ selected }) => {
     day_of_week: selected?.day_of_week || '',
     schedule_time: selected?.schedule_time || '08:00',
     file: null,
+    is_active: selected?.is_active ?? true,
   };
 
   const validationSchema = Yup.object({
@@ -134,7 +135,11 @@ const AIChatPromptsForm = ({ selected }) => {
       .nullable()
       .when('chat_type', {
         is: 'faqs',
-        then: schema => schema.required('File is required when chat type is FAQs'),
+        then: schema =>
+          schema.test('file-required', 'File is required when chat type is FAQs', value => {
+            if (isEditMode && selected?.faq_file) return true;
+            return !!value;
+          }),
         otherwise: schema => schema.notRequired(),
       })
       .test('fileSize', 'File is too large (max 10MB)', value => {
@@ -160,11 +165,15 @@ const AIChatPromptsForm = ({ selected }) => {
           return;
         }
         if (key === 'file' && values[key]) {
-          formData.append('file', values[key]);
+          formData.append('faq_file', values[key]);
         } else if (key === 'all_trackers' && Array.isArray(values[key])) {
           values[key].forEach(trackerId => {
             formData.append('all_trackers', trackerId);
           });
+        } else if (key === 'is_active') {
+          if (isEditMode) {
+            formData.append('is_active', values[key] ? 'true' : 'false');
+          }
         } else if (values[key] !== undefined && values[key] !== '' && values[key] !== null) {
           formData.append(key, values[key]);
         }
@@ -361,7 +370,8 @@ const AIChatPromptsForm = ({ selected }) => {
               label={selectedChatType === 'faqs' ? 'Upload FAQs File' : 'Upload File (Optional)'}
               accept={['.pdf', '.doc', '.docx', '.txt', '.csv']}
               maxSize={10 * 1024 * 1024}
-              required={selectedChatType === 'faqs'}
+              required={selectedChatType === 'faqs' && !(isEditMode && selected?.faq_file)}
+              fileURL={selected?.faq_file || selected?.file_info?.url || ''}
             />
 
             <Button type="submit" size="2xl" className="self-start" isLoading={isSubmitting}>

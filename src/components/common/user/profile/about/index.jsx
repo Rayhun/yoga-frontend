@@ -1,6 +1,6 @@
 import Chip from '@mui/material/Chip';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
-import { LANGUAGES } from '@/utils/constants';
+import { getCoachingAreaLabel, getLanguageDisplayLabels } from '@/utils/expertProfileTags';
 import { 
   FiUser, 
   FiTarget, 
@@ -9,6 +9,8 @@ import {
   FiBriefcase, 
   FiCheckCircle 
 } from 'react-icons/fi';
+import { LuBriefcaseBusiness } from 'react-icons/lu';
+import BusinessProfileCard from './BusinessProfileCard';
 
 const AboutSection = ({ label, children, icon: Icon }) => (
   <div className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6 shadow-sm hover:shadow-md transition-all duration-300">
@@ -32,45 +34,39 @@ const ProfileChip = ({ label }) => (
   />
 );
 
-const findRelatedLanguages = (languages) => {
-  if (!languages || !Array.isArray(languages)) return [];
-  
-  const normalizedLanguages = languages.flatMap(lang => 
-    typeof lang === 'string' ? lang.split(',') : lang
-  );
-  
-  return normalizedLanguages
-    .map(lang => LANGUAGES.find(item => item.value === lang))
-    .filter(lang => lang !== undefined);
-};
-
-const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = false }) => {
-  const relatedLanguages = findRelatedLanguages(data?.languages);
+const UserProfileAbout = ({ data, isExpertView = false, showFullAboutText = false, disableLinks = false }) => {
+  const languageLabels = getLanguageDisplayLabels(data?.languages);
   return (
     <div className="flex flex-col gap-5">
       <AboutSection label="About" icon={FiUser}>
         <div className="prose prose-sm max-w-none dark:prose-invert">
-          <ControllableRichText showFullText={showFullAboutText}>
+          <ControllableRichText showFullText={showFullAboutText} disableLinks={disableLinks}>
             {data?.description || 'No description provided'}
           </ControllableRichText>
         </div>
       </AboutSection>
 
+      {(data?.business_name || data?.business_logo) && (
+        <AboutSection label="Business" icon={LuBriefcaseBusiness}>
+          <BusinessProfileCard businessName={data?.business_name} businessLogo={data?.business_logo} />
+        </AboutSection>
+      )}
+
       {data?.coaching_areas && data.coaching_areas.length > 0 && (
         <AboutSection label="Coaching Areas" icon={FiTarget}>
           <div className="flex flex-wrap gap-2.5">
             {data.coaching_areas.map(item => (
-              <ProfileChip key={item.id} label={item?.title} />
+              <ProfileChip key={item.id} label={getCoachingAreaLabel(item)} />
             ))}
           </div>
         </AboutSection>
       )}
 
-      {relatedLanguages && relatedLanguages.length > 0 && (
+      {languageLabels.length > 0 && (
         <AboutSection label="Languages" icon={FiGlobe}>
           <div className="flex flex-wrap gap-2.5">
-            {relatedLanguages.map((language, index) => (
-              <ProfileChip key={index} label={language?.label} />
+            {languageLabels.map((language, index) => (
+              <ProfileChip key={index} label={language} />
             ))}
           </div>
         </AboutSection>

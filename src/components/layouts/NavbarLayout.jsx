@@ -4,10 +4,10 @@ import { SimpleNavbar } from '../navbar';
 
 const NavbarLayout = ({ children }) => {
   return (
-    <div className="w-full min-h-screen flex flex-col">
+    <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-hidden">
       <SimpleNavbar />
       <Toolbar />
-      <main className="h-full overflow-y-auto">{children}</main>
+      <main className="min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
     </div>
   );
 };

@@ -18,11 +18,11 @@ export const updateAIChatPrompt = async ({ payload, config = {} }) => {
     // For FormData, extract id and send the rest
     const id = payload.get('id');
     payload.delete('id'); // Remove id from FormData since it's in the URL
-    return axios.put(`/ai/prompts/${id}/`, payload, config);
+    return axios.patch(`/ai/prompts/${id}/`, payload, config);
   } else {
     // For regular objects, destructure as before
     const { id, ...restPayload } = payload;
-    return axios.put(`/ai/prompts/${id}/`, restPayload, config);
+    return axios.patch(`/ai/prompts/${id}/`, restPayload, config);
   }
 };
 

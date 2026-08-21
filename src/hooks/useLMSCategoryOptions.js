@@ -8,13 +8,21 @@ import queryKeys from '@/utils/query-keys';
 function useLMSCategoryOptions({ context, field } = {}) {
   const useCatalog = Boolean(context && field);
 
-  const { isLoading: catalogLoading, data: catalogData } = useQuery({
+  const {
+    isLoading: catalogLoading,
+    isError: catalogError,
+    data: catalogData,
+  } = useQuery({
     queryFn: () => getExpertCatalogTags({ context, field }),
     queryKey: [queryKeys.lmsCategories, context, field],
     enabled: useCatalog,
   });
 
-  const { isLoading: genericLoading, data: categoriesResponse } = useQuery({
+  const {
+    isLoading: genericLoading,
+    isError: genericError,
+    data: categoriesResponse,
+  } = useQuery({
     queryFn: getCategoriesList,
     queryKey: [queryKeys.lmsCategories],
     enabled: !useCatalog,
@@ -35,6 +43,7 @@ function useLMSCategoryOptions({ context, field } = {}) {
 
   return {
     isLoading: useCatalog ? catalogLoading : genericLoading,
+    isError: useCatalog ? catalogError : genericError,
     options,
   };
 }

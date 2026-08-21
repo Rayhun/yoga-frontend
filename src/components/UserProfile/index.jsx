@@ -52,7 +52,7 @@ const UserProfile = () => {
     }
   };
   return (
-    <div className="p-4 sm:p-6 lg:p-8n bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 sm:p-6 lg:p-8">
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
         {({ isSubmitting }) => {
           return (
@@ -102,8 +102,8 @@ const UserProfile = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end">
-                <Button type="submit" size="2xl" isLoading={isSubmitting}>
+              <div className="flex justify-stretch sm:justify-end">
+                <Button type="submit" size="2xl" isLoading={isSubmitting} className="w-full sm:w-auto">
                   {isSubmitting ? 'Updating...' : 'Update My Profile'}
                 </Button>
               </div>

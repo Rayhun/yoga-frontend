@@ -1,47 +1,35 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import useAuthContext from '@/hooks/useAuthContext';
 import { useInbox } from '@/context/InboxContext';
 import LoadingWrapper from '../common/loader/Wrapper';
-import { FiPaperclip, FiFileText } from 'react-icons/fi';
+import { FiPaperclip } from 'react-icons/fi';
 import Image from 'next/image';
 import SystemMessage from './SystemMessage';
 import { isSystemMessage, getSystemMessageType } from '@/utils/messagePatterns';
+import {
+  ATTACHMENT_TYPE,
+  getAttachmentDuration,
+  getFileIcon,
+  resolveAttachmentKind,
+} from './chatMedia';
+import VoiceNotePlayer from './VoiceNotePlayer';
+import CircleChatEmptyState from './CircleChatEmptyState';
+import { USER_ROLE } from '@/utils/authorization';
 
-const Attachment = ({ url }) => {
-  const isImage = /\.(jpe?g|png|gif|bmp|webp)(\?.*)?$/i.test(url);
-  const isVideo = /\.(mp4|avi|mov|wmv|flv|webm)(\?.*)?$/i.test(url);
-  const fileName = url.split('/').pop().split('?')[0];
-  
-  const getFileIcon = (url) => {
-    const extension = url.split('.').pop().toLowerCase();
-    switch (extension) {
-      case 'pdf':
-        return '📄';
-      case 'doc':
-      case 'docx':
-        return '📝';
-      case 'xls':
-      case 'xlsx':
-        return '📊';
-      case 'ppt':
-      case 'pptx':
-        return '📋';
-      case 'txt':
-        return '📃';
-      case 'zip':
-      case 'rar':
-        return '📦';
-      case 'mp3':
-      case 'wav':
-        return '🎵';
-      default:
-        return '📎';
-    }
-  };
+const isVoiceAttachment = attachment => {
+  const kind = resolveAttachmentKind(attachment);
+  return kind === ATTACHMENT_TYPE.VOICE || kind === ATTACHMENT_TYPE.AUDIO;
+};
 
-  if (isImage) {
+const Attachment = ({ attachment, isMyMessage = false, messageTime = null }) => {
+  const url = attachment?.file || attachment?.url || '';
+  const kind = resolveAttachmentKind(attachment);
+  const fileName = decodeURIComponent(url.split('/').pop().split('?')[0] || 'file');
+  const durationSeconds = getAttachmentDuration(attachment);
+
+  if (kind === ATTACHMENT_TYPE.IMAGE) {
     return (
       <a href={url} target="_blank" rel="noreferrer" download className="block mb-2">
         <Image
@@ -55,7 +43,18 @@ const Attachment = ({ url }) => {
     );
   }
 
-  if (isVideo) {
+  if (kind === ATTACHMENT_TYPE.VOICE || kind === ATTACHMENT_TYPE.AUDIO) {
+    return (
+      <VoiceNotePlayer
+        url={url}
+        durationSeconds={durationSeconds}
+        isMyMessage={isMyMessage}
+        messageTime={messageTime}
+      />
+    );
+  }
+
+  if (kind === ATTACHMENT_TYPE.VIDEO) {
     return (
       <div className="mb-2">
         <video
@@ -75,7 +74,7 @@ const Attachment = ({ url }) => {
       download
       target="_blank"
       rel="noreferrer"
-      className="flex items-center space-x-3 p-3 mb-2 bg-gray-50 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors duration-200"
+      className="flex items-center space-x-3 p-3 mb-2 bg-gray-50 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors duration-200 min-w-[180px] max-w-[280px]"
     >
       <div className="text-2xl">{getFileIcon(url)}</div>
       <div className="flex-1 min-w-0">
@@ -87,87 +86,177 @@ const Attachment = ({ url }) => {
   );
 };
 
-const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => (
-  <>
-    {isMyMessage ? (
-      <div className="flex justify-end mb-1">
-        <div className="max-w-[70%]">
-          <div className="rounded-lg rounded-br-sm px-3 py-2 shadow-sm max-w-full relative" style={{ backgroundColor: '#DBF8C6' }}>
-            {/* Show attachments first (above text) */}
-            {attachments.map(att => (
-              <Attachment key={att.id} url={att.file || att.url} />
-            ))}
-            {/* Show text message below attachments */}
-            {children && (
-              <p className="text-sm leading-relaxed text-black pr-12 font-medium">{children}</p>
-            )}
-            {/* Timestamp inside bubble at bottom right */}
-            <div className="absolute bottom-2 right-2">
-              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+const Message = ({ isMyMessage, senderName, time, children, attachments = [] }) => {
+  const hasText = typeof children === 'string' && children.trim() !== '';
+  const isVoiceOnly =
+    attachments.length > 0 &&
+    attachments.every(isVoiceAttachment) &&
+    !hasText;
+
+  return (
+    <>
+      {isMyMessage ? (
+        <div className="flex justify-end mb-1">
+          <div className="max-w-[70%]">
+            <div
+              className="rounded-lg rounded-br-sm px-3 py-2 shadow-sm max-w-full relative"
+              style={{ backgroundColor: '#DBF8C6' }}
+            >
+              {attachments.map(att => (
+                <Attachment
+                  key={att.id || att.file}
+                  attachment={att}
+                  isMyMessage
+                  messageTime={time}
+                />
+              ))}
+              {hasText && (
+                <p className="text-sm leading-relaxed text-black pr-12 font-medium">{children}</p>
+              )}
+              {!isVoiceOnly && (
+                <div className="absolute bottom-2 right-2">
+                  <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    ) : (
-      <div className="flex justify-start mb-1">
-        <div className="max-w-[70%]">
-          <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2 shadow-sm border border-gray-200 max-w-full relative">
-            {/* Show sender name in group chat */}
-            {senderName && (
-              <p className="text-xs font-semibold text-blue-600 mb-1">{senderName}</p>
-            )}
-            {/* Show attachments first (above text) */}
-            {attachments.map(att => (
-              <Attachment key={att.id} url={att.file || att.url} />
-            ))}
-            {/* Show text message below attachments */}
-            {children && (
-              <p className="text-sm leading-relaxed text-gray-800 pr-12 font-medium">{children}</p>
-            )}
-            {/* Timestamp inside bubble at bottom right */}
-            <div className="absolute bottom-2 right-2">
-              <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+      ) : (
+        <div className="flex justify-start mb-1">
+          <div className="max-w-[70%]">
+            <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2 shadow-sm border border-gray-200 max-w-full relative">
+              {senderName && (
+                <p className="text-xs font-semibold text-blue-600 mb-1">{senderName}</p>
+              )}
+              {attachments.map(att => (
+                <Attachment
+                  key={att.id || att.file}
+                  attachment={att}
+                  isMyMessage={false}
+                  messageTime={time}
+                />
+              ))}
+              {hasText && (
+                <p className="text-sm leading-relaxed text-gray-800 pr-12 font-medium">{children}</p>
+              )}
+              {!isVoiceOnly && (
+                <div className="absolute bottom-2 right-2">
+                  <p className="text-xs text-gray-500">{dayjs(time).format('HH:mm')}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </>
-);
+      )}
+    </>
+  );
+};
 
 const MessagesList = () => {
   const messagesEndRef = useRef(null);
-  const {
-    user: {
-      profile: { id: loggedInUserID },
-    },
-  } = useAuthContext();
+  const scrollContainerRef = useRef(null);
+  const knownIdsRef = useRef(new Set());
+  const conversationIdRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
+  const animateIdsRef = useRef(new Set());
+
+  const { user } = useAuthContext();
+  const loggedInUserID = user?.profile?.id;
+  const isExpertPortal = user?.profile?.role === USER_ROLE.TEACHER;
   const {
     conversations: { active: activeConversation },
     messages: { isLoading: isLoadingMessages, data: messages },
   } = useInbox();
 
-  // Scroll to bottom when messages change
+  const conversationId = activeConversation?.id;
+
+  // Reset tracking when switching conversations
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (conversationId !== conversationIdRef.current) {
+      conversationIdRef.current = conversationId;
+      knownIdsRef.current = new Set();
+      animateIdsRef.current = new Set();
+      isInitialLoadRef.current = true;
     }
-  }, [messages]);
+  }, [conversationId]);
+
+  // Decide which messages get enter animation (new only — not history)
+  if (Array.isArray(messages)) {
+    const nextAnimate = new Set();
+    messages.forEach(message => {
+      const id = message?.id;
+      if (id == null) return;
+      if (!isInitialLoadRef.current && !knownIdsRef.current.has(id)) {
+        nextAnimate.add(id);
+      }
+    });
+    animateIdsRef.current = nextAnimate;
+  }
+
+  useLayoutEffect(() => {
+    if (isLoadingMessages || !Array.isArray(messages)) return;
+
+    const container = scrollContainerRef.current;
+    const end = messagesEndRef.current;
+    if (!container || !end) return;
+
+    // History / conversation open: jump to bottom instantly (no staggered scroll fight)
+    if (isInitialLoadRef.current) {
+      end.scrollIntoView({ behavior: 'auto', block: 'end' });
+      messages.forEach(m => {
+        if (m?.id != null) knownIdsRef.current.add(m.id);
+      });
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    // Realtime append: only smooth-scroll if user is already near the bottom
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const nearBottom = distanceFromBottom < 120;
+
+    messages.forEach(m => {
+      if (m?.id != null) knownIdsRef.current.add(m.id);
+    });
+
+    if (nearBottom) {
+      end.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [messages, isLoadingMessages]);
+
+  const hasMessages = Array.isArray(messages) && messages.length > 0;
+  const isGroupCircle = Boolean(activeConversation?.is_group && !activeConversation?.is_coach);
+  const showExpertEmptyState =
+    !isLoadingMessages &&
+    !hasMessages &&
+    isGroupCircle &&
+    isExpertPortal &&
+    activeConversation?.can_view_detail;
+  const showMemberEmptyState =
+    !isLoadingMessages && !hasMessages && isGroupCircle && !isExpertPortal;
 
   return (
-    <div 
-      className="flex-1 overflow-hidden relative"
-      style={{
-        backgroundColor: '#EDE6DE'
-      }}
+    <div
+      className="relative min-h-0 flex-1 overflow-hidden"
+      style={{ backgroundColor: '#EDE6DE' }}
     >
       <LoadingWrapper isLoading={isLoadingMessages}>
-        <div className="h-full overflow-y-auto px-4 py-2 scroll-smooth">
-          <div className="space-y-0.5">
-            {[...messages].map((message, index) => {
+        {showExpertEmptyState ? (
+          <CircleChatEmptyState variant="expert" />
+        ) : showMemberEmptyState ? (
+          <CircleChatEmptyState groupName={activeConversation?.name} />
+        ) : (
+          <div
+            ref={scrollContainerRef}
+            className={`h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-2 ${
+              isInitialLoadRef.current ? 'animate-chatThreadIn' : ''
+            }`}
+            style={{ scrollBehavior: 'auto' }}
+          >
+            <div className="space-y-0.5">
+              {[...messages].map(message => {
               const messageContent = message.content || message.message || '';
-              
-              // Check if this should be displayed as a system message
+
               if (isSystemMessage(message)) {
                 return (
                   <SystemMessage
@@ -178,17 +267,19 @@ const MessagesList = () => {
                   />
                 );
               }
-              
-              // Regular user message
+
+              const shouldAnimate = animateIdsRef.current.has(message.id);
+
               return (
                 <div
                   key={message.id}
-                  className="animate-fadeIn"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className={shouldAnimate ? 'animate-chatMessageIn' : undefined}
                 >
                   <Message
                     time={message.created_at}
-                    senderName={activeConversation.is_group ? message.sender_name : undefined}
+                    senderName={
+                      activeConversation?.is_group ? message.sender_name : undefined
+                    }
                     isMyMessage={message.sender === loggedInUserID}
                     attachments={message?.attachments}
                   >
@@ -196,10 +287,11 @@ const MessagesList = () => {
                   </Message>
                 </div>
               );
-            })}
+              })}
+            </div>
+            <div ref={messagesEndRef} />
           </div>
-          <div ref={messagesEndRef} />
-        </div>
+        )}
       </LoadingWrapper>
     </div>
   );

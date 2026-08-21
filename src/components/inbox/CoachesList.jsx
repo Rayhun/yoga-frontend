@@ -1,19 +1,21 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
-import Image from 'next/image';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
-import { FiPlus, FiSearch } from 'react-icons/fi';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { FiSearch } from 'react-icons/fi';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { useInbox } from '@/context/InboxContext';
-import { getAvailableCoaches, createCoachConversation } from '@/services/private/inbox/conversation';
+import { createCoachConversation } from '@/services/private/inbox/conversation';
+import {
+  getDiscoverCommunityCoaches,
+  toggleFollowCoach,
+} from '@/services/private/customer/v2/coaches';
 import queryKeys from '@/utils/query-keys';
-import UserAvatar from './UserAvatar';
 import LoadingWrapper from '../common/loader/Wrapper';
-import Spinner from '../common/loader/Spinner';
+import DiscoverCoachCard from './DiscoverCoachCard';
+import HomeCoachSidebarSection from './HomeCoachSidebarSection';
 
 const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
-  const router = useRouter();
   const {
     conversations: { active: activeConversation },
     actions: { setActiveConversation },
@@ -25,6 +27,8 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   const setCurrentSubTab = setActiveSubTab || setLocalSubTab;
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [followOverrides, setFollowOverrides] = useState({});
 
   // Debounce search
   useEffect(() => {
@@ -34,15 +38,94 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  // Fetch available coaches for "Find Coaches" tab
+  // Fetch coaches for "Find Coaches" tab from v2 community discover API
   const { data: coachesResponse, isLoading: isLoadingCoaches } = useQuery({
-    queryFn: () => getAvailableCoaches({ search: debouncedSearchText.trim() || undefined }),
-    queryKey: [queryKeys.availableCoaches, debouncedSearchText],
+    queryFn: () =>
+      getDiscoverCommunityCoaches({
+        search: debouncedSearchText.trim() || undefined,
+      }),
+    queryKey: [queryKeys.communityCoachesDiscover, debouncedSearchText],
     enabled: currentSubTab === 'find-coaches',
     refetchOnMount: 'always',
   });
 
-  const availableCoaches = coachesResponse?.data?.data || [];
+  const discoverPayload = coachesResponse?.data?.data;
+  const filterItems = (discoverPayload?.filter_bar?.items || []).filter(
+    item => item.value !== 'all' && item.id !== 'filter_all'
+  );
+
+  const discoverCoaches = useMemo(() => {
+    const section =
+      discoverPayload?.sections?.find(item => item.section_id === 'expert_profiles_list') ||
+      discoverPayload?.sections?.[0];
+    return section?.items || [];
+  }, [discoverPayload]);
+
+  const followMutation = useMutation({
+    mutationFn: expertId => toggleFollowCoach(expertId),
+    onSuccess: (response, expertId) => {
+      const payload = response?.data?.data;
+      setFollowOverrides(prev => ({
+        ...prev,
+        [expertId]: {
+          isFollow: Boolean(payload?.is_follow),
+          label: payload?.label || (payload?.is_follow ? 'Following' : '+ Follow'),
+        },
+      }));
+      queryClient.invalidateQueries({ queryKey: [queryKeys.communityCoachesDiscover] });
+    },
+    onError: () => {
+      toast.error('Could not update follow status. Please try again.');
+    },
+  });
+
+  const getFollowState = coach => {
+    const override = followOverrides[coach.id];
+    if (override) return override;
+    const followButton = coach.actions?.follow_button;
+    return {
+      isFollow: Boolean(followButton?.is_follow),
+      label: followButton?.label || (followButton?.is_follow ? 'Following' : '+ Follow'),
+    };
+  };
+
+  const handleDiscoverMessage = async coach => {
+    const messageAction = coach.actions?.message_button;
+    if (!messageAction) return;
+
+    if (messageAction.conversation_id) {
+      setActiveConversation({
+        id: messageAction.conversation_id,
+        name: coach.name,
+        is_group: false,
+        is_coach: true,
+        coach_title: coach.title,
+      });
+      setCurrentSubTab('my-chats');
+      return;
+    }
+
+    if (!messageAction.coach_user_id) return;
+
+    try {
+      const response = await createCoachConversation(messageAction.coach_user_id);
+      const conversationData = response.data.data;
+      setActiveConversation({
+        id: conversationData.conversation_id,
+        name: conversationData.name || coach.name,
+        is_group: false,
+        is_coach: true,
+        coach_title: conversationData.coach_title || coach.title,
+        coach_status: conversationData.coach_status,
+      });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.inboxConversations] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.communityCoachesDiscover] });
+      setCurrentSubTab('my-chats');
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      toast.error('Could not start a conversation. Please try again.');
+    }
+  };
 
   // Filter coaches with unread messages
   const unreadCoaches = useMemo(
@@ -90,18 +173,8 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* My Coaches Header */}
-      <div className="px-3 md:px-4 py-3 md:py-4 bg-white border-b border-gray-200">
-        <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">My Coaches</h2>
-        {/* <button
-          onClick={() => setCurrentSubTab('find-coaches')}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 md:py-2.5 px-3 md:px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm md:text-base"
-        >
-          <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
-          <span>Find a Coach</span>
-        </button> */}
-      </div>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <HomeCoachSidebarSection />
 
       {/* Sub-navigation */}
       <div className="flex border-b border-gray-200 bg-white">
@@ -109,7 +182,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
           onClick={() => setCurrentSubTab('my-chats')}
           className={`flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-colors ${
             currentSubTab === 'my-chats'
-              ? 'text-green-600 border-b-2 border-green-600'
+              ? 'text-primary border-b-2 border-primary'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -119,7 +192,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
           onClick={() => setCurrentSubTab('find-coaches')}
           className={`flex-1 px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-colors ${
             currentSubTab === 'find-coaches'
-              ? 'text-green-600 border-b-2 border-green-600'
+              ? 'text-primary border-b-2 border-primary'
               : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -142,7 +215,7 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {currentSubTab === 'my-chats' ? (
           <LoadingWrapper isLoading={isLoading}>
             {/* Unread Messages Section */}
@@ -243,122 +316,62 @@ const CoachesList = ({ coaches, isLoading, activeSubTab, setActiveSubTab }) => {
           </LoadingWrapper>
         ) : (
           <LoadingWrapper isLoading={isLoadingCoaches}>
-            <div className="px-3 md:px-4 py-3 md:py-4">
-              <h3 className="text-xs md:text-sm font-semibold text-gray-900 mb-2 md:mb-3">Find a Coach</h3>
-              {availableCoaches.length > 0 ? (
-                <div className="space-y-2 md:space-y-3">
-                  {availableCoaches.map((coach) => (
-                    <div
-                      key={coach.expert_id}
-                      className="flex items-start gap-2 md:gap-3 p-2 md:p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="relative flex-shrink-0">
-                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold text-xs md:text-sm">
-                          {getInitials(coach.name)}
-                        </div>
-                        {coach.status === 'Available' && (
-                          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs md:text-sm font-semibold text-gray-900">{coach.name}</h4>
-                        <div className="mb-1">
-                          {coach?.specialization && (() => {
-                            const raw = coach.specialization;
-                            const list = Array.isArray(raw)
-                              ? raw.filter(Boolean)
-                              : String(raw ?? '')
-                                  .split(',')
-                                  .map(item => item.trim())
-                                  .filter(Boolean);
+            <div className="space-y-4 px-3 py-3 md:px-4 md:py-4">
+              {filterItems.length > 0 ? (
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {filterItems.map(filter => {
+                    const isActive = activeFilter === filter.value;
+                    return (
+                      <button
+                        key={filter.id}
+                        type="button"
+                        onClick={() =>
+                          setActiveFilter(current =>
+                            current === filter.value ? null : filter.value
+                          )
+                        }
+                        className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                          isActive
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-stone-200 bg-white text-gray-600 hover:border-primary/30 hover:text-primary'
+                        }`}
+                      >
+                        {filter.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
 
-                            if (!list.length) return <span className="text-xs text-green-600">Coach</span>;
+              {discoverCoaches.length > 0 ? (
+                <div className="space-y-4">
+                  {discoverCoaches.map(coach => {
+                    const followState = getFollowState(coach);
+                    const isPending =
+                      followMutation.isPending && followMutation.variables === coach.id;
 
-                            const primary = list[0];
-                            const secondary = list[1] || null;
-                            const extraCount = list.length > 2 ? list.length - 2 : 0;
-
-                            return (
-                              <div className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs text-gray-700">
-                                <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-[10px] text-green-600">
-                                  ★
-                                </span>
-                                <span>
-                                  <span className="font-medium">{primary}</span>
-                                  {secondary && <span className="text-gray-500"> ({secondary})</span>}
-                                </span>
-                                {extraCount > 0 && (
-                                  <span className="ml-2 inline-flex flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-gray-700">
-                                    +{extraCount}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })() || <span className="text-xs text-green-600">Coach</span>}
-                        </div>
-                        {/* {coach.description && (
-                          <div
-                            className="text-xs text-gray-600 mb-2 line-clamp-2 leading-relaxed [&_p]:mb-0 [&_p]:last:mb-0 [&_strong]:font-semibold [&_a]:text-green-600 [&_a]:underline [&_a]:break-all"
-                            dangerouslySetInnerHTML={{ __html: coach.description }}
-                          />
-                        )} */}
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                          <button
-                            onClick={async () => {
-                              if (coach.has_existing_chat && coach.conversation_id) {
-                                setActiveConversation({
-                                  id: coach.conversation_id,
-                                  name: coach.name,
-                                  is_group: false,
-                                  is_coach: true,
-                                  coach_title: coach.title,
-                                  coach_status: coach.status,
-                                });
-                              } else {
-                                try {
-                                  const response = await createCoachConversation(coach.user_id);
-                                  const conversationData = response.data.data;
-                                  setActiveConversation({
-                                    id: conversationData.conversation_id,
-                                    name: conversationData.name,
-                                    is_group: false,
-                                    is_coach: true,
-                                    coach_title: conversationData.coach_title,
-                                    coach_status: conversationData.coach_status,
-                                  });
-                                  // Refresh conversations list
-                                  queryClient.invalidateQueries([queryKeys.inboxConversations]);
-                                } catch (error) {
-                                  console.error('Failed to create conversation:', error);
-                                }
-                              }
-                            }}
-                            className="flex-1 sm:flex-none px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors"
-                          >
-                            {coach.has_existing_chat ? 'Open Chat' : 'Send Message'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (coach.expert_id) {
-                                router.push(`/portal/customer/lms/expert/${coach.expert_id}/profile?active_tab=about`);
-                              }
-                            }}
-                            className="flex-1 sm:flex-none px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-medium rounded-lg transition-colors"
-                          >
-                            View Profile
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    return (
+                      <DiscoverCoachCard
+                        key={coach.id}
+                        coach={coach}
+                        isFollowing={followState.isFollow}
+                        followLabel={followState.label}
+                        isFollowPending={isPending}
+                        onFollow={() => followMutation.mutate(coach.id)}
+                        onMessage={() => handleDiscoverMessage(coach)}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3 md:mb-4">
-                    <FiSearch className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 md:mb-4 md:h-16 md:w-16">
+                    <FiSearch className="h-6 w-6 text-gray-400 md:h-8 md:w-8" />
                   </div>
-                  <p className="text-xs md:text-sm text-gray-500 px-4">
-                    {debouncedSearchText ? 'No coaches found matching your search.' : 'No coaches available at the moment.'}
+                  <p className="px-4 text-xs text-gray-500 md:text-sm">
+                    {debouncedSearchText
+                      ? 'No coaches found matching your search.'
+                      : 'No coaches available at the moment.'}
                   </p>
                 </div>
               )}

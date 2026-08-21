@@ -1,0 +1,146 @@
+import {
+  getCatalogTagChipLabel,
+  getCatalogTagNamespaceLabel,
+  getCatalogTagRowLabel,
+  resolveCatalogTagIdsByLabel,
+} from '@/utils/catalogTag';
+import { LANGUAGES } from '@/utils/constants';
+
+/** Map expert profile form field names to catalog-tags API ``field`` param. */
+
+export const EXPERT_PROFILE_CATALOG_FIELDS = {
+  practice_type: {
+    field: 'practice_type',
+    label: 'Practice Type',
+    modalTitle: 'Select practice type',
+    triggerPlaceholder: 'Select practice type',
+  },
+  coaching_style: {
+    field: 'coaching_style',
+    label: 'Coaching Style',
+    modalTitle: 'Select coaching style',
+    triggerPlaceholder: 'Select coaching style',
+  },
+  culture_experience: {
+    field: 'culture_experience',
+    label: 'Culture Experience',
+    modalTitle: 'Select culture experience',
+    triggerPlaceholder: 'Select culture experience',
+  },
+  categories: {
+    field: 'categories',
+    label: 'Categories',
+    modalTitle: 'Select categories',
+    triggerPlaceholder: 'Select categories',
+  },
+  tags: {
+    field: 'tags',
+    label: 'Focus & approach?',
+    modalTitle: 'Select focus & approach',
+    triggerPlaceholder: 'Select focus & approach',
+  },
+  coaching_areas: {
+    field: 'coaching_areas',
+    label: 'Coaching Areas',
+    modalTitle: 'Select coaching areas',
+    triggerPlaceholder: 'Select coaching areas',
+  },
+  languages: {
+    field: 'languages',
+    label: 'Languages',
+    modalTitle: 'Select languages',
+    triggerPlaceholder: 'Select languages',
+  },
+};
+
+/** Normalize expert tag payload (M2M arrays or single FK object like ``practice_type``). */
+export function normalizeExpertTagItems(items) {
+  if (!items) return [];
+  if (Array.isArray(items)) return items.filter(item => item != null);
+  if (typeof items === 'object') return [items];
+  return [];
+}
+
+/** Read catalog tag IDs from API expert payload. */
+export function mapExpertTagIds(items) {
+  return normalizeExpertTagItems(items)
+    .map(item => (item && typeof item === 'object' ? item.id : item))
+    .filter(id => id != null && !Number.isNaN(Number(id)))
+    .map(Number);
+}
+
+/**
+ * Map expert ``languages`` from API (string labels or tag objects) to catalog tag IDs.
+ * Expert GET returns label strings; catalog rows are required to resolve labels to IDs.
+ */
+export function mapExpertLanguageIds(items, catalogRows = []) {
+  const normalized = normalizeExpertTagItems(items);
+  if (!normalized.length) return [];
+
+  const hasResolvableLabels = normalized.some(item => {
+    if (typeof item === 'string') return item.trim().length > 0;
+    if (item && typeof item === 'object' && item.id == null) {
+      return Boolean((item.label ?? item.title ?? '').trim());
+    }
+    return false;
+  });
+
+  if (hasResolvableLabels && catalogRows.length) {
+    return resolveCatalogTagIdsByLabel(normalized, catalogRows);
+  }
+
+  return mapExpertTagIds(normalized);
+}
+
+/** Chip seed rows from saved expert tag objects (labels before modal/catalog fetch). */
+export function seedExpertTagRows(items) {
+  return normalizeExpertTagItems(items).flatMap(item => {
+    if (typeof item === 'string') {
+      const label = item.trim();
+      return label ? [{ label }] : [];
+    }
+
+    return [
+      {
+        id: item.id,
+        label: getCatalogTagChipLabel(item),
+        namespace: item?.namespace ?? item?.namespace_slug,
+        namespaceLabel: getCatalogTagNamespaceLabel(item),
+      },
+    ];
+  });
+}
+
+/** Display label for coaching area tags from expert API (`title` or legacy `label`). */
+export function getCoachingAreaLabel(item) {
+  return item?.title ?? item?.label ?? '';
+}
+
+/** Normalize expert language values from API (string labels, codes, or tag objects). */
+export function getLanguageDisplayLabels(languages) {
+  if (!languages || !Array.isArray(languages)) return [];
+
+  return languages.flatMap(lang => {
+    if (typeof lang === 'string') {
+      return lang
+        .split(',')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .map(part => {
+          const byValue = LANGUAGES.find(item => item.value === part);
+          const byLabel = LANGUAGES.find(item => item.label === part);
+          return byValue?.label || byLabel?.label || part;
+        });
+    }
+
+    if (lang && typeof lang === 'object') {
+      const raw = lang.label ?? lang.title ?? lang.value;
+      if (!raw) return [];
+      const byValue = LANGUAGES.find(item => item.value === raw);
+      const byLabel = LANGUAGES.find(item => item.label === raw);
+      return [byValue?.label || byLabel?.label || raw];
+    }
+
+    return [];
+  });
+}

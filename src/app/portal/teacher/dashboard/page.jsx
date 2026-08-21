@@ -1,41 +1,46 @@
 'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import ExpertDashboard from '@/components/expert/ExpertDashboard';
-import useAuthContext from '@/hooks/useAuthContext';
+
+import { useQuery } from '@tanstack/react-query';
 import PageLoader from '@/components/common/loader/PageLoader';
 import TeacherQTEStatusBanner from '@/components/certification/apply/TeacherQTEStatusBanner';
+import ExpertHomeDashboard from '@/components/expert/HomeDashboard';
+import useAuthContext from '@/hooks/useAuthContext';
+import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import { getExpertHomeDashboard } from '@/services/private/expert/dashboard';
+import queryKeys from '@/utils/query-keys';
 
 export default function Page() {
   const { user } = useAuthContext();
-  const router = useRouter();
-  
-  const isProfileComplete = user?.profile?.is_profile_complete ?? false;
-  const hasEventOrConsult = user?.profile?.has_event_or_consult ?? false;
-  const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
   const userRole = user?.profile?.role ?? '';
 
-  useEffect(() => {
-    // Redirect if not a teacher or any of the required conditions are not met
-    if (userRole !== 'Teacher' || !isProfileComplete || !hasEventOrConsult || !stripeOnboarded) {
-      router.replace('/portal');
-    }
-  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, router]);
+  const { data, isLoading, failureReason, isError } = useQuery({
+    queryFn: getExpertHomeDashboard,
+    queryKey: [queryKeys.expertHomeDashboard],
+    enabled: userRole === 'Teacher',
+    refetchOnMount: 'always',
+  });
 
-  // Show loader while checking authentication
+  useHandleApiResponse(failureReason);
+
   if (!user || userRole !== 'Teacher') {
     return <PageLoader />;
   }
 
-  // Show loader if any required condition is not met (will redirect)
-  if (!isProfileComplete || !hasEventOrConsult || !stripeOnboarded) {
-    return <PageLoader />;
+  if (isLoading) return <PageLoader />;
+
+  if (isError || !data?.data?.data) {
+    return (
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold text-gray-800">Unable to load dashboard</h2>
+        <p className="text-sm text-gray-500">Please try again in a moment.</p>
+      </div>
+    );
   }
 
   return (
     <div>
       <TeacherQTEStatusBanner />
-      <ExpertDashboard />
+      <ExpertHomeDashboard data={data.data.data} />
     </div>
   );
 }

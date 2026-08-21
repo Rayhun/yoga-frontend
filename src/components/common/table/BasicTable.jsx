@@ -10,26 +10,50 @@ import {
 import CustomTable from './Table';
 import { getDefaultPageSize } from '@/utils/helpers';
 
-const BasicTable = ({ isLoading = false, columns = [], data = [], ...restProps }) => {
+const BasicTable = ({ isLoading = false, columns = [], data = [], serverPagination = null, ...restProps }) => {
+  const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: getDefaultPageSize(),
   });
 
+  const isServerPagination = Boolean(serverPagination?.enabled);
+  const tablePagination = isServerPagination
+    ? {
+        pageIndex: serverPagination.pageIndex ?? 0,
+        pageSize: serverPagination.pageSize ?? getDefaultPageSize(),
+      }
+    : pagination;
+
+  const handlePaginationChange = updater => {
+    if (!isServerPagination) {
+      setPagination(updater);
+      return;
+    }
+
+    const nextPagination =
+      typeof updater === 'function' ? updater(tablePagination) : updater;
+    serverPagination.onPaginationChange?.(nextPagination);
+  };
+
   const table = useReactTable({
     data,
     columns,
     state: {
-      pagination,
+      sorting,
+      pagination: tablePagination,
     },
-    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
+    onPaginationChange: handlePaginationChange,
+    manualPagination: isServerPagination,
+    pageCount: isServerPagination ? serverPagination.pageCount ?? -1 : undefined,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  return <CustomTable {...restProps} table={table} pagination={pagination} isLoading={isLoading} />;
+  return <CustomTable {...restProps} table={table} pagination={tablePagination} isLoading={isLoading} />;
 };
 
 export default BasicTable;

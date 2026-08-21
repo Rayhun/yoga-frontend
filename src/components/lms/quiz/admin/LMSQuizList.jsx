@@ -1,23 +1,20 @@
 'use client';
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
 import { BiImport, BiExport } from 'react-icons/bi';
-import { useMutation } from '@tanstack/react-query';
 import useTable from '@/hooks/useTable';
 import useImport from '@/hooks/useImport';
+import useExport from '@/hooks/useExport';
 import useDelete from '@/hooks/useDelete';
-import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import { deleteSingleQuiz, getQuizesList, importQuizes, exportQuizes } from '@/services/private/lms/quiz';
 import queryKeys from '@/utils/query-keys';
-import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 
 const LMSQuizList = () => {
   const router = useRouter();
-  const confirm = useConfirm();
   const { isImporting, handleImport: handleImportQuizes } = useImport({
     mutationFn: importQuizes,
     invalidateQueryKey: [queryKeys.lmsQuizes],
@@ -28,18 +25,12 @@ const LMSQuizList = () => {
     invalidateQueryKey: [queryKeys.lmsQuizes],
     onSuccess: () => toast.success('Quiz deleted successfully'),
   });
-
-  const { mutateAsync: exportQuizesFn, isPending: isExporting } = useMutation({ mutationFn: exportQuizes });
-  const handleExport = useCallback(async () => {
-    try {
-      await confirm({ message: 'Export quizzes?' });
-      const response = await exportQuizesFn();
-      downloadBlobAsCsv(response, 'quizzes_export.csv');
-      toast.success('Quizzes exported successfully');
-    } catch (e) {
-      if (e?.message !== 'cancel') toastApiError(e);
-    }
-  }, [confirm, exportQuizesFn]);
+  const { isExporting, handleExport } = useExport({
+    mutationFn: exportQuizes,
+    filename: 'quizzes_export.csv',
+    confirmMessage: 'Export quizzes?',
+    successMessage: 'Quizzes exported successfully',
+  });
 
   const tableColumns = useMemo(
     () => [

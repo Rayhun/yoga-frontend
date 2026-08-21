@@ -4,6 +4,17 @@ export const getUsersList = async () => {
   return axios.get('/auth/users/list/');
 };
 
+export const exportUsers = async () => {
+  return axios.get('/auth/users/export/', {
+    responseType: 'blob',
+  });
+};
+
+/** Staff-only: brief users matching `search` (email / name / id). */
+export const searchUsersForNotifications = async ({ search }) => {
+  return axios.get('/auth/users/list/', { params: { search } });
+};
+
 export const getUser = async ({ id }) => {
   return axios.get(`/auth/users/${id}/`);
 };

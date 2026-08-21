@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { FiMail, FiLock } from 'react-icons/fi';
@@ -11,9 +11,13 @@ import Button from '@/components/common/Button';
 import { loginUser } from '@/services/public/auth';
 import { getOnboardingRecommendations } from '@/services/private/onboarding/quiz';
 import { toastApiError } from '@/utils/helpers';
+import { getOnboardingRedirectPath, getSafeRedirectPath } from '@/utils/auth-redirect';
+import { toast } from 'react-toastify';
 
 const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get('next');
   const { mutateAsync } = useMutation({
     mutationFn: loginUser,
   });
@@ -36,13 +40,19 @@ const LoginForm = () => {
       if (response?.data?.token) {
         const userDetails = response?.data?.user;
         const { email_verify, on_boarding_quiz, role } = userDetails?.profile;
+        const subscriptionExpired =
+          response?.data?.subscription_expired === true ||
+          userDetails?.profile?.has_active_subscription === false;
+
         if (role?.toLowerCase() === 'teacher') {
           // Only email verification is required on the frontend (mobile OTP flow disabled)
           if (!email_verify) {
             sessionStorage.setItem('pendingVerificationToken', response?.data?.token);
             sessionStorage.setItem('pendingVerificationEmail', userDetails?.email);
-            // sessionStorage.setItem('pendingVerificationPhone', mobile_number);
-            router.replace('/auth/verify-account?step=email');
+            const verifyUrl = nextPath
+              ? `/auth/verify-account?step=email&next=${encodeURIComponent(nextPath)}`
+              : '/auth/verify-account?step=email';
+            router.replace(verifyUrl);
           } else {
             Cookies.set('token', response?.data?.token);
             router.replace('/portal/teacher/profile?active_tab=about');
@@ -53,6 +63,10 @@ const LoginForm = () => {
         } else if (role?.toLowerCase() === 'institution') {
           Cookies.set('token', response?.data?.token);
           router.replace('/portal/institution/dashboard');
+        } else if (subscriptionExpired && role?.toLowerCase() === 'customer') {
+          Cookies.set('token', response?.data?.token);
+          toast.info('Your subscription has expired. Please renew to continue.');
+          router.replace('/portal/customer/subscriptions');
         } else if (on_boarding_quiz) {
           Cookies.set('token', response?.data?.token);
           
@@ -67,11 +81,12 @@ const LoginForm = () => {
             } catch (error) {
               console.error('Failed to fetch recommendations:', error);
             }
-            router.replace('/');
+            const safeNext = getSafeRedirectPath(nextPath);
+            router.replace(safeNext || '/');
           }
         } else {
           Cookies.set('token', response?.data?.token);
-          router.replace('/onboarding');
+          router.replace(getOnboardingRedirectPath(nextPath));
         }
       }
     } catch (error) {

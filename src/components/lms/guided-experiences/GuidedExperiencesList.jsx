@@ -5,14 +5,22 @@ import { toast } from 'react-toastify';
 import { Tab, Tabs } from '@mui/material';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline } from 'react-icons/md';
 import { GoPlus } from 'react-icons/go';
+import { BiImport } from 'react-icons/bi';
 import useDelete from '@/hooks/useDelete';
+import useImport from '@/hooks/useImport';
 import useConfirm from '@/hooks/useConfirm';
 import useTable from '@/hooks/useTable';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
-import { getGuidedExperiencesList, deleteGuidedExperience, toggleGuidedExperienceStatus } from '@/services/private/lms/guided-experiences';
+import {
+  getGuidedExperiencesList,
+  deleteGuidedExperience,
+  toggleGuidedExperienceStatus,
+  importGuidedExperiences,
+  exportGuidedExperiencesList,
+} from '@/services/private/lms/guided-experiences';
 import queryKeys from '@/utils/query-keys';
-import { toastApiError } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
 import { BsToggleOff, BsToggleOn } from 'react-icons/bs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -27,6 +35,9 @@ const EVENT_TYPES = {
   MASTERCLASS: 'masterclass',
 };
 
+const EVENT_DELETE_BLOCKED_MESSAGE =
+  'This event cannot be deleted because users have signed up or tickets have been sold. Please refund or cancel all orders before deleting this event.';
+
 const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const router = useRouter();
   const [selectedEventType, setSelectedEventType] = useState(propEventType || EVENT_TYPES.WORKSHOP);
@@ -37,11 +48,52 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
   // Create stable filters object using useMemo to prevent unnecessary re-renders
   const filters = useMemo(() => ({ event_type: eventType }), [eventType]);
 
+  const { isImporting, handleImport: handleImportExperiences } = useImport({
+    mutationFn: importGuidedExperiences,
+    invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
+    onSuccess: () => toast.success('Guided experiences imported successfully'),
+  });
+
+  const { mutateAsync: exportExperiences } = useMutation({
+    mutationFn: exportGuidedExperiencesList,
+  });
+
+  const handleExport = useCallback(async () => {
+    try {
+      await confirm({
+        message: 'Export guided experiences for the current type as CSV?',
+      });
+      const response = await exportExperiences({ event_type: eventType });
+      const slug = eventType === 'live event' ? 'live_event' : eventType;
+      downloadBlobAsCsv(response, `guided_experiences_${slug}_export.csv`);
+      toast.success('Guided experiences exported successfully');
+    } catch (error) {
+      if (error?.message !== 'cancel') {
+        toastApiError(error);
+      }
+    }
+  }, [confirm, exportExperiences, eventType]);
+
   const { handleDelete: handleDeleteExperience } = useDelete({
     mutationFn: deleteGuidedExperience,
     invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
-    onSuccess: () => toast.success('Guided experience deleted successfully'),
+    getConfirmOptions: {
+      heading: 'Delete event?',
+      message: 'Are you sure you want to delete this event? This action cannot be undone.',
+    },
+    onSuccess: () => toast.success('Event deleted successfully'),
   });
+
+  const handleDeleteRow = useCallback(
+    row => {
+      if (!row?.original?.can_delete) {
+        toast.error(row?.original?.delete_blocked_message || EVENT_DELETE_BLOCKED_MESSAGE);
+        return;
+      }
+      handleDeleteExperience({ id: row.original.id });
+    },
+    [handleDeleteExperience]
+  );
 
   const { mutateAsync: toggleStatus } = useMutation({
     mutationFn: toggleGuidedExperienceStatus,
@@ -141,7 +193,8 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
       {
         id: 'delete',
         Icon: MdDeleteOutline,
-        onClick: row => handleDeleteExperience({ id: row.original.id }),
+        render: row => row?.original?.can_delete,
+        onClick: row => handleDeleteRow(row),
       },
       {
         id: 'active',
@@ -156,7 +209,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         onClick: row => handleToggleStatus(row?.original),
       },
     ],
-    [handleDeleteExperience, router, handleToggleStatus, eventType]
+    [handleDeleteRow, router, handleToggleStatus, eventType]
   );
 
   const { isLoading, columns, data: tableData } = useTable({
@@ -176,6 +229,18 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'import',
+        Icon: BiImport,
+        label: 'Import',
+        isLoading: isImporting,
+        onClick: handleImportExperiences,
+      },
+      {
+        id: 'export',
+        label: 'Export',
+        onClick: handleExport,
+      },
+      {
         id: 'add',
         variant: 'primary',
         onClick: () => {
@@ -187,7 +252,7 @@ const GuidedExperiencesList = ({ eventType: propEventType }) => {
         Icon: GoPlus,
       },
     ],
-    [router, propEventType, selectedEventType]
+    [router, propEventType, selectedEventType, handleImportExperiences, isImporting, handleExport]
   );
 
   const handleTabChange = (event, newValue) => {

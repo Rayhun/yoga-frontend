@@ -94,7 +94,7 @@ const SleepTracker = () => {
   if (!isFetching && !hasTrackerData) {
     return (
       <div className="max-w-4xl mx-auto p-6 min-h-screen">
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+        <div className="bg-white rounded-2xl portal-section shadow-lg border border-gray-100 text-center">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-gray-400 text-2xl">🎯</span>
           </div>
@@ -138,7 +138,7 @@ const SleepTracker = () => {
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+        <div className="bg-white rounded-2xl portal-section shadow-xl border border-gray-100">
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
             {({ setFieldValue, isSubmitting, errors, values, touched }) => (
               <>

@@ -4,7 +4,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
@@ -15,18 +15,26 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 // import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import { CategoriesField, TagsField } from '@/components/lms/general/fields';
-import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
+import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
+import {
+  EXPERT_PROFILE_CATALOG_FIELDS,
+  mapExpertLanguageIds,
+  mapExpertTagIds,
+  seedExpertTagRows,
+} from '@/utils/expertProfileTags';
+import {
+  addNewExpert,
+  getExpertCatalogTagsList,
+  getExpertCatalogTagsRows,
+  updateExistingExpert,
+} from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
+import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
 import queryKeys from '@/utils/query-keys';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
-import { COACHING_STYLES_OPTIONS, CULTURE_EXPERIENCE_OPTIONS, LANGUAGES, TITLE_OPTIONS } from '@/utils/constants';
+import { TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
-import CoachingAreasField from '../general/fields/CoachingAreasField';
-import CertificationsField from '../general/fields/CertificationsField';
-import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const router = useRouter();
@@ -35,8 +43,6 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const [savedExpertId, setSavedExpertId] = useState(selected?.id || null);
   const [currentStep, setCurrentStep] = useState(1);
   const [draftValues, setDraftValues] = useState(null);
-  const { options: coachingAreaOptions } = useLMSCoachingAreas('Coaching Areas');
-  const { options: certificationOptions } = useLMSCoachingAreas('Certifications');
   const draftStorageKey = `expert_profile_form_draft_${isAdminContext ? 'admin' : 'teacher'}_${selected?.id || 'new'}`;
 
   const { mutateAsync: addExpert } = useMutation({
@@ -45,6 +51,36 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const { mutateAsync: updateExpert } = useMutation({
     mutationFn: updateExistingExpert,
   });
+
+  const needsLanguageResolution = Boolean(
+    selected?.languages?.some(
+      item =>
+        typeof item === 'string' ||
+        (item && typeof item === 'object' && item.id == null && (item.label || item.title))
+    )
+  );
+
+  const { data: languageCatalogResponse } = useQuery({
+    queryKey: [queryKeys.expertCatalogTags, 'languages', 'resolve'],
+    queryFn: () =>
+      getExpertCatalogTagsList({ context: 'expert_profile', field: 'languages', limit: 500 }),
+    enabled: needsLanguageResolution,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const languageCatalogRows = useMemo(() => {
+    return getExpertCatalogTagsRows(languageCatalogResponse).map(row => ({
+      id: row.id,
+      label: row.label,
+      namespace: row.namespace,
+      namespaceLabel: row.namespace_label,
+    }));
+  }, [languageCatalogResponse]);
+
+  const resolvedLanguageIds = useMemo(
+    () => mapExpertLanguageIds(selected?.languages, languageCatalogRows),
+    [selected?.languages, languageCatalogRows]
+  );
 
   const baseInitialValues = {
     first_name: selected?.first_name || '',
@@ -57,20 +93,20 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     intro: selected?.intro || '',
     business_name: selected?.business_name || '',
     description: selected?.description || '',
-    categories: selected?.categories?.map(i => i.id) || [],
-    tags: selected?.tags?.map(i => i.id) || [],
-    coaching_areas: selected?.coaching_areas?.map(i => i.id) || [],
-    certifications: selected?.certifications?.map(i => i.id) || [],
-    languages: selected?.languages?.[0]?.split(',') || [],
+    practice_type: mapExpertTagIds(selected?.practice_type),
+    coaching_style: mapExpertTagIds(selected?.coaching_style),
+    culture_experience: mapExpertTagIds(selected?.culture_experience),
+    categories: mapExpertTagIds(selected?.categories),
+    tags: mapExpertTagIds(selected?.tags),
+    coaching_areas: mapExpertTagIds(selected?.coaching_areas),
+    certifications: selected?.certifications?.map(item => item?.id).filter(Boolean) || [],
+    languages: resolvedLanguageIds,
     // credentials: selected?.credentials?.[0]?.split(',') || [],
     available: selected?.available || false,
     experience: selected?.experience || 0,
     // coaching_content: selected?.coaching_content?.split(',') || [],
-    culture_experience: Array.isArray(selected?.culture_experience)
-      ? selected.culture_experience
-      : selected?.culture_experience?.split(',') || [],
-    coaching_style: selected?.coaching_style || '',
     file: selected?.file || null,
+    business_logo: selected?.business_logo || null,
     program_file: null,
   };
 
@@ -82,12 +118,37 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     if (!savedDraft) return;
     try {
       const parsedDraft = JSON.parse(savedDraft);
-      if (parsedDraft?.values) setDraftValues(parsedDraft.values);
+      if (parsedDraft?.values) {
+        const values = { ...parsedDraft.values };
+        const tagFields = [
+          'practice_type',
+          'coaching_style',
+          'culture_experience',
+          'categories',
+          'tags',
+          'coaching_areas',
+          'languages',
+        ];
+        tagFields.forEach(field => {
+          if (Array.isArray(values[field])) {
+            values[field] =
+              field === 'languages'
+                ? mapExpertLanguageIds(values[field], languageCatalogRows)
+                : mapExpertTagIds(values[field]);
+          }
+        });
+        if (Array.isArray(values.certifications)) {
+          values.certifications = values.certifications
+            .map(id => Number(id))
+            .filter(id => !Number.isNaN(id));
+        }
+        setDraftValues(values);
+      }
       if (parsedDraft?.step >= 1 && parsedDraft?.step <= 3) setCurrentStep(parsedDraft.step);
     } catch {
       localStorage.removeItem(draftStorageKey);
     }
-  }, [draftStorageKey]);
+  }, [draftStorageKey, languageCatalogRows]);
 
   const fullFieldSchema = useMemo(
     () => ({
@@ -120,19 +181,32 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           const wordsCount = textContent.split(' ').filter(word => word.length > 0).length;
           return wordsCount >= 25 && wordsCount <= 500;
         }),
+      practice_type: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'Practice type is required')
+        .max(1, 'Only one practice type can be selected'),
       categories: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one category is required'),
-      tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one tag is required'),
+      tags: Yup.array().of(Yup.number().required('Required!')).min(1, 'At least one focus & approach is required'),
       coaching_areas: Yup.array()
-        .of(Yup.mixed().required('Required!'))
+        .of(Yup.number().required('Required!'))
         .min(1, 'At least 1 coaching area is required')
         .max(10, 'Maximum 10 coaching areas are allowed'),
       certifications: Yup.array()
-        .of(Yup.mixed().required('Required!'))
+        .of(Yup.number().required('Required!'))
         .min(1, 'At least 1 certification is required')
         .max(5, 'Maximum 5 certifications are allowed'),
-      languages: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 language is required'),
-      culture_experience: Yup.array().of(Yup.string().required('Required!')).min(1, 'At least 1 is required'),
-      coaching_style: Yup.string().required('Coaching Style is required'),
+      languages: Yup.array()
+        .transform(value =>
+          Array.isArray(value) ? value.map(v => Number(v)).filter(n => !Number.isNaN(n)) : value
+        )
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least 1 language is required'),
+      culture_experience: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least one culture experience is required'),
+      coaching_style: Yup.array()
+        .of(Yup.number().required('Required!'))
+        .min(1, 'At least one coaching style is required'),
       experience: Yup.number()
         .required('Experience is required')
         .integer('Experience must be a whole number')
@@ -161,6 +235,16 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           if (!value || typeof value === 'string') return true;
           return value.size <= 10 * ONE_MB;
         }),
+      business_logo: Yup.mixed()
+        .nullable()
+        .test('fileType', 'Only image files are allowed', value => {
+          if (!value || typeof value === 'string') return true;
+          return value?.type?.includes('image');
+        })
+        .test('fileSize', 'File size must be less than 10 MB', value => {
+          if (!value || typeof value === 'string') return true;
+          return value.size <= 10 * ONE_MB;
+        }),
     }),
     []
   );
@@ -180,6 +264,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         'website',
       ],
       2: [
+        'practice_type',
         'coaching_style',
         'culture_experience',
         'description',
@@ -190,7 +275,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         'languages',
         'available',
       ],
-      3: ['file'],
+      3: ['file', 'business_logo'],
     }),
     []
   );
@@ -202,25 +287,6 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     });
     return Yup.object(schemaForStep);
   }, [currentStep, fullFieldSchema, stepFieldKeys]);
-
-  const normalizeLookupIds = (items = [], options = []) => {
-    if (!Array.isArray(items)) return [];
-    return items
-      .map(item => {
-        if (item && typeof item === 'object') {
-          return item.id ?? item.value ?? item.label ?? null;
-        }
-        const matchedOption = options.find(
-          option =>
-            option?.value === item ||
-            (typeof item === 'string' &&
-              typeof option?.label === 'string' &&
-              option.label.toLowerCase() === item.toLowerCase())
-        );
-        return matchedOption?.value ?? item;
-      })
-      .filter(value => value !== null && value !== undefined && value !== '');
-  };
 
   const persistDraft = (values, step) => {
     if (typeof window === 'undefined') return;
@@ -240,11 +306,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
   const handleSubmit = async (values, { setSubmitting, setTouched }) => {
     try {
-      const normalizedPayload = {
-        ...values,
-        coaching_areas: normalizeLookupIds(values.coaching_areas, coachingAreaOptions),
-        certifications: normalizeLookupIds(values.certifications, certificationOptions),
-      };
+      const normalizedPayload = { ...values };
 
       const stepPayloadMap = {
         1: {
@@ -260,9 +322,10 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           website: normalizedPayload.website,
         },
         2: {
+          practice_type: normalizedPayload.practice_type,
           coaching_style: normalizedPayload.coaching_style,
           culture_experience: normalizedPayload.culture_experience,
-          description: normalizedPayload.description,
+          description: stripHtmlLinks(normalizedPayload.description),
           categories: normalizedPayload.categories,
           tags: normalizedPayload.tags,
           coaching_areas: normalizedPayload.coaching_areas,
@@ -272,6 +335,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         },
         3: {
           file: normalizedPayload.file,
+          business_logo: normalizedPayload.business_logo,
         },
       };
 
@@ -295,7 +359,14 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         setCurrentStep(prev => prev + 1);
         toast.success(`Step ${currentStep} saved successfully`);
       } else {
-        toast.success(isEditMode ? 'Expert updated successfully' : 'Expert created successfully');
+        const isFirstTimeProfileCompletion = !isAdminContext && !selected?.is_profile_complete;
+        toast.success(
+          isFirstTimeProfileCompletion
+            ? 'Profile completed! Next, create your first guided experience.'
+            : isEditMode
+              ? 'Expert updated successfully'
+              : 'Expert created successfully'
+        );
         clearDraft();
         await queryClient.invalidateQueries([
           {
@@ -308,10 +379,16 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 : [queryKeys.teacherProfile],
           },
         ]);
-        
+        if (!isAdminContext) {
+          await queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] });
+        }
+
         // Redirect based on context
         if (isAdminContext) {
           router.push('/portal/admin/lms/expert');
+        } else if (isFirstTimeProfileCompletion) {
+          // First-time profile completion → create guided experience
+          router.push('/portal/teacher/group_coaching/add');
         } else {
           router.push('/portal/teacher/profile?active_tab=about');
         }
@@ -423,28 +500,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
               {currentStep === 2 && (
                 <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                      Coaching Details
-                    </h3>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <FormikSelect
-                        name="coaching_style"
-                        label="Coaching Style"
-                        placeholder="Select Coaching Style"
-                        options={COACHING_STYLES_OPTIONS}
-                        required
-                      />
-                      <FormikMultiSelect
-                        name="culture_experience"
-                        label="Culture Experience"
-                        placeholder="Select Culture Experience"
-                        options={CULTURE_EXPERIENCE_OPTIONS}
-                        required
-                      />
-                    </div>
-                  </div>
+                
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="space-y-4">
@@ -452,38 +508,92 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                       <FiInfo className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       About
                     </h3>
-                    <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required />
+                    <FormikRichTextEditor name="description" label="Description" placeholder="Tell us about yourself (25-500 words)" rows={5} required disableLinks />
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+                  <ExpertCatalogTagsField
+                    name="practice_type"
+                    field={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.field}
+                    label={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.label}
+                    modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.modalTitle}
+                    triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.practice_type.triggerPlaceholder}
+                    seedRows={seedExpertTagRows(selected?.practice_type)}
+                    maxSelections={1}
+                    required
+                  />
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                    <ExpertCatalogTagsField
+                      name="categories"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.categories.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.categories.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.categories.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.categories.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.categories)}
+                      required
+                    />
+                    <ExpertCatalogTagsField
+                      name="tags"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.tags.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.tags.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.tags.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.tags.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.tags)}
+                      required
+                    />
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CategoriesField name="categories" label="Categories" placeholder="Select categories" required />
-                  <TagsField name="tags" label="Tags" placeholder="Select tags" required />
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                    <CertificationsField name="certifications" required />
+                    <ExpertCatalogTagsField
+                      name="languages"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.languages.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.languages.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.languages.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.languages.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.languages)}
+                      required
+                    />
+                  </div>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CoachingAreasField
-                    name="coaching_areas"
-                    label="Coaching Areas"
-                    placeholder="Select or add coaching areas (max 10)"
-                    required
-                  />
-
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <CertificationsField
-                    name="certifications"
-                    label="Certifications"
-                    placeholder="Select or add certifications (max 5)"
-                    required
-                  />
-
-                  <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                  <FormikMultiSelect
-                    options={LANGUAGES}
-                    name="languages"
-                    label="Languages"
-                    placeholder="Select languages you speak"
-                    required
-                  />
-
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <FiTarget className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Coaching Details
+                    </h3>
+                    <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                      <ExpertCatalogTagsField
+                        name="coaching_style"
+                        field={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.field}
+                        label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.label}
+                        modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.modalTitle}
+                        triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_style.triggerPlaceholder}
+                        seedRows={seedExpertTagRows(selected?.coaching_style)}
+                        required
+                      />
+                      <ExpertCatalogTagsField
+                        name="culture_experience"
+                        field={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.field}
+                        label={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.label}
+                        modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.modalTitle}
+                        triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.culture_experience.triggerPlaceholder}
+                        seedRows={seedExpertTagRows(selected?.culture_experience)}
+                        required
+                      />
+                    </div>
+                    <ExpertCatalogTagsField
+                      name="coaching_areas"
+                      field={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.field}
+                      label={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.label}
+                      modalTitle={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.modalTitle}
+                      triggerPlaceholder={EXPERT_PROFILE_CATALOG_FIELDS.coaching_areas.triggerPlaceholder}
+                      seedRows={seedExpertTagRows(selected?.coaching_areas)}
+                      required
+                    />
+                  </div>
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
                   <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-800/30">
                     <FormikSwitch name="available" label="Available for Coaching" />
@@ -495,19 +605,34 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    Profile Photo
-                  </h3>
-                  <div className="flex justify-center items-center py-4">
-                    <div className="relative">
-                      <FormikImageInput name="file" label="" />
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Profile Photo
+                    </h3>
+                    <div className="flex justify-center items-center py-2">
+                      <FormikImageInput name="file" label="" size={128} />
                     </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Upload a professional photo that represents you. This will be visible to users.
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                    Upload a professional photo that represents you. This will be visible to users.
-                  </p>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700" />
+
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <LuBriefcaseBusiness className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      Business Logo
+                    </h3>
+                    <div className="flex justify-center items-center py-2">
+                      <FormikImageInput name="business_logo" label="" size={128} />
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      Upload your business or brand logo. This appears as a badge on your profile photo across the portal, Circle pages, and public join links.
+                    </p>
+                  </div>
                 </div>
               )}
 

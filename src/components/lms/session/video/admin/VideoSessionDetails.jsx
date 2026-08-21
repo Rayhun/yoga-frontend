@@ -1,11 +1,29 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
+import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, ReliefIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import {
+  SESSION_CATALOG_FIELD_NAMESPACES,
+  filterSessionTagsByNamespace,
+  getCultureExperienceDisplayData,
+} from '@/utils/sessionCatalogTags';
 
 const VideoSessionDetails = ({ data = {} }) => {
   const router = useRouter();
-
+  const focusAreaTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.focus_areas
+  );
+  const languageTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.languages
+  );
+  const categoryTags = filterSessionTagsByNamespace(
+    data.tags,
+    SESSION_CATALOG_FIELD_NAMESPACES.categories
+  );
+  const cultureExperienceTags = getCultureExperienceDisplayData(data);
   return (
     <DetailsLayoutWrapper
       title="Video Session"
@@ -20,11 +38,32 @@ const VideoSessionDetails = ({ data = {} }) => {
         <DetailsRecord label="Intensity">{data.intensity}</DetailsRecord>
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
-        <MultiValueDetailsRecord label="Focus Areas" data={data.focus_areas} getChipLabel={i => i} />
+        <DetailsRecord label="Relief index">
+          <ReliefIndexBadge value={data.relief_index} />
+        </DetailsRecord>
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
+          data={focusAreaTags.length ? focusAreaTags : data.focus_areas}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
         <MultiValueDetailsRecord label="Equipments" data={data.equipments} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Languages" data={data.languages} getChipLabel={i => i} />
-        <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        <MultiValueDetailsRecord
+          label="Culture Experience"
+          data={cultureExperienceTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={languageTags.length ? languageTags : data.languages}
+          getChipLabel={item => (typeof item === 'string' ? item : getCatalogTagChipLabel(item))}
+        />
+        <MultiValueDetailsRecord
+          label="Categories"
+          data={categoryTags.length ? categoryTags : data.categories}
+          getChipLabel={item =>
+            typeof item === 'string' ? item : item?.name ?? getCatalogTagChipLabel(item)
+          }
+        />
         <DetailsRecord label="Video File">
           <DetailsFileCard fileURL={data.content_file} />
         </DetailsRecord>

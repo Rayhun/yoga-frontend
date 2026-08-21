@@ -20,8 +20,9 @@ export const uploadPrograms = async ({ payload }) => {
 export const savePaymentInfo = async ({ payload }) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
-    if (key==='available' || value) formData.set(key, value);
-
+    if (key === 'available' || value !== undefined && value !== null && value !== '') {
+      formData.set(key, value);
+    }
   });
   return axios.post(`LMS/experts/payment/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };

@@ -5,22 +5,23 @@ import queryKeys from '@/utils/query-keys';
 import { getLookupsListByCategory } from '@/services/private/lms/expert';
 
 function useLookUpsByCategory(category = 'Coaching Areas') {
-  const { data: lookupsResponse } = useQuery({
+  const { isLoading, isError, data: lookupsResponse } = useQuery({
     queryFn: () => getLookupsListByCategory(category),
     queryKey: [queryKeys.lookupsByCategory, category],
   });
 
   const categoriesOptions = useMemo(
     () =>
-      lookupsResponse?.data?.data?.map((option, index) => ({
+      lookupsResponse?.data?.data?.map(option => ({
         label: option?.title ?? '',
-        // Ensure unique value: backend may use id or uuid; fallback to label+index so Autocomplete can distinguish options
-        value: option?.id ?? option?.uuid ?? `${option?.title ?? 'item'}-${index}`,
+        value: option?.id,
       })) ?? [],
     [lookupsResponse?.data?.data]
   );
 
   return {
+    isLoading,
+    isError,
     options: categoriesOptions,
   };
 }
