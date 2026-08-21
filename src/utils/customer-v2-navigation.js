@@ -22,6 +22,7 @@ import {
   MdLogout,
   MdOutlineContactSupport,
   MdTrackChanges,
+  MdVerified,
 } from 'react-icons/md';
 import {
   RiRepeatOneFill,
@@ -33,6 +34,7 @@ const NAV_PATH_TO_HREF = {
   '/circles': '/portal/inbox',
   '/programs': '/portal/customer/lms/program',
   '/guided-experiences': '/portal/customer/lms/group_coaching',
+  '/certifications': '/portal/customer/certification',
   '/coaches': '/portal/customer/lms/expert',
   '/habits/monthly-goal': '/portal/customer/checkin/monthly_goal',
   '/habits/tracker': '/portal/customer/checkin/sleep_tracker',
@@ -52,6 +54,7 @@ const ICON_MAP = {
   circles: FaInbox,
   programs: FaNewspaper,
   guided_experiences: GiTeacher,
+  certifications: MdVerified,
   coaches: GrUserExpert,
   habits: LuClipboardCheck,
   cycles_calendar: LuClipboardCheck,

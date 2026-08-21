@@ -29,6 +29,21 @@ const BLANK_BASICS = {
   duration_estimate: '',
   target_audience: 'both',
   thumbnail: null,
+  subtitle: '',
+  full_description: '',
+  level: null,
+  language: '',
+  promo_video: '',
+  outcomes: '',
+  start_date: '',
+  time_zone: '',
+  event_type: '',
+  is_online: true,
+  meeting_link: '',
+  venue_location: '',
+  is_recurring: false,
+  recurring_dates: [],
+  followup_support: [],
 };
 
 const pickBasics = program => ({
@@ -38,6 +53,25 @@ const pickBasics = program => ({
   duration_estimate: program?.duration_estimate ?? '',
   target_audience: program?.target_audience ?? 'both',
   thumbnail: program?.thumbnail ?? null,
+  subtitle: program?.subtitle ?? '',
+  full_description: program?.full_description ?? '',
+  level: program?.level ?? null,
+  language: program?.language ?? '',
+  promo_video: program?.promo_video ?? '',
+  outcomes: program?.outcomes ?? '',
+  start_date: program?.start_date ?? '',
+  time_zone: program?.time_zone ?? '',
+  event_type: program?.event_type ?? '',
+  is_online: program?.is_online ?? true,
+  meeting_link: program?.meeting_link ?? '',
+  venue_location: program?.venue_location ?? '',
+  is_recurring: program?.is_recurring ?? false,
+  recurring_dates: Array.isArray(program?.recurring_dates) ? program.recurring_dates : [],
+  // Stored server-side as a comma-joined CharField (mirrors LMS.Event.followup_support) —
+  // FormikMultiSelect needs an array either way.
+  followup_support: program?.followup_support
+    ? (Array.isArray(program.followup_support) ? program.followup_support : program.followup_support.split(','))
+    : [],
 });
 
 const pickDelivery = program => ({
@@ -74,22 +108,27 @@ const pickCertificateSetup = program => ({
 });
 
 /**
- * Single scrollable page (not a stepper, not a floating overlay) rendering the builder's six
- * confirmed sections in order: Basics, Delivery, Curriculum, Pricing, Certificate Setup,
- * Publish. Every section shares the same {initialValues, onSave, disabled} → status contract
- * via useSectionAutosave, so this file is mostly wiring: each handle*Save calls its endpoint,
- * then invalidates the shared program-detail query so every other section (and Publish's
- * completeness view) stays in sync.
+ * Two-step wizard (KAN-121) — Step 1 is Program Basics (Workshop/Program-style information,
+ * gated behind its own "Continue to Step 2 →" action); Step 2 is the builder's remaining five
+ * confirmed sections in order: Delivery, Curriculum, Pricing, Certificate Setup, Publish. Every
+ * section still shares the same {initialValues, onSave, disabled} → status contract via
+ * useSectionAutosave — the stepper only changes navigation/gating, not save mechanics (KAN-121
+ * explicitly keeps `useSectionAutosave` untouched). This file is mostly wiring: each handle*Save
+ * calls its endpoint, then invalidates the shared program-detail query so every other section
+ * (and Publish's completeness view) stays in sync.
  *
  * ``programId`` is the route param — either an existing program's id, or the literal string
- * 'new'. On 'new', only Basics renders (nothing else can attach without an id yet); the first
- * successful Basics save creates the draft and replaces the URL with the real id, at which
- * point the rest of the sections mount.
+ * 'new'. On 'new', only Step 1 renders (nothing else can attach without an id yet); the first
+ * successful Basics save creates the draft and replaces the URL with the real id. Resuming an
+ * existing program (``routeParam !== 'new'``) defaults straight to Step 2 — if the program
+ * already exists, Step 1 has necessarily already been saved at least once; a "← Back to Step 1"
+ * link still lets the creator revisit it.
  */
 const ProgramBuilderModal = ({ programId: routeParam }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [liveId, setLiveId] = useState(routeParam === 'new' ? null : routeParam);
+  const [currentStep, setCurrentStep] = useState(routeParam === 'new' ? 1 : 2);
 
   const { data: programRes, isLoading } = useQuery({
     queryKey: [queryKeys.certificationProgramDetail, liveId],
@@ -178,10 +217,26 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
   const pricingInitialValues = useMemo(() => pickPricing(program), [program]);
   const certificateSetupInitialValues = useMemo(() => pickCertificateSetup(program), [program]);
 
+  const stepHeader = (label, showBack) => (
+    <div className="flex items-center justify-between">
+      <p className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
+      {showBack && (
+        <button
+          type="button"
+          onClick={() => setCurrentStep(1)}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          ← Back to Step 1
+        </button>
+      )}
+    </div>
+  );
+
   if (!liveId) {
     return (
       <div className="flex flex-col gap-6 max-w-3xl">
-        <ProgramBasicsSection initialValues={BLANK_BASICS} onSave={handleBasicsSave} />
+        {stepHeader('Step 1 of 2 — Program Basics', false)}
+        <ProgramBasicsSection initialValues={BLANK_BASICS} onSave={handleBasicsSave} onContinue={() => setCurrentStep(2)} />
       </div>
     );
   }
@@ -195,9 +250,23 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     return null;
   }
 
+  if (currentStep === 1) {
+    return (
+      <div className="flex flex-col gap-6 max-w-3xl">
+        {stepHeader('Step 1 of 2 — Program Basics', false)}
+        <ProgramBasicsSection
+          key={`basics-${liveId}`}
+          initialValues={basicsInitialValues}
+          onSave={handleBasicsSave}
+          onContinue={() => setCurrentStep(2)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      <ProgramBasicsSection key={`basics-${liveId}`} initialValues={basicsInitialValues} onSave={handleBasicsSave} />
+      {stepHeader('Step 2 of 2 — Delivery, Curriculum, Pricing, Certificate & Publish', true)}
       <DeliveryFormatSection key={`delivery-${liveId}`} initialValues={deliveryInitialValues} onSave={handleDeliverySave} />
       <CurriculumBuilderSection key={`curriculum-${liveId}`} initialValues={modulesInitialValues} onSave={handleModulesSave} />
       <PricingSection key={`pricing-${liveId}`} initialValues={pricingInitialValues} onSave={handlePricingSave} />
