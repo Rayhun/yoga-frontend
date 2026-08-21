@@ -44,14 +44,17 @@ const TeacherQTEStatusBanner = () => {
     );
   }
 
+  // Once approved, the "Certification Programs" sidebar link (KAN-86/88) is the permanent
+  // entry point to program creation — don't keep showing the approved banner on every
+  // dashboard visit indefinitely.
+  if (data.application_status === 'approved') return null;
+
   return (
     <div className="mb-4">
       <ApplicationStatusCard
         applicationStatus={data.application_status}
         rejectedReason={data.rejected_reason}
         reapplyHref="/portal/teacher/apply-qte"
-        approvedCtaHref="/portal/teacher/certification/programs/builder/new"
-        approvedCtaLabel="Create your first program"
       />
     </div>
   );
