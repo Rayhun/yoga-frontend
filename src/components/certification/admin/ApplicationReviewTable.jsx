@@ -18,7 +18,7 @@ import ApplicationReviewDrawer from './ApplicationReviewDrawer';
 // List endpoint filters by 'qte'/'institution'; approve/reject URLs use 'expert'/'institution'
 // as the type segment (Expert model backs QTE applications) — mapped here at the call sites.
 const TABS = [
-  { key: 'qte', label: 'QTE (Experts)', actionType: 'expert' },
+  { key: 'qte', label: 'Qualified Teaching Experts (QTE)', actionType: 'expert' },
   { key: 'institution', label: 'Institutions', actionType: 'institution' },
 ];
 
