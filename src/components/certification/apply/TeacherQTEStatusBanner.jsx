@@ -1,16 +1,16 @@
 'use client';
 import React from 'react';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { FaAward } from 'react-icons/fa';
 import queryKeys from '@/utils/query-keys';
 import { getMyQTEApplication } from '@/services/private/certification/application';
 import ApplicationStatusCard from '@/components/certification/apply/ApplicationStatusCard';
 
 /**
- * Shown at the top of the Teacher dashboard (KAN-88). Every Expert has a row with
- * ``creator_type='expert'``/``application_status='draft'`` by default until they apply for
- * QTE — in that state we show a CTA instead of a status card.
+ * Shown at the top of the Teacher dashboard (KAN-88). Renders nothing for an Expert who
+ * hasn't applied for QTE yet (creator_type='expert'/application_status='draft', the default
+ * row) — QTE signup now happens only via the ?type=qte link the client sends directly
+ * (KAN-120), not an in-app discovery CTA. Once an application exists, shows its
+ * submitted/under_review/rejected status.
  */
 const TeacherQTEStatusBanner = () => {
   const { data, isLoading } = useQuery({
@@ -22,26 +22,14 @@ const TeacherQTEStatusBanner = () => {
 
   if (isLoading || !data) return null;
 
+  // "Not yet applied" state (creator_type='expert'/application_status='draft', the default
+  // row) previously showed an in-app "Apply Now" CTA here. Per client instruction, that
+  // discovery CTA is removed — QTE signup now happens only via the ?type=qte link the client
+  // sends directly (KAN-120). Every other state (submitted/under_review/rejected/approved)
+  // is unaffected since creator_type flips to 'qte' as soon as an application is submitted
+  // and never reverts (see ExpertQTEApplyAPI), so this branch never overlaps those.
   if (data.creator_type !== 'qte' || data.application_status === 'draft') {
-    return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-5 flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          <FaAward className="text-2xl text-green-700 flex-shrink-0" />
-          <div>
-            <h3 className="font-semibold text-green-800">Become a Qualified Teaching Expert</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              Apply for QTE status to unlock certification-program building and issuance tools.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/portal/teacher/apply-qte"
-          className="whitespace-nowrap text-sm font-medium bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800"
-        >
-          Apply Now
-        </Link>
-      </div>
-    );
+    return null;
   }
 
   // Once approved, the "Certification Programs" sidebar link (KAN-86/88) is the permanent

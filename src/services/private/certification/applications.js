@@ -11,3 +11,7 @@ export const approveApplication = async ({ type, id }) => {
 export const rejectApplication = async ({ type, id, payload }) => {
   return axios.post(`/certification/admin/applications/${type}/${id}/reject/`, payload);
 };
+
+export const deleteApplication = async ({ type, id }) => {
+  return axios.delete(`/certification/admin/applications/${type}/${id}/`);
+};

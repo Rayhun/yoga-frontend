@@ -2,7 +2,7 @@
 import React from 'react';
 import Drawer from '@mui/material/Drawer';
 import { MdClose } from 'react-icons/md';
-import { BsPersonCheck, BsPersonX } from 'react-icons/bs';
+import { BsPersonCheck, BsPersonX, BsTrash } from 'react-icons/bs';
 import Button from '@/components/common/Button';
 
 const STATUS_BADGE = {
@@ -47,7 +47,7 @@ const DocumentLink = ({ label, url }) => {
  * return every submitted field, including the private document links) — no separate
  * fetch-by-id call needed.
  */
-const ApplicationReviewDrawer = ({ application, applicationType, onClose, onApprove, onReject }) => {
+const ApplicationReviewDrawer = ({ application, applicationType, onClose, onApprove, onReject, onDelete }) => {
   const open = !!application;
   const isQTE = applicationType === 'qte';
   const status = application?.application_status;
@@ -118,14 +118,27 @@ const ApplicationReviewDrawer = ({ application, applicationType, onClose, onAppr
           </div>
         ) : null}
 
-        {application && ['submitted', 'under_review'].includes(status) ? (
+        {application ? (
           <div className="flex gap-3 px-5 py-4 border-t border-gray-200">
-            <Button variant="secondary" onClick={() => onReject(application)} className="flex-1">
-              <BsPersonX className="mr-1" /> Reject
-            </Button>
-            <Button onClick={() => onApprove(application)} className="flex-1">
-              <BsPersonCheck className="mr-1" /> Approve
-            </Button>
+            {['submitted', 'under_review'].includes(status) ? (
+              <>
+                <Button variant="secondary" onClick={() => onReject(application)} className="flex-1">
+                  <BsPersonX className="mr-1" /> Disapprove
+                </Button>
+                <Button onClick={() => onApprove(application)} className="flex-1">
+                  <BsPersonCheck className="mr-1" /> Approve
+                </Button>
+              </>
+            ) : null}
+            {status !== 'approved' ? (
+              <Button
+                variant="secondary"
+                onClick={() => onDelete(application)}
+                className="flex-1 !border-red-200 !bg-red-50 !text-red-700 hover:!bg-red-100"
+              >
+                <BsTrash className="mr-1" /> Delete
+              </Button>
+            ) : null}
           </div>
         ) : null}
       </div>

@@ -13,7 +13,7 @@ const RejectApplicationModal = ({ show, onClose, onSubmit }) => {
     <Modal open={show} onClose={onClose}>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
         <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
-          <h2 className="text-center text-2xl font-semibold mb-6">Reject Application</h2>
+          <h2 className="text-center text-2xl font-semibold mb-6">Disapprove Application</h2>
 
           <Formik
             initialValues={{ rejected_reason: '' }}
@@ -29,7 +29,7 @@ const RejectApplicationModal = ({ show, onClose, onSubmit }) => {
                     Cancel
                   </Button>
                   <Button type="submit" isLoading={isSubmitting}>
-                    Reject
+                    Disapprove
                   </Button>
                 </div>
               </Form>

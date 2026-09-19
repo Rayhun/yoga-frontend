@@ -1,6 +1,6 @@
 'use client';
 import React, { useMemo, useState, useCallback } from 'react';
-import { BsPersonCheck, BsPersonX } from 'react-icons/bs';
+import { BsPersonCheck, BsPersonX, BsTrash } from 'react-icons/bs';
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -11,7 +11,12 @@ import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 import useConfirm from '@/hooks/useConfirm';
 import { toastApiError } from '@/utils/helpers';
-import { approveApplication, getApplicationsList, rejectApplication } from '@/services/private/certification/applications';
+import {
+  approveApplication,
+  deleteApplication,
+  getApplicationsList,
+  rejectApplication,
+} from '@/services/private/certification/applications';
 import RejectApplicationModal from './RejectApplicationModal';
 import ApplicationReviewDrawer from './ApplicationReviewDrawer';
 
@@ -34,6 +39,7 @@ const ApplicationReviewTable = () => {
 
   const { mutateAsync: approveMutate } = useMutation({ mutationFn: approveApplication });
   const { mutateAsync: rejectMutate } = useMutation({ mutationFn: rejectApplication });
+  const { mutateAsync: deleteMutate } = useMutation({ mutationFn: deleteApplication });
 
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: [queryKeys.certificationApplicationsList] }),
@@ -64,7 +70,7 @@ const ApplicationReviewTable = () => {
   const handleRejectSubmit = async (values, { setSubmitting }) => {
     try {
       await rejectMutate({ type: activeTab.actionType, id: rejectTarget.id, payload: values });
-      toast.success('Application rejected');
+      toast.success('Application disapproved');
       await invalidateList();
       setRejectTarget(null);
     } catch (error) {
@@ -73,6 +79,25 @@ const ApplicationReviewTable = () => {
       setSubmitting(false);
     }
   };
+
+  const handleDelete = useCallback(
+    async row => {
+      await confirm({
+        heading: 'Delete application?',
+        message: 'Are you sure? This cannot be undone.',
+      })
+        .then(async () => {
+          await deleteMutate({ type: activeTab.actionType, id: row.id });
+          toast.success('Application deleted');
+          await invalidateList();
+          setViewedApplication(null);
+        })
+        .catch(error => {
+          if (error?.response) toastApiError(error);
+        });
+    },
+    [confirm, deleteMutate, activeTab, invalidateList]
+  );
 
   const isQTE = activeTab.key === 'qte';
 
@@ -113,8 +138,14 @@ const ApplicationReviewTable = () => {
         Icon: BsPersonX,
         onClick: row => handleOpenReject(row?.original),
       },
+      {
+        id: 'delete',
+        render: row => row?.original?.application_status !== 'approved',
+        Icon: BsTrash,
+        onClick: row => handleDelete(row?.original),
+      },
     ],
-    [handleApprove, handleOpenReject]
+    [handleApprove, handleOpenReject, handleDelete]
   );
 
   const { isLoading, columns, data } = useTable({
@@ -174,6 +205,7 @@ const ApplicationReviewTable = () => {
         onClose={() => setViewedApplication(null)}
         onApprove={handleApprove}
         onReject={handleOpenReject}
+        onDelete={handleDelete}
       />
     </React.Fragment>
   );
