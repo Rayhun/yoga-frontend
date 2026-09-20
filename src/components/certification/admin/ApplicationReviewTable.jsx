@@ -1,7 +1,8 @@
 'use client';
 import React, { useMemo, useState, useCallback } from 'react';
-import { BsPersonCheck, BsPersonX, BsTrash } from 'react-icons/bs';
-import { MdOutlineRemoveRedEye } from 'react-icons/md';
+import { useRouter } from 'next/navigation';
+import { BsPersonCheck, BsToggleOff, BsToggleOn, BsTrash, BsXCircle } from 'react-icons/bs';
+import { MdOutlineEdit, MdOutlineRemoveRedEye } from 'react-icons/md';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
@@ -10,12 +11,13 @@ import { PageHeader } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 import useConfirm from '@/hooks/useConfirm';
-import { toastApiError } from '@/utils/helpers';
+import { toastApiError, formatSignupDate } from '@/utils/helpers';
 import {
   approveApplication,
   deleteApplication,
   getApplicationsList,
   rejectApplication,
+  toggleApplicationActive,
 } from '@/services/private/certification/applications';
 import RejectApplicationModal from './RejectApplicationModal';
 import ApplicationReviewDrawer from './ApplicationReviewDrawer';
@@ -30,6 +32,7 @@ const TABS = [
 const STATUS_FILTERS = ['submitted', 'under_review', 'approved', 'rejected'];
 
 const ApplicationReviewTable = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [statusFilter, setStatusFilter] = useState('submitted');
   const [rejectTarget, setRejectTarget] = useState(null);
@@ -40,6 +43,7 @@ const ApplicationReviewTable = () => {
   const { mutateAsync: approveMutate } = useMutation({ mutationFn: approveApplication });
   const { mutateAsync: rejectMutate } = useMutation({ mutationFn: rejectApplication });
   const { mutateAsync: deleteMutate } = useMutation({ mutationFn: deleteApplication });
+  const { mutateAsync: toggleActiveMutate } = useMutation({ mutationFn: toggleApplicationActive });
 
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: [queryKeys.certificationApplicationsList] }),
@@ -101,51 +105,135 @@ const ApplicationReviewTable = () => {
 
   const isQTE = activeTab.key === 'qte';
 
+  const handleToggleActive = useCallback(
+    async row => {
+      const message = row?.is_active
+        ? 'Are you sure you want to deactivate this application?'
+        : 'Are you sure you want to activate this application?';
+      await confirm({ message })
+        .then(async () => {
+          await toggleActiveMutate({ type: activeTab.actionType, id: row.id });
+          toast.success('Status updated successfully');
+          await invalidateList();
+        })
+        .catch(error => {
+          if (error?.response) toastApiError(error);
+        });
+    },
+    [confirm, toggleActiveMutate, activeTab, invalidateList]
+  );
+
+  // "Profile Completed"/"Coaching" have no equivalent for Institution — Institution has no
+  // profile-completeness or coaching concept in the backend, unlike Expert. See
+  // AdminInstitutionApplicationSerializer for the corresponding backend note.
   const tableColumns = useMemo(
     () =>
       isQTE
         ? [
             { header: 'Name', accessorKey: 'first_name' },
             { header: 'Email', accessorKey: 'email' },
+            {
+              header: 'Active Status',
+              accessorKey: 'is_active',
+              cell: ({ row }) => (row?.original?.is_active ? 'Active' : 'Inactive'),
+            },
+            {
+              header: 'Profile Completed',
+              accessorKey: 'is_profile_complete',
+              cell: ({ row }) => (row?.original?.is_profile_complete ? 'Yes' : 'No'),
+            },
+            {
+              header: 'Coaching',
+              accessorKey: 'has_event_or_consult',
+              cell: ({ row }) => (row?.original?.has_event_or_consult ? 'Yes' : 'No'),
+            },
+            {
+              header: 'Signed Up',
+              accessorKey: 'signed_up_at',
+              cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
+            },
             { header: 'Country', accessorKey: 'country' },
             { header: 'Status', accessorKey: 'application_status' },
           ]
         : [
             { header: 'Organization', accessorKey: 'legal_organization_name' },
             { header: 'Email', accessorKey: 'email' },
+            {
+              header: 'Active Status',
+              accessorKey: 'is_active',
+              cell: ({ row }) => (row?.original?.is_active ? 'Active' : 'Inactive'),
+            },
+            {
+              header: 'Signed Up',
+              accessorKey: 'signed_up_at',
+              cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
+            },
             { header: 'Country', accessorKey: 'country' },
             { header: 'Status', accessorKey: 'application_status' },
           ],
     [isQTE]
   );
 
+  // `group` clusters related icons with a divider between clusters (view | edit, toggle |
+  // approve, reject | delete) so the row stays readable instead of one flat run of up to 6
+  // icons — see TableActions in components/common/table. `variant: 'danger'` gives Reject a
+  // red hover instead of the shared primary green, and BsXCircle (vs. Approve's
+  // person-silhouette BsPersonCheck) keeps the two from being confused at a glance — both
+  // were a real accidental-click risk found during QA.
   const rowActions = useMemo(
     () => [
       {
         id: 'view',
+        group: 'view',
         Icon: MdOutlineRemoveRedEye,
         onClick: row => setViewedApplication(row?.original),
       },
       {
+        id: 'edit',
+        group: 'edit',
+        // Institution has no admin edit flow yet (unlike Expert's /portal/admin/lms/expert/[id]/edit) — QTE-only for now.
+        render: () => isQTE,
+        Icon: MdOutlineEdit,
+        onClick: row => router.push(`/portal/admin/lms/expert/${row.original.id}/edit`),
+      },
+      {
+        id: 'active',
+        group: 'edit',
+        render: row => !row?.original?.is_active,
+        Icon: BsToggleOff,
+        onClick: row => handleToggleActive(row?.original),
+      },
+      {
+        id: 'deactive',
+        group: 'edit',
+        render: row => row?.original?.is_active,
+        Icon: BsToggleOn,
+        onClick: row => handleToggleActive(row?.original),
+      },
+      {
         id: 'approve',
+        group: 'decision',
         render: row => ['submitted', 'under_review'].includes(row?.original?.application_status),
         Icon: BsPersonCheck,
         onClick: row => handleApprove(row?.original),
       },
       {
         id: 'reject',
+        group: 'decision',
+        variant: 'danger',
         render: row => ['submitted', 'under_review'].includes(row?.original?.application_status),
-        Icon: BsPersonX,
+        Icon: BsXCircle,
         onClick: row => handleOpenReject(row?.original),
       },
       {
         id: 'delete',
+        group: 'delete',
         render: row => row?.original?.application_status !== 'approved',
         Icon: BsTrash,
         onClick: row => handleDelete(row?.original),
       },
     ],
-    [handleApprove, handleOpenReject, handleDelete]
+    [isQTE, router, handleToggleActive, handleApprove, handleOpenReject, handleDelete]
   );
 
   const { isLoading, columns, data } = useTable({

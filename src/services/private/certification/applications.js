@@ -15,3 +15,7 @@ export const rejectApplication = async ({ type, id, payload }) => {
 export const deleteApplication = async ({ type, id }) => {
   return axios.delete(`/certification/admin/applications/${type}/${id}/`);
 };
+
+export const toggleApplicationActive = async ({ type, id }) => {
+  return axios.post(`/certification/admin/applications/${type}/${id}/toggle_active/`);
+};
