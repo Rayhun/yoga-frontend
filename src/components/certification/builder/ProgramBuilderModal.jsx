@@ -72,6 +72,7 @@ const pickBasics = program => ({
   followup_support: program?.followup_support
     ? (Array.isArray(program.followup_support) ? program.followup_support : program.followup_support.split(','))
     : [],
+  tags: Array.isArray(program?.tags) ? program.tags : [],
 });
 
 const pickDelivery = program => ({

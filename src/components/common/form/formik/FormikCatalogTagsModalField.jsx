@@ -21,6 +21,11 @@ import SelectedChipsScrollRegion from './SelectedChipsScrollRegion';
 /**
  * Pill trigger opens a modal to search and multi-select catalog tags (canonical Tag IDs),
  * grouped by namespace with label-only options.
+ *
+ * Optional ``onChange(nextIds)`` fires right after each toggle (in addition to the internal
+ * ``setFieldValue``) — for forms without a submit button (e.g. autosave-on-blur sections) that
+ * need to know immediately when the selection changes, the same way they already do for other
+ * non-text-input fields.
  */
 const FormikCatalogTagsModalField = ({
   name,
@@ -36,6 +41,8 @@ const FormikCatalogTagsModalField = ({
   seedRows = [],
   className = '',
   placeholder: _legacyPlaceholder,
+  onChange,
+  disabled = false,
   ...rest
 }) => {
   const isSingleSelect = maxSelections === 1;
@@ -141,8 +148,9 @@ const FormikCatalogTagsModalField = ({
         next = [...selectedIds, num];
       }
       setFieldValue(name, next, true);
+      onChange?.(next);
     },
-    [isSingleSelect, maxSelections, name, selectedIds, setFieldValue]
+    [isSingleSelect, maxSelections, name, onChange, selectedIds, setFieldValue]
   );
 
   const toggleNamespaceCollapsed = useCallback(namespace => {
@@ -193,8 +201,9 @@ const FormikCatalogTagsModalField = ({
 
       <button
         type="button"
+        disabled={disabled}
         onClick={() => setOpen(true)}
-        className={`flex w-full items-center justify-between gap-3 rounded-full border bg-white px-4 py-3 text-left shadow-sm transition hover:border-gray-300 hover:shadow dark:border-strokedark dark:bg-boxdark dark:hover:border-bodydark2 ${
+        className={`flex w-full items-center justify-between gap-3 rounded-full border bg-white px-4 py-3 text-left shadow-sm transition hover:border-gray-300 hover:shadow disabled:cursor-default disabled:bg-gray-100 disabled:hover:border-gray-200 disabled:hover:shadow-sm dark:border-strokedark dark:bg-boxdark dark:hover:border-bodydark2 dark:disabled:bg-boxdark ${
           isErrorField ? 'border-red-400 ring-1 ring-red-200' : 'border-gray-200'
         }`}
       >
@@ -227,7 +236,7 @@ const FormikCatalogTagsModalField = ({
                 key={id}
                 size="small"
                 label={idToLabel.get(id) ?? `Tag #${id}`}
-                onDelete={() => toggleId(id)}
+                onDelete={disabled ? undefined : () => toggleId(id)}
                 className="!h-auto !max-w-full !rounded-lg !border !border-gray-200 !bg-gray-50 !py-0.5 !pl-2 !pr-1 !text-xs !font-medium !text-gray-800 dark:!border-strokedark dark:!bg-meta-4 dark:!text-white"
               />
             ))}

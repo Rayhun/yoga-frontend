@@ -13,6 +13,7 @@ import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect
 import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker';
 import Button from '@/components/common/Button';
 import Popup from '@/components/common/popup';
+import { ContentCatalogTagsField } from '@/components/lms/general/fields';
 import { uploadLMSFile } from '@/services/private/lms';
 import { toastApiError } from '@/utils/helpers';
 import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
@@ -55,6 +56,7 @@ const validationSchema = Yup.object({
   language: Yup.string(),
   promo_video: Yup.string().url('Must be a valid URL'),
   outcomes: Yup.string(),
+  tags: Yup.array().of(Yup.number()),
   start_date: Yup.string().nullable(),
   time_zone: Yup.string().nullable(),
   event_type: Yup.string().nullable(),
@@ -81,6 +83,7 @@ const toPayload = values => ({
   language: values.language,
   promo_video: values.promo_video,
   outcomes: values.outcomes,
+  tags: values.tags || [],
   start_date: values.start_date || null,
   time_zone: values.time_zone,
   event_type: values.event_type,
@@ -109,8 +112,12 @@ const toPayload = values => ({
  *    `GroupCoachingFrom.jsx`'s UI exactly, per the confirmed "style example only" interpretation.
  *
  * Program's existing single `tags` M2M + `category` FK stay as-is — not expanded to Workshop's
- * 4-dimension tag structure (culture_experience/categories/tags/languages); `tags` itself stays
- * unexposed here (no reusable tag-picker component for it yet, separate scope).
+ * 4-dimension tag structure (culture_experience/categories/tags/languages). `tags` (feedback
+ * point 9) uses `ContentCatalogTagsField` with `context="certification_program"` — a new Tag
+ * registry context (see `Tag/registry.py`) scoped to what a course-level entity should offer
+ * (phase/goal/modality/language required; challenge/symptom/experience/cultural/intensity/format
+ * optional; a handful of demographic namespaces soft) — distinct from LMS's own `"program"`
+ * context since `CertificationProgram` is a separate model in a separate app.
  *
  * Thumbnail reuses the exact public-upload pattern `ProgramForm.jsx` uses for
  * `LMS.Program.image` (`uploadLMSFile` → `POST /LMS/file/upload/` → `file_link`), not KAN-87's
@@ -139,7 +146,7 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, disabled = fa
   // `recurring_picker_value` is a transient, UI-only field (the popup's date/time input) — never
   // sent to the backend (excluded from toPayload), so it's defaulted here rather than requiring
   // every caller of this section to know about it.
-  const formInitialValues = { recurring_picker_value: '', ...initialValues };
+  const formInitialValues = { recurring_picker_value: '', tags: [], ...initialValues };
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -237,6 +244,16 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, disabled = fa
               placeholder="One outcome per line"
               rows={3}
               disabled={disabled}
+            />
+
+            <ContentCatalogTagsField
+              context="certification_program"
+              name="tags"
+              label="Tags"
+              modalTitle="Select tags"
+              triggerPlaceholder="Select tags"
+              disabled={disabled}
+              onChange={next => handleBlur({ ...values, tags: next })}
             />
 
             <FormikDropzone
