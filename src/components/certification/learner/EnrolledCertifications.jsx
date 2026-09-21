@@ -41,7 +41,7 @@ const EnrolledCertifications = () => {
   return (
     <div className="min-h-[60vh] flex flex-col gap-4 md:gap-7 p-6 bg-white rounded-lg shadow-md">
       <div className="w-full h-[30px] flex justify-center items-center text-center text-gray-500 px-4">
-        Explore the Library to find and enroll in ones you&apos;ll love.
+        Continue where you left off, or explore new programs in the Library.
       </div>
       {/* Status Filters */}
       <div className="flex gap-3 justify-center">
@@ -73,13 +73,15 @@ const EnrolledCertifications = () => {
                 {programs.map((program, index) => (
                   <ProgramCard
                     key={`${program.id}-${program.title}-${index}`}
-                    program={program}
+                    program={{ ...program, is_enrolled: true }}
                     onClick={() => router.push(`/portal/customer/certification/${program.id}`)}
                   />
                 ))}
               </div>
             ) : (
-              <div className="w-full h-[300px] flex justify-center items-center">No certifications found</div>
+              <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
+                No certifications found. Explore the Library to get started!
+              </div>
             )}
           </div>
         )}

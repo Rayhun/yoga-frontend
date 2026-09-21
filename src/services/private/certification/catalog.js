@@ -13,3 +13,13 @@ export const getProgramCatalogDetail = async ({ id }) => {
 export const getEnrolledCertifications = async ({ status = '' }) => {
   return axios.get(`/certification/programs/enrolled/?status=${status}`);
 };
+
+export const getLearnerProgramDetail = async ({ id }) => {
+  return axios.get(`/certification/programs/${id}/learner-detail/`);
+};
+
+export const completeCertificationLesson = async ({ programId, lessonId, watchPercent }) => {
+  return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/complete/`, {
+    watch_percent: watchPercent,
+  });
+};
