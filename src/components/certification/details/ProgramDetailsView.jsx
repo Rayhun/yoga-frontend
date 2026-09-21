@@ -1,62 +1,43 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
-import React, { useState } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BiCheck } from 'react-icons/bi';
+import { FiLock } from 'react-icons/fi';
+import LinearProgress from '@mui/material/LinearProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import LinearProgress from '@mui/material/LinearProgress';
-import {
-  FaRegClock,
-  FaPlayCircle,
-  FaFileAlt,
-  FaFilePdf,
-  FaQuestionCircle,
-  FaClipboardList,
-  FaLink,
-  FaRegFileImage,
-  FaBookOpen,
-  FaUser,
-  FaCheckCircle,
-  FaLock,
-} from 'react-icons/fa';
-import Spinner from '@/components/common/loader/Spinner';
+import { MdViewModule } from 'react-icons/md';
+import { FaTv } from 'react-icons/fa';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
-import { toastApiError } from '@/utils/helpers';
+import PageLoader from '@/components/common/loader/PageLoader';
+import Spinner from '@/components/common/loader/Spinner';
+import ContentCard from './ContentCard';
+import { getProgramCatalogDetail, getLearnerProgramDetail, checkoutCertificationProgram } from '@/services/private/certification/catalog';
 import queryKeys from '@/utils/query-keys';
-import {
-  getProgramCatalogDetail,
-  getLearnerProgramDetail,
-  checkoutCertificationProgram,
-} from '@/services/private/certification/catalog';
 
-const CREATOR_TYPE_LABELS = { qte: 'Coach', expert: 'Coach', institution: 'Institution' };
-const TARGET_AUDIENCE_LABELS = {
-  career: 'Career Track',
-  professional: 'Professional Track',
-  both: 'Career & Professional',
+const TABS = {
+  JOURNEY: 'journey',
+  DESCRIPTION: 'description',
+  BENEFITS: 'benefits',
 };
-const LESSON_ICON = {
-  video: FaPlayCircle,
-  text: FaFileAlt,
-  pdf: FaFilePdf,
-  quiz: FaQuestionCircle,
-  assignment: FaClipboardList,
-  link: FaLink,
-};
-const DETAIL_TABS = { JOURNEY: 'journey', DESCRIPTION: 'description', BENEFITS: 'benefits' };
+
+const ITEMS_PER_PAGE = 9;
 
 const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState(DETAIL_TABS.JOURNEY);
+  const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
+  const [displayedItemsCount, setDisplayedItemsCount] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadingRef = useRef(null);
+  const observerRef = useRef(null);
 
   const {
     data: catalogResponse,
-    isFetching: isCatalogLoading,
+    isLoading: isCatalogLoading,
     failureReason: catalogError,
+    refetch,
   } = useQuery({
     queryFn: () => getProgramCatalogDetail({ id: programId }),
     queryKey: [queryKeys.certificationProgramCatalogDetail, programId],
@@ -71,7 +52,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
 
   const {
     data: learnerResponse,
-    isFetching: isLearnerLoading,
+    isLoading: isLearnerLoading,
   } = useQuery({
     queryFn: () => getLearnerProgramDetail({ id: programId }),
     queryKey: [queryKeys.certificationLearnerDetail, programId],
@@ -85,7 +66,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
     mutationFn: checkoutCertificationProgram,
   });
 
-  const handleEnroll = async () => {
+  const handleEnrollProgram = async () => {
     if (isEnrolling || !catalogProgram) return;
     try {
       await checkout({ id: catalogProgram.id });
@@ -94,29 +75,79 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.certificationEnrolledCertifications] });
       toast.success('Enrolled successfully! Start learning now.');
     } catch (error) {
-      toastApiError(error);
+      toast.error('Something went wrong in enrolling the program');
     }
   };
 
-  const handleLessonClick = (lesson, module) => {
-    if (lesson.is_completed) {
-      router.push(`/portal/customer/certification/${programId}/lesson/${lesson.id}?module=${module.id}`);
-      return;
-    }
-    if (lesson.lesson_type === 'quiz') {
-      toast.info('Quiz content will be available soon.');
-      return;
-    }
-    router.push(`/portal/customer/certification/${programId}/lesson/${lesson.id}?module=${module.id}`);
-  };
+  const isProgramCompleted = program?.enrollment_status === 'completed' || program?.enrollment_status === 'Completed';
 
-  if (isCatalogLoading || (isEnrolled && isLearnerLoading)) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>
+  const programProgress = Math.round(program?.progress_percent || 0);
+
+  const allContent = useMemo(() => {
+    if (!program?.modules) return [];
+    const items = [];
+    program.modules.forEach(module => {
+      items.push({
+        ...module,
+        content_type: 'module',
+        completed: module.completed_count === module.total_count && module.total_count > 0,
+        locked: !isEnrolled || module.is_locked,
+      });
+    });
+    return items;
+  }, [program, isEnrolled]);
+
+  const displayedContent = useMemo(() => {
+    if (selectedTab !== TABS.JOURNEY) return [];
+    return allContent.slice(0, displayedItemsCount);
+  }, [allContent, displayedItemsCount, selectedTab]);
+
+  const hasMoreItems = useMemo(() => {
+    return allContent.length > displayedItemsCount;
+  }, [allContent.length, displayedItemsCount]);
+
+  const loadMoreItems = useCallback(() => {
+    if (hasMoreItems && !isLoadingMore) {
+      setIsLoadingMore(true);
+      setTimeout(() => {
+        setDisplayedItemsCount(prev => Math.min(prev + ITEMS_PER_PAGE, allContent.length));
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [hasMoreItems, isLoadingMore, allContent.length]);
+
+  useEffect(() => {
+    if (selectedTab === TABS.JOURNEY) {
+      setDisplayedItemsCount(ITEMS_PER_PAGE);
+    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== TABS.JOURNEY || isCatalogLoading || (isEnrolled && isLearnerLoading)) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreItems && !isLoadingMore) {
+          loadMoreItems();
+        }
+      },
+      { threshold: 0.1 }
     );
-  }
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMoreItems, isLoadingMore, selectedTab, loadMoreItems, isCatalogLoading, isEnrolled, isLearnerLoading]);
+
+  if (isCatalogLoading || (isEnrolled && isLearnerLoading)) return <PageLoader />;
 
   if (!catalogProgram) {
     return (
@@ -126,224 +157,171 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
     );
   }
 
-  const isFree = catalogProgram.payment_type === 'free';
-  const isFull = catalogProgram.seat_limit !== null && catalogProgram.seats_remaining === 0;
+  const handleTabChange = (_, newValue) => {
+    setSelectedTab(newValue);
+  };
+
+  const handleCompleteProgram = async () => {
+    toast.success('Program completed successfully!');
+  };
+
   const benefits = catalogProgram.outcomes ? catalogProgram.outcomes.split('\n').filter(Boolean) : [];
-  const progressPercent = program?.progress_percent || 0;
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
-      {mode === 'preview' ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700">
-          Preview — this is how learners will see this program.
-        </div>
-      ) : null}
-
-      {/* Hero Card */}
-      <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-white">
-        <div className="relative aspect-[16/9] w-full bg-gray-100 overflow-hidden">
-          {catalogProgram.thumbnail ? (
-            <Image src={catalogProgram.thumbnail} alt={catalogProgram.title} fill className="object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <FaRegFileImage className="text-5xl text-gray-300" />
-            </div>
-          )}
+    <div>
+      {/* Details Card - Matching Programs Module */}
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+        {/* Left Section - Image */}
+        <div className="w-full md:w-1/2">
+          <Image
+            src={catalogProgram?.thumbnail || '/images/content/default.png'}
+            alt="Program Image"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="w-full max-h-[400px] rounded-lg shadow-lg"
+          />
         </div>
 
-        <div className="p-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            {catalogProgram.creator_type && (
-              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700">
-                {CREATOR_TYPE_LABELS[catalogProgram.creator_type] || 'Coach'}
-              </span>
-            )}
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-              {TARGET_AUDIENCE_LABELS[catalogProgram.target_audience] || catalogProgram.target_audience}
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900">{catalogProgram.title}</h1>
-          {catalogProgram.subtitle && <p className="text-gray-500">{catalogProgram.subtitle}</p>}
-          {catalogProgram.creator_display_name && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <FaUser size={12} className="text-purple-500" />
-              <span>By {catalogProgram.creator_display_name}</span>
+        {/* Right Section - Details */}
+        <div className="w-full md:w-1/2 flex flex-col gap-5">
+          <h3 className="text-2xl font-bold dark:text-white">{catalogProgram.title}</h3>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-white">
+            <div className="flex items-center gap-3">
+              <FaTv size={24} className="text-primary" />
+              <span>{catalogProgram?.lesson_count || 0} Lessons</span>
             </div>
-          )}
-          {catalogProgram.short_description && (
-            <p className="text-gray-700">{catalogProgram.short_description}</p>
-          )}
-
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-            {catalogProgram.duration_estimate && (
-              <span className="flex items-center gap-1.5">
-                <FaRegClock /> {catalogProgram.duration_estimate}
-              </span>
-            )}
-            {catalogProgram.level && <span className="capitalize">{catalogProgram.level}</span>}
-            {catalogProgram.language && <span>{catalogProgram.language}</span>}
-            {catalogProgram.module_count && (
-              <span className="flex items-center gap-1">
-                <FaBookOpen size={12} className="text-green-500" />
-                {catalogProgram.module_count} module{catalogProgram.module_count === 1 ? '' : 's'}
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              <MdViewModule size={24} className="text-primary" />
+              <span>{catalogProgram?.module_count} Modules</span>
+            </div>
           </div>
 
-          {/* Progress bar for enrolled users */}
-          {isEnrolled && (
-            <div className="mt-2">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Your progress</span>
-                <span>{Math.round(progressPercent)}%</span>
+          {/* Enrollment */}
+          {isEnrolled ? (
+            <>
+              <div className={`!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl text-white ${
+                isProgramCompleted ? 'bg-primary' : 'bg-orange-500'
+              }`}>
+                {isProgramCompleted ? 'Completed' : 'InProgress'}
               </div>
-              <LinearProgress variant="determinate" value={progressPercent} sx={{ height: 8, borderRadius: 4 }} />
-            </div>
-          )}
-
-          {/* Action Button */}
-          {mode === 'learner' && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <span className="text-xl font-bold text-green-600">
-                {isFree ? 'Free' : `${catalogProgram.currency} ${catalogProgram.price}`}
-                {!isFree && <span className="text-sm font-normal text-gray-500 ml-2">one-time</span>}
-              </span>
-              {isEnrolled ? (
+              {/* Completion Button */}
+              {programProgress === 100 && !isProgramCompleted && (
                 <button
-                  onClick={() => {
-                    const firstModule = program?.modules?.[0];
-                    const firstLesson = firstModule?.lessons?.[0];
-                    if (firstLesson) handleLessonClick(firstLesson, firstModule);
-                  }}
-                  className="py-2.5 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-colors shadow-lg hover:shadow-xl"
+                  className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 rounded-md shadow hover:bg-primary/80"
+                  onClick={handleCompleteProgram}
                 >
-                  Continue Learning
-                </button>
-              ) : isFull ? (
-                <span className="text-sm font-semibold text-red-500">Full</span>
-              ) : (
-                <button
-                  onClick={handleEnroll}
-                  disabled={isEnrolling}
-                  className="py-2.5 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-colors disabled:opacity-60 shadow-lg hover:shadow-xl"
-                >
-                  {isEnrolling ? 'Enrolling...' : 'Start Program'}
+                  Mark Program as Complete
                 </button>
               )}
-            </div>
+            </>
+          ) : (
+            <button
+              className="w-full md:w-auto bg-primary text-white disabled:bg-gray-300 p-4 rounded-md shadow hover:bg-primary/80"
+              disabled={isEnrolling}
+              onClick={handleEnrollProgram}
+            >
+              {isEnrolling ? 'Enrolling...' : 'Begin Certificate'}
+            </button>
           )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
-          <Tab value={DETAIL_TABS.JOURNEY} label="Curriculum" />
-          <Tab value={DETAIL_TABS.DESCRIPTION} label="About" />
-          <Tab value={DETAIL_TABS.BENEFITS} label="Outcomes" />
-        </Tabs>
-
-        <div className="p-6">
-          {/* Curriculum Tab */}
-          <div hidden={selectedTab !== DETAIL_TABS.JOURNEY}>
-            {(isEnrolled ? program?.modules : catalogProgram?.modules_in_outline || program?.modules)?.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {(isEnrolled ? program?.modules : catalogProgram?.modules_in_outline || program?.modules)?.map(
-                  (module, mIdx) => (
-                    <div key={module.id} className="rounded-xl border border-gray-200 p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-sm font-bold">
-                          {mIdx + 1}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-800">{module.title}</h4>
-                          {module.description && (
-                            <p className="text-sm text-gray-500">{module.description}</p>
-                          )}
-                        </div>
-                        {isEnrolled && module.completed_count !== undefined && (
-                          <span className="text-xs text-gray-400">
-                            {module.completed_count}/{module.total_count}
-                          </span>
-                        )}
-                      </div>
-                      <ul className="ml-11 flex flex-col gap-1">
-                        {module.lessons?.map(lesson => {
-                          const LessonIcon = LESSON_ICON[lesson.lesson_type] || FaFileAlt;
-                          return (
-                            <li
-                              key={lesson.id}
-                              className={`flex items-center gap-2 text-sm py-1.5 px-2 rounded-lg transition-colors ${
-                                isEnrolled
-                                  ? 'cursor-pointer hover:bg-gray-50 text-gray-700'
-                                  : 'text-gray-400'
-                              } ${lesson.is_completed ? 'text-green-600' : ''}`}
-                              onClick={() => isEnrolled && handleLessonClick(lesson, module)}
-                            >
-                              {lesson.is_completed ? (
-                                <FaCheckCircle size={14} className="text-green-500 flex-shrink-0" />
-                              ) : !isEnrolled && mode === 'learner' ? (
-                                <FaLock size={14} className="text-gray-300 flex-shrink-0" />
-                              ) : (
-                                <LessonIcon className="text-gray-400 flex-shrink-0" />
-                              )}
-                              <span className="flex-1">{lesson.title}</span>
-                              {lesson.duration && (
-                                <span className="text-gray-400 text-xs">{lesson.duration}</span>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  )
-                )}
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">Curriculum will be available soon.</div>
-            )}
-          </div>
-
-          {/* About Tab */}
-          <div hidden={selectedTab !== DETAIL_TABS.DESCRIPTION}>
-            {catalogProgram.full_description ? (
-              <div className="text-gray-700 whitespace-pre-line leading-relaxed">
-                {catalogProgram.full_description}
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">No description available.</div>
-            )}
-          </div>
-
-          {/* Outcomes Tab */}
-          <div hidden={selectedTab !== DETAIL_TABS.BENEFITS}>
-            {benefits.length > 0 ? (
-              <ul className="flex flex-col gap-3">
-                {benefits.map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-gray-700">
-                    <span className="mt-1 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
-                    <span>{benefit.trim()}</span>
-                  </li>
+      {/* Program Content */}
+      <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
+        <div className={`w-full ${isEnrolled ? 'md:w-3/4' : 'md:w-full'}`}>
+          {/* Tabs */}
+          <Tabs value={selectedTab} onChange={handleTabChange}>
+            <Tab value={TABS.JOURNEY} label="Curriculum" />
+            <Tab value={TABS.DESCRIPTION} label="About" />
+            <Tab value={TABS.BENEFITS} label="Outcomes" />
+          </Tabs>
+          <div className="py-5">
+            {/* Journey Tab */}
+            <div hidden={selectedTab !== TABS.JOURNEY}>
+              <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedContent.map(item => (
+                  <ContentCard key={`${item.content_type}-${item.id}`} item={item} isEnrolled={isEnrolled} programId={programId} />
                 ))}
-              </ul>
-            ) : (
-              <div className="text-center text-gray-500 py-8">Outcomes will be listed soon.</div>
-            )}
+              </div>
+              {/* Loading indicator for infinite scroll */}
+              {hasMoreItems && (
+                <div ref={loadingRef} className="flex justify-center items-center py-8">
+                  {isLoadingMore && (
+                    <div className="flex flex-col items-center gap-2">
+                      <Spinner size={40} />
+                      <p className="text-gray-600 dark:text-gray-400">Loading more content...</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Description Tab */}
+            <div hidden={selectedTab !== TABS.DESCRIPTION}>
+              <div className="dark:text-white">{catalogProgram?.full_description || catalogProgram?.short_description || 'No description provided'}</div>
+            </div>
+
+            {/* Benefits Tab */}
+            <div hidden={selectedTab !== TABS.BENEFITS}>
+              <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
+              <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
+                {benefits.map((benefit, idx) => (
+                  <li key={idx}>{benefit}</li>
+                ))}
+              </ol>
+            </div>
           </div>
         </div>
+
+        {/* Program Details Sidebar */}
+        {isEnrolled && (
+          <div className="w-full md:w-1/4 flex flex-col gap-7">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg text-primary font-bold">Program Progress</h3>
+              <div className="flex flex-col gap-2">
+                <LinearProgress className="rounded-full !h-2" value={programProgress} />
+                <span className="text-sm text-right dark:text-white">{programProgress}% Complete</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg text-primary font-bold">Program Navigation</h3>
+              <ol className="relative p-5 border-s-4 border-gray-200 dark:border-gray-700">
+                {program?.modules?.map(module => {
+                  const locked = module.is_locked;
+                  return (
+                    <li key={module.id} className="ms-6 mb-6">
+                      <div className="absolute -start-4 bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg">
+                        {locked ? (
+                          <FiLock size={20} className="text-gray-500 dark:text-gray-400" />
+                        ) : (
+                          <BiCheck
+                            size={20}
+                            className={`rounded-full text-white ${module.completed_count === module.total_count && module.total_count > 0 ? 'bg-secondary' : 'bg-white dark:bg-gray-600'}`}
+                          />
+                        )}
+                      </div>
+                      <h5 className={`mb-1 text-md font-semibold ${locked ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                        {module.title}
+                        {locked && <span className="ml-1 text-xs font-normal">(Locked)</span>}
+                      </h5>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Certificate Section */}
       {catalogProgram.certificate_setting && (
-        <div className="rounded-2xl border border-gray-100 shadow-lg bg-white p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Certificate</h2>
-          <div className="flex flex-col gap-1 text-sm text-gray-700">
-            <p className="font-semibold text-gray-900">{catalogProgram.certificate_setting.certificate_title}</p>
+        <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+          <h3 className="text-lg font-bold dark:text-white mb-3">Certificate Details</h3>
+          <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <p className="font-semibold text-gray-900 dark:text-white">{catalogProgram.certificate_setting.certificate_title}</p>
             {catalogProgram.certificate_setting.completion_rules && (
               <p>{catalogProgram.certificate_setting.completion_rules}</p>
             )}
@@ -359,9 +337,9 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
 
       {/* Policies Section */}
       {(catalogProgram.refund_policy || catalogProgram.completion_deadline_days || catalogProgram.code_of_conduct || catalogProgram.disclaimer) && (
-        <div className="rounded-2xl border border-gray-100 shadow-lg bg-white p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Policies</h2>
-          <div className="flex flex-col gap-3 text-sm text-gray-700">
+        <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+          <h3 className="text-lg font-bold dark:text-white mb-3">Policies</h3>
+          <div className="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
             {catalogProgram.refund_policy && (
               <p><strong>Refund Policy:</strong> {catalogProgram.refund_policy}</p>
             )}
