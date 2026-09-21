@@ -23,3 +23,7 @@ export const completeCertificationLesson = async ({ programId, lessonId, watchPe
     watch_percent: watchPercent,
   });
 };
+
+export const checkoutCertificationProgram = async ({ id, ref }) => {
+  return axios.post(`/certification/programs/${id}/checkout/`, ref ? { ref } : {});
+};
