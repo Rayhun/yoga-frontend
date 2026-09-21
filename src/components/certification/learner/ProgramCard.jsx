@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { FaPlay, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
+import { FaPlay, FaBookOpen, FaCheckCircle, FaAward } from 'react-icons/fa';
 
 const CREATOR_TYPE_LABELS = {
   qte: 'Coach',
@@ -41,7 +41,9 @@ const ProgramCard = ({ program, onClick }) => {
           </div>
         </div>
         {isEnrolled && (
-          <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <div className={`absolute top-3 right-3 text-white px-2 py-1 rounded-full text-xs font-medium ${
+            isComplete ? 'bg-primary' : 'bg-orange-500'
+          }`}>
             {isComplete ? 'Completed' : 'In Progress'}
           </div>
         )}
@@ -52,7 +54,7 @@ const ProgramCard = ({ program, onClick }) => {
         )}
       </div>
 
-      {/* Content Section */}
+      {/* Content Section - Flex to push button to bottom */}
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
@@ -68,13 +70,27 @@ const ProgramCard = ({ program, onClick }) => {
           <p className="text-sm text-gray-500">By {program.creator_display_name}</p>
         )}
 
+        {/* Stats */}
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-1">
             <FaBookOpen size={12} className="text-green-500" />
             <span>{program.module_count || 0} modules</span>
           </div>
+          <div className="flex items-center gap-1">
+            <FaAward size={12} className="text-blue-500" />
+            <span>{program.lesson_count || 0} lessons</span>
+          </div>
         </div>
 
+        {/* Price */}
+        <div className="flex items-center gap-2 min-h-[1.5rem]">
+          <span className="text-lg font-bold text-green-600">
+            {isFree ? 'Free' : `${program.currency || 'USD'} ${program.price}`}
+          </span>
+          {!isFree && <span className="text-sm text-gray-500">one-time</span>}
+        </div>
+
+        {/* Spacer to push button to bottom */}
         <div className="flex-1" />
 
         {/* Progress bar for enrolled */}
@@ -84,32 +100,30 @@ const ProgramCard = ({ program, onClick }) => {
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-green-600">
-            {isFree ? 'Free' : `${program.currency || 'USD'} ${program.price}`}
-          </span>
-          {isComplete ? (
-            <span className="flex items-center gap-1 text-sm font-semibold text-green-600">
-              <FaCheckCircle size={14} /> Completed
-            </span>
-          ) : isEnrolled ? (
-            <button
-              onClick={e => { e.stopPropagation(); onClick(); }}
-              className="py-2 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all"
-            >
-              Continue Learning
-            </button>
-          ) : isFull ? (
-            <span className="text-sm font-semibold text-red-500">Full</span>
-          ) : (
-            <button
-              onClick={e => { e.stopPropagation(); onClick(); }}
-              className="py-2 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:from-green-600 hover:to-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              Start Program
-            </button>
-          )}
-        </div>
+        {/* Action Button - Always at bottom */}
+        {isComplete ? (
+          <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 flex items-center justify-center gap-2">
+            <FaCheckCircle size={14} /> Completed
+          </div>
+        ) : isEnrolled ? (
+          <button
+            onClick={e => { e.stopPropagation(); onClick(); }}
+            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all"
+          >
+            Continue Certificate
+          </button>
+        ) : isFull ? (
+          <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-center text-red-500">
+            Full
+          </div>
+        ) : (
+          <button
+            onClick={e => { e.stopPropagation(); onClick(); }}
+            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:from-green-600 hover:to-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Start Certificate
+          </button>
+        )}
       </div>
     </div>
   );
