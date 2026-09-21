@@ -2,16 +2,16 @@
 import { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import EnrolledCertifications from './EnrolledCertifications';
 import DiscoverPanel from './DiscoverPanel';
-import MyCertificationsPanel from './MyCertificationsPanel';
 
 const TABS = {
-  DISCOVER: 'discover',
   MY_CERTIFICATIONS: 'my-certifications',
+  LIBRARY: 'library',
 };
 
 const CertificationHub = () => {
-  const [selectedTab, setSelectedTab] = useState(TABS.DISCOVER);
+  const [selectedTab, setSelectedTab] = useState(TABS.MY_CERTIFICATIONS);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -20,15 +20,15 @@ const CertificationHub = () => {
   return (
     <div>
       <Tabs value={selectedTab} onChange={handleTabChange}>
-        <Tab value={TABS.DISCOVER} label="Discover" />
         <Tab value={TABS.MY_CERTIFICATIONS} label="My Certifications" />
+        <Tab value={TABS.LIBRARY} label="Library" />
       </Tabs>
       <div className="py-5">
-        <div hidden={selectedTab !== TABS.DISCOVER}>
+        <div hidden={selectedTab !== TABS.LIBRARY}>
           <DiscoverPanel />
         </div>
         <div hidden={selectedTab !== TABS.MY_CERTIFICATIONS}>
-          <MyCertificationsPanel />
+          <EnrolledCertifications />
         </div>
       </div>
     </div>

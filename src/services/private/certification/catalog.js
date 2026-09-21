@@ -9,3 +9,7 @@ export const getCertificationCatalog = async params => {
 export const getProgramCatalogDetail = async ({ id }) => {
   return axios.get(`/certification/programs/${id}/catalog-detail/`);
 };
+
+export const getEnrolledCertifications = async ({ status = '' }) => {
+  return axios.get(`/certification/programs/enrolled/?status=${status}`);
+};
