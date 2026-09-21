@@ -18,6 +18,14 @@ export const getLearnerProgramDetail = async ({ id }) => {
   return axios.get(`/certification/programs/${id}/learner-detail/`);
 };
 
+export const getLearnerModuleDetail = async ({ programId, moduleId }) => {
+  return axios.get(`/certification/programs/${programId}/modules/${moduleId}/detail/`);
+};
+
+export const getLearnerLessonDetail = async ({ programId, lessonId }) => {
+  return axios.get(`/certification/programs/${programId}/lessons/${lessonId}/detail/`);
+};
+
 export const completeCertificationLesson = async ({ programId, lessonId, watchPercent }) => {
   return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/complete/`, {
     watch_percent: watchPercent,
