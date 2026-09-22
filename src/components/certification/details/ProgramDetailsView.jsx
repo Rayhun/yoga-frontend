@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
@@ -26,6 +27,7 @@ const TABS = {
 const ITEMS_PER_PAGE = 9;
 
 const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
   const [displayedItemsCount, setDisplayedItemsCount] = useState(ITEMS_PER_PAGE);
@@ -69,11 +71,18 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   const handleEnrollProgram = async () => {
     if (isEnrolling || !catalogProgram) return;
     try {
-      await checkout({ id: catalogProgram.id });
+      const response = await checkout({ id: catalogProgram.id });
+      const data = response?.data;
+
+      if (data?.status === 'success' && data?.data?.enrolled === false && data?.data?.checkout_session_client_secret) {
+        router.push(`/payment/certification/${catalogProgram.id}?client_secret=${data.data.checkout_session_client_secret}`);
+        return;
+      }
+
       queryClient.invalidateQueries({ queryKey: [queryKeys.certificationCatalog] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.certificationProgramCatalogDetail, programId] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.certificationEnrolledCertifications] });
-      toast.success('Enrolled successfully! Start learning now.');
+      toast.success(data?.message || 'Enrolled successfully! Start learning now.');
     } catch (error) {
       toast.error('Something went wrong in enrolling the program');
     }

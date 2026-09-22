@@ -5,12 +5,14 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import queryKeys from '@/utils/query-keys';
 import StripeCheckout from '@/components/subscription/checkout/StripeCheckout';
 import LoadingWrapper from '@/components/common/loader/Wrapper';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { checkoutCertificationProgram } from '@/services/private/certification/enrollment';
 
 const Page = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const programID = params.id;
+  const clientSecretFromUrl = searchParams.get('client_secret');
 
   const {
     data: response,
@@ -19,11 +21,12 @@ const Page = () => {
   } = useQuery({
     queryFn: () => checkoutCertificationProgram({ id: programID }),
     queryKey: [queryKeys.certificationCatalog, 'checkout', programID],
+    enabled: !clientSecretFromUrl,
   });
 
   useHandleApiResponse(failureReason);
 
-  const clientSecret = response?.data?.data?.checkout_session_client_secret;
+  const clientSecret = clientSecretFromUrl || response?.data?.data?.checkout_session_client_secret;
 
   return (
     <div className="flex flex-col gap-5">
@@ -32,7 +35,7 @@ const Page = () => {
           Please wait for a while. We are creating a checkout session for you. DO NOT refresh the page
         </Alert>
       </div>
-      <LoadingWrapper isLoading={isLoading}>
+      <LoadingWrapper isLoading={isLoading && !clientSecretFromUrl}>
         {clientSecret ? (
           <StripeCheckout clientSecret={clientSecret} />
         ) : (
