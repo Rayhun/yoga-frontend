@@ -9,3 +9,29 @@ export const getCertificationCatalog = async params => {
 export const getProgramCatalogDetail = async ({ id }) => {
   return axios.get(`/certification/programs/${id}/catalog-detail/`);
 };
+
+export const getEnrolledCertifications = async ({ status = '' }) => {
+  return axios.get(`/certification/programs/enrolled/?status=${status}`);
+};
+
+export const getLearnerProgramDetail = async ({ id }) => {
+  return axios.get(`/certification/programs/${id}/learner-detail/`);
+};
+
+export const getLearnerModuleDetail = async ({ programId, moduleId }) => {
+  return axios.get(`/certification/programs/${programId}/modules/${moduleId}/detail/`);
+};
+
+export const getLearnerLessonDetail = async ({ programId, lessonId }) => {
+  return axios.get(`/certification/programs/${programId}/lessons/${lessonId}/detail/`);
+};
+
+export const completeCertificationLesson = async ({ programId, lessonId, watchPercent }) => {
+  return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/complete/`, {
+    watch_percent: watchPercent,
+  });
+};
+
+export const checkoutCertificationProgram = async ({ id, ref }) => {
+  return axios.post(`/certification/programs/${id}/checkout/`, ref ? { ref } : {});
+};
