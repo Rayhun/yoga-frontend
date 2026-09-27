@@ -1,4 +1,6 @@
+import Cookies from 'js-cookie';
 import axios from '@/lib/axios';
+import { API_BASE_URL } from '@/utils/config';
 import { getSearchParamsFromObject } from '@/utils/helpers';
 
 export const getCertificationCatalog = async params => {
@@ -30,6 +32,22 @@ export const updateCertificationLessonProgress = async ({ programId, lessonId, w
   return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/progress/`, {
     watch_percent: watchPercent,
     position_seconds: positionSeconds,
+  });
+};
+
+// Page-unload variant of updateCertificationLessonProgress: axios can't send `keepalive`
+// requests, and sendBeacon can't set the Authorization header, so this is a plain fetch that the
+// browser is allowed to finish after the tab closes. Same endpoint, same payload.
+export const sendCertificationLessonProgressOnUnload = ({ programId, lessonId, watchPercent, positionSeconds }) => {
+  const token = Cookies.get('token');
+  return fetch(`${API_BASE_URL}/certification/programs/${programId}/lessons/${lessonId}/progress/`, {
+    method: 'POST',
+    keepalive: true,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `token ${token}` } : {}),
+    },
+    body: JSON.stringify({ watch_percent: watchPercent, position_seconds: positionSeconds }),
   });
 };
 
