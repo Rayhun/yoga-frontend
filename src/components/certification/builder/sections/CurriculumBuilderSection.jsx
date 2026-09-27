@@ -1,6 +1,7 @@
 'use client';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Formik, Form } from 'formik';
+import isEqual from 'lodash/isEqual';
 import * as Yup from 'yup';
 import { MdAdd, MdDelete, MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md';
 import FormikField from '@/components/common/form/formik/FormikField';
@@ -8,6 +9,7 @@ import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import Button from '@/components/common/Button';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import { toastApiError } from '@/utils/helpers';
 
 const LESSON_TYPE_OPTIONS = [
   { value: 'video', label: '🎥 Video' },
@@ -29,8 +31,13 @@ const URL_LABELS = { video: 'Video URL', pdf: 'PDF URL', link: 'Link URL' };
 const TEXT_LESSON_TYPES = ['text', 'assignment'];
 const TEXT_LABELS = { text: 'Text Content', assignment: 'Assignment Instructions' };
 
-const blankLesson = () => ({ title: '', lesson_type: 'video', content_url: '', text_content: '' });
-const blankModule = () => ({ title: '', lessons: [] });
+// `_key` is a client-only identity for items that don't have a server `id` yet — it lets a save
+// response's ids be adopted by the right module/lesson even if the list changed mid-save.
+let keySequence = 0;
+const newKey = prefix => `${prefix}-new-${Date.now()}-${(keySequence += 1)}`;
+
+const blankLesson = () => ({ _key: newKey('lesson'), title: '', lesson_type: 'video', content_url: '', text_content: '' });
+const blankModule = () => ({ _key: newKey('module'), title: '', lessons: [] });
 
 const validationSchema = Yup.object({
   modules: Yup.array().of(
@@ -46,13 +53,18 @@ const validationSchema = Yup.object({
   ),
 });
 
-// Strips UI-only fields the backend doesn't expect and drops whichever of content_url/
-// text_content doesn't apply to that lesson's type — the modules PUT is delete-then-recreate,
-// so this payload IS the entire curriculum on every save, order taken from array position.
+const withId = item => (item.id ? { id: item.id } : {});
+
+// Strips UI-only fields (`_key`) and drops whichever of content_url/text_content doesn't apply to
+// that lesson's type. The modules PUT is an id-preserving upsert: this payload IS the entire
+// curriculum on every save (order from array position) — items with an `id` are updated in place,
+// items without one are created, and anything missing is deleted.
 const toPayload = values => ({
   modules: (values.modules || []).map(module => ({
+    ...withId(module),
     title: module.title,
     lessons: (module.lessons || []).map(lesson => ({
+      ...withId(lesson),
       title: lesson.title,
       lesson_type: lesson.lesson_type,
       content_url: URL_LESSON_TYPES.includes(lesson.lesson_type) ? lesson.content_url || null : null,
@@ -60,6 +72,30 @@ const toPayload = values => ({
     })),
   })),
 });
+
+// Parallel to a payload: the `_key` of each module/lesson it was built from, by position.
+const keysOf = values =>
+  (values.modules || []).map(module => ({
+    key: module._key,
+    lessonKeys: (module.lessons || []).map(lesson => lesson._key),
+  }));
+
+// Returns `modules` with server ids filled in for items that were created by the save whose
+// payload `sentKeys` describes — the response lists modules/lessons in the same order as sent.
+const withAdoptedIds = (modules, sentKeys, savedModules) => {
+  const idsByKey = new Map();
+  sentKeys.forEach((sentModule, moduleIndex) => {
+    const savedModule = savedModules[moduleIndex];
+    if (!savedModule) return;
+    idsByKey.set(sentModule.key, savedModule.id);
+    sentModule.lessonKeys.forEach((lessonKey, lessonIndex) => {
+      const savedLesson = savedModule.lessons?.[lessonIndex];
+      if (savedLesson) idsByKey.set(lessonKey, savedLesson.id);
+    });
+  });
+  const adopt = item => (item.id || !idsByKey.has(item._key) ? item : { ...item, id: idsByKey.get(item._key) });
+  return modules.map(module => ({ ...adopt(module), lessons: (module.lessons || []).map(adopt) }));
+};
 
 const moveItem = (array, index, direction) => {
   const targetIndex = index + direction;
@@ -80,18 +116,53 @@ const moveItem = (array, index, direction) => {
  * that entirely.
  */
 const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) => {
-  const { notifyBlur, markSaved, status } = useSectionAutosave(onSave);
+  const formikRef = useRef(null);
+  // payload object → keysOf(values) it was built from; the autosave hook hands the very same
+  // payload object back to saveCurriculum, so the response can be matched to the right items.
+  const sentKeysRef = useRef(new WeakMap());
+
+  const saveCurriculum = useCallback(
+    async payload => {
+      try {
+        const savedModules = await onSave(payload);
+        const sentKeys = sentKeysRef.current.get(payload);
+        const formik = formikRef.current;
+        if (sentKeys && formik && Array.isArray(savedModules)) {
+          const currentModules = formik.values.modules || [];
+          const adoptedModules = withAdoptedIds(currentModules, sentKeys, savedModules);
+          if (!isEqual(adoptedModules, currentModules)) formik.setFieldValue('modules', adoptedModules);
+        }
+        return savedModules;
+      } catch (error) {
+        // 409 = the save would delete lessons learners already have progress on; nothing was
+        // written server-side, so put the removed items back on screen.
+        toastApiError(error);
+        if (error?.response?.status === 409) formikRef.current?.resetForm({ values: initialValues });
+        throw error;
+      }
+    },
+    [onSave, initialValues]
+  );
+
+  const { notifyBlur, markSaved, status } = useSectionAutosave(saveCurriculum);
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues]);
 
-  const handleSave = useCallback(values => notifyBlur(toPayload(values)), [notifyBlur]);
+  const handleSave = useCallback(
+    values => {
+      const payload = toPayload(values);
+      sentKeysRef.current.set(payload, keysOf(values));
+      notifyBlur(payload);
+    },
+    [notifyBlur]
+  );
 
   return (
     <SectionCard title="Curriculum Builder" subtitle="Add modules and lessons — link to any video, PDF, or page you host elsewhere." status={status}>
-      <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
+      <Formik innerRef={formikRef} initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values, setFieldValue }) => {
           const modules = values.modules || [];
 

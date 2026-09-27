@@ -80,10 +80,16 @@ const pickDelivery = program => ({
   platform_name: program?.platform_name ?? '',
 });
 
+// `id` is sent back on save so the modules PUT updates in place instead of recreating (which
+// would lose learner progress). `_key` is UI-only identity (see CurriculumBuilderSection).
 const pickModules = program => ({
   modules: (program?.modules || []).map(module => ({
+    id: module.id,
+    _key: `module-${module.id}`,
     title: module.title || '',
     lessons: (module.lessons || []).map(lesson => ({
+      id: lesson.id,
+      _key: `lesson-${lesson.id}`,
       title: lesson.title || '',
       lesson_type: lesson.lesson_type || 'video',
       content_url: lesson.content_url || '',

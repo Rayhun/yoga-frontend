@@ -13,11 +13,22 @@ const TARGET_AUDIENCE_LABELS = {
   both: 'Career & Professional',
 };
 
+// enroll_status values from GET /certification/programs/enrolled/ (EnrolledProgramSerializer).
+const ENROLL_BADGES = {
+  InProgress: { label: 'In Progress', className: 'bg-orange-500' },
+  Complete: { label: 'Completed', className: 'bg-primary' },
+  Expired: { label: 'Expired', className: 'bg-gray-500' },
+  Refunded: { label: 'Refunded', className: 'bg-gray-500' },
+};
+const ACCESS_ENDED_STATUSES = ['Expired', 'Refunded'];
+
 const ProgramCard = ({ program, onClick }) => {
   const isEnrolled = program?.is_enrolled || program?.enroll_status;
   const isFull = program.seat_limit !== null && program.seats_remaining === 0;
   const isFree = program.payment_type === 'free';
   const isComplete = program?.enroll_status === 'Complete';
+  const isAccessEnded = ACCESS_ENDED_STATUSES.includes(program?.enroll_status);
+  const enrollBadge = ENROLL_BADGES[program?.enroll_status] || ENROLL_BADGES.InProgress;
   const progress = program?.progress || 0;
 
   return (
@@ -41,10 +52,8 @@ const ProgramCard = ({ program, onClick }) => {
           </div>
         </div>
         {isEnrolled && (
-          <div className={`absolute top-3 right-3 text-white px-2 py-1 rounded-full text-xs font-medium ${
-            isComplete ? 'bg-primary' : 'bg-orange-500'
-          }`}>
-            {isComplete ? 'Completed' : 'In Progress'}
+          <div className={`absolute top-3 right-3 text-white px-2 py-1 rounded-full text-xs font-medium ${enrollBadge.className}`}>
+            {enrollBadge.label}
           </div>
         )}
         {program.creator_type && (
@@ -94,7 +103,7 @@ const ProgramCard = ({ program, onClick }) => {
         <div className="flex-1" />
 
         {/* Progress bar for enrolled */}
-        {isEnrolled && !isComplete && progress > 0 && (
+        {isEnrolled && !isComplete && !isAccessEnded && progress > 0 && (
           <div className="w-full bg-gray-100 rounded-full h-1.5">
             <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${progress}%` }} />
           </div>
@@ -104,6 +113,10 @@ const ProgramCard = ({ program, onClick }) => {
         {isComplete ? (
           <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 flex items-center justify-center gap-2">
             <FaCheckCircle size={14} /> Completed
+          </div>
+        ) : isAccessEnded ? (
+          <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-center text-gray-500 border-2 border-gray-200">
+            Access ended
           </div>
         ) : isEnrolled ? (
           <button

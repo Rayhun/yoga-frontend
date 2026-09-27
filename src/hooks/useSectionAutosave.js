@@ -70,7 +70,10 @@ function useSectionAutosave(onSave) {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         timerRef.current = null;
-        flush();
+        // Nothing awaits a timer-driven save — a failure is already surfaced via status 'error'
+        // (and by the section's own onSave, e.g. the Curriculum 409 toast), so don't let it
+        // escape as an unhandled promise rejection.
+        flush().catch(() => null);
       }, AUTOSAVE_DELAY_MS);
     },
     [flush, safeSetStatus]
@@ -90,7 +93,7 @@ function useSectionAutosave(onSave) {
         // Best-effort: fire the last pending save so closing/navigating away mid-debounce
         // doesn't lose the edit. The network request itself isn't tied to component lifecycle,
         // so this still lands even though the component is gone by the time it resolves.
-        flush();
+        flush().catch(() => null);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
