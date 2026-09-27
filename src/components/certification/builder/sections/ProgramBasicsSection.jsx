@@ -138,7 +138,7 @@ const toPayload = values => ({
  */
 const ProgramBasicsSection = ({ initialValues, onSave, onContinue, disabled = false }) => {
   const { options: categoryOptions } = useLMSCategoryOptions();
-  const { notifyBlur, flush, markSaved, status } = useSectionAutosave(onSave);
+  const { notifyBlur, flush, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
   const [editingRecurringIndex, setEditingRecurringIndex] = useState(null);
@@ -204,7 +204,7 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, disabled = fa
   );
 
   return (
-    <SectionCard title="Program Basics" status={status}>
+    <SectionCard title="Program Basics" status={status} errorMessage={errorMessage} canRetry={canRetry} onRetry={retry}>
       <Formik
         initialValues={formInitialValues}
         enableReinitialize

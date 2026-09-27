@@ -24,7 +24,7 @@ const validationSchema = Yup.object({
  * not exposed here yet, same "build to the mockup, not the model ceiling" discipline as Basics.
  */
 const DeliveryFormatSection = ({ initialValues, onSave, disabled = false }) => {
-  const { notifyBlur, markSaved, status } = useSectionAutosave(onSave);
+  const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
 
   useEffect(() => {
     markSaved(initialValues);
@@ -34,7 +34,7 @@ const DeliveryFormatSection = ({ initialValues, onSave, disabled = false }) => {
   const handleBlur = useCallback(values => notifyBlur(values), [notifyBlur]);
 
   return (
-    <SectionCard title="Delivery Format" status={status}>
+    <SectionCard title="Delivery Format" status={status} errorMessage={errorMessage} canRetry={canRetry} onRetry={retry}>
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values }) => (
           <Form className="grid grid-cols-1 md:grid-cols-2 gap-4" onBlur={() => handleBlur(values)}>
