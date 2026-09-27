@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -21,6 +21,7 @@ import CurriculumBuilderSection from '@/components/certification/builder/section
 import PricingSection from '@/components/certification/builder/sections/PricingSection';
 import CertificateSetupSection from '@/components/certification/builder/sections/CertificateSetupSection';
 import PublishSection from '@/components/certification/builder/sections/PublishSection';
+import { toLessonFormValues, toModuleFormValues } from '@/components/certification/builder/sections/curriculumFields';
 
 const BLANK_BASICS = {
   title: '',
@@ -80,15 +81,12 @@ const pickDelivery = program => ({
   platform_name: program?.platform_name ?? '',
 });
 
+// `id` is sent back on save so the modules PUT updates in place instead of recreating (which
+// would lose learner progress). `_key` is UI-only identity (see CurriculumBuilderSection).
 const pickModules = program => ({
   modules: (program?.modules || []).map(module => ({
-    title: module.title || '',
-    lessons: (module.lessons || []).map(lesson => ({
-      title: lesson.title || '',
-      lesson_type: lesson.lesson_type || 'video',
-      content_url: lesson.content_url || '',
-      text_content: lesson.text_content || '',
-    })),
+    ...toModuleFormValues(module),
+    lessons: (module.lessons || []).map(toLessonFormValues),
   })),
 });
 
@@ -218,6 +216,12 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
   const pricingInitialValues = useMemo(() => pickPricing(program), [program]);
   const certificateSetupInitialValues = useMemo(() => pickCertificateSetup(program), [program]);
 
+  const isProgramMissing = Boolean(liveId) && !isLoading && !program;
+  // Side effect in an effect, not during render (a toast from render fires on every re-render).
+  useEffect(() => {
+    if (isProgramMissing) toast.error('Program not found.');
+  }, [isProgramMissing]);
+
   const stepHeader = (label, showBack) => (
     <div className="flex items-center justify-between">
       <p className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
@@ -247,8 +251,7 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
   }
 
   if (!program) {
-    toast.error('Program not found.');
-    return null;
+    return <p className="text-gray-500">Program not found.</p>;
   }
 
   if (currentStep === 1) {

@@ -35,7 +35,7 @@ const toPayload = values => ({
  * transparent to the creator.
  */
 const PricingSection = ({ initialValues, onSave, disabled = false }) => {
-  const { notifyBlur, markSaved, status } = useSectionAutosave(onSave);
+  const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -45,7 +45,7 @@ const PricingSection = ({ initialValues, onSave, disabled = false }) => {
   const handleBlur = useCallback(values => notifyBlur(toPayload(values)), [notifyBlur]);
 
   return (
-    <SectionCard title="Pricing" status={status}>
+    <SectionCard title="Pricing" status={status} errorMessage={errorMessage} canRetry={canRetry} onRetry={retry}>
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values }) => (
           <Form className="flex flex-col gap-3" onBlur={() => handleBlur(values)}>

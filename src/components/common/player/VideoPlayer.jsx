@@ -1,13 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 import { toast } from 'react-toastify';
 
 const DEFAULT_VIDEO_URL = 'https://vimeo.com/115783408';
+const LOAD_ERROR_MESSAGE = 'Due to some technical issues actual video cannot be loaded at the moment. Try again later';
 
-const VideoPlayer = ({ url, onUpdateProgress = () => null, ...restProps }) => {
+/**
+ * `fallbackOnError` (default true — existing LMS behaviour): on a load error, toast and swap to
+ * DEFAULT_VIDEO_URL. Pass `false` to opt out: the toast fires once per mount and the player stays
+ * on the original URL (no fallback video, so no error → fallback → error toast loop).
+ */
+const VideoPlayer = ({ url, onUpdateProgress = () => null, fallbackOnError = true, ...restProps }) => {
   const [targetVideoURL, setTargetVideoURL] = useState(() => url);
   const [lastTrackedTime, setLastTrackedTime] = useState(0);
+  const hasReportedErrorRef = useRef(false);
 
   const handleProgress = state => {
     const currentTime = state.playedSeconds;
@@ -20,7 +27,13 @@ const VideoPlayer = ({ url, onUpdateProgress = () => null, ...restProps }) => {
   };
 
   const handleVideoLoadError = () => {
-    toast.info('Due to some technical issues actual video cannot be loaded at the moment. Try again later');
+    if (!fallbackOnError) {
+      if (hasReportedErrorRef.current) return;
+      hasReportedErrorRef.current = true;
+      toast.info(LOAD_ERROR_MESSAGE);
+      return;
+    }
+    toast.info(LOAD_ERROR_MESSAGE);
     setTargetVideoURL(DEFAULT_VIDEO_URL);
   };
 

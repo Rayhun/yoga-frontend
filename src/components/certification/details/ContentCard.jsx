@@ -1,85 +1,50 @@
 'use client';
-import { useMemo } from 'react';
 import Image from 'next/image';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import LinearProgress from '@mui/material/LinearProgress';
 import { BiCheck } from 'react-icons/bi';
-import { FaTv, FaImage, FaHeadphones, FaPlayCircle } from 'react-icons/fa';
-import { MdCheckBox } from 'react-icons/md';
 import { FiLock } from 'react-icons/fi';
+import LessonTypeTile from '@/components/certification/session/LessonTypeTile';
+import { getLessonHref, getLessonMetaLabel, getLessonType } from '@/components/certification/session/lessonTypes';
 
-const getContentRef = item => {
-  let label = 'Item';
-  let href = '#';
+const DEFAULT_LOCK_MESSAGE = 'This content is not yet available. It will unlock as you progress through the program.';
 
-  if (item.content_type === 'module') {
-    label = 'Module';
-    href = `/portal/customer/certification/module/${item.id}/details`;
-  } else if (item.content_type === 'session') {
-    if (item.session_type === 'Image') {
-      label = 'Session';
-      href = `/portal/customer/certification/session/image/${item.id}/details`;
-    } else if (item.session_type === 'Audio') {
-      label = 'Session';
-      href = `/portal/customer/certification/session/audio/${item.id}/details`;
-    } else if (item.session_type === 'Video') {
-      label = 'Session';
-      href = `/portal/customer/certification/session/video/${item.id}/details`;
-    }
-  } else if (item.content_type === 'quiz') {
-    label = 'Quiz';
-    href = `/portal/customer/certification/quiz/${item.id}/details`;
-  }
-  return { label, href };
-};
+const getHref = (item, programId) =>
+  item.content_type === 'module'
+    ? `/portal/customer/certification/module/${item.id}/details?program=${programId}`
+    : getLessonHref(item.id, programId);
 
-const ModuleContent = ({ total_item = 0, completed_item = 0 }) => {
-  const progress = useMemo(
-    () => (total_item <= 1 ? 0 : (completed_item / total_item) * 100),
-    [completed_item, total_item]
-  );
-
+const ModuleContent = ({ totalItems = 0, completedItems = 0 }) => {
+  const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
   return (
     <div className="flex flex-col gap-2 mb-2">
       <p className="text-bodydark2 text-sm">
-        {completed_item}/{total_item} completed
+        {completedItems}/{totalItems} completed
       </p>
       <LinearProgress color="secondary" className="rounded-full" value={progress} />
     </div>
   );
 };
 
-const SessionQuizContent = ({ content_type, session_type, duration = '10 min' }) => {
-  const Icon = useMemo(() => {
-    if (content_type === 'quiz') return MdCheckBox;
-    if (content_type === 'session' && session_type === 'Image') return FaImage;
-    if (content_type === 'session' && session_type === 'Audio') return FaHeadphones;
-    if (content_type === 'session' && session_type === 'Video') return FaPlayCircle;
-    return FaTv;
-  }, [content_type, session_type]);
-
-  const text = useMemo(() => {
-    if (content_type === 'quiz') return '1 question';
-    if (content_type === 'session' && session_type === 'Image') return '1 image';
-    if (content_type === 'session' && session_type === 'Audio') return `${duration} audio`;
-    if (content_type === 'session' && session_type === 'Video') return `${duration} video`;
-    return FaTv;
-  }, [content_type, duration, session_type]);
-
+const LessonContent = ({ lesson }) => {
+  const { icon: Icon } = getLessonType(lesson.lesson_type);
   return (
-    <div className="flex gap-2">
-      <Icon size={22} className="text-secondary" />
-      <p className="text-bodydark2 text-md">{text}</p>
+    <div className="flex gap-2 items-center">
+      <Icon size={20} className="text-secondary" />
+      <p className="text-bodydark2 text-md">{getLessonMetaLabel(lesson)}</p>
     </div>
   );
 };
 
+/**
+ * Card for a module (content_type 'module') or a lesson (content_type 'lesson', with lesson_type).
+ * `locked` comes from the API (module.is_locked); `lock_reason` is the server's explanation.
+ */
 const ContentCard = ({ item, isEnrolled = false, programId }) => {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const contentRef = getContentRef(item);
+  const isModule = item.content_type === 'module';
   const isLocked = Boolean(item?.locked);
 
   const handleNavigate = () => {
@@ -88,17 +53,11 @@ const ContentCard = ({ item, isEnrolled = false, programId }) => {
       return;
     }
     if (isLocked) {
-      toast.info('This content is not yet available. It will unlock as you progress through the program.');
+      toast.info(item.lock_reason || DEFAULT_LOCK_MESSAGE);
       return;
     }
-
-    const resolvedProgramId = programId || params.id;
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('program', resolvedProgramId);
-    router.push(`${contentRef.href}?${newParams.toString()}`);
+    router.push(getHref(item, programId || params.id));
   };
-
-  const contentImage = item.content_type === 'quiz' ? '/images/content/quiz.png' : item?.image;
 
   return (
     <div
@@ -109,15 +68,19 @@ const ContentCard = ({ item, isEnrolled = false, programId }) => {
     >
       {/* Image */}
       <div className="relative">
-        <div className="aspect-[16/9]">
-          <Image
-            width={0}
-            height={0}
-            src={contentImage || '/images/content/default.png'}
-            alt="image"
-            sizes="100vw"
-            className={`w-full h-full object-cover rounded-t-lg ${isLocked ? 'grayscale' : ''}`}
-          />
+        <div className={`aspect-[16/9] overflow-hidden rounded-t-lg ${isLocked ? 'grayscale' : ''}`}>
+          {isModule ? (
+            <Image
+              width={0}
+              height={0}
+              src={item.image || '/images/content/default.png'}
+              alt={item.title || 'Module image'}
+              sizes="100vw"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <LessonTypeTile lesson={item} />
+          )}
         </div>
         {/* Lock overlay */}
         {isLocked && (
@@ -139,15 +102,21 @@ const ContentCard = ({ item, isEnrolled = false, programId }) => {
         ) : null}
       </div>
 
-      {/* Course Info */}
+      {/* Info */}
       <div className="p-4 flex flex-col justify-between h-[110px]">
         <h2 className={`text-lg font-bold line-clamp-1 ${isLocked ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
           {item.title}
           {isLocked && <span className="ml-1 text-sm font-normal">(Locked)</span>}
         </h2>
 
-        {/* Details */}
-        {item.content_type === 'module' ? <ModuleContent total_item={item.total_count || item.lesson_count || 0} completed_item={item.completed_count || 0} /> : <SessionQuizContent {...item} />}
+        {isModule ? (
+          <ModuleContent
+            totalItems={item.total_count ?? item.lesson_count ?? 0}
+            completedItems={item.completed_count ?? 0}
+          />
+        ) : (
+          <LessonContent lesson={item} />
+        )}
       </div>
     </div>
   );
