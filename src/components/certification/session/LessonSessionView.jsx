@@ -12,7 +12,7 @@ import LockedLesson from './LockedLesson';
 import ModuleOutlinePanel from './ModuleOutlinePanel';
 import { CompletedBadge } from './MarkAsDoneButton';
 import CertQuizLesson from './lessons/CertQuizLesson';
-import ComingSoonLesson from './lessons/ComingSoonLesson';
+import AssignmentLesson from './lessons/AssignmentLesson';
 import LinkLesson from './lessons/LinkLesson';
 import PdfLesson from './lessons/PdfLesson';
 import TextLesson from './lessons/TextLesson';
@@ -24,7 +24,7 @@ const LESSON_BODIES = {
   pdf: PdfLesson,
   text: TextLesson,
   quiz: CertQuizLesson,
-  assignment: ComingSoonLesson,
+  assignment: AssignmentLesson,
 };
 
 // Where the lesson sits in the program: its module plus previous/next lessons across modules.
@@ -86,7 +86,10 @@ const LessonSessionView = ({ lessonId, programId }) => {
     if (!lesson) {
       return <div className="w-full h-[200px] flex justify-center items-center text-gray-500">Lesson not found.</div>;
     }
-    const LessonBody = LESSON_BODIES[lesson.lesson_type] || ComingSoonLesson;
+    const LessonBody = LESSON_BODIES[lesson.lesson_type];
+    if (!LessonBody) {
+      return <div className="w-full h-[200px] flex justify-center items-center text-gray-500">This lesson type isn&apos;t supported yet.</div>;
+    }
     return <LessonBody key={lesson.id} lesson={lesson} programId={programId} />;
   };
 

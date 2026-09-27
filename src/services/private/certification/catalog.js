@@ -66,6 +66,15 @@ export const submitCertificationLessonQuiz = async ({ programId, lessonId, answe
   return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/quiz/submit/`, { answers });
 };
 
+export const getCertificationLessonAssignment = async ({ programId, lessonId }) => {
+  return axios.get(`/certification/programs/${programId}/lessons/${lessonId}/assignment/`);
+};
+
+// payload: { text_answer?, file_key? (from uploadCertificationFile), link_url? }
+export const submitCertificationLessonAssignment = async ({ programId, lessonId, payload }) => {
+  return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/assignment/submit/`, payload);
+};
+
 export const checkoutCertificationProgram = async ({ id, ref }) => {
   return axios.post(`/certification/programs/${id}/checkout/`, ref ? { ref } : {});
 };
