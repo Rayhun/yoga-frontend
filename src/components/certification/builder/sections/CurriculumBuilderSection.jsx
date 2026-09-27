@@ -9,7 +9,7 @@ import Button from '@/components/common/Button';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
 import { toastApiError } from '@/utils/helpers';
-import { blankLesson, blankModule, hasUntitledItems, toPayload } from './curriculumFields';
+import { blankLesson, blankModule, getUnsavableReason, keysOf, toPayload, withAdoptedIds } from './curriculumFields';
 import CurriculumLessonFields from './CurriculumLessonFields';
 import CurriculumModuleFields from './CurriculumModuleFields';
 
@@ -17,7 +17,6 @@ const CONFLICT_STATUS = 409;
 // A 409 ("lesson has learner progress") fails the same way on every retry — only fixable by
 // keeping the item, so no Retry button for it.
 const isRetryable = error => error?.response?.status !== CONFLICT_STATUS;
-const UNTITLED_UPLOAD_MESSAGE = 'Give every module and lesson a title first, then upload an image.';
 
 const validationSchema = Yup.object({
   modules: Yup.array().of(
@@ -35,30 +34,6 @@ const validationSchema = Yup.object({
   ),
 });
 
-// Parallel to a payload: the `_key` of each module/lesson it was built from, by position.
-const keysOf = values =>
-  (values.modules || []).map(module => ({
-    key: module._key,
-    lessonKeys: (module.lessons || []).map(lesson => lesson._key),
-  }));
-
-// Returns `modules` with server ids filled in for items that were created by the save whose
-// payload `sentKeys` describes — the response lists modules/lessons in the same order as sent.
-const withAdoptedIds = (modules, sentKeys, savedModules) => {
-  const idsByKey = new Map();
-  sentKeys.forEach((sentModule, moduleIndex) => {
-    const savedModule = savedModules[moduleIndex];
-    if (!savedModule) return;
-    idsByKey.set(sentModule.key, savedModule.id);
-    sentModule.lessonKeys.forEach((lessonKey, lessonIndex) => {
-      const savedLesson = savedModule.lessons?.[lessonIndex];
-      if (savedLesson) idsByKey.set(lessonKey, savedLesson.id);
-    });
-  });
-  const adopt = item => (item.id || !idsByKey.has(item._key) ? item : { ...item, id: idsByKey.get(item._key) });
-  return modules.map(module => ({ ...adopt(module), lessons: (module.lessons || []).map(adopt) }));
-};
-
 const moveItem = (array, index, direction) => {
   const targetIndex = index + direction;
   if (targetIndex < 0 || targetIndex >= array.length) return array;
@@ -73,7 +48,12 @@ const toBlockedNotices = (blocked = []) => {
   const byLesson = new Map();
   const byModule = new Map();
   blocked.forEach(item => {
-    if (item.module_removed) {
+    if (item.kind === 'question') {
+      // Attempted quiz: the question comes back; say so under its quiz lesson.
+      const existing = byLesson.get(item.lesson_id);
+      const message = `Can't remove the question "${item.question_prompt}" — ${learners(item.learner_count)} already attempted this quiz. It has been restored.`;
+      byLesson.set(item.lesson_id, existing ? `${existing} ${message}` : message);
+    } else if (item.module_removed) {
       const existing = byModule.get(item.module_id) || [];
       byModule.set(item.module_id, [...existing, `"${item.lesson_title}" (${learners(item.learner_count)} started it)`]);
     } else {
@@ -115,7 +95,7 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) =
   // payload object back to saveCurriculum, so the response can be matched to the right items.
   const sentKeysRef = useRef(new WeakMap());
   const [blockedNotices, setBlockedNotices] = useState(null);
-  const [isWaitingForTitles, setIsWaitingForTitles] = useState(false);
+  const [unsavableReason, setUnsavableReason] = useState(null);
 
   const saveCurriculum = useCallback(
     async payload => {
@@ -154,11 +134,9 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) =
 
   const handleSave = useCallback(
     values => {
-      if (hasUntitledItems(values)) {
-        setIsWaitingForTitles(true);
-        return;
-      }
-      setIsWaitingForTitles(false);
+      const reason = getUnsavableReason(values);
+      setUnsavableReason(reason);
+      if (reason) return;
       const payload = toPayload(values);
       sentKeysRef.current.set(payload, keysOf(values));
       notifyBlur(payload);
@@ -197,13 +175,17 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) =
           const updateLesson = (mi, li, patch) =>
             updateLessons(mi, lessons => lessons.map((l, j) => (j === li ? { ...l, ...patch } : l)));
 
-          const getUploadBlockReason = () => (hasUntitledItems(values) ? UNTITLED_UPLOAD_MESSAGE : null);
+          // Same rule as saving: an image uploaded now would only be saved once the curriculum can be.
+          const getUploadBlockReason = () => {
+            const reason = getUnsavableReason(values);
+            return reason ? `${reason.split(' — ')[0]} first, then upload an image.` : null;
+          };
 
           return (
             <Form className="flex flex-col gap-4" onBlur={() => handleSave(values)}>
-              {isWaitingForTitles ? (
+              {unsavableReason ? (
                 <p className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                  Give every module and lesson a title — changes save once they&apos;re all named.
+                  {unsavableReason}
                 </p>
               ) : null}
 

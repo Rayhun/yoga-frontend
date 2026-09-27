@@ -57,6 +57,15 @@ export const completeCertificationLesson = async ({ programId, lessonId, watchPe
   });
 };
 
+export const getCertificationLessonQuiz = async ({ programId, lessonId }) => {
+  return axios.get(`/certification/programs/${programId}/lessons/${lessonId}/quiz/`);
+};
+
+// answers: { [questionId]: [optionId, ...] }
+export const submitCertificationLessonQuiz = async ({ programId, lessonId, answers }) => {
+  return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/quiz/submit/`, { answers });
+};
+
 export const checkoutCertificationProgram = async ({ id, ref }) => {
   return axios.post(`/certification/programs/${id}/checkout/`, ref ? { ref } : {});
 };

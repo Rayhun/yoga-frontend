@@ -3,6 +3,7 @@ import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
 import ImageUploadField from '@/components/certification/builder/ImageUploadField';
 import { TEXT_LESSON_TYPES, URL_LESSON_TYPES } from './curriculumFields';
+import QuizQuestionsEditor from './QuizQuestionsEditor';
 
 const LESSON_TYPE_OPTIONS = [
   { value: 'video', label: '🎥 Video' },
@@ -48,7 +49,23 @@ const CurriculumLessonFields = ({ mi, li, lesson, disabled, onLessonChange, getB
         </div>
       ) : null}
       {lesson.lesson_type === 'quiz' ? (
-        <p className="md:col-span-2 text-xs text-gray-400">Quiz content is configured separately — coming in a later pass.</p>
+        <>
+          <FormikField name={`${namePrefix}.quiz_pass_mark_percent`} label="Pass mark (%)" type="number" min={0} max={100} disabled={disabled} />
+          <FormikField
+            name={`${namePrefix}.quiz_max_attempts`}
+            label="Max attempts"
+            type="number"
+            min={1}
+            placeholder="Unlimited"
+            disabled={disabled}
+          />
+          <QuizQuestionsEditor
+            namePrefix={namePrefix}
+            questions={lesson.questions}
+            disabled={disabled}
+            onQuestionsChange={questions => onLessonChange({ questions })}
+          />
+        </>
       ) : null}
 
       <FormikField name={`${namePrefix}.duration_minutes`} label="Duration (minutes)" type="number" min={0} placeholder="e.g. 12" disabled={disabled} />

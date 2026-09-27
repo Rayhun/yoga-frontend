@@ -134,6 +134,7 @@ const queryKeys = {
   certificationLearnerDetail: 'certificationLearnerDetail',
   certificationLearnerModuleDetail: 'certificationLearnerModuleDetail',
   certificationLearnerLessonDetail: 'certificationLearnerLessonDetail',
+  certificationLessonQuiz: 'certificationLessonQuiz',
   certificationProgramCatalogDetail: 'certificationProgramCatalogDetail',
   customerV2SidebarNavigation: 'customerV2SidebarNavigation',
   customerV2HomePage: 'customerV2HomePage',

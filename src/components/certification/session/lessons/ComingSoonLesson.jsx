@@ -2,11 +2,10 @@ import ControllableRichText from '@/components/common/details/ControllableRichTe
 import { getLessonType } from '../lessonTypes';
 
 const COPY = {
-  quiz: 'Quizzes are coming soon — you’ll be able to take this quiz here.',
   assignment: 'Assignment submissions are coming soon — you’ll be able to submit your work here for review.',
 };
 
-// Quiz / assignment placeholder until their own flows ship; an assignment still shows its instructions.
+// Assignment placeholder until submissions ship (quizzes have CertQuizLesson); shows the instructions.
 const ComingSoonLesson = ({ lesson }) => {
   const { icon: Icon, tileClassName } = getLessonType(lesson.lesson_type);
 

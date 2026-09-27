@@ -11,6 +11,7 @@ import LessonPager from './LessonPager';
 import LockedLesson from './LockedLesson';
 import ModuleOutlinePanel from './ModuleOutlinePanel';
 import { CompletedBadge } from './MarkAsDoneButton';
+import CertQuizLesson from './lessons/CertQuizLesson';
 import ComingSoonLesson from './lessons/ComingSoonLesson';
 import LinkLesson from './lessons/LinkLesson';
 import PdfLesson from './lessons/PdfLesson';
@@ -22,7 +23,7 @@ const LESSON_BODIES = {
   link: LinkLesson,
   pdf: PdfLesson,
   text: TextLesson,
-  quiz: ComingSoonLesson,
+  quiz: CertQuizLesson,
   assignment: ComingSoonLesson,
 };
 
