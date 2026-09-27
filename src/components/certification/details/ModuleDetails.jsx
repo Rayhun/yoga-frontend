@@ -102,7 +102,7 @@ const ModuleDetails = () => {
                       content_type: 'session',
                       session_type: lesson.lesson_type === 'video' ? 'Video' : lesson.lesson_type === 'text' ? 'Image' : 'Video',
                       completed: lesson.is_completed || false,
-                      locked: false,
+                      locked: Boolean(moduleDetails.is_locked),
                     }}
                     isEnrolled={true}
                     programId={programId}

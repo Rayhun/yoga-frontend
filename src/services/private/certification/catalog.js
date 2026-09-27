@@ -26,6 +26,13 @@ export const getLearnerLessonDetail = async ({ programId, lessonId }) => {
   return axios.get(`/certification/programs/${programId}/lessons/${lessonId}/detail/`);
 };
 
+export const updateCertificationLessonProgress = async ({ programId, lessonId, watchPercent, positionSeconds }) => {
+  return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/progress/`, {
+    watch_percent: watchPercent,
+    position_seconds: positionSeconds,
+  });
+};
+
 export const completeCertificationLesson = async ({ programId, lessonId, watchPercent }) => {
   return axios.post(`/certification/programs/${programId}/lessons/${lessonId}/complete/`, {
     watch_percent: watchPercent,

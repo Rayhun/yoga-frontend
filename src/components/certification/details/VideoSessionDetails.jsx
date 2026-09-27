@@ -1,15 +1,20 @@
 'use client';
-import Avatar from '@mui/material/Avatar';
+import { useRef } from 'react';
 import { toast } from 'react-toastify';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import VideoPlayer from '@/components/common/player/VideoPlayer';
-import { completeCertificationLesson } from '@/services/private/certification/catalog';
+import {
+  completeCertificationLesson,
+  updateCertificationLessonProgress,
+} from '@/services/private/certification/catalog';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
 
-const VideoSessionDetails = ({ data: sessionDetails, programId }) => {
+const VideoSessionDetails = ({ data: sessionDetails, programId, onCompleted = () => null }) => {
   const searchParams = useSearchParamUtils();
   const programID = programId || searchParams.get('program');
-  const moduleID = searchParams.get('module');
+  const durationSecondsRef = useRef(0);
+  const hasResumedRef = useRef(false);
+  const isCompletedRef = useRef(Boolean(sessionDetails.is_completed));
 
   const SESSION_CARDS = [
     {
@@ -38,15 +43,36 @@ const VideoSessionDetails = ({ data: sessionDetails, programId }) => {
     },
   ];
 
+  // Every ~15s (VideoPlayer's cadence): save watch % + position via the progress endpoint, and
+  // complete the lesson once the server-side threshold is reached. The backend re-checks the
+  // stored watch_percent, so this is a convenience trigger, not the source of truth.
   const handleUpdateSessionProgress = async currentTime => {
+    const durationSeconds = durationSecondsRef.current;
+    if (!durationSeconds) return;
+    const watchPercent = Math.min(100, Math.round((currentTime / durationSeconds) * 100));
     try {
-      await completeCertificationLesson({
+      await updateCertificationLessonProgress({
         programId: programID,
         lessonId: sessionDetails.id,
-        watchPercent: Math.round((currentTime / sessionDetails.duration_seconds) * 100),
+        watchPercent,
+        positionSeconds: Math.floor(currentTime),
       });
+      if (!isCompletedRef.current && watchPercent >= sessionDetails.video_watch_threshold_percent) {
+        isCompletedRef.current = true;
+        await completeCertificationLesson({ programId: programID, lessonId: sessionDetails.id });
+        onCompleted();
+      }
     } catch (error) {
       toast.error('Something went wrong in updating session progress');
+    }
+  };
+
+  const handlePlayerReady = player => {
+    durationSecondsRef.current = player.getDuration() || durationSecondsRef.current;
+    // onReady can fire more than once — only resume on the first, or playback jumps back.
+    if (!hasResumedRef.current) {
+      hasResumedRef.current = true;
+      if (sessionDetails.resume_seconds) player.seekTo(sessionDetails.resume_seconds, 'seconds');
     }
   };
 
@@ -59,8 +85,9 @@ const VideoSessionDetails = ({ data: sessionDetails, programId }) => {
           <VideoPlayer
             url={sessionDetails.content_url}
             onUpdateProgress={handleUpdateSessionProgress}
-            onReady={player => {
-              player.seekTo(parseInt(sessionDetails.watch_duration || '0'));
+            onReady={handlePlayerReady}
+            onDuration={durationSeconds => {
+              durationSecondsRef.current = durationSeconds;
             }}
           />
         </div>

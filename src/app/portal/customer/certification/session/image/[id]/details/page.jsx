@@ -7,6 +7,7 @@ import ImageSessionDetails from '@/components/certification/details/ImageSession
 import { getLearnerProgramDetail } from '@/services/private/certification/catalog';
 import { useSearchParams } from 'next/navigation';
 import queryKeys from '@/utils/query-keys';
+import { toastApiError } from '@/utils/helpers';
 
 const Page = ({ params }) => {
   const searchParams = useSearchParams();
@@ -64,7 +65,7 @@ const Page = ({ params }) => {
                 });
                 refetch();
               } catch (error) {
-                console.error(error);
+                toastApiError(error);
               }
             }}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/80"
