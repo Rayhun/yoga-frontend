@@ -6,6 +6,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
 
 const PAYMENT_TYPE_OPTIONS = [
   { value: 'one_time', label: 'One-Time' },
@@ -34,8 +35,9 @@ const toPayload = values => ({
  * payment_type='one_time' and price > 0 (backend pass 3) — nothing shown here for that, it's
  * transparent to the creator.
  */
-const PricingSection = ({ initialValues, onSave, disabled = false }) => {
+const PricingSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
   const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
+  useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -45,7 +47,14 @@ const PricingSection = ({ initialValues, onSave, disabled = false }) => {
   const handleBlur = useCallback(values => notifyBlur(toPayload(values)), [notifyBlur]);
 
   return (
-    <SectionCard title="Pricing" status={status} errorMessage={errorMessage} canRetry={canRetry} onRetry={retry}>
+    <SectionCard
+      anchorId={anchorId}
+      title="Pricing"
+      status={status}
+      errorMessage={errorMessage}
+      canRetry={canRetry}
+      onRetry={retry}
+    >
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values }) => (
           <Form className="flex flex-col gap-3" onBlur={() => handleBlur(values)}>

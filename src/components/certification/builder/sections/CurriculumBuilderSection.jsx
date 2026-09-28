@@ -8,6 +8,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import Button from '@/components/common/Button';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
 import { toastApiError } from '@/utils/helpers';
 import { blankLesson, blankModule, getUnsavableReason, keysOf, toPayload, withAdoptedIds } from './curriculumFields';
 import CurriculumLessonFields from './CurriculumLessonFields';
@@ -89,7 +90,7 @@ const BlockedNotice = ({ message }) =>
  * (the save would delete a lesson learners have started) restores the curriculum and shows the
  * reason next to the item that couldn't be removed.
  */
-const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) => {
+const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
   const formikRef = useRef(null);
   // payload object → keysOf(values) it was built from; the autosave hook hands the very same
   // payload object back to saveCurriculum, so the response can be matched to the right items.
@@ -126,6 +127,7 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) =
   const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(saveCurriculum, {
     isRetryable,
   });
+  useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -146,6 +148,7 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false }) =
 
   return (
     <SectionCard
+      anchorId={anchorId}
       title="Curriculum Builder"
       subtitle="Add modules and lessons — link to any video, PDF, or page you host elsewhere."
       status={status}
