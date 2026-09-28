@@ -1,10 +1,14 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import queryKeys from '@/utils/query-keys';
 import PageLoader from '@/components/common/loader/PageLoader';
+import { MdOutlineArrowBack, MdOutlineRemoveRedEye } from 'react-icons/md';
+import Button from '@/components/common/Button';
+import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
+import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import {
   createProgram,
   getProgram,
@@ -22,6 +26,39 @@ import PricingSection from '@/components/certification/builder/sections/PricingS
 import CertificateSetupSection from '@/components/certification/builder/sections/CertificateSetupSection';
 import PublishSection from '@/components/certification/builder/sections/PublishSection';
 import { toLessonFormValues, toModuleFormValues } from '@/components/certification/builder/sections/curriculumFields';
+import BuilderStepper from '@/components/certification/builder/BuilderStepper';
+import BuilderTabs from '@/components/certification/builder/BuilderTabs';
+import SaveStatusIndicator from '@/components/certification/builder/SaveStatusIndicator';
+import ProgramPreviewPopup from '@/components/certification/builder/ProgramPreviewPopup';
+import { getPublishBlockers } from '@/components/certification/builder/publish/readiness';
+
+const STEP_PANEL_IDS = { 1: 'builder-step-basics', 2: 'builder-step-content' };
+
+// Step 2's tabs; `blockerId` is the readiness check that decides the tab's ✓ / ⚠ marker.
+const TABS = [
+  { id: 'curriculum', label: 'Curriculum', blockerId: 'curriculum' },
+  { id: 'pricing', label: 'Pricing', blockerId: 'pricing' },
+  { id: 'certificate', label: 'Certificate', blockerId: 'certificate_setup' },
+  { id: 'publish', label: 'Publish' },
+];
+const tabPanelId = tabId => `builder-tab-${tabId}`;
+
+// Every autosaving section: its name in the global save status, and where it lives.
+const SECTIONS = {
+  basics: { label: 'Program Basics', step: 1 },
+  delivery: { label: 'Delivery Format', step: 1 },
+  curriculum: { label: 'Curriculum', step: 2, tab: 'curriculum' },
+  pricing: { label: 'Pricing', step: 2, tab: 'pricing' },
+  certificate: { label: 'Certificate Setup', step: 2, tab: 'certificate' },
+};
+const sectionAnchorId = sectionId => `builder-section-${sectionId}`;
+
+// Every tab panel stays mounted; inactive ones are only hidden (CSS), never unmounted.
+const TabPanel = ({ id, activeTab, children }) => (
+  <div id={tabPanelId(id)} role="tabpanel" aria-labelledby={`${tabPanelId(id)}-tab`} className={id === activeTab ? '' : 'hidden'}>
+    {children}
+  </div>
+);
 
 const BLANK_BASICS = {
   title: '',
@@ -107,27 +144,36 @@ const pickCertificateSetup = program => ({
 });
 
 /**
- * Two-step wizard (KAN-121) — Step 1 is Program Basics (Workshop/Program-style information,
- * gated behind its own "Continue to Step 2 →" action); Step 2 is the builder's remaining five
- * confirmed sections in order: Delivery, Curriculum, Pricing, Certificate Setup, Publish. Every
- * section still shares the same {initialValues, onSave, disabled} → status contract via
- * useSectionAutosave — the stepper only changes navigation/gating, not save mechanics (KAN-121
- * explicitly keeps `useSectionAutosave` untouched). This file is mostly wiring: each handle*Save
- * calls its endpoint, then invalidates the shared program-detail query so every other section
- * (and Publish's completeness view) stays in sync.
+ * Two-step wizard (KAN-121) inside one LMS-style card (FormLayoutWrapper): a clickable stepper and
+ * the global save status sit in the card header. Step 1 is Basics plus the Delivery section (shown
+ * under "Schedule & format" but still its own form/autosave), gated behind "Continue"; Step 2 is
+ * tabbed: Curriculum · Pricing · Certificate · Publish. Every section still shares the same
+ * {initialValues, onSave, disabled} → status contract via useSectionAutosave — the stepper and tabs
+ * only change navigation, not save mechanics. Each section reports its status up
+ * (`onStatusChange`) for the header summary.
+ *
+ * Both steps and every tab stay MOUNTED; inactive ones are only hidden with CSS. Unmounting would
+ * drop a section's Formik values — including values whose save just failed, which the autosave
+ * hook only re-sends on unmount while a debounce timer is still pending.
+ *
+ * This file is mostly wiring: each handle*Save calls its endpoint, then invalidates the shared
+ * program-detail query so every other section (and Publish's readiness view) stays in sync.
  *
  * ``programId`` is the route param — either an existing program's id, or the literal string
- * 'new'. On 'new', only Step 1 renders (nothing else can attach without an id yet); the first
- * successful Basics save creates the draft and replaces the URL with the real id. Resuming an
- * existing program (``routeParam !== 'new'``) defaults straight to Step 2 — if the program
- * already exists, Step 1 has necessarily already been saved at least once; a "← Back to Step 1"
- * link still lets the creator revisit it.
+ * 'new'. On 'new', only Basics renders and Step 2 is disabled (nothing else can attach without an
+ * id yet); the first successful Basics save creates the draft and replaces the URL with the real
+ * id. Resuming an existing program (``routeParam !== 'new'``) defaults straight to Step 2.
  */
 const ProgramBuilderModal = ({ programId: routeParam }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [liveId, setLiveId] = useState(routeParam === 'new' ? null : routeParam);
   const [currentStep, setCurrentStep] = useState(routeParam === 'new' ? 1 : 2);
+  const [activeTab, setActiveTab] = useState(TABS[0].id);
+  const [sectionStatuses, setSectionStatuses] = useState({});
+  const [isContinuing, setIsContinuing] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const basicsFormRef = useRef(null);
 
   const { data: programRes, isLoading } = useQuery({
     queryKey: [queryKeys.certificationProgramDetail, liveId],
@@ -222,60 +268,169 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     if (isProgramMissing) toast.error('Program not found.');
   }, [isProgramMissing]);
 
-  const stepHeader = (label, showBack) => (
-    <div className="flex items-center justify-between">
-      <p className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
-      {showBack && (
-        <button
-          type="button"
-          onClick={() => setCurrentStep(1)}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          ← Back to Step 1
-        </button>
-      )}
-    </div>
+  const statusReporters = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(SECTIONS).map(id => [id, next => setSectionStatuses(previous => ({ ...previous, [id]: next }))])
+      ),
+    []
   );
 
-  if (!liveId) {
-    return (
-      <div className="flex flex-col gap-6 max-w-3xl">
-        {stepHeader('Step 1 of 2 — Program Basics', false)}
-        <ProgramBasicsSection initialValues={BLANK_BASICS} onSave={handleBasicsSave} onContinue={() => setCurrentStep(2)} />
-      </div>
-    );
-  }
+  // Switch to wherever `sectionId` lives (step, and tab on Step 2), then bring its heading into view.
+  // Panels are only hidden, never unmounted, so the element is already there once it's shown.
+  const showSection = useCallback(sectionId => {
+    const { step, tab } = SECTIONS[sectionId];
+    setCurrentStep(step);
+    if (tab) setActiveTab(tab);
+    setTimeout(() => {
+      const anchor = document.getElementById(sectionAnchorId(sectionId));
+      anchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(`${sectionAnchorId(sectionId)}-title`)?.focus({ preventScroll: true });
+    }, 0);
+  }, []);
 
-  if (isLoading && !program) {
+  const handleContinue = useCallback(async () => {
+    setIsContinuing(true);
+    try {
+      // Basics' own submit: validates, flushes its pending autosave, then onContinue → Step 2.
+      await basicsFormRef.current?.submitForm();
+    } finally {
+      setIsContinuing(false);
+    }
+  }, []);
+
+  const blockers = useMemo(() => (program ? getPublishBlockers(program) : []), [program]);
+  const isBlockerOk = id => blockers.find(check => check.id === id)?.ok;
+
+  const saveStatusSections = Object.entries(SECTIONS).map(([id, { label }]) => ({
+    id,
+    label,
+    ...sectionStatuses[id],
+  }));
+  const tabMarker = (tabId, blockerId) => {
+    const failed = Object.entries(SECTIONS).some(([id, section]) => section.tab === tabId && sectionStatuses[id]?.status === 'error');
+    if (failed) return 'error';
+    if (!blockerId) return null;
+    return isBlockerOk(blockerId) ? 'ok' : 'warn';
+  };
+
+  if (liveId && isLoading && !program) {
     return <PageLoader />;
   }
 
-  if (!program) {
+  if (liveId && !program) {
     return <p className="text-gray-500">Program not found.</p>;
   }
 
-  if (currentStep === 1) {
-    return (
-      <div className="flex flex-col gap-6 max-w-3xl">
-        {stepHeader('Step 1 of 2 — Program Basics', false)}
-        <ProgramBasicsSection
-          key={`basics-${liveId}`}
-          initialValues={basicsInitialValues}
-          onSave={handleBasicsSave}
-          onContinue={() => setCurrentStep(2)}
-        />
-      </div>
-    );
-  }
+  const steps = [
+    { id: 1, label: 'Basics', panelId: STEP_PANEL_IDS[1], done: Boolean(liveId) && isBlockerOk('basics') && isBlockerOk('delivery') },
+    {
+      id: 2,
+      label: 'Content & Publish',
+      panelId: STEP_PANEL_IDS[2],
+      disabled: !liveId,
+      disabledReason: 'Give the program a title first',
+    },
+  ];
+
+  const tabs = TABS.map(tab => ({ ...tab, panelId: tabPanelId(tab.id), marker: tabMarker(tab.id, tab.blockerId) }));
+
+  const headerActions = [
+    { id: 'back', variant: 'secondary', onClick: () => router.back(), label: 'Back', Icon: MdOutlineArrowBack },
+    {
+      id: 'preview',
+      variant: 'secondary',
+      onClick: () => setIsPreviewOpen(true),
+      label: 'Preview',
+      Icon: MdOutlineRemoveRedEye,
+      disabled: !program,
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
-      {stepHeader('Step 2 of 2 — Delivery, Curriculum, Pricing, Certificate & Publish', true)}
-      <DeliveryFormatSection key={`delivery-${liveId}`} initialValues={deliveryInitialValues} onSave={handleDeliverySave} />
-      <CurriculumBuilderSection key={`curriculum-${liveId}`} initialValues={modulesInitialValues} onSave={handleModulesSave} />
-      <PricingSection key={`pricing-${liveId}`} initialValues={pricingInitialValues} onSave={handlePricingSave} />
-      <CertificateSetupSection key={`certificate-setup-${liveId}`} initialValues={certificateSetupInitialValues} onSave={handleCertificateSetupSave} />
-      <PublishSection currentStatus={program.status} onPublish={handlePublish} />
+    <div>
+      <PageHeader title="Program Builder">
+        <PageHeaderQuickActions actions={headerActions} />
+      </PageHeader>
+
+      <FormLayoutWrapper
+        headerContent={<BuilderStepper steps={steps} currentStep={currentStep} onSelect={setCurrentStep} />}
+        headerAside={<SaveStatusIndicator sections={saveStatusSections} onShowSection={showSection} />}
+      >
+        <div
+          id={STEP_PANEL_IDS[1]}
+          role="tabpanel"
+          aria-labelledby={`${STEP_PANEL_IDS[1]}-tab`}
+          className={currentStep === 1 ? 'flex flex-col gap-8' : 'hidden'}
+        >
+          <ProgramBasicsSection
+            key={`basics-${liveId ?? 'new'}`}
+            anchorId={sectionAnchorId('basics')}
+            initialValues={basicsInitialValues}
+            onSave={handleBasicsSave}
+            onContinue={() => setCurrentStep(2)}
+            formRef={basicsFormRef}
+            onStatusChange={statusReporters.basics}
+          />
+          {liveId ? (
+            <DeliveryFormatSection
+              key={`delivery-${liveId}`}
+              anchorId={sectionAnchorId('delivery')}
+              initialValues={deliveryInitialValues}
+              onSave={handleDeliverySave}
+              onStatusChange={statusReporters.delivery}
+            />
+          ) : null}
+          <div className="flex justify-end border-t border-stroke pt-4 dark:border-strokedark">
+            <Button type="button" size="2xl" isLoading={isContinuing} onClick={handleContinue}>
+              Continue to Content &amp; Publish →
+            </Button>
+          </div>
+        </div>
+
+        {liveId ? (
+          <div
+            id={STEP_PANEL_IDS[2]}
+            role="tabpanel"
+            aria-labelledby={`${STEP_PANEL_IDS[2]}-tab`}
+            className={currentStep === 2 ? 'flex flex-col gap-6' : 'hidden'}
+          >
+            <BuilderTabs tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
+            <TabPanel id="curriculum" activeTab={activeTab}>
+              <CurriculumBuilderSection
+                key={`curriculum-${liveId}`}
+                anchorId={sectionAnchorId('curriculum')}
+                initialValues={modulesInitialValues}
+                onSave={handleModulesSave}
+                onStatusChange={statusReporters.curriculum}
+              />
+            </TabPanel>
+            <TabPanel id="pricing" activeTab={activeTab}>
+              <PricingSection
+                key={`pricing-${liveId}`}
+                anchorId={sectionAnchorId('pricing')}
+                initialValues={pricingInitialValues}
+                onSave={handlePricingSave}
+                onStatusChange={statusReporters.pricing}
+              />
+            </TabPanel>
+            <TabPanel id="certificate" activeTab={activeTab}>
+              <CertificateSetupSection
+                key={`certificate-setup-${liveId}`}
+                anchorId={sectionAnchorId('certificate')}
+                initialValues={certificateSetupInitialValues}
+                onSave={handleCertificateSetupSave}
+                onStatusChange={statusReporters.certificate}
+              />
+            </TabPanel>
+            <TabPanel id="publish" activeTab={activeTab}>
+              <PublishSection anchorId={sectionAnchorId('publish')} currentStatus={program.status} onPublish={handlePublish} />
+            </TabPanel>
+          </div>
+        ) : null}
+      </FormLayoutWrapper>
+
+      <ProgramPreviewPopup open={isPreviewOpen} program={program} onClose={() => setIsPreviewOpen(false)} />
     </div>
   );
 };

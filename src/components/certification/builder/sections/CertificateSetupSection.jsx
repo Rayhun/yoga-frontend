@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import FormikField from '@/components/common/form/formik/FormikField';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
 
 const validationSchema = Yup.object({
   certificate_title: Yup.string(),
@@ -41,8 +42,9 @@ const toPayload = values => ({
  * expires), but a creator typing "2 years" has to convert to "730" themselves. Worth flagging
  * to the client, not silently working around.
  */
-const CertificateSetupSection = ({ initialValues, onSave, disabled = false }) => {
+const CertificateSetupSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
   const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
+  useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -52,7 +54,14 @@ const CertificateSetupSection = ({ initialValues, onSave, disabled = false }) =>
   const handleBlur = useCallback(values => notifyBlur(toPayload(values)), [notifyBlur]);
 
   return (
-    <SectionCard title="Certificate Setup" status={status} errorMessage={errorMessage} canRetry={canRetry} onRetry={retry}>
+    <SectionCard
+      anchorId={anchorId}
+      title="Certificate Setup"
+      status={status}
+      errorMessage={errorMessage}
+      canRetry={canRetry}
+      onRetry={retry}
+    >
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values }) => (
           <Form className="flex flex-col gap-3" onBlur={() => handleBlur(values)}>

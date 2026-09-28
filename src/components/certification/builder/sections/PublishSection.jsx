@@ -16,7 +16,7 @@ const STATUS_OPTIONS = [
  * messages (e.g. {"delivery": "Delivery format is required."}) — rendered inline here per the
  * acceptance criteria ("shows the specific missing section inline, not a generic error toast").
  */
-const PublishSection = ({ currentStatus, onPublish, disabled = false }) => {
+const PublishSection = ({ currentStatus, onPublish, disabled = false, anchorId }) => {
   const [pendingStatus, setPendingStatus] = useState(null);
   const [sectionErrors, setSectionErrors] = useState(null);
 
@@ -43,7 +43,7 @@ const PublishSection = ({ currentStatus, onPublish, disabled = false }) => {
   );
 
   return (
-    <SectionCard title="Publish" subtitle="Draft is only visible to you; Private is reachable by direct link; Public appears in the catalog.">
+    <SectionCard anchorId={anchorId} title="Publish" subtitle="Draft is only visible to you; Private is reachable by direct link; Public appears in the catalog.">
       <div className="flex flex-wrap gap-2">
         {STATUS_OPTIONS.map(option => (
           <button
