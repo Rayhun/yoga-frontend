@@ -6,6 +6,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
 
 const FORMAT_OPTIONS = [
   { value: 'self_paced', label: 'Self-Paced' },
@@ -23,8 +24,9 @@ const validationSchema = Yup.object({
  * The model also has live_session_count/recordings_available/downloadables_available —
  * not exposed here yet, same "build to the mockup, not the model ceiling" discipline as Basics.
  */
-const DeliveryFormatSection = ({ initialValues, onSave, disabled = false }) => {
-  const { notifyBlur, markSaved, status } = useSectionAutosave(onSave);
+const DeliveryFormatSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
+  const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
+  useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
 
   useEffect(() => {
     markSaved(initialValues);
@@ -34,7 +36,15 @@ const DeliveryFormatSection = ({ initialValues, onSave, disabled = false }) => {
   const handleBlur = useCallback(values => notifyBlur(values), [notifyBlur]);
 
   return (
-    <SectionCard title="Delivery Format" status={status}>
+    <SectionCard
+      anchorId={anchorId}
+      title="Delivery Format"
+      subtitle="Part of Schedule & format — saves on its own."
+      status={status}
+      errorMessage={errorMessage}
+      canRetry={canRetry}
+      onRetry={retry}
+    >
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
         {({ values }) => (
           <Form className="grid grid-cols-1 md:grid-cols-2 gap-4" onBlur={() => handleBlur(values)}>

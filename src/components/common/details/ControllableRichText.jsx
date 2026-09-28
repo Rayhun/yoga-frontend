@@ -1,6 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
+
+// Keep `target` (DOMPurify drops it by default) so existing "open in new tab" links still work.
+const SANITIZE_OPTIONS = { ADD_ATTR: ['target'] };
 
 /**
  * Truncates HTML so the first `maxWords` visible words remain (tags ignored for counting).
@@ -57,13 +61,23 @@ const ControllableRichText = ({
   ...rest
 }) => {
   const [isFullTextVisible, setIsFullTextVisible] = useState(false);
+  // DOMPurify needs a DOM: without one it returns its input unsanitized. So nothing is rendered
+  // until mount — server output and the first client render agree (empty), then the sanitized
+  // HTML appears. Every caller renders client-fetched data, so there's no SSR content to lose.
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const toggleTextVisibility = () => setIsFullTextVisible(prevState => !prevState);
 
   const html = useMemo(() => {
+    if (!isMounted) return '';
     const rawHtml = typeof children === 'string' ? children : String(children ?? '');
-    return disableLinks ? stripHtmlLinks(rawHtml) : rawHtml;
-  }, [children, disableLinks]);
+    const safeHtml = DOMPurify.sanitize(rawHtml, SANITIZE_OPTIONS);
+    return disableLinks ? stripHtmlLinks(safeHtml) : safeHtml;
+  }, [children, disableLinks, isMounted]);
 
   const contentClassName = disableLinks
     ? `${className} rich-text-no-links`.trim()

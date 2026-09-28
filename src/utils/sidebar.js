@@ -11,6 +11,7 @@ import {
   MdVerified,
   MdOutlineNotifications,
   MdViewCarousel,
+  MdOutlineRateReview,
 } from 'react-icons/md';
 import {
   FaInbox,
@@ -618,6 +619,13 @@ const getTeacherSidebarMenuItems = (
             isActive: pathname => pathname.includes('/portal/teacher/certification/programs'),
             disabled: false,
           },
+          {
+            Icon: MdOutlineRateReview,
+            label: 'Grading Queue',
+            href: '/portal/teacher/certification/grading',
+            isActive: pathname => pathname.includes('/portal/teacher/certification/grading'),
+            disabled: false,
+          },
         ]
       : []),
     // {
@@ -733,6 +741,13 @@ const INSTITUTION = [
     label: 'Certification Programs',
     href: '/portal/institution/programs',
     isActive: pathname => pathname.includes('/portal/institution/programs'),
+    disabled: false,
+  },
+  {
+    Icon: MdOutlineRateReview,
+    label: 'Grading Queue',
+    href: '/portal/institution/certification/grading',
+    isActive: pathname => pathname.includes('/portal/institution/certification/grading'),
     disabled: false,
   },
 ];

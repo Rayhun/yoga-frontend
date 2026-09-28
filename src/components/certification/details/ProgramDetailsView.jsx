@@ -213,7 +213,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
               <div className={`!absolute !top-3 !right-0 px-4 py-2 rounded-tl-xl rounded-bl-xl text-white ${
                 isProgramCompleted ? 'bg-primary' : 'bg-orange-500'
               }`}>
-                {isProgramCompleted ? 'Completed' : 'InProgress'}
+                {isProgramCompleted ? 'Completed' : 'In Progress'}
               </div>
               {/* Completion Button */}
               {programProgress === 100 && !isProgramCompleted && (
@@ -241,10 +241,10 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
         <div className={`w-full ${isEnrolled ? 'md:w-3/4' : 'md:w-full'}`}>
           {/* Tabs */}
-          <Tabs value={selectedTab} onChange={handleTabChange}>
+          <Tabs value={selectedTab === TABS.BENEFITS && benefits.length === 0 ? TABS.JOURNEY : selectedTab} onChange={handleTabChange}>
             <Tab value={TABS.JOURNEY} label="Curriculum" />
             <Tab value={TABS.DESCRIPTION} label="About" />
-            <Tab value={TABS.BENEFITS} label="Outcomes" />
+            {benefits.length > 0 ? <Tab value={TABS.BENEFITS} label="Outcomes" /> : null}
           </Tabs>
           <div className="py-5">
             {/* Journey Tab */}
