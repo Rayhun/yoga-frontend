@@ -1,42 +1,75 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import SubscriptionStatus from '@/components/subscription/common/SubscriptionStatus';
-// import { enrollProgram } from '@/services/private/customer/program';
-// import { useMutation } from '@tanstack/react-query';
-// import { useSearchParams, useRouter } from 'next/navigation';
-// import { toast } from 'react-toastify';
+import JoinCircleSuccessView from '@/components/join/JoinCircleSuccessView';
+import OnboardingPaymentSuccessView from '@/components/onboarding/customer/OnboardingPaymentSuccess';
+import PageLoader from '@/components/common/loader/PageLoader';
 
-// export const metadata = {
-//   title: 'Payment Success',
-// };
+const ONBOARDING_SUCCESS_BG =
+  'bg-gradient-to-b from-emerald-50/80 via-[#faf9f7] to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950';
 
-const Page = () => {
-  // const searchParams = useSearchParams();
-  // const router = useRouter();
-  // const programID = searchParams.get("pg");
+const PaymentSuccessContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const communitySlug = searchParams.get('exp-ref');
+  const isOnboardingGuest = searchParams.get('onboarding-guest') === '1';
+  const isRenewal = searchParams.get('renew') === '1';
 
-  // const { mutateAsync: enroll, isPending: isEnrolling } = useMutation({
-  //   mutationFn: enrollProgram,
-  // });
+  useEffect(() => {
+    if (isRenewal) {
+      router.replace('/portal/customer/subscriptions?renewed=1');
+    }
+  }, [isRenewal, router]);
 
-  // const handleEnrollProgram = async () => {
-  //   try {
-  //     await enroll({ id: programID });
-  //     toast.success('Program enrolled successfully');
-  //     router.push(`/portal/customer/lms/program/${programID}/details`);
-  //   } catch (error) {
-  //     toast.error('Something went wrong in enrolling the program');
-  //   }
-  // };
+  useEffect(() => {
+    if (!isOnboardingGuest) return undefined;
 
-  // const renderButton = (
-  //   <button
-  //     onClick={handleEnrollProgram}
-  //     className="w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/70 transition duration-300"
-  //   >
-  //     {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-  //   </button>
-  // );
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflowX = document.documentElement.style.overflowX;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflowX = previousHtmlOverflowX;
+    };
+  }, [isOnboardingGuest]);
+
+  if (isRenewal) {
+    return <PageLoader />;
+  }
+
+  if (isOnboardingGuest) {
+    return (
+      <div
+        className={`fixed inset-0 z-30 box-border flex items-center justify-center overflow-hidden px-4 sm:px-6 ${ONBOARDING_SUCCESS_BG}`}
+      >
+        <div className="w-full min-w-0 max-w-lg">
+          <OnboardingPaymentSuccessView />
+        </div>
+      </div>
+    );
+  }
+
+  if (communitySlug) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
+        <JoinCircleSuccessView slug={communitySlug} />
+      </div>
+    );
+  }
 
   return <SubscriptionStatus variant="success" />;
 };
+
+const Page = () => (
+  <Suspense fallback={<PageLoader />}>
+    <PaymentSuccessContent />
+  </Suspense>
+);
 
 export default Page;

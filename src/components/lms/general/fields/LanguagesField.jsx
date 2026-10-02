@@ -1,15 +1,30 @@
 'use client';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
-import { ACCESS_SETTING_OPTIONS } from '@/utils/options';
 
-const LanguagesField = ({ name = 'languages', label = 'Languages', placeholder = 'Languages' }) => {
+import { useMemo } from 'react';
+import { LANGUAGES } from '@/utils/constants';
+import FormikMultiOptionsModalField from '@/components/common/form/formik/FormikMultiOptionsModalField';
+
+const LanguagesField = ({
+  name = 'languages',
+  label = 'Languages',
+  placeholder = 'Select languages you speak',
+  ...props
+}) => {
+  const options = useMemo(
+    () => LANGUAGES.map(({ value, label: langLabel }) => ({ value, label: langLabel })),
+    []
+  );
+
   return (
-    <FormikSubmittableField
+    <FormikMultiOptionsModalField
       {...props}
       name={name}
       label={label}
-      placeholder={placeholder}
-      options={ACCESS_SETTING_OPTIONS}
+      triggerPlaceholder={placeholder}
+      options={options}
+      chipKind="language"
+      modalTitle="Languages"
+      searchPlaceholder="Search languages…"
     />
   );
 };

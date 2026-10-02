@@ -31,16 +31,59 @@ export const setFormFieldError = (error = {}, fieldNames = [], setFieldError = (
 
 export const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
+export const formatSignupDate = dateString => {
+  if (!dateString) return 'N/A';
+  return dayjs(dateString).format('MMM D, YYYY');
+};
+
+export const canFetchFileFromUrl = url => {
+  if (!url || typeof url !== 'string') return false;
+
+  const lower = url.toLowerCase();
+  if (
+    /vimeo\.com|youtube\.com|youtu\.be|drive\.google\.com|dropbox\.com|wistia\.com/.test(
+      lower
+    )
+  ) {
+    return false;
+  }
+
+  return /^https?:\/\//i.test(url);
+};
+
+export const createRemoteFilePlaceholder = url => {
+  const cleanUrl = String(url).split('?')[0];
+  const filename =
+    decodeURIComponent(cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1)) || 'Existing file';
+
+  return {
+    name: filename,
+    path: url,
+    isRemotePlaceholder: true,
+    remoteUrl: url,
+    type: 'application/octet-stream',
+  };
+};
+
 export const getFileFromURL = async url => {
-  const response = await axios({
-    url,
-    responseType: 'blob',
-  });
+  if (!canFetchFileFromUrl(url)) {
+    return null;
+  }
 
-  const filename = url.substring(url.lastIndexOf('/') + 1);
-  const fileType = response.data.type;
+  try {
+    const response = await axios({
+      url,
+      responseType: 'blob',
+      timeout: 30000,
+    });
 
-  return new File([response.data], filename, { type: fileType });
+    const filename = url.substring(url.lastIndexOf('/') + 1);
+    const fileType = response.data.type;
+
+    return new File([response.data], filename, { type: fileType });
+  } catch {
+    return null;
+  }
 };
 
 export const getSearchParamsFromObject = obj => {

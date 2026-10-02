@@ -2,6 +2,8 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import useChatSocket from '@/hooks/useChatSocket';
 import useAuthContext from '@/hooks/useAuthContext';
+import { getAiChatFriendlyErrorMessage } from '@/utils/ai-chat-errors';
+import { streamAiChatText } from '@/utils/ai-chat-stream';
 
 const initialState = {
   messages: {
@@ -14,6 +16,7 @@ const initialState = {
   },
   isAITyping: false,
   streamingMessage: null,
+  streamingIsError: false,
   actions: {
     sendMessage: () => null,
   },
@@ -28,8 +31,8 @@ function AICoachProvider({ children }) {
 
   const [isAITyping, setIsAITyping] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState(null);
-  const streamingTextRef = useRef('');
-  const streamingIntervalRef = useRef(null);
+  const [streamingIsError, setStreamingIsError] = useState(false);
+  const streamCancelRef = useRef(null);
 
   const {
     user: {
@@ -45,66 +48,63 @@ function AICoachProvider({ children }) {
 
   useEffect(() => {
     return () => {
-      if (streamingIntervalRef.current) {
-        clearInterval(streamingIntervalRef.current);
-      }
+      streamCancelRef.current?.();
     };
   }, []);
 
-  const streamText = (fullText, onComplete) => {
-    streamingTextRef.current = '';
+  const streamAssistantMessage = (fullText, onComplete, { isError = false } = {}) => {
+    streamCancelRef.current?.();
     setStreamingMessage('');
+    setStreamingIsError(isError);
     setIsAITyping(true);
 
-    let currentIndex = 0;
-
-    const tokens = fullText.match(/\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\)|\S+|\s+/g) || [];
-
-    if (streamingIntervalRef.current) {
-      clearInterval(streamingIntervalRef.current);
-    }
-
-    streamingIntervalRef.current = setInterval(() => {
-      if (currentIndex < tokens.length) {
-        streamingTextRef.current += tokens[currentIndex];
-        setStreamingMessage(streamingTextRef.current);
-        currentIndex++;
-      } else {
-        clearInterval(streamingIntervalRef.current);
-        setIsAITyping(false);
+    streamCancelRef.current = streamAiChatText({
+      fullText,
+      onTokenUpdate: setStreamingMessage,
+      onTypingStart: () => setIsAITyping(true),
+      onTypingEnd: () => setIsAITyping(false),
+      onComplete: () => {
         setStreamingMessage(null);
-        onComplete();
-      }
-    }, 30);
+        setStreamingIsError(false);
+        streamCancelRef.current = null;
+        onComplete?.();
+      },
+    });
   };
 
   useEffect(() => {
     if (chatRoomMessage) {
-      // Handle error responses from backend
       if (chatRoomMessage.error) {
-        setIsAITyping(false);
-        const errorMessage = {
-          message: chatRoomMessage.error,
-          isSentByMe: false,
-          isError: true,
-          created_at: new Date().toISOString(),
-        };
-        setMessages(prevState => ({
-          ...prevState,
-          data: [...prevState.data, errorMessage],
-        }));
+        const friendlyError = getAiChatFriendlyErrorMessage(chatRoomMessage.error);
+        streamAssistantMessage(
+          friendlyError,
+          () => {
+            setMessages(prevState => ({
+              ...prevState,
+              data: [
+                ...prevState.data,
+                {
+                  message: friendlyError,
+                  isSentByMe: false,
+                  isError: true,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            }));
+          },
+          { isError: true }
+        );
         return;
       }
 
       const messageText = chatRoomMessage.message;
 
-      // Skip if message is undefined or empty
       if (!messageText) {
         return;
       }
 
       if (!chatRoomMessage.isSentByMe) {
-        streamText(messageText, () => {
+        streamAssistantMessage(messageText, () => {
           setMessages(prevState => ({
             ...prevState,
             data: [...prevState.data, chatRoomMessage],
@@ -143,6 +143,7 @@ function AICoachProvider({ children }) {
         connection: chatRoomConnection,
         isAITyping,
         streamingMessage,
+        streamingIsError,
         actions: { sendMessage: handleSendMessage },
       }}
     >

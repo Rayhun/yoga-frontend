@@ -54,7 +54,7 @@ const AffiliateUserDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white portal-hero rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">

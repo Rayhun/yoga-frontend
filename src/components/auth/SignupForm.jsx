@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { FiLock, FiUser } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
@@ -19,6 +19,8 @@ import FormikPhoneFieldWithValidation from '@/components/common/form/formik/Form
 const SignupForm = () => {
   const router = useRouter();
   const confirm = useConfirm();
+  const searchParams = useSearchParams();
+  const isQteSignup = searchParams.get('type') === 'qte';
 
   const { mutateAsync } = useMutation({
     mutationFn: registerNewUser,
@@ -84,6 +86,7 @@ const SignupForm = () => {
           profile: {
             ...rest,
           },
+          ...(isQteSignup ? { signup_type: 'qte' } : {}),
         };
 
         const { data: createdUserAccount } = await mutateAsync({ payload });

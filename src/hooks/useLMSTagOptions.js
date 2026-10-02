@@ -1,10 +1,11 @@
 'use client';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTagsList } from '@/services/private/lms/tag';
+import { getLmsContentTagsList } from '@/services/private/lms/tag';
 import { getExpertCatalogTags } from '@/services/private/lms/catalogTags';
 import queryKeys from '@/utils/query-keys';
 
+/** Legacy LMS.Tag options (consultation, group coaching filters) when no catalog context/field is given; otherwise uses the expert catalog tags. */
 function useLMSTagOptions({ context, field } = {}) {
   const useCatalog = Boolean(context && field);
 
@@ -15,8 +16,8 @@ function useLMSTagOptions({ context, field } = {}) {
   });
 
   const { data: tagsResponse } = useQuery({
-    queryFn: getTagsList,
-    queryKey: [queryKeys.lmsTags],
+    queryFn: getLmsContentTagsList,
+    queryKey: [queryKeys.lmsTags, 'lms-content-catalog'],
     enabled: !useCatalog,
   });
 
@@ -27,8 +28,8 @@ function useLMSTagOptions({ context, field } = {}) {
         value: option.id,
       }));
     }
-    return tagsResponse?.data?.map(option => ({
-      label: option.name,
+    return (tagsResponse?.data?.data || []).map(option => ({
+      label: option.name ?? '',
       value: option.id,
     }));
   }, [useCatalog, catalogData, tagsResponse]);

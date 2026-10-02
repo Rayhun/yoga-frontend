@@ -1,5 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
 
 /**
  * Truncates HTML so the first `maxWords` visible words remain (tags ignored for counting).
@@ -47,12 +48,26 @@ function truncateHtmlToWordCount(html, maxWords) {
   return html;
 }
 
-const ControllableRichText = ({ numberOfWords = 50, children, showFullText = false, ...rest }) => {
+const ControllableRichText = ({
+  numberOfWords = 50,
+  children,
+  showFullText = false,
+  disableLinks = false,
+  className = '',
+  ...rest
+}) => {
   const [isFullTextVisible, setIsFullTextVisible] = useState(false);
 
   const toggleTextVisibility = () => setIsFullTextVisible(prevState => !prevState);
 
-  const html = useMemo(() => (typeof children === 'string' ? children : String(children ?? '')), [children]);
+  const html = useMemo(() => {
+    const rawHtml = typeof children === 'string' ? children : String(children ?? '');
+    return disableLinks ? stripHtmlLinks(rawHtml) : rawHtml;
+  }, [children, disableLinks]);
+
+  const contentClassName = disableLinks
+    ? `${className} rich-text-no-links`.trim()
+    : className;
 
   // Strip HTML tags for word counting (used for "should we show toggle")
   const plainText = useMemo(() => {
@@ -72,14 +87,14 @@ const ControllableRichText = ({ numberOfWords = 50, children, showFullText = fal
   // If showFullText is true, always show full text without "See More" button
   if (showFullText) {
     return (
-      <div {...rest}>
+      <div className={contentClassName} {...rest}>
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </div>
     );
   }
 
   return (
-    <div {...rest}>
+    <div className={contentClassName} {...rest}>
       {hasTruncableText ? (
         <>
           <div

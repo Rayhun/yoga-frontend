@@ -61,7 +61,7 @@ const ConsultationsLibrary = () => {
       </Popup>
 
       {/* Hero Section */}
-      <div className="bg-white text-gray-800 py-12 px-8 rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
+      <div className="bg-white text-gray-800 portal-hero rounded-2xl shadow-2xl mb-8 relative overflow-hidden border border-gray-100">
         <div className="relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
@@ -94,13 +94,13 @@ const ConsultationsLibrary = () => {
         </div>
       </div>
 
-      <div className="p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
+      <div className="p-4 sm:p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
         {/* Categories */}
         {/* <FeaturedCategories selected={filters.categories} onSelect={handleSelectFeaturedCategory} /> */}
 
-        <div className="flex gap-4 items-center justify-end">
+        <div className="portal-search-row">
           <input
-            className="min-w-[300px] rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="portal-search-input rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Programs"
             onChange={e => setSearchText(e.target.value || '')}
           />

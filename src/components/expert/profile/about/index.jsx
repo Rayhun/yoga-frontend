@@ -29,7 +29,7 @@ const ExpertProfileAbout = ({ data }) => {
       </div>
     );
 
-  return <UserProfileAbout data={data} isExpertView />;
+  return <UserProfileAbout data={data} isExpertView disableLinks />;
 };
 
 export default ExpertProfileAbout;

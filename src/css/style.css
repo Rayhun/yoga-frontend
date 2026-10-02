@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import './nourish-tokens.css';
 
 @tailwind base;
 @tailwind components;
@@ -11,6 +13,7 @@
 }
 
 @layer components {
+  @import './nourish.css';
 }
 
 @layer utilities {
@@ -73,8 +76,25 @@
     @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
   }
 
+  /* Fill portal main area (no page scroll). Parent locks to viewport on inbox. */
   .inbox-height {
-    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    @apply h-full max-h-full min-h-0;
+  }
+
+  .portal-hero {
+    @apply py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8;
+  }
+
+  .portal-section {
+    @apply p-4 sm:p-6 md:p-8;
+  }
+
+  .portal-search-input {
+    @apply w-full min-w-0 sm:min-w-[240px] md:min-w-[300px];
+  }
+
+  .portal-search-row {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4;
   }
 }
 
@@ -373,20 +393,25 @@ span.flatpickr-weekday,
 
 .data-table-common .datatable-table > tbody > tr > td:first-child,
 .data-table-common .datatable-table > thead > tr > th:first-child {
-  @apply pl-8;
+  @apply pl-4 md:pl-8;
 }
 
 .data-table-common .datatable-table > tbody > tr > td:last-child,
 .data-table-common .datatable-table > thead > tr > th:last-child {
-  @apply pr-8;
+  @apply pr-4 md:pr-8;
 }
 
 .data-table-common .datatable-table > thead > tr:last-child > th {
   @apply !border-b border-stroke py-5 dark:border-strokedark font-bold;
 }
 
-.data-table-common .datatable-table > thead > tr:last-child > th input {
+/* Header filter/search inputs only — do not style checkboxes (they need fixed size) */
+.data-table-common .datatable-table > thead > tr:last-child > th input:not([type='checkbox']):not([type='radio']) {
   @apply h-[34px] w-full rounded border border-stroke bg-transparent px-3 text-sm outline-none focus:border-primary dark:border-strokedark dark:bg-meta-4 dark:focus:border-primary;
+}
+
+.data-table-common .datatable-table > thead > tr > th input[type='checkbox'] {
+  @apply h-4 w-4 min-h-[1rem] min-w-[1rem] max-h-4 max-w-4 shrink-0 cursor-pointer rounded border-stroke p-0 accent-primary;
 }
 
 .data-table-common .datatable-table > tbody > tr {
@@ -430,7 +455,7 @@ span.flatpickr-weekday,
 }
 
 .data-table-two .datatable-bottom {
-  @apply flex flex-col gap-4 px-8 py-7 after:hidden sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:space-x-4;
+  @apply flex flex-col gap-4 px-4 py-5 after:hidden sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:space-x-4 md:px-8 md:py-7;
 }
 
 .data-table-two .datatable-search input {

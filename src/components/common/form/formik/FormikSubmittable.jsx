@@ -4,6 +4,7 @@ import { useField, useFormikContext } from 'formik';
 import Chip from '@mui/material/Chip';
 import { IconButton, Tooltip } from '@mui/material';
 import { MdInfoOutline } from 'react-icons/md';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 const FormikSubmittable = ({
   name = '',
@@ -17,6 +18,7 @@ const FormikSubmittable = ({
   const { setFieldValue, setFieldError } = useFormikContext();
   const [value, setValue] = useState('');
   const [field, meta] = useField(name);
+  const containerRef = useScrollToFirstErrorField(name);
 
   const isErrorField = meta.touched && meta.error;
 
@@ -77,7 +79,7 @@ const FormikSubmittable = ({
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       <div className="flex items-center gap-4">
         {label ? (
           <label

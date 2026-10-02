@@ -1,5 +1,19 @@
 import axios from '@/lib/axios';
 
+const appendSessionPayload = (formData, payload) => {
+  const { thumbnail, audio_file, file, ...rest } = payload;
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      formData.set(key, value);
+    }
+  });
+
+  if (file) formData.set('file', file);
+  if (audio_file) formData.set('audio_file', audio_file);
+  if (thumbnail) formData.set('thumbnail_image', thumbnail);
+};
+
 export const getSessionsList = async ({ type }) => {
   return axios.get(`/LMS/session/list/?type=${type}`);
 };
@@ -9,28 +23,29 @@ export const getSingleSession = async ({ id }) => {
 };
 
 export const addNewSession = async ({
-  payload: { focus_areas, equipments, languages, categories, tags, ...payload },
+  payload: { focus_areas, equipments, languages, categories, culture_experience, ...payload },
 }) => {
   const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
-  });
+  appendSessionPayload(formData, payload);
   formData.set('focus_areas', focus_areas.join(','));
   formData.set('equipments', equipments.join(','));
   formData.set('languages', languages.join(','));
   formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  formData.set('culture_experience', culture_experience.join(','));
 
   return axios.post('/LMS/session/', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
 
-export const updateExistingSession = async ({ payload: { id, categories, tags, ...payload } }) => {
+export const updateExistingSession = async ({
+  payload: { id, focus_areas, equipments, languages, categories, culture_experience, ...payload },
+}) => {
   const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value) formData.set(key, value);
-  });
-  formData.set('categories', categories.join(','));
-  formData.set('tags', tags.join(','));
+  appendSessionPayload(formData, payload);
+  if (categories) formData.set('categories', categories.join(','));
+  if (culture_experience) formData.set('culture_experience', culture_experience.join(','));
+  if (focus_areas) formData.set('focus_areas', focus_areas.join(','));
+  if (equipments) formData.set('equipments', equipments.join(','));
+  if (languages) formData.set('languages', languages.join(','));
 
   return axios.put(`/LMS/session/${id}/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };

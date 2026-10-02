@@ -5,7 +5,7 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import PageLoader from '@/components/common/loader/PageLoader';
 import OnboardingQuizForm from '@/components/onboarding/quiz/OnboardingQuizForm';
-import { getSingleQuiz } from '@/services/private/onboarding/quiz';
+import { getOnboardingV2Question } from '@/services/private/onboarding/quiz-v2';
 import queryKeys from '@/utils/query-keys';
 import { MdOutlineArrowBack } from 'react-icons/md';
 
@@ -17,8 +17,8 @@ const Page = ({ params }) => {
     isLoading,
     failureReason,
   } = useQuery({
-    queryFn: () => getSingleQuiz({ id: params.id }),
-    queryKey: [queryKeys.onboardingQuiz, params.id],
+    queryFn: () => getOnboardingV2Question({ id: params.id }),
+    queryKey: [queryKeys.onboardingQuizV2, params.id],
   });
 
   useHandleApiResponse(failureReason);
@@ -37,7 +37,7 @@ const Page = ({ params }) => {
 
   return (
     <div>
-      <PageHeader title="Edit Quiz">
+      <PageHeader title="Edit onboarding step">
         <PageHeaderQuickActions actions={headerActions} />
       </PageHeader>
       <OnboardingQuizForm selected={response?.data?.data} />

@@ -12,6 +12,7 @@ function ReactQueryProvider({ children }) {
             retry: false,
             refetchOnWindowFocus: false,
             staleTime: 1000 * 60,
+            throwOnError: false,
           },
           mutations: {
             retry: false,

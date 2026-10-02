@@ -1,12 +1,13 @@
 'use client';
-import { createContext } from 'react';
-import { redirect } from 'next/navigation';
+import { createContext, useEffect } from 'react';
+import { redirect, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
-import { authenticateUser } from '@/services/public/auth';
+import { authenticateUser, updateUserTimezone } from '@/services/public/auth';
 import FullScreenLoader from '@/components/common/loader/FullScreenLoader';
 import queryKeys from '@/utils/query-keys';
 import { USER_ROLE, USER_SUB_ROLE } from '@/utils/authorization';
+import { buildLoginUrl } from '@/utils/auth-redirect';
 
 const initialState = {
   user: {
@@ -36,8 +37,9 @@ const initialState = {
 export const AuthContext = createContext(initialState);
 
 function AuthProvider({ children }) {
+  const pathname = usePathname();
   const token = Cookies.get('token');
-  if (!token) redirect('/auth/login');
+  if (!token) redirect(buildLoginUrl(pathname));
 
   const {
     data: userAuthenticationResponse,
@@ -48,9 +50,15 @@ function AuthProvider({ children }) {
     queryKey: [queryKeys.loggedInUser],
   });
 
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      updateUserTimezone().catch(() => {});
+    }
+  }, [isLoading, isError]);
+
   if (isLoading) return <FullScreenLoader />;
 
-  if (isError) redirect('/auth/login');
+  if (isError) redirect(buildLoginUrl(pathname));
 
   const logout = () => {
     Cookies.remove('token');
@@ -65,6 +73,7 @@ function AuthProvider({ children }) {
   const isStaff = userProfile?.role === USER_ROLE.STAFF;
   const isCustomer = userProfile?.role === USER_ROLE.CUSTOMER;
   const isAffiliate = userProfile?.role === USER_ROLE.AFFILIATE;
+  const isInstitution = userProfile?.role === USER_ROLE.INSTITUTION;
   const isIndividualCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.INDIVIDUAL;
   const isBusinessCustomer = isCustomer && userProfile?.profile_type === USER_SUB_ROLE.BUSINESS;
   
@@ -131,6 +140,7 @@ function AuthProvider({ children }) {
           isIndividualCustomer, 
           isBusinessCustomer, 
           isAffiliate,
+          isInstitution,
           isBusinessOwner,
           isEmployee
         },

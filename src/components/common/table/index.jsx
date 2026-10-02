@@ -35,23 +35,41 @@ export const IndeterminateCheckbox = ({ indeterminate, className = '', ...rest }
   );
 };
 
+// `group` and `variant` are opt-in — actions without them render exactly as before (a flat
+// row, no dividers, default hover color), so existing callers (ExpertsList, TagList,
+// OnboardingQuizList, and every table built on useTable/useSelectionTable) are unaffected.
+// Pass `group` on every action to cluster related actions with a divider between groups
+// (e.g. 'view' | 'edit' | 'decision' | 'delete'), and `variant: 'danger'` on a destructive
+// action to give it a red hover state instead of the default primary green.
 export const TableActions = ({ row, actions = [] }) => {
-  const actionsWithRender = useMemo(() => {
-    return actions.map(action => {
-      const shouldRenderAction = action.render ? action.render(row) : true;
-
-      return {
-        ...action,
-        render: shouldRenderAction && (
-          <button key={action.id} onClick={() => action.onClick(row)} className="hover:text-primary">
-            <action.Icon size={20} />
-          </button>
-        ),
-      };
-    });
+  const visibleActions = useMemo(() => {
+    return actions.filter(action => (action.render ? action.render(row) : true));
   }, [row, actions]);
 
-  return <div className="flex items-center space-x-3.5">{actionsWithRender.map(({ render }) => render)}</div>;
+  const hasGroups = visibleActions.some(action => action.group);
+
+  // Grouped rows (currently only Certification's up-to-6-icon action column) use a tighter,
+  // uniform gap and slightly smaller icons so the divider doesn't push the row into
+  // horizontal-scroll territory; ungrouped rows keep the original space-x-3.5 / size-20 look
+  // untouched (this branch is never taken when no action declares `group`).
+  const containerClass = hasGroups ? 'flex items-center gap-1.5' : 'flex items-center space-x-3.5';
+  const iconSize = hasGroups ? 17 : 20;
+
+  const items = [];
+  visibleActions.forEach((action, index) => {
+    const previousGroup = index > 0 ? visibleActions[index - 1].group : undefined;
+    if (hasGroups && index > 0 && action.group !== previousGroup) {
+      items.push(<span key={`divider-${action.id}`} className="h-4 w-px bg-stroke" aria-hidden="true" />);
+    }
+    const hoverClass = action.variant === 'danger' ? 'hover:text-red-600' : 'hover:text-primary';
+    items.push(
+      <button key={action.id} onClick={() => action.onClick(row)} className={hoverClass}>
+        <action.Icon size={iconSize} />
+      </button>
+    );
+  });
+
+  return <div className={containerClass}>{items}</div>;
 };
 
 export { default as BasicTable } from './BasicTable';

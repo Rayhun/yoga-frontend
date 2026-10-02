@@ -1,9 +1,26 @@
 'use client';
-import React, { useMemo } from 'react';
-import ReactQuill from 'react-quill';
+import React, { useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
 import '@/css/quill-custom.css';
 import { useField } from 'formik';
+import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+
+const DEFAULT_TOOLBAR = [
+  [{ header: [1, 2, 3, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }],
+  [{ align: [] }],
+  ['clean'],
+];
+
+const DEFAULT_FORMATS = [
+  'header', 'bold', 'italic', 'underline', 'strike',
+  'list', 'bullet', 'indent', 'link', 'align',
+];
 
 const FormikRichTextEditor = ({ 
   name, 
@@ -12,29 +29,34 @@ const FormikRichTextEditor = ({
   required = false, 
   rows = 4,
   className = '',
+  disableLinks = false,
   ...props 
 }) => {
   const [field, meta, helpers] = useField(name);
 
-  const modules = useMemo(() => ({
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link'],
-      [{ 'align': [] }],
-      ['clean']
-    ],
-  }), []);
+  const modules = useMemo(() => {
+    const toolbar = [...DEFAULT_TOOLBAR];
+    if (!disableLinks) {
+      toolbar.splice(4, 0, ['link']);
+    }
+    return { toolbar };
+  }, [disableLinks]);
 
-  const formats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent', 'link', 'align'
-  ];
+  const formats = useMemo(
+    () => (disableLinks ? DEFAULT_FORMATS.filter(format => format !== 'link') : DEFAULT_FORMATS),
+    [disableLinks]
+  );
+
+  useEffect(() => {
+    if (!disableLinks || !field.value) return;
+    const stripped = stripHtmlLinks(field.value);
+    if (stripped !== field.value) {
+      helpers.setValue(stripped);
+    }
+  }, [disableLinks, field.value, helpers]);
 
   const handleChange = (content) => {
-    helpers.setValue(content);
+    helpers.setValue(disableLinks ? stripHtmlLinks(content) : content);
   };
 
   const handleBlur = () => {

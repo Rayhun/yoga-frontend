@@ -74,7 +74,7 @@ const ReferralsDetails = ({ data = {} }) => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white portal-hero rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
@@ -97,8 +97,8 @@ const ReferralsDetails = ({ data = {} }) => {
         </h2>
         <div className="group relative overflow-hidden rounded-xl border border-stroke bg-gradient-to-br from-white to-orange-50/50 px-6 py-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] dark:border-strokedark dark:bg-gradient-to-br dark:from-boxdark dark:to-orange-900/20">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-200/20 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg flex-shrink-0">
                 <FiCode className="text-white" size={20} />
               </div>
@@ -111,7 +111,7 @@ const ReferralsDetails = ({ data = {} }) => {
             </div>
             <button
               onClick={() => handleCopy(data.referral_code, 'Referral code', 'referral-code')}
-              className={`ml-4 flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+              className={`flex shrink-0 items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 self-end sm:self-auto ${
                 copiedItem === 'referral-code'
                   ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg scale-110'
                   : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 hover:from-gray-200 hover:to-gray-300 hover:scale-105 dark:from-gray-700 dark:to-gray-800 dark:text-gray-300'
@@ -142,8 +142,8 @@ const ReferralsDetails = ({ data = {} }) => {
                 className="group relative overflow-hidden rounded-xl border border-stroke bg-gradient-to-br from-white to-blue-50/50 px-6 py-5 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] dark:border-strokedark dark:bg-gradient-to-br dark:from-boxdark dark:to-blue-900/20"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                <div className="relative z-10 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg flex-shrink-0">
                       <FiLink2 className="text-white" size={20} />
                     </div>
@@ -154,7 +154,7 @@ const ReferralsDetails = ({ data = {} }) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
                     <button
                       onClick={() => handleCopy(link, 'Referral link', `link-${index}`)}
                       className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
