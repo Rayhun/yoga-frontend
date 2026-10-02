@@ -485,7 +485,7 @@ const getTeacherSidebarMenuItems = (is_profile_complete, has_event_or_consult, s
     },
     {
       Icon: FaInbox,
-      label: 'Inbox',
+      label: 'Circles',
       href: '/portal/inbox',
       isActive: pathname => pathname === '/portal/inbox',
       disabled: !isDevelopmentEnvironment || !is_profile_complete || !has_event_or_consult,

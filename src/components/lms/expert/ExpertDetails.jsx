@@ -36,7 +36,8 @@ const ExpertDetails = ({ data }) => {
       <ShareProfileDialog
         open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
-        expertEmail={data?.email || data?.expert_email || data?.user?.email}
+        // expertEmail={data?.email || data?.expert_email || data?.user?.email}
+        publicUsername={data?.public_username}
         expertId={data?.id}
       />
       <div className="flex flex-col gap-6">

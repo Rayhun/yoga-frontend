@@ -146,7 +146,7 @@ const AffiliateUserDashboard = () => {
               <h4 className="text-2xl font-bold text-black dark:text-white mb-1">
                 {formatCurrency(dashboardData?.commission?.value)}
               </h4>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Commission Earned</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings Paid</p>
             </div>
           </div>
 
@@ -159,11 +159,33 @@ const AffiliateUserDashboard = () => {
               <h4 className="text-2xl font-bold text-black dark:text-white mb-1">
                 {formatCurrency(dashboardData?.commission?.pending || 0)}
               </h4>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Commission</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estimated Earnings (Processing)</p>
             </div>
           </div>
         </div>
       </div>
+
+      <div
+          className="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/30"
+          role="note"
+        >
+          <div className="flex gap-3 text-sm leading-relaxed text-amber-950/90 dark:text-amber-100/90">
+            <span className="shrink-0 select-none" aria-hidden>
+              📌
+            </span>
+            <div className="space-y-2">
+              <p>
+                Earnings are calculated on the net transaction amount after taxes, refunds, and
+                third-party payment fees.
+              </p>
+              <p>
+                Third-party fees include payment processing (Stripe), payout processing (PayPal), and
+                currency conversion where applicable. These are estimated using a blended rate (e.g., ~7%)
+                and may vary slightly by transaction.
+              </p>
+            </div>
+          </div>
+        </div>
 
       {/* Charts Section */}
       <div>

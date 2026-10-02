@@ -4,10 +4,10 @@ import Popup from '@/components/common/popup';
 import { FiCopy, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
-const ShareProfileDialog = ({ open, onClose, expertEmail, expertId }) => {
+const ShareProfileDialog = ({ open, onClose, publicUsername, expertId }) => {
   const [copied, setCopied] = useState(false);
   const inputRef = useRef(null);
-  const username = expertEmail?.split('@')?.[0] || expertId;
+  const username = publicUsername || expertId;
 
   const profileUrl =
     typeof window !== 'undefined' && username ? `${window.location.origin}/expert/${username}` : '';

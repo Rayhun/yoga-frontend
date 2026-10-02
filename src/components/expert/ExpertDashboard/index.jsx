@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import CardDataStats from '../../stats/CardDataStats';
 import { FiDollarSign, FiUsers, FiTrendingUp, FiBookOpen } from 'react-icons/fi';
-import { TbChartLine, TbTarget } from 'react-icons/tb';
+import { TbTarget } from 'react-icons/tb';
 import { HiOutlineChartBar } from 'react-icons/hi';
 // import { PiHandshake } from 'react-icons/pi';
 import { getExpertDashboard } from '@/services/private/expert/dashboard';
@@ -77,48 +77,91 @@ const ExpertDashboard = () => {
         </div>
       </div>
 
-      {/* Main Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-        <CardDataStats 
-          title="Total Earnings" 
-          total={`$${dashboardData?.earnings_analytics?.total_earnings || 0}`}
-          gradient="from-emerald-500 to-teal-600"
-          iconBg="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30"
+      {/* Earnings cards + info (info always directly under the two earnings boxes) */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <CardDataStats 
+            title="Total Earnings Paid" 
+            total={`$${dashboardData?.earnings_analytics?.total_earnings || 0}`}
+            gradient="from-emerald-500 to-teal-600"
+            iconBg="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30"
+          >
+            <FiDollarSign className="text-emerald-600 dark:text-emerald-400" />
+          </CardDataStats>
+          
+          <CardDataStats 
+            title="Estimated Earnings (Processing)  " 
+            total={`$${dashboardData?.earnings_analytics?.pending_earnings || 0}`}
+            gradient="from-amber-500 to-orange-600"
+            iconBg="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30"
+          >
+            <FiTrendingUp className="text-amber-600 dark:text-amber-400" />
+          </CardDataStats>
+          <CardDataStats 
+          title="Total Guided Experiences" 
+          total={dashboardData?.content_analytics?.total_events || 0}
+          onClick={() => router.push('/portal/teacher/profile?active_tab=group_coaching')}
+          gradient="from-violet-500 to-purple-600"
+          iconBg="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30"
         >
-          <FiDollarSign className="text-emerald-600 dark:text-emerald-400" />
+          <TbTarget className="text-violet-600 dark:text-violet-400" />
         </CardDataStats>
-        
-        <CardDataStats 
-          title="Pending Earnings" 
-          total={`$${dashboardData?.earnings_analytics?.pending_earnings || 0}`}
-          gradient="from-amber-500 to-orange-600"
-          iconBg="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30"
+        </div>
+
+        <div
+          className="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/30"
+          role="note"
         >
-          <FiTrendingUp className="text-amber-600 dark:text-amber-400" />
-        </CardDataStats>
-        
+          <div className="flex gap-3 text-sm leading-relaxed text-amber-950/90 dark:text-amber-100/90">
+            <span className="shrink-0 select-none" aria-hidden>
+              📌
+            </span>
+            <div className="space-y-2">
+              <p>
+                Earnings are calculated on the net transaction amount after taxes, refunds, and
+                third-party payment fees.
+              </p>
+              <p>
+                Third-party fees include payment processing (Stripe), payout processing (PayPal), and
+                currency conversion where applicable. These are estimated using a blended rate (e.g., ~7%)
+                and may vary slightly by transaction.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Other stats */}
+      {/* <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
         <CardDataStats 
+          title="Total Guided Experiences" 
+          total={dashboardData?.content_analytics?.total_events || 0}
+          onClick={() => router.push('/portal/teacher/profile?active_tab=group_coaching')}
+          gradient="from-violet-500 to-purple-600"
+          iconBg="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30"
+        >
+          <TbTarget className="text-violet-600 dark:text-violet-400" />
+        </CardDataStats> */}
+        
+        {/* <CardDataStats 
           title="Total Enrollments" 
           total={dashboardData?.enrollment_analytics?.total_enrollments || 0}
           gradient="from-blue-500 to-indigo-600"
           iconBg="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30"
         >
           <FiBookOpen className="text-blue-600 dark:text-blue-400" />
-        </CardDataStats>
+        </CardDataStats> */}
         
-        <CardDataStats 
+        {/* <CardDataStats 
           title="Unique Students" 
           total={dashboardData?.student_analytics?.unique_students || 0}
           gradient="from-purple-500 to-pink-600"
           iconBg="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30"
         >
           <FiUsers className="text-purple-600 dark:text-purple-400" />
-        </CardDataStats>
-      </div>
-
-      {/* Secondary Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-        <CardDataStats 
+        </CardDataStats> */}
+      {/* </div> */}
+       {/* <CardDataStats 
           title="Total Programs" 
           total={dashboardData?.content_analytics?.total_programs || 0}
           gradient="from-cyan-500 to-blue-600"
@@ -145,10 +188,10 @@ const ExpertDashboard = () => {
         >
           <FiUsers className="text-rose-600 dark:text-rose-400" />
         </CardDataStats>
-      </div>
+      </div> */}
 
       {/* Charts Section */}
-      {isClient && (
+      {/* {isClient && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-8">
@@ -189,7 +232,7 @@ const ExpertDashboard = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

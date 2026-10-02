@@ -1,46 +1,71 @@
 'use client';
 import { useMemo, useState } from 'react';
 
+/**
+ * Truncates HTML so the first `maxWords` visible words remain (tags ignored for counting).
+ * Cuts before the first character of word (maxWords + 1).
+ */
+function truncateHtmlToWordCount(html, maxWords) {
+  if (!html || maxWords <= 0) return html || '';
+  let wordCount = 0;
+  let i = 0;
+  let inTag = false;
+  let inWord = false;
+  const len = html.length;
+
+  while (i < len) {
+    const c = html[i];
+    if (c === '<') {
+      inTag = true;
+      inWord = false;
+      i++;
+      continue;
+    }
+    if (c === '>') {
+      inTag = false;
+      i++;
+      continue;
+    }
+    if (inTag) {
+      i++;
+      continue;
+    }
+    if (/\s/.test(c)) {
+      inWord = false;
+      i++;
+      continue;
+    }
+    if (!inWord) {
+      wordCount++;
+      if (wordCount > maxWords) {
+        return html.substring(0, i);
+      }
+      inWord = true;
+    }
+    i++;
+  }
+  return html;
+}
+
 const ControllableRichText = ({ numberOfWords = 50, children, showFullText = false, ...rest }) => {
   const [isFullTextVisible, setIsFullTextVisible] = useState(false);
 
   const toggleTextVisibility = () => setIsFullTextVisible(prevState => !prevState);
 
-  // Strip HTML tags for word counting
-  const plainText = useMemo(() => {
-    if (!children) return '';
-    return children.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  }, [children]);
+  const html = useMemo(() => (typeof children === 'string' ? children : String(children ?? '')), [children]);
 
-  const totalWords = useMemo(() => plainText.split(' ').filter(word => word.length > 0), [plainText]);
+  // Strip HTML tags for word counting (used for "should we show toggle")
+  const plainText = useMemo(() => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }, [html]);
+
+  const totalWords = useMemo(() => plainText.split(/\s+/).filter((word) => word.length > 0), [plainText]);
 
   const truncatedText = useMemo(() => {
-    if (totalWords.length <= numberOfWords) return children;
-    
-    // Find the position in the original HTML where we should truncate
-    let wordCount = 0;
-    let position = 0;
-    let inTag = false;
-    
-    for (let i = 0; i < children.length && wordCount < numberOfWords; i++) {
-      if (children[i] === '<') {
-        inTag = true;
-      } else if (children[i] === '>') {
-        inTag = false;
-      } else if (!inTag && children[i] === ' ') {
-        wordCount++;
-      }
-    }
-    
-    // Find the end of the current word or tag
-    while (position < children.length && (children[position] !== ' ' || inTag)) {
-      if (children[position] === '<') inTag = true;
-      else if (children[position] === '>') inTag = false;
-      position++;
-    }
-    
-    return children.substring(0, position);
-  }, [children, totalWords, numberOfWords]);
+    if (totalWords.length <= numberOfWords) return html;
+    return truncateHtmlToWordCount(html, numberOfWords);
+  }, [html, totalWords.length, numberOfWords]);
 
   const hasTruncableText = totalWords.length > numberOfWords;
 
@@ -48,7 +73,7 @@ const ControllableRichText = ({ numberOfWords = 50, children, showFullText = fal
   if (showFullText) {
     return (
       <div {...rest}>
-        <div dangerouslySetInnerHTML={{ __html: children }} />
+        <div dangerouslySetInnerHTML={{ __html: html }} />
       </div>
     );
   }
@@ -57,9 +82,9 @@ const ControllableRichText = ({ numberOfWords = 50, children, showFullText = fal
     <div {...rest}>
       {hasTruncableText ? (
         <>
-          <div 
-            dangerouslySetInnerHTML={{ 
-              __html: isFullTextVisible ? children : truncatedText + '...' 
+          <div
+            dangerouslySetInnerHTML={{
+              __html: isFullTextVisible ? html : truncatedText + '...',
             }}
           />
           <span className="text-primary cursor-pointer ml-2" onClick={toggleTextVisibility}>
@@ -67,7 +92,7 @@ const ControllableRichText = ({ numberOfWords = 50, children, showFullText = fal
           </span>
         </>
       ) : (
-        <div dangerouslySetInnerHTML={{ __html: children }} />
+        <div dangerouslySetInnerHTML={{ __html: html }} />
       )}
     </div>
   );

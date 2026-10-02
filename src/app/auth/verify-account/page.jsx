@@ -45,7 +45,7 @@ function Page() {
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  You&apos;re one step away from joining our wellness community. Enter the codes we sent to verify your contact details.
+                  You&apos;re one step away from joining our wellness community. Enter the code we sent to verify your email.
                 </p>
 
                 <div className="flex items-center justify-center space-x-4 mt-8">
@@ -77,7 +77,7 @@ function Page() {
               Verify Your Account
             </h2>
                 <p className="text-gray-600">
-                  Enter the OTP code sent to your email and phone
+                  Enter the OTP code sent to your email
                 </p>
               </div>
 

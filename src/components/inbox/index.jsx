@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { FiUsers } from 'react-icons/fi';
 import Image from 'next/image';
 import { useInbox } from '@/context/InboxContext';
+import useAuthContext from '@/hooks/useAuthContext';
+import { USER_ROLE } from '@/utils/authorization';
 import CirclesList from './CirclesList';
 import CoachesList from './CoachesList';
 import ActiveConversationHeader from './ActiveConversationHeader';
@@ -24,9 +26,11 @@ const CoachesIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }) => {
 };
 
 const Inbox = () => {
+  const { user } = useAuthContext();
   const {
     conversations: { data: conversationsData, active: activeConversation, isLoading: isLoadingConversations },
   } = useInbox();
+  const shouldShowCoachesTab = user?.profile?.role !== USER_ROLE.TEACHER;
   const [activeTab, setActiveTab] = useState('circles'); // 'circles' or 'coaches'
   const [circlesSubTab, setCirclesSubTab] = useState('my-circles'); // For circles sub-navigation
   const [coachesSubTab, setCoachesSubTab] = useState('my-chats'); // For coaches sub-navigation
@@ -55,22 +59,24 @@ const Inbox = () => {
               <FiUsers className="w-4 h-4 md:w-5 md:h-5" />
               <span>Circles</span>
             </button>
-            <button
-              onClick={() => setActiveTab('coaches')}
-              className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-4 py-2 md:py-3 font-medium transition-colors text-xs md:text-sm ${
-                activeTab === 'coaches'
-                  ? 'text-green-600 border-b-2 border-green-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              {/* Prefer icon, fallback to image */}
-              <CoachesIcon className="w-4 h-4 md:w-5 md:h-5" />
-              <span>Coaches</span>
-            </button>
+            {shouldShowCoachesTab && (
+              <button
+                onClick={() => setActiveTab('coaches')}
+                className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-4 py-2 md:py-3 font-medium transition-colors text-xs md:text-sm ${
+                  activeTab === 'coaches'
+                    ? 'text-green-600 border-b-2 border-green-600'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                {/* Prefer icon, fallback to image */}
+                <CoachesIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span>Coaches</span>
+              </button>
+            )}
           </div>
 
           {/* Content based on active tab */}
-          {activeTab === 'circles' ? (
+          {activeTab === 'circles' || !shouldShowCoachesTab ? (
             <CirclesList 
               circles={circles} 
               isLoading={isLoadingConversations}
@@ -116,10 +122,14 @@ const Inbox = () => {
                 setActiveTab('circles');
                 setCirclesSubTab('discover');
               }}
-              onFindCoach={() => {
-                setActiveTab('coaches');
-                setCoachesSubTab('find-coaches');
-              }}
+              onFindCoach={
+                shouldShowCoachesTab
+                  ? () => {
+                      setActiveTab('coaches');
+                      setCoachesSubTab('find-coaches');
+                    }
+                  : undefined
+              }
             />
           )}
         </div>
