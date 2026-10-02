@@ -1,5 +1,5 @@
 const Layout = ({ children }) => {
-  return <div className="flex justify-center mt-[15vh]">{children}</div>;
+  return <div className="w-full min-w-0 overflow-x-hidden">{children}</div>;
 };
 
 export default Layout;

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import useAuthContext from '@/hooks/useAuthContext';
+import CustomerDashboard from '@/components/dashboard/Customer';
 import PageLoader from '@/components/common/loader/PageLoader';
 
 // Dynamically import BusinessDashboard to avoid SSR issues
@@ -15,35 +16,30 @@ export default function Page() {
   const { user } = useAuthContext();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  
+
   const userRole = user?.profile?.role ?? '';
   const userSubRole = user?.profile?.sub_role ?? '';
 
   useEffect(() => {
     // Set client-side flag
     setIsClient(true);
-    
-    // Redirect if not a customer or not a business customer
-    if (userRole !== 'Customer' || userSubRole !== 'Business') {
+
+    // Redirect if not a customer
+    if (userRole !== 'Customer') {
       router.replace('/portal');
     }
-    
-    // Business owners can access both regular dashboard and business dashboard
-  }, [userRole, userSubRole, user?.isBusinessOwner, router]);
+  }, [userRole, router]);
 
   // Show loader while checking authentication or during SSR
   if (!isClient || !user || userRole !== 'Customer') {
     return <PageLoader />;
   }
 
-  // Show loader if not a business customer (will redirect)
-  if (userSubRole !== 'Business') {
-    return <PageLoader />;
+  // Business customers see the business dashboard
+  if (userSubRole === 'Business') {
+    return <BusinessDashboard />;
   }
 
-  return (
-    <div>
-      <BusinessDashboard />
-    </div>
-  );
+  // Individual customers see the general customer dashboard
+  return <CustomerDashboard />;
 }

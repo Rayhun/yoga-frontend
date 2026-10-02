@@ -4,18 +4,36 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline } from 'react-icons/md';
-import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
+import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord, ReliefIndexBadge } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import { BasicTable } from '@/components/common/table';
 import { deleteModuleContent } from '@/services/private/lms/module';
 import useConfirm from '@/hooks/useConfirm';
 import queryKeys from '@/utils/query-keys';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import {
+  CONTENT_CATALOG_FIELD_NAMESPACES,
+  filterContentTagsByNamespace,
+  getCultureExperienceDisplayData,
+} from '@/utils/contentCatalogTags';
 
 const ModuleDetails = ({ data = {} }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
-
+  const focusAreaTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.focus_areas
+  );
+  const languageTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.languages
+  );
+  const categoryTags = filterContentTagsByNamespace(
+    data.tags,
+    CONTENT_CATALOG_FIELD_NAMESPACES.categories
+  );
+  const cultureExperienceTags = getCultureExperienceDisplayData(data);
   const { mutateAsync: deleteContent, isPending: isDeleting } = useMutation({
     mutationFn: deleteModuleContent,
     onSuccess: () => {
@@ -163,8 +181,31 @@ const ModuleDetails = ({ data = {} }) => {
         </DetailsRecord>
         <DetailsRecord label="Access Setting">{data.access_setting}</DetailsRecord>
         <DetailsRecord label="Visibility Setting">{data.visibility_setting}</DetailsRecord>
-        <MultiValueDetailsRecord label="Categories" data={data.categories} getChipLabel={i => i.name} />
-        <MultiValueDetailsRecord label="Tags" data={data.tags} getChipLabel={i => i.name} />
+        <DetailsRecord label="Relief index">
+          <ReliefIndexBadge value={data.relief_index} />
+        </DetailsRecord>
+        <MultiValueDetailsRecord
+          label="Categories"
+          data={categoryTags.length ? categoryTags : data.categories}
+          getChipLabel={item =>
+            typeof item === 'string' ? item : item?.name ?? getCatalogTagChipLabel(item)
+          }
+        />
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
+          data={focusAreaTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+        <MultiValueDetailsRecord
+          label="Culture Experience"
+          data={cultureExperienceTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={languageTags}
+          getChipLabel={getCatalogTagChipLabel}
+        />
         <DetailsRecord label="Content">
           <BasicTable
             columns={tableColumns}

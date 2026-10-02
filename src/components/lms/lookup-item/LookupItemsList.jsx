@@ -1,19 +1,23 @@
 'use client';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Tab, Tabs } from '@mui/material';
 import { MdOutlineEdit, MdOutlineRemoveRedEye, MdDeleteOutline, MdOutlineAdd } from 'react-icons/md';
-import { BiExport } from 'react-icons/bi';
-import { useMutation } from '@tanstack/react-query';
+import { BiExport, BiImport } from 'react-icons/bi';
 import useDelete from '@/hooks/useDelete';
+import useImport from '@/hooks/useImport';
+import useExport from '@/hooks/useExport';
 import useTable from '@/hooks/useTable';
-import useConfirm from '@/hooks/useConfirm';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
-import { deleteSingleLookupItem, getLookupItemsList, exportLookupItems } from '@/services/private/lms/lookup-item';
-import { downloadBlobAsCsv, toastApiError } from '@/utils/helpers';
+import {
+  deleteSingleLookupItem,
+  getLookupItemsList,
+  exportLookupItems,
+  importLookupItems,
+} from '@/services/private/lms/lookup-item';
 
 const CATEGORIES = {
   CERTIFICATIONS: 'Certifications',
@@ -22,7 +26,6 @@ const CATEGORIES = {
 
 const LookupItemsList = () => {
   const router = useRouter();
-  const confirm = useConfirm();
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIES.CERTIFICATIONS);
 
   const { handleDelete: handleDeleteLookupItem } = useDelete({
@@ -31,21 +34,32 @@ const LookupItemsList = () => {
     onSuccess: () => toast.success('Lookup item deleted successfully'),
   });
 
-  const { mutateAsync: exportLookupItemsFn, isPending: isExporting } = useMutation({
-    mutationFn: exportLookupItems,
+  const { isImporting, handleImport } = useImport({
+    mutationFn: importLookupItems,
+    invalidateQueryKey: [queryKeys.lookupItems],
+    onSuccess: () => toast.success('Lookup items imported successfully'),
   });
-  const handleExport = useCallback(async () => {
-    try {
-      const categoryLabel = selectedCategory === CATEGORIES.CERTIFICATIONS ? 'Certifications' : 'Coaching Areas';
-      await confirm({ message: `Export ${categoryLabel} only?` });
-      const response = await exportLookupItemsFn({ category: selectedCategory });
-      const slug = selectedCategory === CATEGORIES.CERTIFICATIONS ? 'certifications' : 'coaching_areas';
-      downloadBlobAsCsv(response, `lookup_${slug}_export.csv`);
-      toast.success(`${categoryLabel} exported successfully`);
-    } catch (e) {
-      if (e?.message !== 'cancel') toastApiError(e);
-    }
-  }, [confirm, exportLookupItemsFn, selectedCategory]);
+
+  const { isExporting, handleExport } = useExport({
+    mutationFn: exportLookupItems,
+    filename: params => {
+      const category = params?.category || selectedCategory;
+      const slug = category === CATEGORIES.CERTIFICATIONS ? 'certifications' : 'coaching_areas';
+      return `lookup_${slug}_export.csv`;
+    },
+    confirmMessage: params => {
+      const category = params?.category || selectedCategory;
+      const categoryLabel =
+        category === CATEGORIES.CERTIFICATIONS ? 'Certifications' : 'Coaching Areas';
+      return `Export ${categoryLabel} only?`;
+    },
+    successMessage: params => {
+      const category = params?.category || selectedCategory;
+      const categoryLabel =
+        category === CATEGORIES.CERTIFICATIONS ? 'Certifications' : 'Coaching Areas';
+      return `${categoryLabel} exported successfully`;
+    },
+  });
 
   const tableColumns = useMemo(
     () => [
@@ -81,11 +95,18 @@ const LookupItemsList = () => {
   const headerQuickActions = useMemo(
     () => [
       {
+        id: 'import',
+        Icon: BiImport,
+        label: 'Import',
+        isLoading: isImporting,
+        onClick: handleImport,
+      },
+      {
         id: 'export',
         Icon: BiExport,
         label: 'Export',
         isLoading: isExporting,
-        onClick: handleExport,
+        onClick: () => handleExport({ category: selectedCategory }),
       },
       {
         id: 'add',
@@ -94,7 +115,7 @@ const LookupItemsList = () => {
         onClick: () => router.push('/portal/admin/lookup/add'),
       },
     ],
-    [handleExport, isExporting, router]
+    [handleExport, handleImport, isExporting, isImporting, router, selectedCategory]
   );
 
   const { isLoading, columns, data } = useTable({
@@ -104,7 +125,6 @@ const LookupItemsList = () => {
     rowActions,
   });
 
-  // Filter data by selected category
   const filteredData = useMemo(() => {
     const allData = data?.data || [];
     return allData.filter(item => item.category === selectedCategory);
@@ -156,4 +176,3 @@ const LookupItemsList = () => {
 };
 
 export default LookupItemsList;
-

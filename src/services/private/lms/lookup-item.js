@@ -23,3 +23,11 @@ export const deleteSingleLookupItem = async ({ id }) => {
 export const exportLookupItems = async (params = {}) => {
   return axios.get('/LMS/lookup/export/', { params, responseType: 'blob' });
 };
+
+export const importLookupItems = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return axios.post('/LMS/lookup/import/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};

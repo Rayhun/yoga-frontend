@@ -6,6 +6,7 @@ const STATUS_OPTIONS = [
   { value: '', label: 'All' },
   { value: 'profile_complete', label: 'Profile Completed' },
   { value: 'has_event_or_consult', label: 'Has Event/Consult' },
+  { value: 'is_live', label: 'Live' },
 ];
 
 const EXPERT_STATUS_OPTIONS = [
@@ -33,7 +34,7 @@ const ListFilters = ({ onClose, onApplyFilter, selected, handleReset }) => {
   const handleSubmit = (values, { setSubmitting }) => {
     onApplyFilter(values);
     setSubmitting(false);
-    onClose();
+    onClose?.();
   };
 
   return (
@@ -53,7 +54,7 @@ const ListFilters = ({ onClose, onApplyFilter, selected, handleReset }) => {
                   sx={{ textAlign: 'left' }}
                 >
                   {EXPERT_STATUS_OPTIONS.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <MenuItem key={String(option.value)} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
@@ -71,7 +72,7 @@ const ListFilters = ({ onClose, onApplyFilter, selected, handleReset }) => {
                   sx={{ textAlign: 'left' }}
                 >
                   {STATUS_OPTIONS.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <MenuItem key={option.value || 'status-all'} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}

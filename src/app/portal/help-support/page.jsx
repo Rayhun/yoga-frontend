@@ -58,8 +58,8 @@ const HelpSupportPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-boxdark p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div>
+      <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">

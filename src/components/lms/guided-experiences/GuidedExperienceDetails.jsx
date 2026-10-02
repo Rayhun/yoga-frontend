@@ -3,14 +3,56 @@ import { useRouter } from 'next/navigation';
 import { DetailsLayoutWrapper, DetailsRecord, MultiValueDetailsRecord } from '@/components/common/details';
 import DetailsFileCard from '@/components/common/details/DetailsFileCard';
 import ControllableRichText from '@/components/common/details/ControllableRichText';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { getUserTimeAndTimezone } from '@/utils/helpers';
+import { getUserTimeAndTimezone, toastApiError } from '@/utils/helpers';
+import {
+  deleteGuidedExperience,
+  duplicateGuidedExperience,
+} from '@/services/private/lms/guided-experiences';
+import queryKeys from '@/utils/query-keys';
+import { getCatalogTagChipLabel } from '@/utils/catalogTag';
+import useConfirm from '@/hooks/useConfirm';
+import useDelete from '@/hooks/useDelete';
 
 dayjs.extend(utc);
 
+const EVENT_DELETE_BLOCKED_MESSAGE =
+  'This event cannot be deleted because users have signed up or tickets have been sold. Please refund or cancel all orders before deleting this event.';
+
 const GuidedExperienceDetails = ({ data = {}, eventType }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const confirm = useConfirm();
+
+  const { mutateAsync: duplicateExperience, isPending: isDuplicating } = useMutation({
+    mutationFn: duplicateGuidedExperience,
+  });
+
+  const { handleDelete: handleDeleteExperience, isDeleting } = useDelete({
+    mutationFn: deleteGuidedExperience,
+    invalidateQueryKey: [queryKeys.guidedExperiences, eventType],
+    getConfirmOptions: {
+      heading: 'Delete event?',
+      message:
+        'Are you sure you want to delete this event? This action cannot be undone.',
+    },
+    onSuccess: () => {
+      toast.success('Event deleted successfully');
+      const eventTypePath = eventType === 'live event' ? 'live-event' : eventType;
+      router.push(`/portal/admin/lms/expert/guided-experiences/${eventTypePath}`);
+    },
+  });
+
+  const handleDelete = async () => {
+    if (!data.can_delete) {
+      toast.error(data.delete_blocked_message || EVENT_DELETE_BLOCKED_MESSAGE);
+      return;
+    }
+    await handleDeleteExperience({ id: data.id });
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -65,10 +107,39 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
     return `/portal/admin/lms/expert/guided-experiences/${eventTypePath}/${data.id}/edit`;
   };
 
+  const handleCopy = async () => {
+    try {
+      const response = await duplicateExperience({ id: data.id });
+      const copiedEvent = response?.data?.data;
+      const itemEventType = copiedEvent?.event_type || eventType;
+      const eventTypePath = itemEventType === 'live event' ? 'live-event' : itemEventType;
+
+      toast.success('Guided experience copied successfully');
+      await queryClient.invalidateQueries([queryKeys.guidedExperiences, eventType]);
+
+      if (copiedEvent?.id) {
+        router.push(`/portal/admin/lms/expert/guided-experiences/${eventTypePath}/${copiedEvent.id}/edit`);
+      }
+    } catch (error) {
+      toastApiError(error);
+    }
+  };
+
   return (
     <DetailsLayoutWrapper 
       title="Guided Experience Details"
       onEdit={() => router.push(getEditPath())}
+      onDelete={handleDelete}
+      isDeleting={isDeleting}
+      customActions={
+        <button
+          className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-1 text-sm text-center font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-60"
+          onClick={handleCopy}
+          disabled={isDuplicating}
+        >
+          {isDuplicating ? 'Copying...' : 'Use as Template'}
+        </button>
+      }
     >
       <div className="flex flex-col gap-5">
         <DetailsRecord label="Title">{data.title || 'N/A'}</DetailsRecord>
@@ -189,15 +260,27 @@ const GuidedExperienceDetails = ({ data = {}, eventType }) => {
         )}
 
         <MultiValueDetailsRecord
-          label="Categories"
-          data={data.categories}
-          getChipLabel={item => item.name || item}
+          label="Culture Experience"
+          data={data.culture_experience}
+          getChipLabel={getCatalogTagChipLabel}
         />
 
         <MultiValueDetailsRecord
-          label="Tags"
+          label="Categories"
+          data={data.categories}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+
+        <MultiValueDetailsRecord
+          label="Focus & approach?"
           data={data.tags}
-          getChipLabel={item => item.name || item}
+          getChipLabel={getCatalogTagChipLabel}
+        />
+
+        <MultiValueDetailsRecord
+          label="Languages"
+          data={data.languages}
+          getChipLabel={getCatalogTagChipLabel}
         />
 
         {data.is_online !== undefined && (

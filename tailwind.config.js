@@ -11,6 +11,9 @@ const config = {
   theme: {
     fontFamily: {
       satoshi: ['Satoshi', 'sans-serif'],
+      serif: ['Georgia', '"Times New Roman"', 'serif'],
+      'nd-display': ['var(--nd-font-display)'],
+      'nd-body': ['var(--nd-font-body)'],
     },
     screens: {
       '2xsm': '375px',
@@ -20,6 +23,31 @@ const config = {
     },
     extend: {
       colors: {
+        nd: {
+          white: 'var(--nd-white)',
+          'off-white': 'var(--nd-off-white)',
+          bg: 'var(--nd-bg)',
+          surface: 'var(--nd-surface)',
+          divider: 'var(--nd-divider)',
+          border: 'var(--nd-border)',
+          'text-dark': 'var(--nd-text-dark)',
+          'text-mid': 'var(--nd-text-mid)',
+          'text-light': 'var(--nd-text-light)',
+          'text-faint': 'var(--nd-text-faint)',
+          'green-dark': 'var(--nd-green-dark)',
+          'green-mid': 'var(--nd-green-mid)',
+          'green-soft': 'var(--nd-green-soft)',
+          'green-border': 'var(--nd-green-border)',
+          'orange-dark': 'var(--nd-orange-dark)',
+          'orange-mid': 'var(--nd-orange-mid)',
+          'orange-soft': 'var(--nd-orange-soft)',
+          'orange-border': 'var(--nd-orange-border)',
+          gold: 'var(--nd-gold)',
+          'gold-soft': 'var(--nd-gold-soft)',
+          'gold-border': 'var(--nd-gold-border)',
+          red: 'var(--nd-red)',
+          'red-soft': 'var(--nd-red-soft)',
+        },
         current: 'currentColor',
         transparent: 'transparent',
         white: '#FFFFFF',
@@ -250,7 +278,14 @@ const config = {
         10: '10px',
         12: '12px',
       },
+      borderRadius: {
+        nd: 'var(--nd-radius)',
+        'nd-sm': 'var(--nd-radius-sm)',
+        'nd-pill': 'var(--nd-radius-pill)',
+      },
       boxShadow: {
+        'nd-sm': 'var(--nd-shadow-sm)',
+        'nd-md': 'var(--nd-shadow-md)',
         default: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
         card: '0px 1px 3px rgba(0, 0, 0, 0.12)',
         'card-2': '0px 1px 2px rgba(0, 0, 0, 0.05)',

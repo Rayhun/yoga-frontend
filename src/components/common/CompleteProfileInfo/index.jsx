@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
+import useAuthContext from '@/hooks/useAuthContext';
 
-const InfoNote = ({expertData}) => {
+const InfoNote = ({ expertData }) => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const isChatGroup = Boolean(user?.profile?.is_chat_group);
 
   const handlePayPalSetup = () => {
-    // Check if profile is complete before allowing PayPal setup
     if (!expertData?.is_profile_complete) {
       setShowProfilePopup(true);
       return;
@@ -16,8 +18,7 @@ const InfoNote = ({expertData}) => {
     router.push('/portal/teacher/payments');
   };
 
-  const handleAddCoachingOrConsultation = (path) => {
-    // Check if profile is complete before allowing coaching/consultation creation
+  const handleRequiresProfile = path => {
     if (!expertData?.is_profile_complete) {
       setShowProfilePopup(true);
       return;
@@ -25,6 +26,52 @@ const InfoNote = ({expertData}) => {
     router.push(path);
   };
 
+  const steps = useMemo(() => {
+    const items = [];
+
+    if (!expertData?.is_profile_complete) {
+      items.push({
+        id: 'profile',
+        text: 'Complete your profile to continue working on the app.',
+      });
+    }
+
+    if (!expertData?.stripe_onboarded) {
+      items.push({
+        id: 'paypal',
+        text: 'Set up your PayPal account to receive payments.',
+        buttonText: 'Link Account',
+        onClick: handlePayPalSetup,
+      });
+    }
+
+    if (!expertData?.has_event_or_consult) {
+      items.push({
+        id: 'guided-experiences',
+        text: 'Add Guided Experiences (workshops, bootcamps, masterclasses, live events)',
+        buttonText: 'Add Guided Experiences',
+        onClick: () => handleRequiresProfile('/portal/teacher/group_coaching/add'),
+      });
+    }
+
+    if (!isChatGroup) {
+      items.push({
+        id: 'private-circle',
+        text: 'Create your private circle to connect with your community.',
+        buttonText: 'Create Private Circle',
+        onClick: () => handleRequiresProfile('/portal/teacher/community/create'),
+      });
+    }
+
+    return items;
+  }, [
+    expertData?.is_profile_complete,
+    expertData?.stripe_onboarded,
+    expertData?.has_event_or_consult,
+    isChatGroup,
+  ]);
+
+  if (!steps.length) return null;
 
   return (
     <div className="mx-auto my-8">
@@ -34,63 +81,25 @@ const InfoNote = ({expertData}) => {
           <h2 className="text-xl font-semibold text-primary">Quick Steps to Get Started</h2>
         </div>
 
-        {/* Step 1 */}
-        {!expertData?.is_profile_complete && <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
-            1
-          </div>
-          <div className="flex-1 text-gray-800 font-medium">
-            Complete your profile to continue working on the app.
-          </div>
-        </div>}
-
-        {/* PayPal Setup Step */}
-        {!expertData?.stripe_onboarded && (
-          <div className="flex items-start gap-4">
+        {steps.map((step, index) => (
+          <div key={step.id} className="flex items-start gap-4">
             <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
-              {expertData?.is_profile_complete ? 1 : 2}
+              {index + 1}
             </div>
-            <div className="flex-1 text-gray-800 font-medium">
-              Set up your PayPal account to receive payments.
-            </div>
-            <div className="flex-shrink-0">
-              <button
-                onClick={handlePayPalSetup}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Link Account
-              </button>
-            </div>
+            <div className="flex-1 text-gray-800 font-medium">{step.text}</div>
+            {step.buttonText ? (
+              <div className="flex-shrink-0">
+                <button
+                  onClick={step.onClick}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                >
+                  {step.buttonText}
+                </button>
+              </div>
+            ) : null}
           </div>
-        )}
+        ))}
 
-        {/* Final Step - Only show when has_event_or_consult is false */}
-        {!expertData?.has_event_or_consult && (
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary flex items-center justify-center rounded-full font-bold">
-              {expertData?.stripe_onboarded ? (expertData?.is_profile_complete ? 2 : 3) : (expertData?.is_profile_complete ? 1 : 2)}
-            </div>
-            <div className="flex-1 text-gray-800 font-medium">
-              Add a guided experiences to get started.
-            </div>
-            <div className="flex-shrink-0 flex gap-3">
-              <button
-                onClick={() => handleAddCoachingOrConsultation('/portal/teacher/group_coaching/add')}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
-              >
-                Add Guided Experiences
-              </button>
-              {/* <button
-                onClick={() => handleAddCoachingOrConsultation('/portal/teacher/consultation/add')}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
-              >
-                Add Consultation
-              </button> */}
-            </div>
-          </div>
-        )}
-
-        {/* Profile Completion Popup */}
         {showProfilePopup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -125,7 +134,6 @@ const InfoNote = ({expertData}) => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

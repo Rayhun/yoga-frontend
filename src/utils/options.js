@@ -32,7 +32,7 @@ export const CONTENT_TYPE_OPTIONS = [
     value: CONTENT_TYPE.audio,
   },
   {
-    label: 'Image',
+    label: 'Guide',
     value: CONTENT_TYPE.image,
   },
   {
@@ -42,10 +42,11 @@ export const CONTENT_TYPE_OPTIONS = [
 ];
 
 export const ACCESS_SETTING_OPTIONS = [
-  // {
-  //   label: 'Open',
-  //   value: ACCESS_SETTING.open,
-  // },
+  {
+    label: 'Open',
+    value: ACCESS_SETTING.open,
+  },
+  
   {
     label: 'Free',
     value: ACCESS_SETTING.free,
@@ -146,7 +147,7 @@ export const INTENSITY_LEVEL_OPTIONS = [
 
 export const MODULE_TYPE_OPTIONS = [
   {
-    label: 'Image',
+    label: 'Guide',
     value: MODULE_TYPE.image,
   },
   {
@@ -165,7 +166,7 @@ export const MODULE_TYPE_OPTIONS = [
 
 export const PROGRAM_TYPE_OPTIONS = [
   {
-    label: 'Image',
+    label: 'Guide',
     value: PROGRAM_TYPE.image,
   },
   {
@@ -251,4 +252,35 @@ export const SUBSCRIPTION_FREE_TRIAL_OPTIONS = [
   { label: '7 Days', value: 7 },
   { label: '14 Days', value: 14 },
   { label: '21 Days', value: 21 },
+];
+
+/** Session / quiz focus areas — value stored on API rows (readable strings). */
+export const SESSION_FOCUS_AREA_OPTIONS = [
+  { value: 'Flexibility', label: 'Flexibility' },
+  { value: 'Strength & Conditioning', label: 'Strength & Conditioning' },
+  { value: 'Balance & Stability', label: 'Balance & Stability' },
+  { value: 'Stress Relief & Relaxation', label: 'Stress Relief & Relaxation' },
+  { value: 'Breathwork & Pranayama', label: 'Breathwork & Pranayama' },
+  { value: 'Mobility & Joint Health', label: 'Mobility & Joint Health' },
+  { value: 'Core Stability', label: 'Core Stability' },
+  { value: 'Mindfulness & Meditation', label: 'Mindfulness & Meditation' },
+  { value: 'Recovery & Restoration', label: 'Recovery & Restoration' },
+  { value: 'Posture & Alignment', label: 'Posture & Alignment' },
+  { value: 'Energy & Awakening', label: 'Energy & Awakening' },
+  { value: 'Cardiovascular / Endurance', label: 'Cardiovascular / Endurance' },
+];
+
+/** Session / quiz equipment — value stored on API rows. */
+export const SESSION_EQUIPMENT_OPTIONS = [
+  { value: 'No equipment', label: 'No equipment' },
+  { value: 'Yoga mat', label: 'Yoga mat' },
+  { value: 'Yoga blocks', label: 'Yoga blocks' },
+  { value: 'Strap or belt', label: 'Strap or belt' },
+  { value: 'Bolster', label: 'Bolster' },
+  { value: 'Blanket', label: 'Blanket' },
+  { value: 'Chair / wall', label: 'Chair / wall' },
+  { value: 'Resistance band', label: 'Resistance band' },
+  { value: 'Dumbbells / weights', label: 'Dumbbells / weights' },
+  { value: 'Foam roller', label: 'Foam roller' },
+  { value: 'Pillow / cushion', label: 'Pillow / cushion' },
 ];

@@ -1,10 +1,9 @@
-import React from 'react';
-import { Chip } from '@mui/material';
-import { useParams } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useParams, useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   cancelGroupCoaching,
   completeGroupCoaching,
+  deleteGroupCoaching,
   getExpertGroupCoachingDetails,
 } from '@/services/private/expert/groupCoaching';
 import queryKeys from '@/utils/query-keys';
@@ -12,14 +11,20 @@ import useHandleApiResponse from '@/hooks/useHandleApiResponse';
 import { GroupCoachingDetails } from '@/components/common/groupCoaching/GroupCoachingDetailsPage';
 import useConfirm from '@/hooks/useConfirm';
 import { toast } from 'react-toastify';
+import { toastApiError } from '@/utils/helpers';
 import Popup from '@/components/common/popup';
 import useToggle from '@/hooks/useToggle';
 import MarkCompleteForm from '@/components/common/MarkCompleteForm';
 
+const EVENT_DELETE_BLOCKED_MESSAGE =
+  'This event cannot be deleted because users have signed up or tickets have been sold. Please refund or cancel all orders before deleting this event.';
+
 export const ExpertGroupCoachingDetails = () => {
   const params = useParams();
+  const router = useRouter();
   const eventId = params.id;
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const { isOpen: isCompletionModalOpen, toggle: toggleCompletionModal } = useToggle();
 
   const {
@@ -40,6 +45,10 @@ export const ExpertGroupCoachingDetails = () => {
     mutationFn: completeGroupCoaching,
   });
 
+  const { isPending: isDeleting, mutateAsync: deleteEvent } = useMutation({
+    mutationFn: deleteGroupCoaching,
+  });
+
   const eventDetails = response?.data?.data || {};
 
   useHandleApiResponse(failureReason);
@@ -57,6 +66,28 @@ export const ExpertGroupCoachingDetails = () => {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!eventDetails.can_delete) {
+      toast.error(eventDetails.delete_blocked_message || EVENT_DELETE_BLOCKED_MESSAGE);
+      return;
+    }
+
+    try {
+      await confirm({
+        heading: 'Delete event?',
+        message: 'Are you sure you want to delete this event? This action cannot be undone.',
+      });
+      await deleteEvent({ id: eventId });
+      await queryClient.invalidateQueries({ queryKey: [queryKeys.expertGroupCoaching] });
+      toast.success('Event deleted successfully');
+      router.push('/portal/teacher/profile?tab=group_coaching');
+    } catch (error) {
+      if (error?.message !== 'User cancelled') {
+        toastApiError(error);
+      }
+    }
+  };
+
   const handleEventCompletion = async (values, { setSubmitting }) => {
     try {
       await completeEvent({ ...values, id: eventId });
@@ -70,6 +101,10 @@ export const ExpertGroupCoachingDetails = () => {
     }
   };
 
+  const handleDuplicateEvent = async () => {
+    router.push(`/portal/teacher/group_coaching/add?copy_from=${eventId}`);
+  };
+
   return (
     <>
       <GroupCoachingDetails
@@ -80,6 +115,10 @@ export const ExpertGroupCoachingDetails = () => {
         canceling={isPending}
         completingEvent={isCompleting}
         toggleCompletionModal={toggleCompletionModal}
+        handleDuplicateEvent={handleDuplicateEvent}
+        duplicating={false}
+        handleDeleteEvent={handleDeleteEvent}
+        deleting={isDeleting}
       />
       <Popup heading={null} open={isCompletionModalOpen} onClose={() => toggleCompletionModal()}>
         <MarkCompleteForm handleSubmit={handleEventCompletion} toggleCompletionModal={toggleCompletionModal} />

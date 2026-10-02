@@ -11,6 +11,8 @@ import { getSubscriptionPagesList } from '@/services/private/subscription/page';
 import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 
 const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit }) => {
+  const isReapproval = selected?.status === 'Declined';
+  const isEdit = selected?.status === 'Approved';
   const {
     data: commissionTypes,
     isLoading,
@@ -67,7 +69,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
         <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
           {/* Title */}
           <h2 id="approve-affiliate-form-title" className="text-center text-2xl font-semibold mb-6">
-            Approve Affiliate
+            {isReapproval ? 'Re-approve Affiliate' : isEdit ? 'Update Affiliate' : 'Approve Affiliate'}
           </h2>
 
           {isLoading && (
@@ -95,7 +97,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
                   placeholder="Select Commission Type"
                   options={commissionTypeOptions}
                   required
-                  disabled={!!selected}
+                  disabled={isEdit}
                 />
 
                 <FormikMultiSelect
@@ -117,7 +119,7 @@ const ApproveAffiliateForm = ({ show = false, onClose, selected, handleSubmit })
                     Cancel
                   </Button>
                   <Button type="submit" size="2xl" className="self-start mt-4" isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                    {isSubmitting ? 'Submitting...' : isReapproval ? 'Re-approve' : 'Submit'}
                   </Button>
                 </div>
               </Form>

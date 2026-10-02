@@ -1,7 +1,18 @@
-import Image from 'next/image';
-import { FaUser, FaBriefcase, FaAward } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
+import ExpertCoverImage from '@/components/common/ExpertCoverImage';
+
+const getPracticeTypeLabel = expert => {
+  if (typeof expert?.practice_type === 'string' && expert.practice_type.trim()) {
+    return expert.practice_type.trim();
+  }
+  if (expert?.practice_type?.label) return expert.practice_type.label;
+  return expert?.title?.trim() || '';
+};
 
 const ExpertCard = ({ expert, onClick }) => {
+  const practiceType = getPracticeTypeLabel(expert);
+  const expertName = `${expert.first_name || ''} ${expert.last_name || ''}`.trim();
+
   return (
     <div
       className="group relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer h-full flex flex-col dark:bg-boxdark dark:border-gray-700"
@@ -9,14 +20,10 @@ const ExpertCard = ({ expert, onClick }) => {
     >
       {/* Image Section with Overlay */}
       <div className="relative aspect-[16/9] overflow-hidden">
-        <Image
-          width={300}
-          height={169}
-          src={expert.file?.startsWith('http') ? expert.file : '/images/user/placeholder_profile.png'}
-          alt={`${expert.first_name} ${expert.last_name ? expert.last_name : ''}`}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          quality={95}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        <ExpertCoverImage
+          src={expert.file}
+          name={expertName}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
         {/* Gradient Overlay */}
@@ -26,10 +33,13 @@ const ExpertCard = ({ expert, onClick }) => {
       {/* Content Section - Flex to push button to bottom */}
       <div className="p-5 flex flex-col gap-3 flex-1">
         {/* Name */}
-        <h4 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-green-700 transition-colors dark:text-white min-h-[3.5rem]">
+        <h4 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-green-700 transition-colors dark:text-white">
           {expert.first_name} {expert.last_name ? expert.last_name : ''}
         </h4>
-        
+
+        {practiceType ? (
+          <p className="text-sm text-gray-500 line-clamp-1">{practiceType}</p>
+        ) : null}
         {/* Title and Specialization */}
         {/* {expert?.title && (
           <div className="flex items-center gap-2 text-sm text-gray-600 min-h-[1.25rem]">

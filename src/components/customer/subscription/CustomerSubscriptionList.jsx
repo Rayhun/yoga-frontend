@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   getCustomerSubscriptionStatus,
   cancelCustomerSubscription,
@@ -19,12 +20,16 @@ import {
 } from 'react-icons/fi';
 import Spinner from '@/components/common/loader/Spinner';
 import useAuthContext from '@/hooks/useAuthContext';
+import ExpertRenewMembershipModal from './ExpertRenewMembershipModal';
 
 const CustomerSubscriptionList = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuthContext();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [showExpertRenewModal, setShowExpertRenewModal] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [otherReason, setOtherReason] = useState('');
   const [isCancelledConfirmed, setIsCancelledConfirmed] = useState(false);
@@ -38,6 +43,15 @@ const CustomerSubscriptionList = () => {
     queryKey: ['customerSubscriptionStatus'],
     queryFn: getCustomerSubscriptionStatus,
   });
+
+  useEffect(() => {
+    if (searchParams.get('renewed') !== '1') return;
+
+    toast.success('Membership renewed successfully.');
+    queryClient.invalidateQueries(['customerSubscriptionStatus']);
+    queryClient.invalidateQueries([queryKeys.loggedInUser]);
+    router.replace('/portal/customer/subscriptions');
+  }, [searchParams, queryClient, router]);
 
   // Subscription history is no longer needed - removed
 
@@ -67,6 +81,25 @@ const CustomerSubscriptionList = () => {
 
   const subscription = subscriptionResponse?.data?.data;
   const hasSubscription = subscription?.has_subscription;
+  const isSubscriptionActive = Boolean(subscription?.is_active);
+  const renewPageSlug = subscription?.renew_page_slug;
+  const isExpertAssociated = Boolean(subscription?.is_expert_associated);
+  const expertAmount = subscription?.expert_amount;
+  const communitySlug = subscription?.community_slug || subscription?.expert_public_username;
+  const renewFlowContent = subscription?.renew_flow_content;
+  const firstName = user?.profile?.first_name || '';
+
+  const handleRenew = () => {
+    if (isExpertAssociated && renewFlowContent && communitySlug) {
+      setShowExpertRenewModal(true);
+      return;
+    }
+    if (renewPageSlug) {
+      window.location.href = `/subscription/${renewPageSlug}`;
+      return;
+    }
+    toast.error('No renewal plan page is available. Please contact support.');
+  };
 
   const handleCancel = () => {
     setShowCancelModal(true);
@@ -122,10 +155,11 @@ const CustomerSubscriptionList = () => {
       if (e.key === 'Escape') {
         setShowCancelModal(false);
         setShowReactivateModal(false);
+        setShowExpertRenewModal(false);
       }
     };
 
-    if (showCancelModal || showReactivateModal) {
+    if (showCancelModal || showReactivateModal || showExpertRenewModal) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
     }
@@ -134,7 +168,7 @@ const CustomerSubscriptionList = () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [showCancelModal, showReactivateModal]);
+  }, [showCancelModal, showReactivateModal, showExpertRenewModal]);
 
   if (isLoadingSubscription) {
     return (
@@ -174,10 +208,39 @@ const CustomerSubscriptionList = () => {
             You don&apos;t have an active subscription yet.
           </p>
           <button
-            onClick={() => window.location.href = '/subscription'}
+            onClick={handleRenew}
             className="bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
           >
             Choose a Plan
+          </button>
+        </div>
+      ) : !isSubscriptionActive ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
+          <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+            <FiAlertCircle className="h-12 w-12 text-red-500 dark:text-red-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Membership Expired</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-2">
+            Your {subscription?.plan_title || 'subscription'} ended
+            {subscription?.expires_at ? ` on ${formatDate(subscription.expires_at)}` : ''}.
+          </p>
+          <p className="text-gray-500 dark:text-gray-400 mb-2">
+            Renew your membership to continue accessing the platform.
+          </p>
+          {isExpertAssociated && expertAmount != null ? (
+            <p className="text-emerald-700 dark:text-emerald-400 font-semibold text-lg mb-6">
+              Renew for ${expertAmount}/mo
+              {subscription?.expert_name ? ` with ${subscription.expert_name}` : ''}
+            </p>
+          ) : (
+            <div className="mb-6" />
+          )}
+          <button
+            onClick={handleRenew}
+            className="bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center gap-2"
+          >
+            <FiRefreshCw className="h-5 w-5" />
+            Renew Membership
           </button>
         </div>
       ) : (
@@ -225,7 +288,14 @@ const CustomerSubscriptionList = () => {
                   </p>
                 ) : null}
                 {subscription?.auto_renew && subscription?.is_active && !subscription?.is_cancelled && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Auto-renewing • Your membership will continue automatically</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Auto-renews on {formatDate(subscription?.expires_at)} • Cancel anytime before then
+                  </p>
+                )}
+                {!subscription?.auto_renew && subscription?.is_active && !subscription?.is_cancelled && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                    Auto-renew is off for this membership
+                  </p>
                 )}
               </div>
 
@@ -521,6 +591,14 @@ const CustomerSubscriptionList = () => {
           </div>
         </div>
       )}
+
+      <ExpertRenewMembershipModal
+        open={showExpertRenewModal}
+        onClose={() => setShowExpertRenewModal(false)}
+        content={renewFlowContent}
+        firstName={firstName}
+        communitySlug={communitySlug}
+      />
     </div>
   );
 };

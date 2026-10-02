@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useField } from 'formik';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6';
+import useScrollToFirstErrorField from './useScrollToFirstErrorField';
 
 const FormikField = ({
   name: fieldName,
@@ -15,6 +16,7 @@ const FormikField = ({
 }) => {
   const [typeState, setTypeState] = useState(type);
   const [field, meta] = useField(fieldName);
+  const containerRef = useScrollToFirstErrorField(fieldName);
 
   const isErrorField = meta.touched && meta.error;
 
@@ -23,7 +25,7 @@ const FormikField = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={containerRef} className="flex flex-col gap-2">
       {label ? (
         <div className="flex items-center gap-2">
           <label className={`text-sm font-semibold text-gray-700 dark:text-gray-300 ${required ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}>

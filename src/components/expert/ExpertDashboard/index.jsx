@@ -1,4 +1,9 @@
 'use client';
+/**
+ * @deprecated Legacy expert dashboard (LMS /expert/dashboard/).
+ * Teacher home now uses `@/components/expert/HomeDashboard` + GET /api/v2/expert/dashboard/.
+ * Kept for reference only — not mounted by the teacher dashboard page.
+ */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -50,7 +55,7 @@ const ExpertDashboard = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header with Filter */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative">
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white portal-hero rounded-2xl shadow-2xl mb-6 relative">
         {/* Overlay */}
         <div className="absolute inset-0 bg-black opacity-10"></div>
         
@@ -66,7 +71,7 @@ const ExpertDashboard = () => {
                   Dashboard Overview
                 </h1>
               </div>
-              <p className="text-sm sm:text-base text-white/90 ml-[60px] font-medium">
+              <p className="text-sm sm:text-base text-white/90 ml-0 sm:ml-[60px] font-medium">
                 Track your performance and earnings at a glance
               </p>
             </div>

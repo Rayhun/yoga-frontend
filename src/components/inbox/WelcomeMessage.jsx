@@ -15,7 +15,7 @@ const CoachesIcon = ({ className = "w-8 h-8 md:w-10 md:h-10" }) => {
   );
 };
 
-const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach }) => {
+const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach, showDiscover = true }) => {
 
   // Default welcome message
   return (
@@ -38,11 +38,12 @@ const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach }
         {/* Description */}
         <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
           {activeTab === 'circles'
-            ? 'Select a circle to start chatting, or discover new ones to join.'
+            ? (showDiscover ? 'Select a circle to start chatting, or discover new ones to join.' : 'Select a circle to start chatting.')
             : 'Select a coach to chat, or find new coaches to help you'}
         </p>
 
         {/* Action Button */}
+        {((activeTab === 'circles' && showDiscover && onExploreCircles) || (activeTab === 'coaches' && onFindCoach)) && (
         <button
           onClick={() => {
             if (activeTab === 'circles' && onExploreCircles) {
@@ -55,6 +56,7 @@ const WelcomeMessage = ({ activeTab = 'circles', onExploreCircles, onFindCoach }
         >
           {activeTab === 'circles' ? 'Explore Circles' : 'Find a Coach'}
         </button>
+        )}
       </div>
     </div>
   );

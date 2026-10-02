@@ -1,14 +1,20 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { getTrackerInfo, createPeriodDailyGoal, updatePeriodDailyGoal, listPeriodDailyGoals } from '@/services/private/customer/goal';
+import { createPeriodDailyGoal, updatePeriodDailyGoal } from '@/services/private/customer/goal';
+import {
+  useInvalidatePeriodTrackerQueries,
+  usePeriodDailyGoalsQuery,
+  useTrackerInfoQuery,
+} from '@/hooks/usePeriodTrackerQueries';
 import { useRouter } from 'next/navigation';
 import { MdOutlineDateRange } from 'react-icons/md';
 import Calender from '@/components/common/Calender';
 import dayjs from 'dayjs';
+import { toast } from 'react-toastify';
 
 const Section = ({ children, className = "" }) => (
-  <div className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
+  <div className={`bg-white portal-section rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 ${className}`}>
     <div>{children}</div>
   </div>
 );
@@ -444,18 +450,34 @@ const DailyTracker = () => {
   const router = useRouter();
   const [symptomLevels, setSymptomLevels] = useState({});
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
-  const [trackerData, setTrackerData] = useState(null);
-  const [cycleInfo, setCycleInfo] = useState(null);
   const [existingData, setExistingData] = useState(null);
   const [currentMonth] = useState(new Date().toISOString().slice(0, 7)); // Current month in YYYY-MM format
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [notificationTimer, setNotificationTimer] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const { invalidatePeriodDailyGoals, invalidateTrackerInfo } = useInvalidatePeriodTrackerQueries();
+  const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+  const dailyGoalsParams = useMemo(
+    () => ({ start_date: selectedDateStr, end_date: selectedDateStr }),
+    [selectedDateStr]
+  );
+
+  const {
+    data: trackerInfo,
+    isLoading: isLoadingTrackerInfo,
+    isError: isTrackerInfoError,
+  } = useTrackerInfoQuery();
+
+  const trackerData = trackerInfo?.page_info ?? null;
+  const cycleInfo = trackerInfo?.cycle_info ?? null;
+
+  const {
+    data: dailyGoals = [],
+    isFetching: isFetchingDailyGoals,
+    isError: isDailyGoalsError,
+  } = usePeriodDailyGoalsQuery(dailyGoalsParams, { enabled: Boolean(trackerData) });
+
+  const loading = isLoadingTrackerInfo;
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
@@ -465,7 +487,7 @@ const DailyTracker = () => {
   const handleDateChange = (date) => {
     // Validation: Cannot select future dates
     if (dayjs(date).isAfter(dayjs(), 'day')) {
-      showNotification('Cannot select future dates. Please select a date today or in the past.', 'error');
+      toast.error('Cannot select future dates. Please select a date today or in the past.');
       return;
     }
     
@@ -480,145 +502,45 @@ const DailyTracker = () => {
   };
 
 
-  // Show notification function
-  const showNotification = useCallback((message, type = 'success') => {
-    console.log('Showing notification:', { message, type });
-    
-    // Clear any existing timer
-    if (notificationTimer) {
-      clearInterval(notificationTimer);
+  useEffect(() => {
+    if (isTrackerInfoError) {
+      setError('Failed to load tracker configuration');
+      toast.error('Failed to load tracker configuration. Please try again.');
     }
-    
-    setNotification({ message, type, progress: 100 });
-    setIsHovered(false);
-    setIsPaused(false);
-    
-    // Start countdown timer
-    let progress = 100;
-    const timer = setInterval(() => {
-      if (!isPaused) {
-        progress -= 2.5; // 4 seconds = 100% / 40 intervals of 100ms
-        setNotification(prev => prev ? { ...prev, progress } : null);
-        
-        if (progress <= 0) {
-          clearInterval(timer);
-          setNotification(null);
-          setNotificationTimer(null);
-        }
-      }
-    }, 100);
-    
-    setNotificationTimer(timer);
-    
-    // Fallback timeout
-    setTimeout(() => {
-      clearInterval(timer);
-      setNotification(null);
-      setNotificationTimer(null);
-    }, 4000);
-  }, [notificationTimer, isPaused]);
+  }, [isTrackerInfoError]);
 
-  // Fetch tracker configuration only
   useEffect(() => {
-    const fetchTrackerConfig = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch tracker configuration
-        const trackerResponse = await getTrackerInfo();
-        if (trackerResponse.data.status === 'success') {
-          const data = trackerResponse.data.data;
-          setTrackerData(data.page_info);
-          setCycleInfo(data.cycle_info);
-          
-          // Initialize symptom levels
-          const initialSymptomLevels = {};
-          Object.keys(data.page_info.symptoms_level).forEach(symptom => {
-            initialSymptomLevels[symptom] = 1;
-          });
-          setSymptomLevels(initialSymptomLevels);
-        }
-      } catch (err) {
-        console.error('Error fetching tracker config:', err);
-        setError('Failed to load tracker configuration');
-        showNotification('Failed to load tracker configuration. Please try again.', 'error');
-      } finally {
-        setLoading(false);
-      }
+    if (!trackerData || isFetchingDailyGoals) return;
+
+    const buildDefaultSymptomLevels = () => {
+      const initialSymptomLevels = {};
+      Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
+        initialSymptomLevels[symptom] = 1;
+      });
+      return initialSymptomLevels;
     };
 
-    fetchTrackerConfig();
-  }, []); // Only run once on mount
+    if (isDailyGoalsError) {
+      setSymptomLevels(buildDefaultSymptomLevels());
+      setSelectedSymptoms([]);
+      setExistingData(null);
+      return;
+    }
 
-  // Load existing data when selectedDate changes
-  useEffect(() => {
-    if (!trackerData || !selectedDate) return;
+    if (dailyGoals.length > 0) {
+      const existing = dailyGoals[0];
+      setExistingData(existing);
+      setSymptomLevels(existing.symptom_levels || buildDefaultSymptomLevels());
+      setSelectedSymptoms(existing.selected_symptoms || []);
+    } else {
+      setExistingData(null);
+      setSymptomLevels(buildDefaultSymptomLevels());
+      setSelectedSymptoms([]);
+    }
 
-    const loadExistingData = async () => {
-      try {
-        const dateStr = selectedDate.format('YYYY-MM-DD');
-        
-        // Fetch existing data for the selected date
-        const response = await listPeriodDailyGoals({
-          start_date: dateStr,
-          end_date: dateStr
-        });
-
-        if (response.data.status === 'success' && response.data.data && response.data.data.length > 0) {
-          // Found existing data for this date
-          const existing = response.data.data[0];
-          setExistingData(existing);
-          
-          // Populate form with existing data
-          if (existing.symptom_levels) {
-            setSymptomLevels(existing.symptom_levels);
-          } else {
-            // Initialize with default values
-            const initialSymptomLevels = {};
-            Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-              initialSymptomLevels[symptom] = 1;
-            });
-            setSymptomLevels(initialSymptomLevels);
-          }
-          
-          if (existing.selected_symptoms) {
-            setSelectedSymptoms(existing.selected_symptoms);
-          } else {
-            setSelectedSymptoms([]);
-          }
-          
-          setHasUnsavedChanges(false);
-          setSaveStatus('idle');
-        } else {
-          // No existing data for this date, initialize with defaults
-          setExistingData(null);
-          
-          // Initialize symptom levels with default values
-          const initialSymptomLevels = {};
-          Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-            initialSymptomLevels[symptom] = 1;
-          });
-          setSymptomLevels(initialSymptomLevels);
-          setSelectedSymptoms([]);
-          
-          setHasUnsavedChanges(false);
-          setSaveStatus('idle');
-        }
-      } catch (err) {
-        console.error('Error loading existing data:', err);
-        // On error, just initialize with defaults
-        const initialSymptomLevels = {};
-        Object.keys(trackerData.symptoms_level || {}).forEach(symptom => {
-          initialSymptomLevels[symptom] = 1;
-        });
-        setSymptomLevels(initialSymptomLevels);
-        setSelectedSymptoms([]);
-        setExistingData(null);
-      }
-    };
-
-    loadExistingData();
-  }, [selectedDate, trackerData]); // Load when date or tracker config changes
+    setHasUnsavedChanges(false);
+    setSaveStatus('idle');
+  }, [selectedDate, trackerData, dailyGoals, isFetchingDailyGoals, isDailyGoalsError]);
 
   // Handle symptom level changes
   const handleSymptomLevelChange = useCallback((symptom, level) => {
@@ -664,9 +586,7 @@ const DailyTracker = () => {
       }
       
       if (response.data.status === 'success') {
-        const action = existingData ? 'updated' : 'saved';
-        console.log('Success response:', response.data);
-        showNotification(`Daily check-in data ${action} successfully!`, 'success');
+        toast.success('Saved successfully');
         
         // Update existing data with the response data
         if (response.data.data) {
@@ -676,17 +596,10 @@ const DailyTracker = () => {
         setHasUnsavedChanges(false);
         setSaveStatus('saved');
         
-        // Reload tracker data to get updated information
-        try {
-          const trackerResponse = await getTrackerInfo();
-          if (trackerResponse.data.status === 'success') {
-            const data = trackerResponse.data.data;
-            setTrackerData(data.page_info);
-            setCycleInfo(data.cycle_info);
-          }
-        } catch (reloadError) {
-          console.error('Error reloading tracker data:', reloadError);
-        }
+        await Promise.all([
+          invalidatePeriodDailyGoals(dailyGoalsParams),
+          invalidateTrackerInfo(),
+        ]);
         
         // Reset save status after 3 seconds
         setTimeout(() => setSaveStatus('idle'), 3000);
@@ -696,14 +609,24 @@ const DailyTracker = () => {
     } catch (err) {
       console.error('Error saving tracker data:', err);
       setSaveStatus('error');
-      showNotification('Failed to save tracker data. Please try again.', 'error');
+      toast.error('Something went wrong. Please try again.');
       
       // Reset error status after 5 seconds
       setTimeout(() => setSaveStatus('idle'), 5000);
     } finally {
       setSaving(false);
     }
-  }, [symptomLevels, selectedSymptoms, trackerData, existingData, showNotification, selectedDate]);
+  }, [
+    symptomLevels,
+    selectedSymptoms,
+    trackerData,
+    cycleInfo,
+    existingData,
+    selectedDate,
+    dailyGoalsParams,
+    invalidatePeriodDailyGoals,
+    invalidateTrackerInfo,
+  ]);
 
   // Loading state
   if (loading) {
@@ -968,152 +891,6 @@ const DailyTracker = () => {
           <p className="text-gray-600 text-sm">Get personalized insights and recommendations based on your daily tracking data.</p>
         </div>
       </div>
-
-      {/* Interactive Notification Toast */}
-      {notification && (
-        <div 
-          className={`fixed top-4 right-4 z-[9999] transform transition-all duration-500 ease-out cursor-pointer group ${
-            isHovered ? 'scale-105 shadow-2xl' : 'scale-100'
-          } ${
-            notification.type === 'success' 
-              ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500' 
-              : 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500'
-          }`}
-          style={{
-            position: 'fixed',
-            top: '16px',
-            right: '16px',
-            zIndex: 9999,
-            minWidth: '320px',
-            maxWidth: '420px',
-            borderRadius: '16px',
-            boxShadow: isHovered ? `
-              0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 0 0 1px rgba(255, 255, 255, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2)
-            ` : `
-              0 20px 25px -5px rgba(0, 0, 0, 0.1),
-              0 10px 10px -5px rgba(0, 0, 0, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `,
-            border: `1px solid ${notification.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-            backdropFilter: 'blur(10px)',
-          }}
-          onMouseEnter={() => {
-            setIsHovered(true);
-            setIsPaused(true);
-          }}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setIsPaused(false);
-          }}
-          onClick={() => {
-            // Click to dismiss
-            if (notificationTimer) {
-              clearInterval(notificationTimer);
-              setNotificationTimer(null);
-            }
-            setNotification(null);
-          }}
-        >
-          {/* Interactive Timer Bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-black bg-opacity-20 rounded-t-2xl overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-100 ease-linear ${
-                isPaused ? 'opacity-50' : 'opacity-100'
-              } ${
-                notification.type === 'success' 
-                  ? 'bg-gradient-to-r from-green-300 to-green-400' 
-                  : 'bg-gradient-to-r from-red-300 to-red-400'
-              }`}
-              style={{ width: `${notification.progress}%` }}
-            />
-            {isPaused && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              </div>
-            )}
-          </div>
-          
-          {/* Content */}
-          <div className="px-6 py-4 pt-5 flex items-center gap-4">
-            {/* Animated Icon */}
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
-              isHovered ? 'scale-110 rotate-12' : 'scale-100 rotate-0'
-            } ${
-              notification.type === 'success' 
-                ? 'bg-white bg-opacity-20 shadow-green-200 group-hover:bg-opacity-30' 
-                : 'bg-white bg-opacity-20 shadow-red-200 group-hover:bg-opacity-30'
-            }`}>
-              {notification.type === 'success' ? (
-                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
-                  isHovered ? 'scale-110' : 'scale-100'
-                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className={`w-5 h-5 text-white drop-shadow-sm transition-all duration-300 ${
-                  isHovered ? 'scale-110' : 'scale-100'
-                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-            
-            {/* Message with hover effects */}
-            <div className="flex-1">
-              <p className={`text-white font-semibold text-sm leading-tight drop-shadow-sm transition-all duration-300 ${
-                isHovered ? 'text-base' : 'text-sm'
-              }`}>
-                {notification.message}
-              </p>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-white text-xs opacity-80">
-                  {isPaused ? 'Paused' : `${Math.round(notification.progress / 25)}s remaining`}
-                </p>
-                {isPaused && (
-                  <div className="flex gap-1">
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Interactive Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (notificationTimer) {
-                  clearInterval(notificationTimer);
-                  setNotificationTimer(null);
-                }
-                setNotification(null);
-              }}
-              className={`w-8 h-8 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 flex items-center justify-center transition-all duration-200 ${
-                isHovered ? 'scale-110 bg-opacity-30' : 'scale-100'
-              } hover:scale-125 hover:rotate-90`}
-            >
-              <svg className="w-4 h-4 text-white transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-            </button>
-          </div>
-          
-          {/* Animated Bottom Glow */}
-          <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl transition-all duration-300 ${
-            notification.type === 'success' 
-              ? 'bg-gradient-to-r from-transparent via-green-300 to-transparent' 
-              : 'bg-gradient-to-r from-transparent via-red-300 to-transparent'
-          } ${isHovered ? 'opacity-80' : 'opacity-50'}`} />
-          
-          {/* Hover Indicator */}
-          {isHovered && (
-            <div className="absolute inset-0 rounded-2xl border-2 border-white border-opacity-30 pointer-events-none animate-pulse" />
-          )}
-        </div>
-      )}
     </div>
   );
 };

@@ -1,23 +1,29 @@
 'use client';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
+
+import FormikMultiOptionsModalField from '@/components/common/form/formik/FormikMultiOptionsModalField';
 import useLMSCoachingAreas from '@/hooks/useLMSCoachingArea';
 
 const CoachingAreasField = ({
   name = 'coaching_areas',
   label = 'Coaching Areas',
-  placeholder = 'Coaching Areas',
+  placeholder = 'Select coaching areas (max 10)',
   ...props
 }) => {
-  const { options: tagsOptions } = useLMSCoachingAreas('Coaching Areas');
+  const { isLoading, isError, options } = useLMSCoachingAreas('Coaching Areas');
 
   return (
-    <FormikMultiSelect
+    <FormikMultiOptionsModalField
       {...props}
       name={name}
       label={label}
-      placeholder={placeholder}
-      options={tagsOptions}
+      triggerPlaceholder={placeholder}
+      options={options}
+      loading={isLoading}
+      loadError={isError}
       max={10}
+      chipKind="coaching_area"
+      modalTitle="Coaching areas"
+      searchPlaceholder="Search coaching areas…"
     />
   );
 };

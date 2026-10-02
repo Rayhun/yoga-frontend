@@ -1,7 +1,7 @@
 import { ExpertProvider } from '@/context/ExpertProfileContext';
 
 export const metadata = {
-  title: 'Upload Programs',
+  title: 'Payment Setup',
 };
 
 const Layout = ({ children }) => {

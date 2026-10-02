@@ -124,7 +124,7 @@ const Transactions = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-6 rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white portal-hero rounded-2xl shadow-2xl mb-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
@@ -140,27 +140,27 @@ const Transactions = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="rounded-xl border border-stroke bg-white shadow-lg p-6 dark:border-strokedark dark:bg-boxdark">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="rounded-xl border border-stroke bg-white p-4 shadow-lg dark:border-strokedark dark:bg-boxdark sm:p-6">
+        <div className="flex flex-col gap-4 md:flex-row">
           {/* Search */}
-          <div className="flex-1 relative">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <div className="relative flex-1">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400" size={20} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by user email or name..."
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-stroke bg-white focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark"
+              className="w-full rounded-xl border border-stroke bg-white py-3 pl-10 pr-4 focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark"
             />
           </div>
 
           {/* Status Filter */}
-          <div className="relative">
-            <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <div className="relative w-full md:w-auto">
+            <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400" size={20} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-10 pr-4 py-3 rounded-xl border border-stroke bg-white focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark appearance-none min-w-[180px]"
+              className="w-full appearance-none rounded-xl border border-stroke bg-white py-3 pl-10 pr-4 focus:border-primary focus:outline-none dark:border-strokedark dark:bg-boxdark md:min-w-[180px]"
             >
               <option value="">All Status</option>
               <option value="Pending">Pending</option>
@@ -184,7 +184,59 @@ const Transactions = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            {/* Mobile card list */}
+            <div className="divide-y divide-gray-200 dark:divide-gray-700 md:hidden">
+              {filteredTransactions.map((transaction) => (
+                <button
+                  key={transaction.id}
+                  type="button"
+                  onClick={() => handleTransactionClick(transaction)}
+                  className="w-full p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                        {transaction.user_name || 'N/A'}
+                      </div>
+                      <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+                        {transaction.user_email || 'N/A'}
+                      </div>
+                    </div>
+                    {getStatusBadge(transaction.status)}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Subscription</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(transaction.user_amount)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Commission</p>
+                      <p className="font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(transaction.commission_amount)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Month</p>
+                      <p className="text-gray-900 dark:text-white">
+                        {transaction.month_number ? `Month ${transaction.month_number}` : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Created</p>
+                      <p className="text-gray-900 dark:text-white">
+                        {formatDate(transaction.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden overflow-x-auto md:block">
             <table className="w-full">
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
                 <tr>
@@ -282,7 +334,8 @@ const Transactions = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
 

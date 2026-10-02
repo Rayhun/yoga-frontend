@@ -11,7 +11,7 @@ import FormikField from '@/components/common/form/formik/FormikField';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import { addNewExpert, updateExistingExpert } from '@/services/private/lms/expert';
 import { toastApiError } from '@/utils/helpers';
-import { CategoriesField, TagsField } from '@/components/lms/general/fields';
+import { CategoriesField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
 import { ONE_MB } from '@/utils/general';
 import queryKeys from '@/utils/query-keys';
 
@@ -96,8 +96,10 @@ const ExpertForm = ({ selected }) => {
             </div>
             <FormikField name="title" label="Title" placeholder="Title" required />
             <FormikField name="description" label="Description" placeholder="Description" rows={5} required />
-            <CategoriesField name="categories" label="Categories" placeholder="Categories" required />
-            <TagsField name="tags" label="Tags" placeholder="Tags" required />
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+              <CategoriesField name="categories" label="Categories" placeholder="Categories" required />
+              <ExpertCatalogTagsField name="tags" label="Tags" placeholder="Tags" required />
+            </div>
             <FormikDropzone
               name="file"
               label="File"

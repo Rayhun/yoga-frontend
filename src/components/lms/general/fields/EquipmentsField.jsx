@@ -1,15 +1,28 @@
 'use client';
-import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
-import { ACCESS_SETTING_OPTIONS } from '@/utils/options';
 
-const EquipmentsField = ({ name = 'equipments', label = 'Equipments', placeholder = 'Equipments' }) => {
+import { useMemo } from 'react';
+import { SESSION_EQUIPMENT_OPTIONS } from '@/utils/options';
+import FormikMultiOptionsModalField from '@/components/common/form/formik/FormikMultiOptionsModalField';
+
+const EquipmentsField = ({
+  name = 'equipments',
+  label = 'Equipments',
+  placeholder = 'Select equipment',
+  modalTitle = 'Equipment',
+  ...props
+}) => {
+  const options = useMemo(() => SESSION_EQUIPMENT_OPTIONS, []);
+
   return (
-    <FormikSubmittableField
+    <FormikMultiOptionsModalField
       {...props}
       name={name}
       label={label}
-      placeholder={placeholder}
-      options={ACCESS_SETTING_OPTIONS}
+      options={options}
+      chipKind="selection"
+      modalTitle={modalTitle}
+      triggerPlaceholder={placeholder}
+      searchPlaceholder="Search equipment…"
     />
   );
 };
