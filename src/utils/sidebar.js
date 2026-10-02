@@ -582,6 +582,22 @@ const STAFF = [
   },
 ];
 
+// Approved creators (QTE / Institution) get a focused menu: only these items, in the order the
+// role's own menu defines them. Help & Support and Logout are footer actions rendered by the
+// sidebar component, not menu items. Anything not listed here (including items added later) stays
+// hidden for them. "Payments" is the Expert payment-setup page (QTEs are Experts); Institution menus
+// have no such item, so it only applies to QTEs.
+const APPROVED_CREATOR_MENU_LABELS = new Set([
+  'Dashboard',
+  'Certification Programs',
+  'Grading Queue',
+  'My Circle',
+  'Payments',
+]);
+
+const restrictToApprovedCreatorMenu = menuItems =>
+  menuItems.filter(item => APPROVED_CREATOR_MENU_LABELS.has(item.label));
+
 const getTeacherSidebarMenuItems = (
   is_profile_complete,
   has_event_or_consult,
@@ -593,7 +609,7 @@ const getTeacherSidebarMenuItems = (
     ? '/portal/inbox'
     : '/portal/teacher/community/create';
 
-  return [
+  const menuItems = [
     {
       Icon: FiTarget,
       label: 'Dashboard',
@@ -695,7 +711,16 @@ const getTeacherSidebarMenuItems = (
       disabled: !is_profile_complete || !stripe_onboarded,
     },
   ];
-}
+
+  // Regular Experts keep the full menu exactly as built above; only an approved QTE is narrowed.
+  if (!isApprovedQTE) return menuItems;
+
+  // Payments is where PayPal/Stripe onboarding happens, so for QTEs it can't wait on the very flag
+  // (`stripe_onboarded`) that the page sets — only an incomplete profile disables it.
+  return restrictToApprovedCreatorMenu(menuItems).map(item =>
+    item.label === 'Payments' ? { ...item, disabled: !is_profile_complete } : item
+  );
+};
 
 const AFFILIATE = [
   {
@@ -752,6 +777,27 @@ const INSTITUTION = [
   },
 ];
 
-const SIDEBAR = { ADMIN, STAFF, CUSTOMER, getTeacherSidebarMenuItems, AFFILIATE, INSTITUTION };
+const INSTITUTION_MY_CIRCLE = {
+  Icon: FaInbox,
+  label: 'My Circle',
+  href: '/portal/inbox',
+  isActive: pathname => pathname === '/portal/inbox',
+  disabled: !isDevelopmentEnvironment,
+};
+
+// Until the institution's application is approved, "My Application" is the only way back to that
+// page, so the full INSTITUTION menu stays as it is; approval narrows it to the creator menu.
+const getInstitutionSidebarMenuItems = isApprovedInstitution =>
+  isApprovedInstitution ? restrictToApprovedCreatorMenu([...INSTITUTION, INSTITUTION_MY_CIRCLE]) : INSTITUTION;
+
+const SIDEBAR = {
+  ADMIN,
+  STAFF,
+  CUSTOMER,
+  getTeacherSidebarMenuItems,
+  AFFILIATE,
+  INSTITUTION,
+  getInstitutionSidebarMenuItems,
+};
 
 export default SIDEBAR;

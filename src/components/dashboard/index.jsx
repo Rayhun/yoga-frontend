@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import ECommerce from '@/components/dashboard/E-commerce/E-commerce';
 import ExpertQuickSteps from '@/components/expert/ExpertQuickSteps';
 import useAuthContext from '@/hooks/useAuthContext';
+import useApprovedQTE from '@/hooks/useApprovedQTE';
 
 const ClientPortalPage = () => {
   const { user } = useAuthContext();
@@ -12,10 +13,13 @@ const ClientPortalPage = () => {
   const isProfileComplete = user?.profile?.is_profile_complete ?? false;
   const hasEventOrConsult = user?.profile?.has_event_or_consult ?? false;
   const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
+  // Approved QTEs don't use Guided Experiences (hidden from their sidebar), so they don't need one
+  // to reach the dashboard. Only looked up for Teachers — this page serves every role.
+  const { isApprovedQTE } = useApprovedQTE({ enabled: userRole === 'Teacher' });
 
   useEffect(() => {
     // Redirect teachers to the new home dashboard once onboarding is complete
-    if (userRole === 'Teacher' && isProfileComplete && hasEventOrConsult && stripeOnboarded) {
+    if (userRole === 'Teacher' && isProfileComplete && (hasEventOrConsult || isApprovedQTE) && stripeOnboarded) {
       router.replace('/portal/teacher/dashboard');
     }
 
@@ -47,7 +51,7 @@ const ClientPortalPage = () => {
     // Business owners and employees can access the regular portal
     // Business owners can also access the Business Dashboard via sidebar
     // Business employees have the same experience as individual users
-  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, user?.isBusinessOwner, router]);
+  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, isApprovedQTE, user?.isBusinessOwner, router]);
 
   const renderDashboard = () => {
     switch (userRole) {

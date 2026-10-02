@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 import useTable from '@/hooks/useTable';
 import { PageHeader } from '@/components/common/page';
-import { BasicTable } from '@/components/common/table';
+import { BasicTable, TableActions } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 import useConfirm from '@/hooks/useConfirm';
 import { toastApiError, formatSignupDate } from '@/utils/helpers';
@@ -30,6 +30,21 @@ const TABS = [
 ];
 
 const STATUS_FILTERS = ['submitted', 'under_review', 'approved', 'rejected'];
+
+// The admin serializer returns first_name and last_name separately; the Name column shows both.
+const getFullName = application =>
+  [application?.first_name, application?.last_name]
+    .map(part => (typeof part === 'string' ? part.trim() : ''))
+    .filter(Boolean)
+    .join(' ');
+
+// Column widths (md+, where the table uses a fixed layout). The Action column holds up to six
+// icons with dividers, so it gets a wide share and the low-information columns between Active
+// Status and Status (Profile Completed, Coaching, Signed Up, Country) are narrowed to make room;
+// the remaining columns split what's left.
+const QTE_COLUMN_WIDTHS = { profile: 'md:w-[8%]', coaching: 'md:w-[7%]', signedUp: 'md:w-[8.5%]', country: 'md:w-[8%]', action: 'md:w-[19%]' };
+const INSTITUTION_COLUMN_WIDTHS = { signedUp: 'md:w-[11%]', country: 'md:w-[10%]', action: 'md:w-[18%]' };
+const widthMeta = tableCellClassName => ({ tableCellClassName });
 
 const ApplicationReviewTable = () => {
   const router = useRouter();
@@ -130,7 +145,7 @@ const ApplicationReviewTable = () => {
     () =>
       isQTE
         ? [
-            { header: 'Name', accessorKey: 'first_name' },
+            { header: 'Name', id: 'name', accessorFn: getFullName },
             { header: 'Email', accessorKey: 'email' },
             {
               header: 'Active Status',
@@ -141,18 +156,21 @@ const ApplicationReviewTable = () => {
               header: 'Profile Completed',
               accessorKey: 'is_profile_complete',
               cell: ({ row }) => (row?.original?.is_profile_complete ? 'Yes' : 'No'),
+              meta: widthMeta(QTE_COLUMN_WIDTHS.profile),
             },
             {
               header: 'Coaching',
               accessorKey: 'has_event_or_consult',
               cell: ({ row }) => (row?.original?.has_event_or_consult ? 'Yes' : 'No'),
+              meta: widthMeta(QTE_COLUMN_WIDTHS.coaching),
             },
             {
               header: 'Signed Up',
               accessorKey: 'signed_up_at',
               cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
+              meta: widthMeta(QTE_COLUMN_WIDTHS.signedUp),
             },
-            { header: 'Country', accessorKey: 'country' },
+            { header: 'Country', accessorKey: 'country', meta: widthMeta(QTE_COLUMN_WIDTHS.country) },
             { header: 'Status', accessorKey: 'application_status' },
           ]
         : [
@@ -167,8 +185,9 @@ const ApplicationReviewTable = () => {
               header: 'Signed Up',
               accessorKey: 'signed_up_at',
               cell: ({ row }) => formatSignupDate(row?.original?.signed_up_at),
+              meta: widthMeta(INSTITUTION_COLUMN_WIDTHS.signedUp),
             },
-            { header: 'Country', accessorKey: 'country' },
+            { header: 'Country', accessorKey: 'country', meta: widthMeta(INSTITUTION_COLUMN_WIDTHS.country) },
             { header: 'Status', accessorKey: 'application_status' },
           ],
     [isQTE]
@@ -236,12 +255,26 @@ const ApplicationReviewTable = () => {
     [isQTE, router, handleToggleActive, handleApprove, handleOpenReject, handleDelete]
   );
 
-  const { isLoading, columns, data } = useTable({
+  // The Action column is added here (not by useTable) so it can carry its own width.
+  const { isLoading, columns: dataColumns, data } = useTable({
     columns: tableColumns,
     queryFn: () => getApplicationsList({ type: activeTab.key, status: statusFilter }),
     queryKey: [queryKeys.certificationApplicationsList, activeTab.key, statusFilter],
-    rowActions,
+    removeActionColumn: true,
   });
+
+  const columns = useMemo(
+    () => [
+      ...dataColumns,
+      {
+        id: 'action',
+        header: 'Action',
+        meta: widthMeta((isQTE ? QTE_COLUMN_WIDTHS : INSTITUTION_COLUMN_WIDTHS).action),
+        cell: ({ row }) => <TableActions row={row} actions={rowActions} />,
+      },
+    ],
+    [dataColumns, isQTE, rowActions]
+  );
 
   return (
     <React.Fragment>

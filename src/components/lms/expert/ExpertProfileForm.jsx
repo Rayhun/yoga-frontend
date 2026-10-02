@@ -15,7 +15,7 @@ import FormikRichTextEditor from '@/components/common/form/formik/FormikRichText
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import FormikTermsAgreement from '@/components/common/form/formik/FormikTermsAgreement';
 import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
 import {
   EXPERT_PROFILE_CATALOG_FIELDS,
@@ -812,7 +812,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
 
                       <div className="border-t border-gray-200 dark:border-gray-700" />
 
-                      <FormikCheckbox name="agreement_accepted" label="I accept the creator agreement" />
+                      <FormikTermsAgreement name="agreement_accepted" />
                     </>
                   )}
                 </div>

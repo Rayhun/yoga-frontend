@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FiUser, FiGlobe } from 'react-icons/fi';
 import FormikField from '@/components/common/form/formik/FormikField';
-import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import FormikTermsAgreement from '@/components/common/form/formik/FormikTermsAgreement';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import CertificationsField from '@/components/lms/general/fields/CertificationsField';
 import Button from '@/components/common/Button';
@@ -179,7 +179,7 @@ const QTEApplyForm = () => {
             supportedFilesText="pdf, jpg, jpeg and png files are supported."
           />
 
-          <FormikCheckbox name="agreement_accepted" label="I accept the creator agreement" />
+          <FormikTermsAgreement name="agreement_accepted" />
 
           <Button
             type="submit"

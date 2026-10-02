@@ -48,11 +48,11 @@ export const TableActions = ({ row, actions = [] }) => {
 
   const hasGroups = visibleActions.some(action => action.group);
 
-  // Grouped rows (currently only Certification's up-to-6-icon action column) use a tighter,
-  // uniform gap and slightly smaller icons so the divider doesn't push the row into
-  // horizontal-scroll territory; ungrouped rows keep the original space-x-3.5 / size-20 look
-  // untouched (this branch is never taken when no action declares `group`).
-  const containerClass = hasGroups ? 'flex items-center gap-1.5' : 'flex items-center space-x-3.5';
+  // Grouped rows (currently only Certification's up-to-6-icon action column) use a uniform gap
+  // and slightly smaller icons so the dividers fit; the table gives that column extra width (see
+  // ApplicationReviewTable) so the icons aren't cramped. Ungrouped rows keep the original
+  // space-x-3.5 / size-20 look untouched (this branch is never taken when no action declares `group`).
+  const containerClass = hasGroups ? 'flex items-center gap-3' : 'flex items-center space-x-3.5';
   const iconSize = hasGroups ? 17 : 20;
 
   const items = [];

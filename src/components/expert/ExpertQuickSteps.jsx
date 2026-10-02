@@ -2,8 +2,9 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FiUser, FiCheckCircle, FiCreditCard } from 'react-icons/fi';
-import { MdOutlineEventNote } from 'react-icons/md';
+import { MdOutlineEventNote, MdVerified } from 'react-icons/md';
 import useAuthContext from '@/hooks/useAuthContext';
+import useApprovedQTE, { NEW_CERTIFICATION_PROGRAM_HREF } from '@/hooks/useApprovedQTE';
 const ExpertQuickSteps = () => {
   const { user } = useAuthContext();
   const router = useRouter();
@@ -11,6 +12,11 @@ const ExpertQuickSteps = () => {
   const isProfileComplete = user?.profile?.is_profile_complete ?? false;
   const hasEventOrConsult = user?.profile?.has_event_or_consult ?? false;
   const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
+
+  // Approved QTEs don't use Guided Experiences (hidden from their sidebar), so for them the "has an
+  // event" requirement counts as met and the events step gives way to creating a Certification Program.
+  const { isApprovedQTE, isLoading: isQTEStatusLoading, needsFirstProgram } = useApprovedQTE({ withPrograms: true });
+  const hasRequiredEvent = isApprovedQTE || hasEventOrConsult;
 
   const handlePayPalSetup = () => {
     router.push('/portal/teacher/payments');
@@ -49,7 +55,20 @@ const ExpertQuickSteps = () => {
       buttonText: hasEventOrConsult ? 'Manage Events' : 'Create Event',
       color: hasEventOrConsult ? 'text-green-600' : 'text-purple-600',
       bgColor: hasEventOrConsult ? 'bg-green-50' : 'bg-purple-50',
-      showWhen: !hasEventOrConsult, // Only show when has_event_or_consult is false
+      // Only show when has_event_or_consult is false (and, once known, the Expert isn't an approved QTE)
+      showWhen: !hasRequiredEvent && !isQTEStatusLoading,
+    },
+    {
+      id: 'certification-program',
+      title: 'Create Your First Certification Program',
+      description: 'Build your curriculum, set your pricing and design your certificate.',
+      icon: MdVerified,
+      completed: false,
+      action: () => router.push(NEW_CERTIFICATION_PROGRAM_HREF),
+      buttonText: 'Create Certification Program',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      showWhen: needsFirstProgram, // Approved QTEs only, until they have a program
     },
     // {
     //   id: 'consultations',
@@ -68,7 +87,7 @@ const ExpertQuickSteps = () => {
   // Filter steps based on showWhen condition
   const steps = allSteps.filter(step => step.showWhen !== false);
 
-  const allStepsComplete = isProfileComplete && hasEventOrConsult && stripeOnboarded;
+  const allStepsComplete = isProfileComplete && hasRequiredEvent && stripeOnboarded;
 
   return (
     <div className="bg-gray-50 py-4 dark:bg-gray-900 sm:py-8">
@@ -81,7 +100,7 @@ const ExpertQuickSteps = () => {
           <p className="text-lg text-gray-600 dark:text-gray-400">
             {allStepsComplete 
               ? "🎉 Congratulations! You're all set up and ready to start teaching."
-              : hasEventOrConsult
+              : hasRequiredEvent
               ? "Complete your profile to unlock your dashboard and start teaching."
               : "Complete these quick steps to get started and unlock your dashboard."
             }

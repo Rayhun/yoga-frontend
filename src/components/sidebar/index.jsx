@@ -9,7 +9,7 @@ import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
 import queryKeys from '@/utils/query-keys';
-import { getMyQTEApplication } from '@/services/private/certification/application';
+import { getMyInstitutionApplication, getMyQTEApplication } from '@/services/private/certification/application';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
@@ -105,6 +105,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   });
   const isApprovedQTE = qteApplication?.creator_type === 'qte' && qteApplication?.application_status === 'approved';
 
+  // Same check (and shared queryKey) as the institution portal's layout guard.
+  const { data: institutionApplication } = useQuery({
+    queryKey: [queryKeys.myInstitutionApplication],
+    queryFn: getMyInstitutionApplication,
+    select: res => res?.data,
+    retry: false,
+    enabled: userRole === USER_ROLE.INSTITUTION,
+  });
+  const isApprovedInstitution =
+    institutionApplication?.creator_type === 'institution' && institutionApplication?.application_status === 'approved';
+
+  // Approved creators get the focused sidebar (see SIDEBAR's approved-creator menu), which includes
+  // Help & Support.
+  const isApprovedCreator =
+    (userRole === USER_ROLE.TEACHER && isApprovedQTE) || (userRole === USER_ROLE.INSTITUTION && isApprovedInstitution);
+
   const customerV2Menu = useMemo(() => {
     if (!usesCustomerV2Sidebar) return null;
     return buildCustomerV2SidebarMenu(customerV2NavigationData, {
@@ -125,7 +141,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       );
     }
     if (userRole === USER_ROLE.AFFILIATE) return SIDEBAR.AFFILIATE;
-    if (userRole === USER_ROLE.INSTITUTION) return SIDEBAR.INSTITUTION;
+    if (userRole === USER_ROLE.INSTITUTION) return SIDEBAR.getInstitutionSidebarMenuItems(isApprovedInstitution);
     if (customerV2Menu) return customerV2Menu.mainItems;
     return SIDEBAR.CUSTOMER;
   }, [
@@ -134,6 +150,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     has_event_or_consult,
     stripe_onboarded,
     isApprovedQTE,
+    isApprovedInstitution,
     is_chat_group,
     customerV2Menu,
   ]);
@@ -541,8 +558,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </ul>
           ) : null}
 
-          {/* Legacy customer footer (v1 fallback) */}
-          {isCustomer && !hideLegacyCustomerFooter && (
+          {/* Help & Support: legacy customer footer (v1 fallback) and approved QTE / Institution creators */}
+          {(isCustomer || isApprovedCreator) && !hideLegacyCustomerFooter && (
             <li className="list-none mt-auto">
               <Link
                 className="group relative flex items-center gap-2.5 rounded-xl px-4 py-3 font-medium duration-300 ease-in-out cursor-pointer transition-all text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 hover:shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:scale-[1.02] hover:-translate-x-1 border-l-2 border-transparent hover:border-emerald-400"

@@ -9,7 +9,7 @@ import { FiMail, FiLock, FiUser, FiGlobe, FiHash } from 'react-icons/fi';
 import useConfirm from '@/hooks/useConfirm';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikEmailField from '@/components/common/form/formik/FormikEmailField';
-import FormikCheckbox from '@/components/common/form/formik/FormikCheckbox';
+import FormikTermsAgreement from '@/components/common/form/formik/FormikTermsAgreement';
 import FormikCountrySelect from '@/components/common/form/formik/FormikCountrySelect';
 import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 import Button from '@/components/common/Button';
@@ -175,7 +175,7 @@ const InstitutionApplyForm = () => {
             supportedFilesText="pdf, jpg, jpeg and png files are supported."
           />
 
-          <FormikCheckbox name="terms" label="I accept the creator agreement" />
+          <FormikTermsAgreement name="terms" />
 
           <Button type="submit" disabled={isSubmitting || isUploading} isLoading={isSubmitting || isUploading}>
             {isUploading ? 'Uploading document…' : 'Apply as Institution'}
