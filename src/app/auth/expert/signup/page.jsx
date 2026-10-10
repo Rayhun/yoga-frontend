@@ -2,12 +2,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaRegCheckCircle } from 'react-icons/fa';
 import SignupForm from '@/components/auth/SignupForm';
+import { QTE_PANEL_COPY, isQteSignup } from '@/components/auth/signupPanelCopy';
 
 export const metadata = {
   title: 'Expert Signup',
 };
 
-const Page = () => {
+const EXPERT_PANEL_COPY = {
+  headlineAccent: 'Grow Your Practice.',
+  headlineRest: 'Empower Her Midlife.',
+  subheadline: "Sign up for free to start guiding mid-age women through life's transitions – and turn your passion into profit.",
+  pills: ['Expand Your Reach', 'Earn & Grow', 'Collaborate & Shine'],
+  footer: 'Secure & Private',
+};
+
+const Page = ({ searchParams }) => {
+  const copy = isQteSignup(searchParams) ? QTE_PANEL_COPY : EXPERT_PANEL_COPY;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
       {/* Background decorative elements */}
@@ -41,21 +52,17 @@ const Page = () => {
 
               <div className="space-y-6 animate-slideInLeft">
                 <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                  <span className="text-orange-600">Grow Your Practice.</span>{' '}
-                  Empower Her Midlife.
+                  <span className="text-orange-600">{copy.headlineAccent}</span>{' '}
+                  {copy.headlineRest}
                 </h1>
                 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-                  Sign up for free to start guiding mid-age women through life&apos;s transitions – and turn your passion into profit.
+                  {copy.subheadline}
                 </p>
 
                 <div className="mt-8 w-full max-w-md mx-auto">
                   <div className="space-y-3">
-                    {[
-                      'Expand Your Reach',
-                      'Earn & Grow',
-                      'Collaborate & Shine',
-                    ].map((item, index) => (
+                    {copy.pills.map((item, index) => (
                       <div 
                         key={item} 
                         className="flex items-center gap-3 p-3 rounded-lg bg-green-50/50 hover:bg-green-50 transition-colors duration-200 group"
@@ -73,7 +80,7 @@ const Page = () => {
                 <div className="flex items-center justify-center space-x-4 mt-8">
                   <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm">Secure & Private</span>
+                    <span className="text-sm">{copy.footer}</span>
                   </div>
                   {/* <div className="flex items-center space-x-2 text-gray-600">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-300"></div>
