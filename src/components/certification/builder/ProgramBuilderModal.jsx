@@ -141,6 +141,11 @@ const pickCertificateSetup = program => ({
   // Institution.legal_organization_name, see ProgramDetailSerializer.get_creator_display_name)
   // only when nothing's been explicitly saved for this field yet; stays freely editable either way.
   primary_issuer_name: program?.certificate_setting?.primary_issuer_name ?? program?.creator_display_name ?? '',
+  // Printed verbatim on the learner's certificate document (Certificate Setup section).
+  certificate_type: program?.certificate_setting?.certificate_type ?? '',
+  signatory_name: program?.certificate_setting?.signatory_name ?? '',
+  signatory_title: program?.certificate_setting?.signatory_title ?? '',
+  issuer_logo: program?.certificate_setting?.issuer_logo ?? '',
 });
 
 /**

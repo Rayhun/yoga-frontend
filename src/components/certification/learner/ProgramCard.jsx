@@ -1,4 +1,6 @@
+'use client';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { FaPlay, FaBookOpen, FaCheckCircle, FaAward } from 'react-icons/fa';
 
 const CREATOR_TYPE_LABELS = {
@@ -23,6 +25,7 @@ const ENROLL_BADGES = {
 const ACCESS_ENDED_STATUSES = ['Expired', 'Refunded'];
 
 const ProgramCard = ({ program, onClick }) => {
+  const router = useRouter();
   const isEnrolled = program?.is_enrolled || program?.enroll_status;
   const isFull = program.seat_limit !== null && program.seats_remaining === 0;
   const isFree = program.payment_type === 'free';
@@ -111,9 +114,12 @@ const ProgramCard = ({ program, onClick }) => {
 
         {/* Action Button - Always at bottom */}
         {isComplete ? (
-          <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 flex items-center justify-center gap-2">
-            <FaCheckCircle size={14} /> Completed
-          </div>
+          <button
+            onClick={e => { e.stopPropagation(); router.push(`/portal/customer/certification/${program.id}/certificate`); }}
+            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all flex items-center justify-center gap-2"
+          >
+            <FaCheckCircle size={14} /> View Certificate
+          </button>
         ) : isAccessEnded ? (
           <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-center text-gray-500 border-2 border-gray-200">
             Access ended

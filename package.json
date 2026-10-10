@@ -28,6 +28,7 @@
     "lodash": "^4.17.21",
     "next": "14.0.4",
     "nouislider": "^15.7.1",
+    "qrcode.react": "^4.2.0",
     "quill": "^2.0.3",
     "react": "^18",
     "react-apexcharts": "^1.7.0",
