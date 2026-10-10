@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import queryKeys from '@/utils/query-keys';
 import PageLoader from '@/components/common/loader/PageLoader';
 import { MdOutlineArrowBack, MdOutlineRemoveRedEye } from 'react-icons/md';
-import Button from '@/components/common/Button';
 import FormLayoutWrapper from '@/components/common/form/FormLayoutWrapper';
 import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import {
@@ -16,16 +15,16 @@ import {
   updateProgramBasics,
   updateProgramCertificateSetup,
   updateProgramDelivery,
-  updateProgramModules,
   updateProgramPricing,
 } from '@/services/private/certification/program';
 import ProgramBasicsSection from '@/components/certification/builder/sections/ProgramBasicsSection';
+import { FORMAT_FOLD_INDEX } from '@/components/certification/builder/sections/basicsFolds';
 import DeliveryFormatSection from '@/components/certification/builder/sections/DeliveryFormatSection';
 import CurriculumBuilderSection from '@/components/certification/builder/sections/CurriculumBuilderSection';
 import PricingSection from '@/components/certification/builder/sections/PricingSection';
 import CertificateSetupSection from '@/components/certification/builder/sections/CertificateSetupSection';
 import PublishSection from '@/components/certification/builder/sections/PublishSection';
-import { toLessonFormValues, toModuleFormValues } from '@/components/certification/builder/sections/curriculumFields';
+import { toModulesFormValues } from '@/components/certification/builder/sections/curriculumFields';
 import BuilderStepper from '@/components/certification/builder/BuilderStepper';
 import BuilderTabs from '@/components/certification/builder/BuilderTabs';
 import SaveStatusIndicator from '@/components/certification/builder/SaveStatusIndicator';
@@ -118,15 +117,6 @@ const pickDelivery = program => ({
   platform_name: program?.platform_name ?? '',
 });
 
-// `id` is sent back on save so the modules PUT updates in place instead of recreating (which
-// would lose learner progress). `_key` is UI-only identity (see CurriculumBuilderSection).
-const pickModules = program => ({
-  modules: (program?.modules || []).map(module => ({
-    ...toModuleFormValues(module),
-    lessons: (module.lessons || []).map(toLessonFormValues),
-  })),
-});
-
 const pickPricing = program => ({
   payment_type: program?.payment_type ?? 'one_time',
   price: program?.price ?? '',
@@ -145,8 +135,9 @@ const pickCertificateSetup = program => ({
 
 /**
  * Two-step wizard (KAN-121) inside one LMS-style card (FormLayoutWrapper): a clickable stepper and
- * the global save status sit in the card header. Step 1 is Basics plus the Delivery section (shown
- * under "Schedule & format" but still its own form/autosave), gated behind "Continue"; Step 2 is
+ * the global save status sit in the card header. Step 1 is Basics, shown in five short parts (the
+ * Delivery section sits under the last one but is still its own form/autosave), gated behind the last
+ * part's "Continue"; Step 2 is
  * tabbed: Curriculum · Pricing · Certificate · Publish. Every section still shares the same
  * {initialValues, onSave, disabled} → status contract via useSectionAutosave — the stepper and tabs
  * only change navigation, not save mechanics. Each section reports its status up
@@ -171,9 +162,12 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
   const [currentStep, setCurrentStep] = useState(routeParam === 'new' ? 1 : 2);
   const [activeTab, setActiveTab] = useState(TABS[0].id);
   const [sectionStatuses, setSectionStatuses] = useState({});
-  const [isContinuing, setIsContinuing] = useState(false);
+  // Which part of the Basics step is showing (see basicsFolds.jsx). Lives here, not in the section,
+  // because the section remounts when the draft is first created.
+  const [basicsFold, setBasicsFold] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const basicsFormRef = useRef(null);
+  // `curriculumRef.current.reload()` re-reads the curriculum from the server (e.g. after a CSV import).
+  const curriculumRef = useRef(null);
 
   const { data: programRes, isLoading } = useQuery({
     queryKey: [queryKeys.certificationProgramDetail, liveId],
@@ -218,15 +212,6 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     [liveId, invalidateProgram]
   );
 
-  const handleModulesSave = useCallback(
-    async values => {
-      const { data } = await updateProgramModules({ id: liveId, payload: values });
-      await invalidateProgram();
-      return data;
-    },
-    [liveId, invalidateProgram]
-  );
-
   const handlePricingSave = useCallback(
     async values => {
       const { data } = await updateProgramPricing({ id: liveId, payload: values });
@@ -258,7 +243,9 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
 
   const basicsInitialValues = useMemo(() => (program ? pickBasics(program) : BLANK_BASICS), [program]);
   const deliveryInitialValues = useMemo(() => pickDelivery(program), [program]);
-  const modulesInitialValues = useMemo(() => pickModules(program), [program]);
+  // Only the curriculum's starting point: after mount it keeps its own copy (granular saves update it
+  // from each response), and `curriculumRef.current.reload()` re-reads it from the server.
+  const modulesInitialValues = useMemo(() => toModulesFormValues(program), [program]);
   const pricingInitialValues = useMemo(() => pickPricing(program), [program]);
   const certificateSetupInitialValues = useMemo(() => pickCertificateSetup(program), [program]);
 
@@ -278,26 +265,32 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
 
   // Switch to wherever `sectionId` lives (step, and tab on Step 2), then bring its heading into view.
   // Panels are only hidden, never unmounted, so the element is already there once it's shown.
-  const showSection = useCallback(sectionId => {
-    const { step, tab } = SECTIONS[sectionId];
-    setCurrentStep(step);
-    if (tab) setActiveTab(tab);
-    setTimeout(() => {
-      const anchor = document.getElementById(sectionAnchorId(sectionId));
-      anchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.getElementById(`${sectionAnchorId(sectionId)}-title`)?.focus({ preventScroll: true });
-    }, 0);
-  }, []);
+  const showSection = useCallback(
+    sectionId => {
+      const { step, tab } = SECTIONS[sectionId];
+      // Delivery Format is shown under the Basics step's last part; coming back to Basics from another
+      // step starts at its first part (same as selecting the step).
+      if (sectionId === 'delivery') setBasicsFold(FORMAT_FOLD_INDEX);
+      else if (step === 1 && currentStep !== 1) setBasicsFold(0);
+      setCurrentStep(step);
+      if (tab) setActiveTab(tab);
+      setTimeout(() => {
+        const anchor = document.getElementById(sectionAnchorId(sectionId));
+        anchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById(`${sectionAnchorId(sectionId)}-title`)?.focus({ preventScroll: true });
+      }, 0);
+    },
+    [currentStep]
+  );
 
-  const handleContinue = useCallback(async () => {
-    setIsContinuing(true);
-    try {
-      // Basics' own submit: validates, flushes its pending autosave, then onContinue → Step 2.
-      await basicsFormRef.current?.submitForm();
-    } finally {
-      setIsContinuing(false);
-    }
-  }, []);
+  // Selecting Basics from another step opens its first part.
+  const handleStepSelect = useCallback(
+    step => {
+      if (step === 1 && currentStep !== 1) setBasicsFold(0);
+      setCurrentStep(step);
+    },
+    [currentStep]
+  );
 
   const blockers = useMemo(() => (program ? getPublishBlockers(program) : []), [program]);
   const isBlockerOk = id => blockers.find(check => check.id === id)?.ok;
@@ -354,7 +347,7 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
       </PageHeader>
 
       <FormLayoutWrapper
-        headerContent={<BuilderStepper steps={steps} currentStep={currentStep} onSelect={setCurrentStep} />}
+        headerContent={<BuilderStepper steps={steps} currentStep={currentStep} onSelect={handleStepSelect} />}
         headerAside={<SaveStatusIndicator sections={saveStatusSections} onShowSection={showSection} />}
       >
         <div
@@ -369,23 +362,21 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
             initialValues={basicsInitialValues}
             onSave={handleBasicsSave}
             onContinue={() => setCurrentStep(2)}
-            formRef={basicsFormRef}
+            fold={basicsFold}
+            onFoldChange={setBasicsFold}
+            formatSection={
+              liveId ? (
+                <DeliveryFormatSection
+                  key={`delivery-${liveId}`}
+                  anchorId={sectionAnchorId('delivery')}
+                  initialValues={deliveryInitialValues}
+                  onSave={handleDeliverySave}
+                  onStatusChange={statusReporters.delivery}
+                />
+              ) : null
+            }
             onStatusChange={statusReporters.basics}
           />
-          {liveId ? (
-            <DeliveryFormatSection
-              key={`delivery-${liveId}`}
-              anchorId={sectionAnchorId('delivery')}
-              initialValues={deliveryInitialValues}
-              onSave={handleDeliverySave}
-              onStatusChange={statusReporters.delivery}
-            />
-          ) : null}
-          <div className="flex justify-end border-t border-stroke pt-4 dark:border-strokedark">
-            <Button type="button" size="2xl" isLoading={isContinuing} onClick={handleContinue}>
-              Continue to Content &amp; Publish →
-            </Button>
-          </div>
         </div>
 
         {liveId ? (
@@ -398,10 +389,12 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
             <BuilderTabs tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
             <TabPanel id="curriculum" activeTab={activeTab}>
               <CurriculumBuilderSection
+                ref={curriculumRef}
                 key={`curriculum-${liveId}`}
                 anchorId={sectionAnchorId('curriculum')}
-                initialValues={modulesInitialValues}
-                onSave={handleModulesSave}
+                programId={liveId}
+                initialModules={modulesInitialValues}
+                onChanged={invalidateProgram}
                 onStatusChange={statusReporters.curriculum}
               />
             </TabPanel>

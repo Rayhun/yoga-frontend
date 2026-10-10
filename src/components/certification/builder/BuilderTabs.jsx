@@ -8,14 +8,20 @@ const MARKERS = {
   error: { Icon: FiAlertCircle, className: 'text-red-500', label: 'could not save' },
 };
 
+const DEFAULT_TABLIST_CLASS =
+  '-mx-4 flex gap-1 overflow-x-auto border-b border-stroke px-4 dark:border-strokedark sm:-mx-6.5 sm:px-6.5';
+
 /**
  * Step 2's section tabs (Curriculum · Pricing · Certificate · Publish). Only the tab strip lives
  * here — the parent renders every panel and keeps them all mounted (hidden with CSS), so switching
  * tabs never drops unsaved or failed values. ←/→/Home/End move between tabs (roving tabindex).
  *
  * `tabs`: [{ id, label, panelId, marker?: 'ok' | 'warn' | 'error' }]
+ *
+ * `ariaLabel` / `className` (optional) let the same strip tab a lesson's Content / Settings / Questions
+ * inside the edit pane, where it must not bleed out to the card's edges.
  */
-const BuilderTabs = ({ tabs, activeTab, onSelect }) => {
+const BuilderTabs = ({ tabs, activeTab, onSelect, ariaLabel = 'Program content sections', className = DEFAULT_TABLIST_CLASS }) => {
   const buttonRefs = useRef({});
 
   const handleKeyDown = (event, index) => {
@@ -31,11 +37,7 @@ const BuilderTabs = ({ tabs, activeTab, onSelect }) => {
   };
 
   return (
-    <div
-      role="tablist"
-      aria-label="Program content sections"
-      className="-mx-4 flex gap-1 overflow-x-auto border-b border-stroke px-4 dark:border-strokedark sm:-mx-6.5 sm:px-6.5"
-    >
+    <div role="tablist" aria-label={ariaLabel} className={className}>
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeTab;
         const marker = MARKERS[tab.marker];

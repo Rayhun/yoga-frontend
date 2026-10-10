@@ -39,7 +39,7 @@ const DeliveryFormatSection = ({ initialValues, onSave, disabled = false, onStat
     <SectionCard
       anchorId={anchorId}
       title="Delivery Format"
-      subtitle="Part of Schedule & format — saves on its own."
+      subtitle="Saves on its own."
       status={status}
       errorMessage={errorMessage}
       canRetry={canRetry}

@@ -1,7 +1,7 @@
 import { getQuestionProblem } from '@/components/certification/builder/sections/curriculumFields';
 
 // Per-item state for the curriculum outline badges, derived from the same rules that gate saving
-// (`getUnsavableReason`) plus the 409 blocked notices, which are keyed by server id.
+// (`getQuestionProblem`) plus the 409 blocked notices, which are keyed by server id.
 
 const isUntitled = item => !item.title?.trim();
 

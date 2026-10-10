@@ -1,150 +1,250 @@
 'use client';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Formik, Form } from 'formik';
-import isEqual from 'lodash/isEqual';
-import * as Yup from 'yup';
-import { MdAdd, MdDelete, MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md';
-import FormikField from '@/components/common/form/formik/FormikField';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
+import { MdAdd } from 'react-icons/md';
 import Button from '@/components/common/Button';
-import useSectionAutosave from '@/hooks/useSectionAutosave';
+import useConfirm from '@/hooks/useConfirm';
 import SectionCard from '@/components/certification/builder/SectionCard';
 import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
-import { toastApiError } from '@/utils/helpers';
-import { blankLesson, blankModule, getUnsavableReason, keysOf, toPayload, withAdoptedIds } from './curriculumFields';
-import CurriculumLessonFields from './CurriculumLessonFields';
-import CurriculumModuleFields from './CurriculumModuleFields';
+import CurriculumOutline from '@/components/certification/builder/curriculum/CurriculumOutline';
+import ItemSaveState from '@/components/certification/builder/curriculum/ItemSaveState';
+import LessonPane from '@/components/certification/builder/curriculum/LessonPane';
+import ModuleFold from '@/components/certification/builder/curriculum/ModuleFold';
+import NewItemForm from '@/components/certification/builder/curriculum/NewItemForm';
+import { PANE_STATUS, isUnsafeStatus } from '@/components/certification/builder/curriculum/paneState';
+import { locateByKey, moduleKeyOf, resolveSelectedKey } from '@/components/certification/builder/curriculum/selection';
+import useCurriculum from '@/components/certification/builder/curriculum/useCurriculum';
 
-const CONFLICT_STATUS = 409;
-// A 409 ("lesson has learner progress") fails the same way on every retry — only fixable by
-// keeping the item, so no Retry button for it.
-const isRetryable = error => error?.response?.status !== CONFLICT_STATUS;
+const USER_CANCELLED = 'User cancelled';
+const HOME = { kind: 'home' };
 
-const validationSchema = Yup.object({
-  modules: Yup.array().of(
-    Yup.object({
-      title: Yup.string().required('Module title is required'),
-      lessons: Yup.array().of(
-        Yup.object({
-          title: Yup.string().required('Lesson title is required'),
-          lesson_type: Yup.string().required('Required'),
-          duration_minutes: Yup.number().typeError('Enter minutes as a number').min(0, 'Must be 0 or more'),
-          video_watch_threshold_percent: Yup.number().typeError('Enter a percentage').min(0, '0–100').max(100, '0–100'),
-        })
-      ),
-    })
-  ),
-});
+const samePaneState = (a, b) =>
+  a?.key === b?.key &&
+  a?.status === b?.status &&
+  a?.message === b?.message &&
+  a?.canRetry === b?.canRetry &&
+  a?.retry === b?.retry &&
+  a?.attention === b?.attention;
 
-const moveItem = (array, index, direction) => {
-  const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= array.length) return array;
-  const next = [...array];
-  [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
-  return next;
-};
-
-// 409 body `data.blocked` → notices keyed by the lesson/module that couldn't be removed.
-const toBlockedNotices = (blocked = []) => {
-  const learners = count => `${count} learner${count === 1 ? ' has' : 's have'}`;
-  const byLesson = new Map();
-  const byModule = new Map();
-  blocked.forEach(item => {
-    if (item.kind === 'question') {
-      // Attempted quiz: the question comes back; say so under its quiz lesson.
-      const existing = byLesson.get(item.lesson_id);
-      const message = `Can't remove the question "${item.question_prompt}" — ${learners(item.learner_count)} already attempted this quiz. It has been restored.`;
-      byLesson.set(item.lesson_id, existing ? `${existing} ${message}` : message);
-    } else if (item.module_removed) {
-      const existing = byModule.get(item.module_id) || [];
-      byModule.set(item.module_id, [...existing, `"${item.lesson_title}" (${learners(item.learner_count)} started it)`]);
-    } else {
-      byLesson.set(item.lesson_id, `Can't remove this lesson — ${learners(item.learner_count)} already started it. It has been restored.`);
-    }
-  });
-  const moduleNotices = new Map(
-    [...byModule].map(([moduleId, lessons]) => [
-      moduleId,
-      `Can't remove this module — learners have progress on ${lessons.join(', ')}. It has been restored.`,
-    ])
-  );
-  return { byLesson, byModule: moduleNotices };
-};
-
-const BlockedNotice = ({ message }) =>
-  message ? (
-    <p role="alert" className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-      {message}
-    </p>
-  ) : null;
+const Banner = ({ tone, children, onDismiss }) => (
+  <div
+    role="alert"
+    className={`mb-4 flex items-start justify-between gap-3 rounded-md border px-4 py-3 text-sm ${
+      tone === 'error'
+        ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'
+        : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200'
+    }`}
+  >
+    <span className="flex items-start gap-2">
+      <FiAlertCircle aria-hidden className="mt-0.5 shrink-0" />
+      <span>{children}</span>
+    </span>
+    <button type="button" onClick={onDismiss} className="shrink-0 font-medium underline-offset-2 hover:underline">
+      Dismiss
+    </button>
+  </div>
+);
 
 /**
- * Module/lesson list editor — add/remove per item, up/down reorder (no drag-and-drop dependency,
- * per the backend plan's MVP substitute note). Every structural change (add/remove/reorder) and
- * every discrete control (type select, required switch, image, unlock rule) saves immediately via
- * the same debounced useSectionAutosave text fields use on blur. Formik's FieldArray isn't used
- * here: its push/remove helpers mutate state asynchronously, which would make "read values, save
- * immediately" read stale data — plain array functions computed at click-time and pushed through
- * setFieldValue + the save call together sidestep that entirely.
+ * Curriculum Builder: an outline of modules and lessons (right side on wide screens, above the pane on
+ * narrow ones) and ONE edit pane for the selected item. Every user action is a single request that names
+ * only that object (see useCurriculum) — the whole-tree PUT is no longer used. Creating an item asks for
+ * its title first, so an untitled item never exists; each item shows its own save state; a stale or
+ * refused change reloads the curriculum from the server and says why. Leaving the page while something
+ * is unsaved or failed asks first.
  *
- * Saving waits until every module/lesson has a title (the API rejects blank titles), and a 409
- * (the save would delete a lesson learners have started) restores the curriculum and shows the
- * reason next to the item that couldn't be removed.
+ * `ref.reload()` re-reads the whole curriculum from the server (for anything that changes it from outside
+ * this screen, e.g. a CSV import). `onChanged` runs after each successful save so the shared
+ * program-detail query — and with it Publish's readiness checks — is refetched.
+ *
+ * Until step 5b a lesson is edited with the existing lesson form inside the pane (LessonPane).
  */
-const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
-  const formikRef = useRef(null);
-  // payload object → keysOf(values) it was built from; the autosave hook hands the very same
-  // payload object back to saveCurriculum, so the response can be matched to the right items.
-  const sentKeysRef = useRef(new WeakMap());
-  const [blockedNotices, setBlockedNotices] = useState(null);
-  const [unsavableReason, setUnsavableReason] = useState(null);
+const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
+  { programId, initialModules, disabled = false, onChanged, onStatusChange, anchorId },
+  ref
+) {
+  const confirm = useConfirm();
+  const curriculum = useCurriculum({ programId, initialModules, onChanged });
+  const { modules, seed, notice, failure, blockedNotices, isBusy } = curriculum;
 
-  const saveCurriculum = useCallback(
-    async payload => {
+  const [selection, setSelection] = useState(() =>
+    initialModules[0] ? { kind: 'item', key: initialModules[0]._key, fallbackKey: initialModules[0]._key } : HOME
+  );
+  const [paneState, setPaneState] = useState(null);
+  const [itemStates, setItemStates] = useState(() => new Map());
+  const paneRef = useRef(null);
+  const switchingRef = useRef(false);
+
+  useImperativeHandle(ref, () => ({ reload: curriculum.reload }), [curriculum.reload]);
+
+  // What is open: the selected item if it still exists (else its module, else the first one).
+  const activeKey = selection.kind === 'item' ? resolveSelectedKey(modules, selection.key, selection.fallbackKey) : null;
+  const view = selection.kind === 'item' && !activeKey ? HOME : selection;
+  const location = activeKey ? locateByKey(modules, activeKey) : null;
+
+  const registerPane = useCallback(pane => {
+    paneRef.current = pane;
+  }, []);
+  const handlePaneState = useCallback(
+    state => {
+      const next = { key: activeKey, ...state };
+      setPaneState(previous => (samePaneState(previous, next) ? previous : next));
+      setItemStates(previous => {
+        const current = previous.get(activeKey);
+        if (current?.status === state.status && current?.message === state.message && current?.attention === state.attention) return previous;
+        return new Map(previous).set(activeKey, { status: state.status, message: state.message, attention: state.attention });
+      });
+    },
+    [activeKey]
+  );
+  const openPaneState = paneState && paneState.key === activeKey ? paneState : null;
+
+  // Save the open item before opening another; if it can't be saved, ask before dropping the edit.
+  const requestSelect = useCallback(
+    async next => {
+      if (switchingRef.current) return false;
+      switchingRef.current = true;
       try {
-        const savedModules = await onSave(payload);
-        setBlockedNotices(null);
-        const sentKeys = sentKeysRef.current.get(payload);
-        const formik = formikRef.current;
-        if (sentKeys && formik && Array.isArray(savedModules)) {
-          const currentModules = formik.values.modules || [];
-          const adoptedModules = withAdoptedIds(currentModules, sentKeys, savedModules);
-          if (!isEqual(adoptedModules, currentModules)) formik.setFieldValue('modules', adoptedModules);
+        const pane = paneRef.current;
+        if (pane) {
+          try {
+            await pane.flush();
+          } catch (error) {
+            try {
+              await confirm({
+                heading: 'Unsaved changes',
+                message: `This item has changes that could not be saved (${error.message}). Leave without saving them?`,
+              });
+            } catch (declined) {
+              if (declined?.message === USER_CANCELLED) return false;
+              throw declined;
+            }
+            pane.discard();
+            // The dropped edit no longer exists; don't keep flagging it in the outline.
+            setItemStates(previous => {
+              const next = new Map(previous);
+              next.delete(activeKey);
+              return next;
+            });
+          }
         }
-        return savedModules;
-      } catch (error) {
-        if (error?.response?.status === CONFLICT_STATUS) {
-          // Nothing was written server-side — put the removed items back and say why, inline.
-          setBlockedNotices(toBlockedNotices(error.response.data?.data?.blocked));
-          toastApiError(error);
-          formikRef.current?.resetForm({ values: initialValues });
-        }
-        throw error;
+        setPaneState(null);
+        setSelection(next);
+        return true;
+      } finally {
+        switchingRef.current = false;
       }
     },
-    [onSave, initialValues]
+    [confirm, activeKey]
   );
 
-  const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(saveCurriculum, {
-    isRetryable,
+  const selectItem = useCallback(
+    key => requestSelect({ kind: 'item', key, fallbackKey: moduleKeyOf(modules, key) }),
+    [requestSelect, modules]
+  );
+
+  const createModule = async ({ title }) => {
+    const result = await curriculum.addModule({ title });
+    if (result.ok) setSelection({ kind: 'item', key: result.key, fallbackKey: result.key });
+  };
+  const createLesson = moduleId => async values => {
+    const result = await curriculum.addLesson(moduleId, values);
+    if (result.ok) setSelection({ kind: 'item', key: result.key, fallbackKey: `module-${moduleId}` });
+  };
+
+  // One status for the builder's header: a failed action beats a saving one beats the open pane's state.
+  const status = failure ? PANE_STATUS.error : isBusy ? PANE_STATUS.saving : openPaneState?.status || PANE_STATUS.idle;
+  const canRetry = !failure && Boolean(openPaneState?.canRetry);
+  useReportSaveStatus(onStatusChange, {
+    status,
+    errorMessage: status === PANE_STATUS.error ? failure || openPaneState?.message || null : null,
+    canRetry,
+    retry: canRetry ? openPaneState.retry : undefined,
   });
-  useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
 
+  // Leaving the page while something is unsaved, failed or still being sent.
+  const hasUnsafeWork = isBusy || Boolean(failure) || isUnsafeStatus(openPaneState?.status);
   useEffect(() => {
-    markSaved(toPayload(initialValues));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues]);
+    if (!hasUnsafeWork) return undefined;
+    const warn = event => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsafeWork]);
 
-  const handleSave = useCallback(
-    values => {
-      const reason = getUnsavableReason(values);
-      setUnsavableReason(reason);
-      if (reason) return;
-      const payload = toPayload(values);
-      sentKeysRef.current.set(payload, keysOf(values));
-      notifyBlur(payload);
-    },
-    [notifyBlur]
-  );
+  const dismissNotice = () => {
+    curriculum.dismissNotice();
+    curriculum.dismissBlocked();
+  };
+
+  const renderPane = () => {
+    if (view.kind === 'new-module') {
+      return <NewItemForm kind="module" disabled={disabled} onCreate={createModule} onCancel={() => setSelection(HOME)} />;
+    }
+    if (view.kind === 'new-lesson') {
+      const parent = modules.find(module => module.id === view.moduleId);
+      if (!parent) return null;
+      return (
+        <NewItemForm
+          kind="lesson"
+          parentTitle={parent.title}
+          disabled={disabled}
+          onCreate={createLesson(parent.id)}
+          onCancel={() => setSelection(HOME)}
+        />
+      );
+    }
+    if (view.kind === 'item' && location) {
+      const paneProps = { disabled, hasItem: curriculum.hasItem, registerPane, onState: handlePaneState };
+      const paneKey = `${activeKey}-${seed}`;
+      const module = modules[location.mi];
+      const crumb = location.type === 'module' ? `Module ${location.mi + 1}` : `Module ${location.mi + 1} › Lesson ${location.li + 1}`;
+      return (
+        <>
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <span className="text-sm font-medium text-body dark:text-gray-400">{crumb}</span>
+            <div className="flex items-start gap-2">
+              <ItemSaveState state={openPaneState} />
+              {openPaneState?.canRetry ? (
+                <button
+                  type="button"
+                  onClick={() => openPaneState.retry()}
+                  className="inline-flex items-center gap-1 rounded-md border border-red-300 px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-50 dark:text-red-300"
+                >
+                  <FiRefreshCw size={11} /> Retry
+                </button>
+              ) : null}
+            </div>
+          </div>
+          {location.type === 'module' ? (
+            <ModuleFold key={paneKey} module={module} saveFields={curriculum.saveModuleFields} {...paneProps} />
+          ) : (
+            <LessonPane
+              key={paneKey}
+              lesson={module.lessons[location.li]}
+              saveFields={curriculum.saveLessonFields}
+              saveQuiz={curriculum.saveQuiz}
+              {...paneProps}
+            />
+          )}
+        </>
+      );
+    }
+    return (
+      <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center dark:border-strokedark">
+        <p className="text-sm text-body dark:text-gray-400">
+          {modules.length ? 'Pick a module or lesson in the outline to edit it.' : 'Your curriculum is empty. Start with the first module.'}
+        </p>
+        {modules.length === 0 ? (
+          <Button type="button" className="mx-auto mt-3" disabled={disabled} onClick={() => requestSelect({ kind: 'new-module' })}>
+            <MdAdd className="mr-1" /> Add your first module
+          </Button>
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <SectionCard
@@ -152,117 +252,42 @@ const CurriculumBuilderSection = ({ initialValues, onSave, disabled = false, onS
       title="Curriculum Builder"
       subtitle="Add modules and lessons — link to any video, PDF, or page you host elsewhere."
       status={status}
-      errorMessage={errorMessage}
-      canRetry={canRetry}
-      onRetry={retry}
     >
-      <Formik innerRef={formikRef} initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
-        {({ values, setFieldValue }) => {
-          const modules = values.modules || [];
+      {failure ? (
+        <Banner tone="error" onDismiss={curriculum.dismissFailure}>
+          {failure}
+        </Banner>
+      ) : null}
+      {notice ? (
+        <Banner tone="warning" onDismiss={dismissNotice}>
+          {notice.message}
+        </Banner>
+      ) : null}
 
-          const commitModules = nextModules => {
-            setFieldValue('modules', nextModules);
-            handleSave({ modules: nextModules });
-          };
-
-          const addModule = () => commitModules([...modules, blankModule()]);
-          const removeModule = mi => commitModules(modules.filter((_, i) => i !== mi));
-          const moveModule = (mi, dir) => commitModules(moveItem(modules, mi, dir));
-          const updateModule = (mi, patch) => commitModules(modules.map((m, i) => (i === mi ? { ...m, ...patch } : m)));
-
-          const updateLessons = (mi, updater) =>
-            commitModules(modules.map((m, i) => (i === mi ? { ...m, lessons: updater(m.lessons) } : m)));
-          const addLesson = mi => updateLessons(mi, lessons => [...lessons, blankLesson()]);
-          const removeLesson = (mi, li) => updateLessons(mi, lessons => lessons.filter((_, j) => j !== li));
-          const moveLesson = (mi, li, dir) => updateLessons(mi, lessons => moveItem(lessons, li, dir));
-          const updateLesson = (mi, li, patch) =>
-            updateLessons(mi, lessons => lessons.map((l, j) => (j === li ? { ...l, ...patch } : l)));
-
-          // Same rule as saving: an image uploaded now would only be saved once the curriculum can be.
-          const getUploadBlockReason = () => {
-            const reason = getUnsavableReason(values);
-            return reason ? `${reason.split(' — ')[0]} first, then upload an image.` : null;
-          };
-
-          return (
-            <Form className="flex flex-col gap-4" onBlur={() => handleSave(values)}>
-              {unsavableReason ? (
-                <p className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                  {unsavableReason}
-                </p>
-              ) : null}
-
-              {modules.map((module, mi) => (
-                <div key={module._key || mi} className="rounded-lg border border-gray-200 p-4 dark:border-strokedark">
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1">
-                      <FormikField name={`modules[${mi}].title`} label={`Module ${mi + 1}`} placeholder="e.g. Module 1 — Foundations" disabled={disabled} />
-                    </div>
-                    <div className="flex items-center gap-1 mt-6">
-                      <button type="button" disabled={disabled || mi === 0} onClick={() => moveModule(mi, -1)} className="p-1.5 text-gray-500 disabled:opacity-30" aria-label="Move module up">
-                        <MdKeyboardArrowUp size={18} />
-                      </button>
-                      <button type="button" disabled={disabled || mi === modules.length - 1} onClick={() => moveModule(mi, 1)} className="p-1.5 text-gray-500 disabled:opacity-30" aria-label="Move module down">
-                        <MdKeyboardArrowDown size={18} />
-                      </button>
-                      <button type="button" disabled={disabled} onClick={() => removeModule(mi)} className="p-1.5 text-red-500" aria-label="Remove module">
-                        <MdDelete size={18} />
-                      </button>
-                    </div>
-                  </div>
-                  <BlockedNotice message={module.id ? blockedNotices?.byModule.get(module.id) : null} />
-
-                  <CurriculumModuleFields
-                    mi={mi}
-                    module={module}
-                    disabled={disabled}
-                    onModuleChange={patch => updateModule(mi, patch)}
-                    getBlockReason={getUploadBlockReason}
-                  />
-
-                  <div className="mt-4 flex flex-col gap-4 pl-4 border-l-2 border-gray-100 dark:border-strokedark">
-                    {module.lessons.map((lesson, li) => (
-                      <div key={lesson._key || li}>
-                        <div className="flex items-start gap-2">
-                          <CurriculumLessonFields
-                            mi={mi}
-                            li={li}
-                            lesson={lesson}
-                            disabled={disabled}
-                            onLessonChange={patch => updateLesson(mi, li, patch)}
-                            getBlockReason={getUploadBlockReason}
-                          />
-                          <div className="flex items-center gap-1 mt-6">
-                            <button type="button" disabled={disabled || li === 0} onClick={() => moveLesson(mi, li, -1)} className="p-1.5 text-gray-500 disabled:opacity-30" aria-label="Move lesson up">
-                              <MdKeyboardArrowUp size={16} />
-                            </button>
-                            <button type="button" disabled={disabled || li === module.lessons.length - 1} onClick={() => moveLesson(mi, li, 1)} className="p-1.5 text-gray-500 disabled:opacity-30" aria-label="Move lesson down">
-                              <MdKeyboardArrowDown size={16} />
-                            </button>
-                            <button type="button" disabled={disabled} onClick={() => removeLesson(mi, li)} className="p-1.5 text-red-500" aria-label="Remove lesson">
-                              <MdDelete size={16} />
-                            </button>
-                          </div>
-                        </div>
-                        <BlockedNotice message={lesson.id ? blockedNotices?.byLesson.get(lesson.id) : null} />
-                      </div>
-                    ))}
-                    <Button type="button" size="sm" variant="secondary" className="self-start" disabled={disabled} onClick={() => addLesson(mi)}>
-                      <MdAdd className="mr-1" /> Add Lesson
-                    </Button>
-                  </div>
-                </div>
-              ))}
-
-              <Button type="button" variant="secondary" className="self-start" disabled={disabled} onClick={addModule}>
-                <MdAdd className="mr-1" /> Add Module
-              </Button>
-            </Form>
-          );
-        }}
-      </Formik>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <aside className="lg:order-2">
+          <CurriculumOutline
+            modules={modules}
+            selectedKey={activeKey}
+            itemStates={itemStates}
+            blockedNotices={blockedNotices}
+            disabled={disabled}
+            onSelect={selectItem}
+            onAddModule={() => requestSelect({ kind: 'new-module' })}
+            onAddLesson={moduleId => requestSelect({ kind: 'new-lesson', moduleId })}
+            onMoveModule={curriculum.moveModule}
+            onMoveLesson={curriculum.moveLessonWithinModule}
+            onMoveLessonToModule={curriculum.moveLessonToModule}
+            onRemoveModule={curriculum.removeModule}
+            onRemoveLesson={curriculum.removeLesson}
+          />
+        </aside>
+        <div className="min-w-0 lg:order-1" role="region" aria-label="Edit pane">
+          {renderPane()}
+        </div>
+      </div>
     </SectionCard>
   );
-};
+});
 
 export default CurriculumBuilderSection;

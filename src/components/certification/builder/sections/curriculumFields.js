@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 
 // Form <-> API mapping for Curriculum Builder modules/lessons, shared by ProgramBuilderModal
-// (API -> form, pickModules) and CurriculumBuilderSection (form -> API, toPayload). Every field
+// (API -> form, toModulesFormValues) and the curriculum panes (form -> API, the to*Payload helpers). Every field
 // the builder edits must round-trip through both directions, or a save silently resets it.
 
 export const DEFAULT_VIDEO_WATCH_THRESHOLD = 90; // CertLesson.video_watch_threshold_percent default
@@ -177,27 +177,75 @@ const toLessonPayload = lesson => ({
 const toUnlockDate = module =>
   module.unlock_rule === 'date' && module.unlock_date ? dayjs(module.unlock_date).startOf('day').toISOString() : null;
 
-// Strips UI-only fields (`_key`, duration helpers). The modules PUT is an id-preserving upsert:
-// this payload IS the entire curriculum on every save (order from array position) — items with an
-// `id` are updated in place, items without one are created, and anything missing is deleted.
-export const toPayload = values => ({
-  modules: (values.modules || []).map(module => ({
-    ...withId(module),
-    title: module.title,
-    description: module.description || null,
-    image: module.image || null,
-    unlock_rule: module.unlock_rule || 'sequential',
-    unlock_date: toUnlockDate(module),
-    lessons: (module.lessons || []).map(toLessonPayload),
-  })),
+// ---- Granular endpoints (PATCH one module / lesson, PUT one lesson's quiz): each request names only
+// the one object it saves. These strip the UI-only fields (`_key`, duration helpers).
+
+// A module's own fields (no id, no lessons).
+export const toModuleFieldsPayload = module => ({
+  title: module.title,
+  description: module.description || null,
+  image: module.image || null,
+  unlock_rule: module.unlock_rule || 'sequential',
+  unlock_date: toUnlockDate(module),
 });
 
-// The backend rejects blank module/lesson titles (400); saving mid-edit (e.g. right after "Add
-// lesson") would fail every time, so the section waits until every item has a title.
-export const hasUntitledItems = values =>
-  (values.modules || []).some(
-    module => !module.title?.trim() || (module.lessons || []).some(lesson => !lesson.title?.trim())
-  );
+// A lesson's own fields (no id, no questions — the quiz is saved by its own endpoint).
+export const toLessonFieldsPayload = lesson => {
+  const { id, questions, ...fields } = toLessonPayload(lesson);
+  return fields;
+};
+
+// A quiz lesson's whole question list, as the quiz endpoint expects it.
+export const toQuestionsPayload = lesson => (lesson.questions || []).map(toQuestionPayload);
+
+// API → form for the whole curriculum (the program detail response).
+export const toModulesFormValues = program =>
+  (program?.modules || []).map(module => ({
+    ...toModuleFormValues(module),
+    lessons: (module.lessons || []).map(toLessonFormValues),
+  }));
+
+const isCount = (value, { min, max = Infinity }) => {
+  const number = Number(value);
+  return Number.isInteger(number) && number >= min && number <= max;
+};
+
+// Why an edit can't be sent yet (the API would answer 400), or null. Shown next to the item instead
+// of silently holding the save back.
+export const getModuleProblem = module => (module.title?.trim() ? null : 'Give the module a title.');
+
+// The first thing that stops a lesson's FIELDS from saving, per lesson tab (null = fine). The lesson's
+// questions are checked separately (getQuestionProblem) because the quiz has its own save.
+export const getLessonFieldProblemsByTab = lesson => {
+  let content = null;
+  if (!lesson.title?.trim()) content = 'Give the lesson a title.';
+  else if (lesson.duration_minutes !== '' && !isCount(lesson.duration_minutes, { min: 0 })) content = 'Duration must be a whole number of minutes.';
+
+  let settings = null;
+  if (lesson.lesson_type === 'video' && !isCount(lesson.video_watch_threshold_percent, { min: 0, max: 100 })) {
+    settings = 'Watch % to complete must be between 0 and 100.';
+  }
+  if (lesson.lesson_type === 'quiz') {
+    if (!isCount(lesson.quiz_pass_mark_percent, { min: 0, max: 100 })) settings = 'Pass mark must be between 0 and 100.';
+    else if (lesson.quiz_max_attempts !== '' && !isCount(lesson.quiz_max_attempts, { min: 1 })) settings = 'Max attempts must be 1 or more.';
+  }
+  return { content, settings };
+};
+
+export const getLessonProblem = lesson => {
+  const { content, settings } = getLessonFieldProblemsByTab(lesson);
+  return content || settings;
+};
+
+// "Question 2 — Add the question text." for a quiz's first unfinished question, else null; plus how many
+// questions are unfinished.
+export const getQuizProblems = lesson => {
+  if (lesson.lesson_type !== 'quiz') return { message: null, count: 0 };
+  const questions = lesson.questions || [];
+  const problems = questions.map(question => getQuestionProblem(question));
+  const index = problems.findIndex(Boolean);
+  return { message: index === -1 ? null : `Question ${index + 1} — ${problems[index]}`, count: problems.filter(Boolean).length };
+};
 
 // Mirrors CertQuizQuestionSerializer.validate — a question the API would reject (400).
 export const getQuestionProblem = question => {
@@ -209,20 +257,6 @@ export const getQuestionProblem = question => {
   const correctCount = options.filter(option => option.is_correct).length;
   if (question.question_type === SINGLE_CHOICE && correctCount !== 1) return 'Mark exactly one correct answer.';
   if (question.question_type === MULTIPLE_CHOICE && correctCount < 1) return 'Mark at least one correct answer.';
-  return null;
-};
-
-const hasIncompleteQuiz = values =>
-  (values.modules || []).some(module =>
-    (module.lessons || []).some(
-      lesson => lesson.lesson_type === 'quiz' && (lesson.questions || []).some(question => getQuestionProblem(question))
-    )
-  );
-
-// Why the curriculum can't be saved right now (the API would reject it), or null when it can.
-export const getUnsavableReason = values => {
-  if (hasUntitledItems(values)) return 'Give every module and lesson a title — changes save once they’re all named.';
-  if (hasIncompleteQuiz(values)) return 'Finish the highlighted quiz questions — changes save once every question is complete.';
   return null;
 };
 

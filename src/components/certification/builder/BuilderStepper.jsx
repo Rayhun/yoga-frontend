@@ -8,8 +8,10 @@ import { FiCheck } from 'react-icons/fi';
  * enabled steps, Home/End jump to the ends, Enter/Space selects.
  *
  * `steps`: [{ id, label, panelId, disabled?, disabledReason?, done? }]
+ * `ariaLabel` / `itemLabel` (optional) rename the tablist and the screen-reader word ("Step 2 of 5") so the
+ * same component can also pager a step's inner sections (Program Basics).
  */
-const BuilderStepper = ({ steps, currentStep, onSelect }) => {
+const BuilderStepper = ({ steps, currentStep, onSelect, ariaLabel = 'Program builder steps', itemLabel = 'Step' }) => {
   const buttonRefs = useRef({});
   const enabledSteps = steps.filter(step => !step.disabled);
 
@@ -34,7 +36,7 @@ const BuilderStepper = ({ steps, currentStep, onSelect }) => {
   };
 
   return (
-    <div role="tablist" aria-label="Program builder steps" className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+    <div role="tablist" aria-label={ariaLabel} className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
       {steps.map((step, index) => {
         const isCurrent = step.id === currentStep;
         return (
@@ -71,7 +73,7 @@ const BuilderStepper = ({ steps, currentStep, onSelect }) => {
               </span>
               <span className="whitespace-nowrap">
                 <span className="sr-only">
-                  Step {index + 1} of {steps.length}:{' '}
+                  {itemLabel} {index + 1} of {steps.length}:{' '}
                 </span>
                 {step.label}
               </span>

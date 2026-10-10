@@ -1,60 +1,19 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
-import { FaRegFileImage } from 'react-icons/fa6';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import FormikField from '@/components/common/form/formik/FormikField';
-import FormikSelect from '@/components/common/form/formik/FormikSelect';
-import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
-import FormikMultiSelect from '@/components/common/form/formik/FormikMultiSelect';
 import DateTimePicker from '@/components/common/form/formik/FormikDateTimePicker';
 import Button from '@/components/common/Button';
 import Popup from '@/components/common/popup';
-import { ContentCatalogTagsField } from '@/components/lms/general/fields';
 import { uploadLMSFile } from '@/services/private/lms';
 import { toastApiError } from '@/utils/helpers';
-import { CONSULTATION_TYPES, TIME_ZONES } from '@/utils/constants';
 import useLMSCategoryOptions from '@/hooks/useLMSCategoryOptions';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
 import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
-
-const TARGET_AUDIENCE_OPTIONS = [
-  { value: 'career', label: 'Career' },
-  { value: 'both', label: 'Career + Professional' },
-  { value: 'professional', label: 'Professional' },
-];
-
-const LEVEL_OPTIONS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
-];
-
-// Mirrors GroupCoachingFrom.jsx's eventTypeOptions exactly (KAN-121 Workshop-parity field) —
-// this is a plain, un-choiced CharField on the model (same as LMS.Event.event_type), so the
-// option set lives here on the frontend, not as backend `choices=`.
-const EVENT_TYPE_OPTIONS = [
-  { label: 'Workshop', value: 'workshop' },
-  { label: 'Bootcamp', value: 'bootcamp' },
-  { label: 'Live Event', value: 'live event' },
-  { label: 'MasterClass', value: 'masterclass' },
-];
-
-// One titled group of Basics fields, laid out on the LMS form's two-column grid (a child spans both
-// columns with `md:col-span-2`).
-const FieldGroup = ({ title, description, children }) => (
-  <div className="flex flex-col gap-4">
-    <div>
-      <h3 className="text-base font-bold text-black dark:text-white">{title}</h3>
-      {description ? <p className="mt-0.5 text-sm text-body">{description}</p> : null}
-    </div>
-    <div className="grid grid-cols-1 items-start gap-x-6 gap-y-4 md:grid-cols-2">{children}</div>
-  </div>
-);
+import BuilderStepper from '@/components/certification/builder/BuilderStepper';
+import { BASICS_FOLDS, FOLD_COMPONENTS, FORMAT_FOLD_INDEX } from '@/components/certification/builder/sections/basicsFolds';
 
 const validationSchema = Yup.object({
   title: Yup.string().trim().required('Title is required'),
@@ -144,19 +103,37 @@ const toPayload = values => ({
  * ``onSave`` is create-or-update agnostic — the parent (ProgramBuilderModal) decides whether a
  * blur here calls POST /programs/ (first save, no id yet) or PATCH /programs/{id}/basics/.
  *
- * ``onContinue`` (optional) is this form's submit handler — the parent's "Continue" button (in the
- * step footer, below the Delivery group) submits it through ``formRef`` (Formik ``innerRef``): it
- * validates the step, flushes any pending autosave, then hands control back to reveal Step 2. Doesn't
- * change the autosave mechanics at all (still onBlur/notifyBlur/flush exactly as shipped in
- * KAN-89/90) — this is an additional affordance on top, not a replacement.
+ * The step is shown in five short parts (About / Catalog / Media / Schedule / Format — see
+ * ``basicsFolds.jsx``), never more than six inputs at a time. It is still ONE Formik form: a part only
+ * changes which fields render, so values, the (whole) validation schema and the autosave payload are
+ * identical whichever part is showing. ``fold`` / ``onFoldChange`` are controlled by the parent (this
+ * component remounts when the draft is first created, so it can't own that state). "Next" validates
+ * just the current part's fields and blocks if invalid; moving between parts flushes the pending
+ * autosave first. The last part's "Continue" validates the whole step (jumping to the first part with
+ * an error), flushes, then calls ``onContinue`` to reveal Step 2.
+ *
+ * ``formatSection`` (optional) is the separate Delivery Format section (its own form and save); it is
+ * shown under the Format part and stays mounted (hidden) in the other parts.
  */
-const ProgramBasicsSection = ({ initialValues, onSave, onContinue, formRef, disabled = false, onStatusChange, anchorId }) => {
+const ProgramBasicsSection = ({
+  initialValues,
+  onSave,
+  onContinue,
+  fold = 0,
+  onFoldChange,
+  formatSection = null,
+  disabled = false,
+  onStatusChange,
+  anchorId,
+}) => {
   const { options: categoryOptions } = useLMSCategoryOptions();
   const { notifyBlur, flush, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
   useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
   const [editingRecurringIndex, setEditingRecurringIndex] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const formikRef = useRef(null);
 
   // `recurring_picker_value` is a transient, UI-only field (the popup's date/time input) — never
   // sent to the backend (excluded from toPayload), so it's defaulted here rather than requiring
@@ -205,6 +182,8 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, formRef, disa
     [handleBlur, flush]
   );
 
+  // The Formik submit handler — reached only through "Continue" (the DOM form's own submit is
+  // disabled below): autosave the whole step, then hand control to the parent (reveals Step 2).
   const handleContinue = useCallback(
     async values => {
       try {
@@ -218,6 +197,59 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, formRef, disa
     [handleBlur, flush, onContinue]
   );
 
+  const touchFields = (formik, fields) =>
+    formik.setTouched({ ...formik.touched, ...Object.fromEntries(fields.map(name => [name, true])) }, false);
+
+  // Moving to another part: going forward validates the part being left (touching its fields so the
+  // errors show) and blocks if invalid; either way the pending autosave is flushed first — the first
+  // flush is what creates the draft, exactly as it did on "Continue".
+  const goToFold = useCallback(
+    async target => {
+      const formik = formikRef.current;
+      if (!formik || isNavigating || target === fold || target < 0 || target > FORMAT_FOLD_INDEX) return;
+      setIsNavigating(true);
+      try {
+        if (target > fold) {
+          const errors = await formik.validateForm();
+          const { fields } = BASICS_FOLDS[fold];
+          touchFields(formik, fields);
+          if (fields.some(name => errors[name])) return;
+        }
+        handleBlur(formik.values);
+        await flush();
+        onFoldChange?.(target);
+      } catch (error) {
+        toastApiError(error);
+      } finally {
+        setIsNavigating(false);
+      }
+    },
+    [fold, isNavigating, handleBlur, flush, onFoldChange]
+  );
+
+  // Last part: validate the whole step; if an earlier part has an error, go there and show it.
+  const continueToNextStep = useCallback(async () => {
+    const formik = formikRef.current;
+    if (!formik || isNavigating) return;
+    setIsNavigating(true);
+    try {
+      const errors = await formik.validateForm();
+      const firstInvalid = BASICS_FOLDS.findIndex(({ fields }) => fields.some(name => errors[name]));
+      if (firstInvalid !== -1) {
+        touchFields(formik, BASICS_FOLDS.flatMap(({ fields }) => fields));
+        onFoldChange?.(firstInvalid);
+        return;
+      }
+      await formik.submitForm();
+    } finally {
+      setIsNavigating(false);
+    }
+  }, [isNavigating, onFoldChange]);
+
+  const foldSteps = BASICS_FOLDS.map(item => ({ id: item.id, label: item.title, panelId: `builder-basics-${item.id}` }));
+  const FoldFields = FOLD_COMPONENTS[fold];
+  const isLastFold = fold === FORMAT_FOLD_INDEX;
+
   return (
     <SectionCard
       anchorId={anchorId}
@@ -227,220 +259,46 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, formRef, disa
       canRetry={canRetry}
       onRetry={retry}
     >
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <BuilderStepper
+          steps={foldSteps}
+          currentStep={BASICS_FOLDS[fold].id}
+          onSelect={id => goToFold(BASICS_FOLDS.findIndex(item => item.id === id))}
+          ariaLabel="Program basics sections"
+          itemLabel="Section"
+        />
+        <p className="text-xs font-medium text-body dark:text-gray-400">
+          {fold + 1} of {BASICS_FOLDS.length}
+        </p>
+      </div>
+
       <Formik
-        innerRef={formRef}
+        innerRef={formikRef}
         initialValues={formInitialValues}
         enableReinitialize
         validationSchema={validationSchema}
         onSubmit={handleContinue}
       >
         {({ values, setFieldValue }) => (
-          <Form className="flex flex-col gap-8" onBlur={() => handleBlur(values)}>
-            <FieldGroup title="About the program">
-              <FormikField name="title" label="Title" placeholder="e.g. Menopause Wellness Coach Certification" required disabled={disabled} />
-              <FormikField name="subtitle" label="Subtitle" placeholder="Optional short tagline" disabled={disabled} />
-              <div className="md:col-span-2">
-                <FormikField
-                  name="short_description"
-                  label="Short Description"
-                  placeholder="One or two sentences learners will see on the program card"
-                  rows={3}
-                  disabled={disabled}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <FormikField
-                  name="full_description"
-                  label="Full Description"
-                  placeholder="The complete program description shown on the program's detail page"
-                  rows={6}
-                  disabled={disabled}
-                />
-              </div>
-            </FieldGroup>
-
-            <FieldGroup title="Catalog" description="Where and how learners find this program.">
-              <FormikSelect name="category" label="Category" placeholder="Select category" options={categoryOptions || []} disabled={disabled} />
-              <FormikSelect name="level" label="Level" placeholder="Select level" options={LEVEL_OPTIONS} disabled={disabled} />
-              <FormikField name="duration_estimate" label="Duration Estimate" placeholder="e.g. 6–8 hours" disabled={disabled} />
-              <FormikField name="language" label="Language" placeholder="e.g. English" disabled={disabled} />
-              <ContentCatalogTagsField
-                context="certification_program"
-                name="tags"
-                label="Tags"
-                modalTitle="Select tags"
-                triggerPlaceholder="Select tags"
+          // The DOM form never submits on its own (Enter in a lone text input, e.g. the promo video,
+          // would otherwise jump to Step 2 from the middle of the step).
+          <Form className="flex flex-col gap-8" onBlur={() => handleBlur(values)} onSubmit={event => event.preventDefault()}>
+            <div id={foldSteps[fold].panelId} role="tabpanel" aria-labelledby={`${foldSteps[fold].panelId}-tab`}>
+              <FoldFields
+                values={values}
+                setFieldValue={setFieldValue}
+                handleBlur={handleBlur}
                 disabled={disabled}
-                onChange={next => handleBlur({ ...values, tags: next })}
+                categoryOptions={categoryOptions}
+                isUploadingThumbnail={isUploadingThumbnail}
+                onThumbnailDrop={handleThumbnailDrop}
+                openRecurringPicker={(index, value) => {
+                  setEditingRecurringIndex(index);
+                  setFieldValue('recurring_picker_value', value);
+                  setIsRecurringModalOpen(true);
+                }}
               />
-              <div className="flex flex-col gap-2">
-                <span id="target-audience-label" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Target Learner Type
-                </span>
-                <div role="group" aria-labelledby="target-audience-label" className="flex flex-wrap gap-2">
-                  {TARGET_AUDIENCE_OPTIONS.map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      disabled={disabled}
-                      aria-pressed={values.target_audience === option.value}
-                      onClick={() => {
-                        setFieldValue('target_audience', option.value);
-                        handleBlur({ ...values, target_audience: option.value });
-                      }}
-                      className={`rounded-lg border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary ${
-                        values.target_audience === option.value
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-gray-300 text-gray-600 dark:border-strokedark dark:text-gray-300'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400">Controls where this program appears in learner discovery &amp; filters.</p>
-              </div>
-            </FieldGroup>
-
-            <FieldGroup title="Media">
-              <FormikDropzone
-                name="file"
-                label={isUploadingThumbnail ? 'Thumbnail (uploading…)' : 'Thumbnail'}
-                fileURLs={values.thumbnail ? [values.thumbnail] : []}
-                Icon={FaRegFileImage}
-                disabled={disabled || isUploadingThumbnail}
-                onDrop={files => handleThumbnailDrop(files, values, setFieldValue)}
-              />
-              <div className="flex flex-col gap-4">
-                <FormikField name="promo_video" label="Promo Video (link)" placeholder="https://" disabled={disabled} />
-                <FormikField name="outcomes" label="Outcomes" placeholder="One outcome per line" rows={5} disabled={disabled} />
-              </div>
-            </FieldGroup>
-
-            <FieldGroup title="Schedule & format">
-              <DateTimePicker name="start_date" label="Start Date & Time" disabled={disabled} />
-              <FormikSelect name="time_zone" label="Time Zone" placeholder="Select time zone" options={TIME_ZONES} disabled={disabled} />
-              <FormikSelect name="event_type" label="Type" placeholder="Select type" options={EVENT_TYPE_OPTIONS} disabled={disabled} />
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Make it recurring</label>
-                <ToggleButtonGroup
-                  value={values.is_recurring}
-                  exclusive
-                  disabled={disabled}
-                  onChange={(_, newValue) => {
-                    if (newValue === null) return;
-                    setFieldValue('is_recurring', newValue);
-                    const nextRecurringDates = newValue ? values.recurring_dates : [];
-                    if (!newValue) setFieldValue('recurring_dates', nextRecurringDates);
-                    handleBlur({ ...values, is_recurring: newValue, recurring_dates: nextRecurringDates });
-                  }}
-                  size="small"
-                  color="primary"
-                >
-                  <ToggleButton value={false}>No</ToggleButton>
-                  <ToggleButton value={true}>Yes</ToggleButton>
-                </ToggleButtonGroup>
-              </div>
-
-              {values.is_recurring && (
-                <div className="md:col-span-2 rounded-xl border border-gray-200 dark:border-strokedark p-4 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Recurring schedule</h4>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      disabled={disabled}
-                      onClick={() => {
-                        setEditingRecurringIndex(null);
-                        setFieldValue('recurring_picker_value', '');
-                        setIsRecurringModalOpen(true);
-                      }}
-                    >
-                      Add Date & Time
-                    </Button>
-                  </div>
-                  {(values.recurring_dates || []).map((item, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2 items-center">
-                      <p className="text-sm text-gray-700 dark:text-gray-300">
-                        {dayjs(item).isValid() ? dayjs(item).format('MMM D, YYYY h:mm A') : item}
-                      </p>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        disabled={disabled}
-                        onClick={() => {
-                          setEditingRecurringIndex(index);
-                          setFieldValue('recurring_picker_value', item);
-                          setIsRecurringModalOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        disabled={disabled}
-                        onClick={() => {
-                          const nextRecurringDates = (values.recurring_dates || []).filter((_, i) => i !== index);
-                          setFieldValue('recurring_dates', nextRecurringDates);
-                          handleBlur({ ...values, recurring_dates: nextRecurringDates });
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Delivery</label>
-                <ToggleButtonGroup
-                  value={values.is_online}
-                  exclusive
-                  disabled={disabled}
-                  onChange={(_, newValue) => {
-                    if (newValue === null) return;
-                    setFieldValue('is_online', newValue);
-                    handleBlur({ ...values, is_online: newValue });
-                  }}
-                  size="small"
-                  color="primary"
-                >
-                  {[
-                    { label: 'Online', value: true },
-                    { label: 'Offline', value: false },
-                  ].map(opt => (
-                    <ToggleButton key={String(opt.value)} value={opt.value}>
-                      {opt.label}
-                    </ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-              </div>
-
-              {values.is_online ? (
-                <FormikField
-                  name="meeting_link"
-                  label="Meeting URL"
-                  placeholder="Enter your meeting url e.g. Zoom, Google Meet, etc."
-                  disabled={disabled}
-                />
-              ) : (
-                <FormikField name="venue_location" label="Venue Location" placeholder="Enter your venue location" disabled={disabled} />
-              )}
-
-              <div className="md:col-span-2">
-                <FormikMultiSelect
-                  name="followup_support"
-                  label="Follow-up Support"
-                  options={CONSULTATION_TYPES}
-                  disabled={disabled}
-                />
-              </div>
-            </FieldGroup>
+            </div>
 
             <Popup
               heading="Pick recurring date & time"
@@ -480,6 +338,27 @@ const ProgramBasicsSection = ({ initialValues, onSave, onContinue, formRef, disa
           </Form>
         )}
       </Formik>
+
+      {formatSection ? <div className={isLastFold ? 'mt-8' : 'hidden'}>{formatSection}</div> : null}
+
+      <div className="mt-8 flex items-center justify-between gap-3 border-t border-stroke pt-4 dark:border-strokedark">
+        {fold > 0 ? (
+          <Button type="button" variant="secondary" size="lg" disabled={isNavigating} onClick={() => goToFold(fold - 1)}>
+            ← Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        {isLastFold ? (
+          <Button type="button" size="2xl" isLoading={isNavigating} onClick={continueToNextStep}>
+            Continue to Content &amp; Publish →
+          </Button>
+        ) : (
+          <Button type="button" size="lg" isLoading={isNavigating} onClick={() => goToFold(fold + 1)}>
+            Next →
+          </Button>
+        )}
+      </div>
     </SectionCard>
   );
 };
