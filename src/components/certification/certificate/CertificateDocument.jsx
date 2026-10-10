@@ -105,9 +105,9 @@ const Seal = ({ certType, platformLogo, platformName }) => {
         <image
           href={platformLogo}
           x="54"
-          y="81.95"
+          y="80.4"
           width="92"
-          height="36.1"
+          height="39.2"
           preserveAspectRatio="xMidYMid meet"
           onError={() => setLogoFailed(true)}
         />
