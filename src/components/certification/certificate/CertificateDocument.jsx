@@ -50,64 +50,83 @@ const fitText = (el, min) => {
   }
 };
 
-const Seal = ({ certType }) => (
-  <svg className="nd-cert-seal" viewBox="0 0 200 200" role="img" aria-label="Wellness for everyone seal">
-    <defs>
-      <path id="nd-cert-arc-top" d="M 32,100 A 68,68 0 0 1 168,100" />
-      <path id="nd-cert-arc-bottom" d="M 22,100 A 78,78 0 0 0 178,100" />
-    </defs>
-    <circle cx="100" cy="100" r="97" fill="#FFFFFF" />
-    <circle cx="100" cy="100" r="98" fill="none" stroke="#FF8C00" strokeWidth="3" />
-    <circle
-      cx="100"
-      cy="100"
-      r="93"
-      fill="none"
-      stroke="#FF8C00"
-      strokeWidth="2.4"
-      strokeDasharray="0.1 5"
-      strokeLinecap="round"
-    />
-    <circle cx="100" cy="100" r="87" fill="none" stroke="#006400" strokeWidth="1" />
-    <circle cx="100" cy="100" r="59" fill="#FFF7EE" stroke="#FF8C00" strokeWidth="1.5" />
-    <text
-      fontFamily="DM Sans, sans-serif"
-      fontSize="11.5"
-      fontWeight="600"
-      letterSpacing="2.6"
-      fill="#006400"
-      textAnchor="middle"
-    >
-      <textPath href="#nd-cert-arc-top" startOffset="50%">
-        WELLNESS FOR EVERYONE
-      </textPath>
-    </text>
-    <text
-      id="nd-cert-seal-bottom"
-      fontFamily="DM Sans, sans-serif"
-      fontSize="11.5"
-      fontWeight="600"
-      letterSpacing="2.6"
-      fill="#006400"
-      textAnchor="middle"
-    >
-      <textPath href="#nd-cert-arc-bottom" startOffset="50%">
-        {(certType || '').toUpperCase()}
-      </textPath>
-    </text>
-    <text
-      x="100"
-      y="106"
-      textAnchor="middle"
-      fontFamily="Playfair Display, serif"
-      fontSize="19"
-      fontWeight="600"
-      fill="#006400"
-    >
-      NourishDoc
-    </text>
-  </svg>
-);
+const Seal = ({ certType, platformLogo, platformName }) => {
+  // The centre medallion carries the platform wordmark (the same PNG the Brevo email templates
+  // use). If it ever 404s we drop back to the typeset name rather than leaving a blank seal.
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = Boolean(platformLogo) && !logoFailed;
+
+  return (
+    <svg className="nd-cert-seal" viewBox="0 0 200 200" role="img" aria-label="Wellness for everyone seal">
+      <defs>
+        <path id="nd-cert-arc-top" d="M 32,100 A 68,68 0 0 1 168,100" />
+        <path id="nd-cert-arc-bottom" d="M 22,100 A 78,78 0 0 0 178,100" />
+      </defs>
+      <circle cx="100" cy="100" r="97" fill="#FFFFFF" />
+      <circle cx="100" cy="100" r="98" fill="none" stroke="#FF8C00" strokeWidth="3" />
+      <circle
+        cx="100"
+        cy="100"
+        r="93"
+        fill="none"
+        stroke="#FF8C00"
+        strokeWidth="2.4"
+        strokeDasharray="0.1 5"
+        strokeLinecap="round"
+      />
+      <circle cx="100" cy="100" r="87" fill="none" stroke="#006400" strokeWidth="1" />
+      <circle cx="100" cy="100" r="59" fill="#FFF7EE" stroke="#FF8C00" strokeWidth="1.5" />
+      <text
+        fontFamily="DM Sans, sans-serif"
+        fontSize="11.5"
+        fontWeight="600"
+        letterSpacing="2.6"
+        fill="#006400"
+        textAnchor="middle"
+      >
+        <textPath href="#nd-cert-arc-top" startOffset="50%">
+          WELLNESS FOR EVERYONE
+        </textPath>
+      </text>
+      <text
+        id="nd-cert-seal-bottom"
+        fontFamily="DM Sans, sans-serif"
+        fontSize="11.5"
+        fontWeight="600"
+        letterSpacing="2.6"
+        fill="#006400"
+        textAnchor="middle"
+      >
+        <textPath href="#nd-cert-arc-bottom" startOffset="50%">
+          {(certType || '').toUpperCase()}
+        </textPath>
+      </text>
+      {showLogo ? (
+        <image
+          href={platformLogo}
+          x="54"
+          y="81.95"
+          width="92"
+          height="36.1"
+          preserveAspectRatio="xMidYMid meet"
+          onError={() => setLogoFailed(true)}
+        />
+      ) : (
+        <text
+          x="100"
+          y="106"
+          textAnchor="middle"
+          fontFamily="Playfair Display, serif"
+          fontSize="19"
+          fontWeight="600"
+          fill="#006400"
+        >
+          {platformName || 'NourishDoc'}
+        </text>
+      )}
+    </svg>
+  );
+};
 
 const CertificateDocument = ({ data, paper = 'a4' }) => {
   const fitRef = useRef(null);
@@ -195,7 +214,7 @@ const CertificateDocument = ({ data, paper = 'a4' }) => {
 
                 <div className="nd-cert-ribbon">
                   <div className="nd-cert-type">{data.certType}</div>
-                  <Seal certType={data.certType} />
+                  <Seal certType={data.certType} platformLogo={data.platformLogo} platformName={data.platformName} />
                 </div>
               </div>
 
