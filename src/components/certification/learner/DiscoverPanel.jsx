@@ -106,8 +106,8 @@ const DiscoverPanel = () => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Certification Programs</h1>
-                <p className="text-gray-600 text-sm">Earn recognized certifications from expert coaches</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Professional Tracks</h1>
+                <p className="text-gray-600 text-sm">Explore accredited learning tracks, elevate your practice, and earn recognized credentials in specialized health and wellness.</p>
               </div>
             </div>
             <p className="text-gray-700 text-lg leading-relaxed">

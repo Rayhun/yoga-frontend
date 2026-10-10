@@ -22,6 +22,12 @@ const ENROLL_BADGES = {
 };
 const ACCESS_ENDED_STATUSES = ['Expired', 'Refunded'];
 
+// "1 Module" / "3 Modules"; a missing count reads as 0 ("0 Modules"), as it did before.
+const countLabel = (count, noun) => {
+  const total = count || 0;
+  return `${total} ${noun}${total === 1 ? '' : 's'}`;
+};
+
 const ProgramCard = ({ program, onClick }) => {
   const isEnrolled = program?.is_enrolled || program?.enroll_status;
   const isFull = program.seat_limit !== null && program.seats_remaining === 0;
@@ -83,11 +89,12 @@ const ProgramCard = ({ program, onClick }) => {
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-1">
             <FaBookOpen size={12} className="text-green-500" />
-            <span>{program.module_count || 0} modules</span>
+            <span>{countLabel(program.module_count, 'Module')}</span>
           </div>
+          <span aria-hidden="true">•</span>
           <div className="flex items-center gap-1">
             <FaAward size={12} className="text-blue-500" />
-            <span>{program.lesson_count || 0} lessons</span>
+            <span>{countLabel(program.lesson_count, 'Lesson')}</span>
           </div>
         </div>
 
@@ -123,7 +130,7 @@ const ProgramCard = ({ program, onClick }) => {
             onClick={e => { e.stopPropagation(); onClick(); }}
             className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all"
           >
-            Continue Certificate
+            Continue Track
           </button>
         ) : isFull ? (
           <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-center text-red-500">
@@ -134,7 +141,7 @@ const ProgramCard = ({ program, onClick }) => {
             onClick={e => { e.stopPropagation(); onClick(); }}
             className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:from-green-600 hover:to-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            Start Certificate
+            Start Track
           </button>
         )}
       </div>
