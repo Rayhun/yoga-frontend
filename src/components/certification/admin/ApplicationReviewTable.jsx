@@ -7,11 +7,21 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
 import useTable from '@/hooks/useTable';
-import { PageHeader } from '@/components/common/page';
+import useAuthContext from '@/hooks/useAuthContext';
+import { PageHeader, PageHeaderQuickActions } from '@/components/common/page';
 import { BasicTable, TableActions } from '@/components/common/table';
 import queryKeys from '@/utils/query-keys';
 import useConfirm from '@/hooks/useConfirm';
-import { toastApiError, formatSignupDate } from '@/utils/helpers';
+import { downloadBlobAsCsv, toastApiError, formatSignupDate } from '@/utils/helpers';
+import {
+  createQteApplication,
+  exportApplications,
+  importApplications,
+} from '@/services/private/certification/applicationsCsv';
+import { addRowToCache, submitNewQte } from './csv/csvTransfer';
+import { buildHeaderActions, createExportHandler } from './csv/headerActions';
+import AddQteModal from './csv/AddQteModal';
+import ImportApplicationsDialog from './csv/ImportApplicationsDialog';
 import {
   approveApplication,
   deleteApplication,
@@ -29,7 +39,9 @@ const TABS = [
   { key: 'institution', label: 'Institutions', actionType: 'institution' },
 ];
 
-const STATUS_FILTERS = ['submitted', 'under_review', 'approved', 'rejected'];
+// 'draft' is where a record created with "+ Add New" starts (and where unfinished sign-ups sit), so the
+// admin needs a way to see it.
+const STATUS_FILTERS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
 // The admin serializer returns first_name and last_name separately; the Name column shows both.
 const getFullName = application =>
@@ -52,8 +64,15 @@ const ApplicationReviewTable = () => {
   const [statusFilter, setStatusFilter] = useState('submitted');
   const [rejectTarget, setRejectTarget] = useState(null);
   const [viewedApplication, setViewedApplication] = useState(null);
+  const [showImport, setShowImport] = useState(false);
+  const [showAddNew, setShowAddNew] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const confirm = useConfirm();
   const queryClient = useQueryClient();
+  // The import/export/create endpoints are Admin-only (Staff can open this page but would get a 403).
+  const {
+    user: { isAdmin },
+  } = useAuthContext();
 
   const { mutateAsync: approveMutate } = useMutation({ mutationFn: approveApplication });
   const { mutateAsync: rejectMutate } = useMutation({ mutationFn: rejectApplication });
@@ -63,6 +82,46 @@ const ApplicationReviewTable = () => {
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: [queryKeys.certificationApplicationsList] }),
     [queryClient]
+  );
+
+  // Export the active tab (and the status filter it is showing) as CSV; no navigation, error toast on failure.
+  const runExport = useMemo(
+    () => createExportHandler({ exportFn: exportApplications, download: downloadBlobAsCsv, onError: toastApiError, setBusy: setIsExporting }),
+    []
+  );
+  const handleExport = useCallback(async () => {
+    const exported = await runExport({ type: activeTab.key, status: statusFilter });
+    if (exported) toast.success('Export downloaded');
+  }, [runExport, activeTab.key, statusFilter]);
+
+  const handleImportApplied = useCallback(
+    async result => {
+      toast.success(`Import finished: ${result.updated} updated, ${result.skipped} skipped`);
+      await invalidateList(); // refresh the table in place
+    },
+    [invalidateList]
+  );
+
+  // "+ Add New" (QTE tab): new records start as Draft, so show the Draft filter and put the row at the top
+  // of its cached list straight away; the invalidation then confirms it against the server.
+  const handleAddNew = useCallback(
+    async values => {
+      const result = await submitNewQte({ createFn: createQteApplication, values });
+      if (!result.ok) {
+        if (Object.keys(result.fieldErrors).length === 0) toast.error(result.message);
+        return result;
+      }
+      setStatusFilter('draft');
+      queryClient.setQueryData([queryKeys.certificationApplicationsList, 'qte', 'draft'], cached =>
+        addRowToCache(cached, result.row)
+      );
+      await invalidateList();
+      setShowAddNew(false);
+      if (result.emailSent) toast.success('QTE record created. They have been emailed to set a password.');
+      else toast.warning(result.message);
+      return result;
+    },
+    [queryClient, invalidateList]
   );
 
   const handleApprove = useCallback(
@@ -119,6 +178,19 @@ const ApplicationReviewTable = () => {
   );
 
   const isQTE = activeTab.key === 'qte';
+
+  const headerActions = useMemo(
+    () =>
+      buildHeaderActions({
+        isAdmin,
+        tabKey: activeTab.key,
+        isExporting,
+        onImport: () => setShowImport(true),
+        onExport: handleExport,
+        onAddNew: () => setShowAddNew(true),
+      }),
+    [isAdmin, activeTab.key, isExporting, handleExport]
+  );
 
   const handleToggleActive = useCallback(
     async row => {
@@ -279,7 +351,9 @@ const ApplicationReviewTable = () => {
   return (
     <React.Fragment>
       <div>
-        <PageHeader title="Certification Applications" />
+        <PageHeader title="Certification Applications">
+          {headerActions.length > 0 && <PageHeaderQuickActions actions={headerActions} />}
+        </PageHeader>
 
         <div className="flex gap-2 mb-4">
           {TABS.map(tab => (
@@ -313,6 +387,22 @@ const ApplicationReviewTable = () => {
 
         <BasicTable isLoading={isLoading} columns={columns} data={data || []} />
       </div>
+
+      {isAdmin && showImport && (
+        <ImportApplicationsDialog
+          key={activeTab.key}
+          show
+          type={activeTab.key}
+          tabLabel={isQTE ? 'QTE' : 'Institution'}
+          importFn={importApplications}
+          onApplied={handleImportApplied}
+          onClose={() => setShowImport(false)}
+        />
+      )}
+
+      {isAdmin && isQTE && (
+        <AddQteModal show={showAddNew} onClose={() => setShowAddNew(false)} onSubmit={handleAddNew} />
+      )}
 
       <RejectApplicationModal
         show={!!rejectTarget}

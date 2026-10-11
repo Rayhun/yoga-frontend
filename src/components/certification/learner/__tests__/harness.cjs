@@ -25,11 +25,13 @@ const harness = {
   catalog: () => ({ data: { results: { data: { 'all-programs': [], tags: [], categories: [] } } } }),
   enrolled: () => ({ data: { results: { data: { 'all-programs': [] } } } }),
   pills: null, // props the page passed to TrackFilterPills
+  axiosCalls: [], // every call made through the shared axios client
   detail: null, // catalog-detail response body for the program detail page
   learner: null, // learner-detail response body (enrolled)
   detailCalls: [],
   learnerCalls: [],
   reset() {
+    this.axiosCalls = [];
     this.detail = null;
     this.learner = null;
     this.detailCalls = [];
@@ -65,6 +67,25 @@ const stubs = {
     useMutation: () => ({ mutateAsync: async () => ({}), isPending: false }),
     useQueryClient: () => ({ invalidateQueries() {} }),
   },
+  // --- admin applications CSV (admin/csv/__tests__) ---
+  '@/lib/axios': {
+    __esModule: true,
+    default: {
+      get: async (url, config) => {
+        harness.axiosCalls.push({ method: 'get', url, config });
+        return { data: 'csv', headers: {} };
+      },
+      post: async (url, body, config) => {
+        harness.axiosCalls.push({ method: 'post', url, body, config });
+        return { data: {} };
+      },
+    },
+  },
+  '@/hooks/useTable': { __esModule: true, default: () => ({ isLoading: false, columns: [], data: [] }) },
+  '@/hooks/useConfirm': { __esModule: true, default: () => async () => null },
+  '@/components/common/table': { BasicTable: () => React.createElement('div', null, 'table'), TableActions: () => null },
+  './RejectApplicationModal': { __esModule: true, default: nothing },
+  './ApplicationReviewDrawer': { __esModule: true, default: nothing },
   // --- program detail page (details/__tests__) ---
   'next/link': props => React.createElement('a', { href: props.href, className: props.className }, props.children),
   'react-toastify': { toast: { success() {}, error() {}, info() {} } },
