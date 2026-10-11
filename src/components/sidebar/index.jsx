@@ -9,7 +9,8 @@ import SidebarLinkGroup from './SidebarLinkGroup';
 import SIDEBAR from '@/utils/sidebar';
 import { USER_ROLE } from '@/utils/authorization';
 import queryKeys from '@/utils/query-keys';
-import { getMyInstitutionApplication, getMyQTEApplication } from '@/services/private/certification/application';
+import { getMyInstitutionApplication } from '@/services/private/certification/application';
+import useApprovedQTE from '@/hooks/useApprovedQTE';
 import { MdLogout, MdOutlineContactSupport } from 'react-icons/md';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { FiUser, FiCreditCard, FiCalendar } from 'react-icons/fi';
@@ -93,17 +94,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     }
   }, [sidebarExpanded]);
 
-  // Same check as TeacherQTEStatusBanner / the program-builder layout guard — "approved QTE"
-  // isn't part of useAuthContext, so it takes a real fetch; queryKey is shared so this stays
-  // deduped against those.
-  const { data: qteApplication } = useQuery({
-    queryKey: [queryKeys.myQTEApplication],
-    queryFn: getMyQTEApplication,
-    select: res => res?.data,
-    retry: false,
-    enabled: userRole === USER_ROLE.TEACHER,
-  });
-  const isApprovedQTE = qteApplication?.creator_type === 'qte' && qteApplication?.application_status === 'approved';
+  // QTE-track state straight from the auth payload (no request) — the same hook the route guard, the
+  // dashboards and the program-builder guard use.
+  const qte = useApprovedQTE({ enabled: userRole === USER_ROLE.TEACHER });
+  const isApprovedQTE = qte.isApprovedQTE;
+  const isQteTrack = userRole === USER_ROLE.TEACHER && qte.isQteTrack;
 
   // Same check (and shared queryKey) as the institution portal's layout guard.
   const { data: institutionApplication } = useQuery({
@@ -118,8 +113,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   // Approved creators get the focused sidebar (see SIDEBAR's approved-creator menu), which includes
   // Help & Support.
+  // Every QTE-track Teacher gets Help & Support too (a suspended one needs the support link).
   const isApprovedCreator =
-    (userRole === USER_ROLE.TEACHER && isApprovedQTE) || (userRole === USER_ROLE.INSTITUTION && isApprovedInstitution);
+    (userRole === USER_ROLE.TEACHER && (isApprovedQTE || isQteTrack)) ||
+    (userRole === USER_ROLE.INSTITUTION && isApprovedInstitution);
 
   const customerV2Menu = useMemo(() => {
     if (!usesCustomerV2Sidebar) return null;
@@ -132,6 +129,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     if (userRole === USER_ROLE.ADMIN) return SIDEBAR.ADMIN;
     if (userRole === USER_ROLE.STAFF) return SIDEBAR.STAFF;
     if (userRole === USER_ROLE.TEACHER) {
+      // Never show the Expert menu to someone who may be on the QTE track: nothing until the state is known,
+      // and a QTE-track Teacher who is not approved gets the QTE menu (approved QTEs keep the creator menu).
+      if (qte.isLoading) return [];
+      if (isQteTrack && !isApprovedQTE) return SIDEBAR.getQteTrackSidebarMenuItems(qte.view);
       return SIDEBAR.getTeacherSidebarMenuItems(
         is_profile_complete,
         has_event_or_consult,
@@ -150,6 +151,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     has_event_or_consult,
     stripe_onboarded,
     isApprovedQTE,
+    isQteTrack,
+    qte.isLoading,
+    qte.view,
     isApprovedInstitution,
     is_chat_group,
     customerV2Menu,

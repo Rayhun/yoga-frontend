@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { FaRegClock, FaCheckCircle, FaTimesCircle, FaSearch } from 'react-icons/fa';
+import { FaRegClock, FaCheckCircle, FaTimesCircle, FaSearch, FaBan } from 'react-icons/fa';
 
 const STATUS_CONFIG = {
   submitted: {
@@ -31,6 +31,14 @@ const STATUS_CONFIG = {
     bg: 'bg-red-50 border-red-200',
     title: 'Application not approved',
     message: 'Your application was not approved this time.',
+  },
+  suspended: {
+    Icon: FaBan,
+    color: 'text-gray-700',
+    bg: 'bg-gray-50 border-gray-300',
+    title: 'Account suspended',
+    message:
+      'Your QTE access is suspended, so the certification tools are unavailable for now. Please contact support to find out why and what happens next.',
   },
 };
 

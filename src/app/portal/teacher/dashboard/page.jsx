@@ -6,25 +6,33 @@ import TeacherQTEStatusBanner from '@/components/certification/apply/TeacherQTES
 import ExpertHomeDashboard from '@/components/expert/HomeDashboard';
 import useAuthContext from '@/hooks/useAuthContext';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import useApprovedQTE from '@/hooks/useApprovedQTE';
+import QteDashboard from '@/components/qte/QteDashboard';
+import { QTE_VIEW } from '@/utils/qteTrack';
 import { getExpertHomeDashboard } from '@/services/private/expert/dashboard';
 import queryKeys from '@/utils/query-keys';
 
 export default function Page() {
   const { user } = useAuthContext();
   const userRole = user?.profile?.role ?? '';
+  const qte = useApprovedQTE();
 
+  // The Expert dashboard API answers 403 for QTE-track accounts, so it is never requested for them.
   const { data, isLoading, failureReason, isError } = useQuery({
     queryFn: getExpertHomeDashboard,
     queryKey: [queryKeys.expertHomeDashboard],
-    enabled: userRole === 'Teacher',
+    enabled: userRole === 'Teacher' && qte.view === QTE_VIEW.NOT_QTE,
     refetchOnMount: 'always',
   });
 
   useHandleApiResponse(failureReason);
 
-  if (!user || userRole !== 'Teacher') {
+  if (!user || userRole !== 'Teacher' || qte.isLoading) {
     return <PageLoader />;
   }
+
+  // QTE track (any status) never sees the Expert dashboard; the guard sends a draft to the wizard.
+  if (qte.isQteTrack) return <QteDashboard />;
 
   if (isLoading) return <PageLoader />;
 

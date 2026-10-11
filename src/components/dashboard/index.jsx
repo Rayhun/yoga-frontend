@@ -5,6 +5,7 @@ import ECommerce from '@/components/dashboard/E-commerce/E-commerce';
 import ExpertQuickSteps from '@/components/expert/ExpertQuickSteps';
 import useAuthContext from '@/hooks/useAuthContext';
 import useApprovedQTE from '@/hooks/useApprovedQTE';
+import { getQtePortalTarget } from '@/utils/qteTrack';
 
 const ClientPortalPage = () => {
   const { user } = useAuthContext();
@@ -15,9 +16,18 @@ const ClientPortalPage = () => {
   const stripeOnboarded = user?.profile?.stripe_onboarded ?? false;
   // Approved QTEs don't use Guided Experiences (hidden from their sidebar), so they don't need one
   // to reach the dashboard. Only looked up for Teachers — this page serves every role.
-  const { isApprovedQTE } = useApprovedQTE({ enabled: userRole === 'Teacher' });
+  const qte = useApprovedQTE({ enabled: userRole === 'Teacher' });
+  const { isApprovedQTE } = qte;
+  const qtePortalTarget = getQtePortalTarget(qte);
 
   useEffect(() => {
+    // QTE-track users never go through the Expert quick steps or Expert dashboard: the QTE dashboard
+    // (or, while the application is a draft, the application wizard).
+    if (qtePortalTarget) {
+      router.replace(qtePortalTarget);
+      return;
+    }
+
     // Redirect teachers to the new home dashboard once onboarding is complete
     if (userRole === 'Teacher' && isProfileComplete && (hasEventOrConsult || isApprovedQTE) && stripeOnboarded) {
       router.replace('/portal/teacher/dashboard');
@@ -51,11 +61,19 @@ const ClientPortalPage = () => {
     // Business owners and employees can access the regular portal
     // Business owners can also access the Business Dashboard via sidebar
     // Business employees have the same experience as individual users
-  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, isApprovedQTE, user?.isBusinessOwner, router]);
+  }, [userRole, isProfileComplete, hasEventOrConsult, stripeOnboarded, isApprovedQTE, qtePortalTarget, user?.isBusinessOwner, router]);
 
   const renderDashboard = () => {
     switch (userRole) {
       case 'Teacher':
+        // A QTE-track user is on their way to the QTE dashboard / wizard — never flash the Expert quick steps.
+        if (qte.isLoading || qte.isQteTrack) {
+          return (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+            </div>
+          );
+        }
         // Show quick steps if any condition is not met
         if (!isProfileComplete || !hasEventOrConsult || !stripeOnboarded) {
           return <ExpertQuickSteps />;

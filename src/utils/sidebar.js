@@ -722,6 +722,41 @@ const getTeacherSidebarMenuItems = (
   );
 };
 
+// Sidebar for a QTE-track Teacher who is not approved (approved QTEs keep the menu above). Never offers an
+// Expert page: draft = the application wizard + Profile; suspended = the explanatory dashboard only;
+// submitted / under_review / rejected = QTE dashboard + Profile. `view` is a QTE_VIEW from utils/qteTrack.js.
+const getQteTrackSidebarMenuItems = view => {
+  const dashboard = {
+    Icon: FiTarget,
+    label: 'Dashboard',
+    href: '/portal/teacher/dashboard',
+    isActive: pathname => pathname.includes('/portal/teacher/dashboard'),
+    disabled: false,
+  };
+  if (view === 'suspended') return [dashboard];
+
+  const profile = {
+    Icon: FaUser,
+    label: 'Profile',
+    href: '/portal/teacher/profile?active_tab=about',
+    isActive: pathname => pathname.includes('/portal/teacher/profile'),
+    disabled: false,
+  };
+  if (view === 'locked') {
+    return [
+      {
+        Icon: FiTarget,
+        label: 'Complete Application',
+        href: '/portal/teacher/editProfile',
+        isActive: pathname => pathname.includes('/portal/teacher/editProfile'),
+        disabled: false,
+      },
+      profile,
+    ];
+  }
+  return [dashboard, profile];
+};
+
 const AFFILIATE = [
   {
     Icon: MdHome,
@@ -795,6 +830,7 @@ const SIDEBAR = {
   STAFF,
   CUSTOMER,
   getTeacherSidebarMenuItems,
+  getQteTrackSidebarMenuItems,
   AFFILIATE,
   INSTITUTION,
   getInstitutionSidebarMenuItems,

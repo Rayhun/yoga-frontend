@@ -57,7 +57,7 @@ const stubs = {
   'next/navigation': {
     useRouter: () => ({ push: p => harness.pushes.push(p), replace: p => harness.pushes.push(p) }),
     useSearchParams: () => harness.url,
-    usePathname: () => '/portal/customer/certification',
+    usePathname: () => harness.pathname || '/portal/customer/certification',
   },
   '@tanstack/react-query': {
     useQuery: opts => {

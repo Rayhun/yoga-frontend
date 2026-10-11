@@ -2,20 +2,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { FaRegFileImage, FaFile } from 'react-icons/fa6';
 import Button from '@/components/common/Button';
 import FormikField from '@/components/common/form/formik/FormikField';
-import { FiMail, FiUser, FiClock, FiPlay, FiGlobe, FiAward, FiTarget, FiInfo } from 'react-icons/fi';
+import { FiMail, FiUser, FiClock, FiPlay, FiGlobe, FiTarget, FiInfo } from 'react-icons/fi';
 import { FaLinkedin } from 'react-icons/fa';
 import { LuBriefcaseBusiness } from 'react-icons/lu';
 import FormikRichTextEditor from '@/components/common/form/formik/FormikRichTextEditor';
-import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
 // import FormikSubmittableField from '@/components/common/form/formik/FormikSubmittable';
 import FormikSwitch from '@/components/common/form/formik/FormikSwitch';
-import FormikTermsAgreement from '@/components/common/form/formik/FormikTermsAgreement';
 import { CertificationsField, ExpertCatalogTagsField } from '@/components/lms/general/fields';
 import {
   EXPERT_PROFILE_CATALOG_FIELDS,
@@ -37,9 +35,15 @@ import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import { TITLE_OPTIONS } from '@/utils/constants';
 import { ONE_MB } from '@/utils/general';
 import FormikImageInput from '@/components/common/form/formik/FormikImageInput';
-import ApplicationStatusCard from '@/components/certification/apply/ApplicationStatusCard';
+import QteApplicationStep, { QteStepButtons } from './QteApplicationStep';
+import {
+  clearDraft as clearStoredDraft,
+  loadDraft,
+  qteInitialValues,
+  saveDraft,
+  submitQteApplication,
+} from './qteApplication';
 
-const QTE_DOCUMENT_ACCEPT = { 'application/pdf': [], 'image/png': [], 'image/jpeg': [] };
 const QTE_IN_FLIGHT_STATUSES = ['submitted', 'under_review', 'approved'];
 
 const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
@@ -50,6 +54,8 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [draftValues, setDraftValues] = useState(null);
   const [uploadingField, setUploadingField] = useState(null);
+  const [qteSection, setQteSection] = useState(0); // which section of step 4 (the QTE application) is open
+  const searchParams = useSearchParams();
   const draftStorageKey = `expert_profile_form_draft_${isAdminContext ? 'admin' : 'teacher'}_${selected?.id || 'new'}`;
 
   // KAN-120: step 4 (QTE application) only exists for self-service applicants who signed
@@ -59,6 +65,11 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
   const totalSteps = isQteApplicant ? 4 : 3;
   const isQteStepBlocked =
     isQteApplicant && QTE_IN_FLIGHT_STATUSES.includes(selected?.application_status);
+  // "Re-apply" from the QTE dashboard (?reapply=1): a rejected applicant reopens the application step, prefilled
+  // from the answers the Expert row already holds (and any newer device draft).
+  const isReapply =
+    isQteApplicant && selected?.application_status === 'rejected' && searchParams?.get('reapply') === '1';
+  const isQteSectionedStep = isQteApplicant && currentStep === totalSteps && !isQteStepBlocked;
 
   const { mutateAsync: addExpert } = useMutation({
     mutationFn: addNewExpert,
@@ -128,27 +139,16 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     program_file: null,
     // QTE application fields (step 4) — seeded from the Expert row itself, which already
     // carries these columns (KAN-85/87), so no separate application fetch is needed here.
-    legal_name: selected?.legal_name || '',
-    public_name: selected?.public_name || '',
-    country: selected?.country || '',
-    timezone: selected?.timezone || '',
-    teaching_experience_years: selected?.teaching_experience_years || '',
-    sample_curriculum: selected?.sample_curriculum || '',
-    sample_lecture_link: selected?.sample_lecture_link || '',
-    prior_student_count: selected?.prior_student_count || '',
-    government_id_file: selected?.government_id_file || null,
-    resume_file: selected?.resume_file || null,
-    agreement_accepted: false,
+    ...qteInitialValues(selected),
   };
 
   const initialValues = draftValues ? { ...baseInitialValues, ...draftValues } : baseInitialValues;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const savedDraft = localStorage.getItem(draftStorageKey);
-    if (!savedDraft) return;
+    const parsedDraft = loadDraft(window.localStorage, draftStorageKey);
+    if (!parsedDraft) return;
     try {
-      const parsedDraft = JSON.parse(savedDraft);
       if (parsedDraft?.values) {
         const values = { ...parsedDraft.values };
         const tagFields = [
@@ -175,11 +175,18 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         }
         setDraftValues(values);
       }
-      if (parsedDraft?.step >= 1 && parsedDraft?.step <= totalSteps) setCurrentStep(parsedDraft.step);
+      if (!isReapply && parsedDraft?.step >= 1 && parsedDraft?.step <= totalSteps) setCurrentStep(parsedDraft.step);
     } catch {
-      localStorage.removeItem(draftStorageKey);
+      clearStoredDraft(window.localStorage, draftStorageKey);
     }
-  }, [draftStorageKey, languageCatalogRows, totalSteps]);
+  }, [draftStorageKey, languageCatalogRows, totalSteps, isReapply]);
+
+  // Re-apply opens straight on the application step (its first section).
+  useEffect(() => {
+    if (!isReapply) return;
+    setCurrentStep(totalSteps);
+    setQteSection(0);
+  }, [isReapply, totalSteps]);
 
   const fullFieldSchema = useMemo(
     () => ({
@@ -345,62 +352,33 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
     return Yup.object(schemaForStep);
   }, [currentStep, fullFieldSchema, stepFieldKeys, isQteStepBlocked]);
 
+  // Device-only draft (localStorage). Picked files cannot be stored, so they are dropped from it (see saveDraft).
   const persistDraft = (values, step) => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(
-      draftStorageKey,
-      JSON.stringify({
-        values,
-        step,
-      })
-    );
+    saveDraft(window.localStorage, draftStorageKey, values, step);
   };
 
   const clearDraft = () => {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(draftStorageKey);
+    clearStoredDraft(window.localStorage, draftStorageKey);
   };
 
   const handleSubmit = async (values, { setSubmitting, setTouched }) => {
     try {
       if (isQteApplicant && currentStep === totalSteps) {
-        let govIdKey = typeof values.government_id_file === 'string' ? values.government_id_file : null;
-        if (values.government_id_file && typeof values.government_id_file !== 'string') {
-          setUploadingField('government_id_file');
-          const { data: govIdUpload } = await uploadCertificationFile({ file: values.government_id_file });
-          govIdKey = govIdUpload?.file_key;
-        }
-
-        let resumeKey = typeof values.resume_file === 'string' ? values.resume_file : null;
-        if (values.resume_file && typeof values.resume_file !== 'string') {
-          setUploadingField('resume_file');
-          const { data: resumeUpload } = await uploadCertificationFile({ file: values.resume_file });
-          resumeKey = resumeUpload?.file_key;
-        }
-        setUploadingField(null);
-
-        const qtePayload = {
-          legal_name: values.legal_name,
-          public_name: values.public_name,
-          linkedin: values.linkedin,
-          country: values.country,
-          timezone: values.timezone,
-          teaching_experience_years: values.teaching_experience_years,
-          sample_curriculum: values.sample_curriculum,
-          sample_lecture_link: values.sample_lecture_link,
-          prior_student_count: values.prior_student_count,
-          certifications: values.certifications,
-          government_id_file: govIdKey,
-          resume_file: resumeKey,
-          agreement_accepted: values.agreement_accepted,
-        };
-
-        await applyForQTEMutate({ payload: qtePayload });
-        clearDraft();
-        await queryClient.invalidateQueries([{ queryKey: [queryKeys.myQTEApplication] }]);
-        await queryClient.invalidateQueries([
-          { queryKey: [queryKeys.teacherProfile, selected.id, queryClient.loggedInUser] },
-        ]);
+        // The device draft is cleared only once the server accepted the application.
+        await submitQteApplication({
+          values,
+          upload: uploadCertificationFile,
+          apply: applyForQTEMutate,
+          clearDraftFn: clearDraft,
+          onUploading: setUploadingField,
+        });
+        await queryClient.invalidateQueries({ queryKey: [queryKeys.myQTEApplication] });
+        await queryClient.invalidateQueries({ queryKey: [queryKeys.teacherProfile] });
+        // The QTE state (draft -> submitted) lives in the auth payload: wait for it, otherwise the route
+        // guard would still see "draft" and send the user straight back to this wizard.
+        await queryClient.invalidateQueries({ queryKey: [queryKeys.loggedInUser] });
         toast.success('QTE application submitted for review');
         router.push('/portal/teacher/dashboard');
         return;
@@ -515,7 +493,8 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
           enableReinitialize
         >
           {({ isSubmitting, values }) => (
-            <Form className="flex flex-col gap-6">
+            // On the application step only the buttons move on: Enter in a text input must not submit a half-shown form.
+            <Form className="flex flex-col gap-6" {...(isQteSectionedStep ? { onSubmit: event => event.preventDefault() } : {})}>
               <div className="px-2 py-2 flex justify-center">
                 <div className="flex items-center justify-center">
                   {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step, index) => (
@@ -738,84 +717,14 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
               )}
 
               {currentStep === 4 && isQteApplicant && (
-                <div className="space-y-6">
-                  {isQteStepBlocked ? (
-                    <ApplicationStatusCard
-                      applicationStatus={selected.application_status}
-                      rejectedReason={selected.rejected_reason}
-                    />
-                  ) : (
-                    <>
-                      {selected?.application_status === 'rejected' && selected?.rejected_reason && (
-                        <ApplicationStatusCard
-                          applicationStatus="rejected"
-                          rejectedReason={selected.rejected_reason}
-                        />
-                      )}
-
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                          <FiAward className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                          QTE Application
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormikField name="legal_name" label="Legal Name" placeholder="Legal Name" Icon={FiUser} required />
-                          <FormikField name="public_name" label="Public Name" placeholder="Public Name" Icon={FiUser} required />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormikField name="country" label="Country" placeholder="Country" required />
-                          <FormikField name="timezone" label="Timezone" placeholder="e.g. America/New_York" required />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormikField
-                            type="number"
-                            name="teaching_experience_years"
-                            label="Teaching Experience (years)"
-                            placeholder="0"
-                            required
-                          />
-                          <FormikField
-                            type="number"
-                            name="prior_student_count"
-                            label="Prior Student Count"
-                            placeholder="0"
-                            required
-                          />
-                        </div>
-                        <FormikField name="sample_curriculum" label="Sample Curriculum (link)" placeholder="https://" required />
-                        <FormikField
-                          name="sample_lecture_link"
-                          label="Sample Lecture (link, any platform)"
-                          placeholder="https://"
-                          required
-                        />
-                      </div>
-
-                      <div className="border-t border-gray-200 dark:border-gray-700" />
-
-                      <div className="space-y-4">
-                        <FormikDropzone
-                          name="government_id_file"
-                          label="Government ID"
-                          required
-                          accept={QTE_DOCUMENT_ACCEPT}
-                          supportedFilesText="pdf, jpg, jpeg and png files are supported."
-                        />
-                        <FormikDropzone
-                          name="resume_file"
-                          label="Resume"
-                          required
-                          accept={QTE_DOCUMENT_ACCEPT}
-                          supportedFilesText="pdf, jpg, jpeg and png files are supported."
-                        />
-                      </div>
-
-                      <div className="border-t border-gray-200 dark:border-gray-700" />
-
-                      <FormikTermsAgreement name="agreement_accepted" />
-                    </>
-                  )}
-                </div>
+                // Two short sections (6 + 5 inputs) of the same form; the draft is saved on this device only.
+                <QteApplicationStep
+                  section={qteSection}
+                  onSectionChange={setQteSection}
+                  selected={selected}
+                  isBlocked={isQteStepBlocked}
+                  onPersist={values => persistDraft(values, currentStep)}
+                />
               )}
 
               {/* Action Buttons */}
@@ -829,7 +738,19 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                 >
                   Cancel
                 </Button>
-                {currentStep > 1 && (
+                {isQteSectionedStep ? (
+                  <QteStepButtons
+                    section={qteSection}
+                    onSectionChange={setQteSection}
+                    onBackToPreviousStep={() => {
+                      persistDraft(values, currentStep - 1);
+                      setCurrentStep(prev => prev - 1);
+                    }}
+                    isSubmitting={isSubmitting}
+                    uploadingField={uploadingField}
+                  />
+                ) : null}
+                {currentStep > 1 && !isQteSectionedStep && (
                   <Button
                     type="button"
                     variant="secondary"
@@ -843,7 +764,7 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
                     Back
                   </Button>
                 )}
-                {!(currentStep === totalSteps && isQteStepBlocked) && (
+                {!(currentStep === totalSteps && isQteStepBlocked) && !isQteSectionedStep && (
                   <Button
                     type="submit"
                     size="lg"
