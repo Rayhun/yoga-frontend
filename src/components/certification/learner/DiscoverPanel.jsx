@@ -5,19 +5,31 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FaFilter } from 'react-icons/fa';
 import useToggle from '@/hooks/useToggle';
+import useAuthContext from '@/hooks/useAuthContext';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
-import Spinner from '@/components/common/loader/Spinner';
 import Popup from '@/components/common/popup';
 import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
 import CertificationLibraryFilter from './CertificationLibraryFilter';
-import ProgramCard from './ProgramCard';
-import { getCertificationCatalog } from '@/services/private/certification/catalog';
+import CatalogSection from './CatalogSection';
+import TrackFilterPills from './TrackFilterPills';
+import {
+  TRACK_TYPE_PARAM,
+  buildCatalogParams,
+  parseTrackType,
+  selectActiveTracks,
+  selectCatalogPrograms,
+} from './catalogModel';
+import { getCertificationCatalog, getEnrolledCertifications } from '@/services/private/certification/catalog';
 import queryKeys from '@/utils/query-keys';
+
+const catalogPrograms = response => response?.data?.results?.data?.['all-programs'] || [];
 
 const DiscoverPanel = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchParamUtils = useSearchParamUtils();
+  const { user } = useAuthContext();
+  const isSignedIn = Boolean(user?.email);
   const enrolledProgramId = searchParams.get('enrolled');
 
   const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
@@ -25,42 +37,53 @@ const DiscoverPanel = () => {
   const [filters, setFilters] = useState({});
 
   const selectedTag = searchParamUtils.get('tags') || '';
+  // The pill selection lives in the URL (?track_type=clinical) so it survives a reload and can be shared.
+  const trackType = parseTrackType(searchParamUtils.get(TRACK_TYPE_PARAM));
 
-  const stableFilters = useMemo(() => {
-    const combinedFilters = { ...filters };
-    if (selectedTag) {
-      combinedFilters.tags = [selectedTag];
-    }
-    if (!combinedFilters.tags?.length && !filters.tags?.length) {
-      combinedFilters.tags = [];
-    }
-    return combinedFilters;
-  }, [selectedTag, filters]);
+  const allParams = useMemo(
+    () => buildCatalogParams({ trackType, filters, tag: selectedTag }),
+    [trackType, filters, selectedTag]
+  );
+  const recommendedParams = useMemo(
+    () => buildCatalogParams({ trackType, filters, tag: selectedTag, recommended: true }),
+    [trackType, filters, selectedTag]
+  );
 
   const { isFetching, data: response } = useQuery({
-    queryFn: () => getCertificationCatalog(stableFilters),
-    queryKey: [queryKeys.certificationCatalog, JSON.stringify(stableFilters)],
+    queryFn: () => getCertificationCatalog(allParams),
+    queryKey: [queryKeys.certificationCatalog, JSON.stringify(allParams)],
+  });
+  const { isFetching: isFetchingRecommended, data: recommendedResponse } = useQuery({
+    queryFn: () => getCertificationCatalog(recommendedParams),
+    queryKey: [queryKeys.certificationCatalog, JSON.stringify(recommendedParams)],
+  });
+  // Existing endpoint, same one My Certifications uses; only asked for when signed in.
+  const { data: activeResponse } = useQuery({
+    queryFn: () => getEnrolledCertifications({ status: 'InProgress' }),
+    queryKey: [queryKeys.certificationEnrolledCertifications, 'InProgress'],
+    enabled: isSignedIn,
   });
 
-  const filteredPrograms = useMemo(
+  const allPrograms = useMemo(() => selectCatalogPrograms(catalogPrograms(response), searchText), [response, searchText]);
+  const recommendedPrograms = useMemo(
+    () => selectCatalogPrograms(catalogPrograms(recommendedResponse), searchText),
+    [recommendedResponse, searchText]
+  );
+  const activeTracks = useMemo(
     () =>
-      (response?.data?.results?.data?.['all-programs'] || []).filter(program =>
-        program.title?.toLowerCase().includes(searchText.toLowerCase())
-      ),
-    [response?.data?.results?.data, searchText]
+      isSignedIn
+        ? selectActiveTracks(catalogPrograms(activeResponse), {
+            searchText,
+            // The enrolled endpoint has no track_type filter: under a pill, keep only what the filtered catalog returned.
+            catalogIds: trackType ? new Set(catalogPrograms(response).map(program => program.id)) : null,
+          })
+        : [],
+    [isSignedIn, activeResponse, response, searchText, trackType]
   );
 
   const apiCategories = response?.data?.results?.data?.categories ?? [];
   const apiTags = response?.data?.results?.data?.tags ?? [];
-
-  const tags = useMemo(
-    () =>
-      apiTags.map(name => ({
-        id: name,
-        name,
-      })),
-    [apiTags]
-  );
+  const tags = useMemo(() => apiTags.map(name => ({ id: name, name })), [apiTags]);
 
   const handleApplyFilter = values => {
     setFilters(values);
@@ -74,6 +97,10 @@ const DiscoverPanel = () => {
       searchParamUtils.set('tags', selected?.name ?? selected?.id ?? '');
     }
   };
+
+  const handleSelectTrackType = value => searchParamUtils.set(TRACK_TYPE_PARAM, value);
+  const openProgram = program => router.push(`/portal/customer/certification/${program.id}`);
+  const isRefined = Boolean(searchText || selectedTag || trackType);
 
   return (
     <div className="flex flex-col gap-4 md:gap-7">
@@ -95,8 +122,8 @@ const DiscoverPanel = () => {
         />
       </Popup>
 
-      {/* Hero Section */}
-      <div className="bg-white text-gray-800 portal-hero rounded-2xl shadow-2xl mb-6 md:mb-8 relative overflow-hidden border border-gray-100">
+      {/* Header */}
+      <div className="bg-white text-gray-800 portal-hero rounded-2xl shadow-2xl mb-2 md:mb-4 relative overflow-hidden border border-gray-100">
         <div className="relative z-10 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 space-y-6">
             <div className="flex items-center gap-3 mb-4">
@@ -110,9 +137,6 @@ const DiscoverPanel = () => {
                 <p className="text-gray-600 text-sm">Explore accredited learning tracks, elevate your practice, and earn recognized credentials in specialized health and wellness.</p>
               </div>
             </div>
-            <p className="text-gray-700 text-lg leading-relaxed">
-              Advance your career with certified programs designed by industry experts and accredited institutions
-            </p>
           </div>
           <div className="md:w-1/2 mt-8 md:mt-0 aspect-[16/9]">
             <div className="relative">
@@ -129,8 +153,10 @@ const DiscoverPanel = () => {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 bg-white flex flex-col gap-4 rounded-lg shadow-md">
-        {/* Tags */}
+      <div className="p-4 sm:p-6 bg-white flex flex-col gap-6 rounded-lg shadow-md">
+        {/* Filter pills (whole page) */}
+        <TrackFilterPills selected={trackType} onSelect={handleSelectTrackType} />
+
         <FeaturedCategories
           categories={tags}
           selected={selectedTag ? [selectedTag] : []}
@@ -146,32 +172,34 @@ const DiscoverPanel = () => {
           <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
         </div>
 
-        {/* Programs Grid */}
-        <section>
-          {isFetching ? (
-            <div className="flex justify-center">
-              <Spinner />
-            </div>
-          ) : (
-            <div>
-              {filteredPrograms.length > 0 ? (
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                  {filteredPrograms.map(program => (
-                    <ProgramCard
-                      key={program.id}
-                      program={program}
-                      onClick={() => router.push(`/portal/customer/certification/${program.id}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="w-full h-[300px] flex justify-center items-center text-gray-500">
-                  {searchText || selectedTag ? 'No certifications found matching your criteria' : 'No certifications found'}
-                </div>
-              )}
-            </div>
-          )}
-        </section>
+        {/* Signed-in learners with at least one track in progress */}
+        {isSignedIn && (
+          <CatalogSection
+            title="My Active Tracks"
+            subtitle="Resume your learning and track your progress toward certification."
+            programs={activeTracks}
+            hideWhenEmpty
+            showProgress
+            onOpen={openProgram}
+          />
+        )}
+
+        <CatalogSection
+          title="Recommended Tracks for You"
+          subtitle="Expand your skill set with expert-led training designed for your level."
+          programs={recommendedPrograms}
+          isLoading={isFetchingRecommended && !recommendedResponse}
+          hideWhenEmpty
+          onOpen={openProgram}
+        />
+
+        <CatalogSection
+          title="All Tracks"
+          programs={allPrograms}
+          isLoading={isFetching}
+          emptyMessage={isRefined ? 'No tracks found matching your criteria' : 'No tracks are available yet. Please check back soon.'}
+          onOpen={openProgram}
+        />
       </div>
     </div>
   );

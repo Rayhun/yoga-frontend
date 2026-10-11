@@ -1,16 +1,11 @@
 import Image from 'next/image';
-import { FaPlay, FaBookOpen, FaCheckCircle, FaAward } from 'react-icons/fa';
+import { FaPlay, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
+import { metaLabel, priceLabel, startOrContinueLabel, trackBadgeLabel } from './catalogModel';
 
 const CREATOR_TYPE_LABELS = {
   qte: 'Coach',
   expert: 'Coach',
   institution: 'Institution',
-};
-
-const TARGET_AUDIENCE_LABELS = {
-  career: 'Career Track',
-  professional: 'Professional Track',
-  both: 'Career & Professional',
 };
 
 // enroll_status values from GET /certification/programs/enrolled/ (EnrolledProgramSerializer).
@@ -22,16 +17,9 @@ const ENROLL_BADGES = {
 };
 const ACCESS_ENDED_STATUSES = ['Expired', 'Refunded'];
 
-// "1 Module" / "3 Modules"; a missing count reads as 0 ("0 Modules"), as it did before.
-const countLabel = (count, noun) => {
-  const total = count || 0;
-  return `${total} ${noun}${total === 1 ? '' : 's'}`;
-};
-
-const ProgramCard = ({ program, onClick }) => {
+const ProgramCard = ({ program, onClick, showProgress = false }) => {
   const isEnrolled = program?.is_enrolled || program?.enroll_status;
   const isFull = program.seat_limit !== null && program.seats_remaining === 0;
-  const isFree = program.payment_type === 'free';
   const isComplete = program?.enroll_status === 'Complete';
   const isAccessEnded = ACCESS_ENDED_STATUSES.includes(program?.enroll_status);
   const enrollBadge = ENROLL_BADGES[program?.enroll_status] || ENROLL_BADGES.InProgress;
@@ -73,7 +61,7 @@ const ProgramCard = ({ program, onClick }) => {
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-            {TARGET_AUDIENCE_LABELS[program.target_audience] || program.target_audience}
+            {trackBadgeLabel(program.track_type)}
           </span>
         </div>
 
@@ -81,38 +69,42 @@ const ProgramCard = ({ program, onClick }) => {
           {program.title}
         </h4>
 
+        {/* Only present when the endpoint sends it (the catalog card does not today). */}
+        {program.short_description && (
+          <p className="text-sm text-gray-600 line-clamp-3">{program.short_description}</p>
+        )}
+
         {program.creator_display_name && (
           <p className="text-sm text-gray-500">By {program.creator_display_name}</p>
         )}
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <div className="flex items-center gap-1">
-            <FaBookOpen size={12} className="text-green-500" />
-            <span>{countLabel(program.module_count, 'Module')}</span>
-          </div>
-          <span aria-hidden="true">•</span>
-          <div className="flex items-center gap-1">
-            <FaAward size={12} className="text-blue-500" />
-            <span>{countLabel(program.lesson_count, 'Lesson')}</span>
-          </div>
+        {/* Stats: "3 Modules • 1 Lesson" */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <FaBookOpen size={12} className="text-green-500" aria-hidden="true" />
+          <span>{metaLabel(program)}</span>
         </div>
 
-        {/* Price */}
+        {/* Price: "USD 500 one-time" / "Free" */}
         <div className="flex items-center gap-2 min-h-[1.5rem]">
-          <span className="text-lg font-bold text-green-600">
-            {isFree ? 'Free' : `${program.currency || 'USD'} ${program.price}`}
-          </span>
-          {!isFree && <span className="text-sm text-gray-500">one-time</span>}
+          <span className="text-lg font-bold text-green-600">{priceLabel(program)}</span>
         </div>
 
         {/* Spacer to push button to bottom */}
         <div className="flex-1" />
 
-        {/* Progress bar for enrolled */}
-        {isEnrolled && !isComplete && !isAccessEnded && progress > 0 && (
-          <div className="w-full bg-gray-100 rounded-full h-1.5">
-            <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${progress}%` }} />
+        {/* Progress bar for enrolled (always shown in "My Active Tracks", otherwise once started) */}
+        {isEnrolled && !isComplete && !isAccessEnded && (showProgress || progress > 0) && (
+          <div>
+            <div
+              className="w-full bg-gray-100 rounded-full h-1.5"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress)}
+            >
+              <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${progress}%` }} />
+            </div>
+            {showProgress && <p className="mt-1 text-xs text-gray-500">{Math.round(progress)}% complete</p>}
           </div>
         )}
 
@@ -128,9 +120,9 @@ const ProgramCard = ({ program, onClick }) => {
         ) : isEnrolled ? (
           <button
             onClick={e => { e.stopPropagation(); onClick(); }}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all"
+            className="w-full min-h-[44px] py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200 hover:from-green-200 hover:to-emerald-200 hover:border-green-300 transition-all"
           >
-            Continue Track
+            {startOrContinueLabel(program)}
           </button>
         ) : isFull ? (
           <div className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-center text-red-500">
@@ -139,9 +131,9 @@ const ProgramCard = ({ program, onClick }) => {
         ) : (
           <button
             onClick={e => { e.stopPropagation(); onClick(); }}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:from-green-600 hover:to-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="w-full min-h-[44px] py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:from-green-600 hover:to-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            Start Track
+            {startOrContinueLabel(program)}
           </button>
         )}
       </div>
