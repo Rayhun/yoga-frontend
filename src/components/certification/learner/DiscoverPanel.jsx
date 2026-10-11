@@ -74,11 +74,10 @@ const DiscoverPanel = () => {
       isSignedIn
         ? selectActiveTracks(catalogPrograms(activeResponse), {
             searchText,
-            // The enrolled endpoint has no track_type filter: under a pill, keep only what the filtered catalog returned.
-            catalogIds: trackType ? new Set(catalogPrograms(response).map(program => program.id)) : null,
+            trackType, // enrolled cards carry their own track_type
           })
         : [],
-    [isSignedIn, activeResponse, response, searchText, trackType]
+    [isSignedIn, activeResponse, searchText, trackType]
   );
 
   const apiCategories = response?.data?.results?.data?.categories ?? [];

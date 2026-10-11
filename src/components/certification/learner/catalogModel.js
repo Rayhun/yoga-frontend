@@ -66,16 +66,35 @@ export const dedupeById = programs => {
 export const matchesSearch = (program, searchText) =>
   !searchText || (program.title || '').toLowerCase().includes(searchText.toLowerCase());
 
-// "My Active Tracks": the learner's in-progress enrollments. The enrolled endpoint cannot filter by
-// track type, so while a track filter is active only the ones the (already filtered) catalog also
-// returned are kept: pass `catalogIds` for that, or null when no filter is active.
-export const selectActiveTracks = (enrolled, { searchText = '', catalogIds = null } = {}) =>
+// "My Active Tracks": the learner's in-progress enrollments. Each enrolled card carries its own
+// `track_type` (same rule as the catalog), so a track pill filters them directly. That keeps a program
+// that is no longer published, and so absent from the catalog, correctly filtered.
+export const selectActiveTracks = (enrolled, { searchText = '', trackType = '' } = {}) =>
   dedupeById(enrolled).filter(
     program =>
       program.enroll_status === 'InProgress' &&
       matchesSearch(program, searchText) &&
-      (catalogIds === null || catalogIds.has(program.id))
+      (!trackType || program.track_type === trackType)
   );
+
+const NAMED_ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
+
+// A description as plain text: tags removed (script/style bodies with them), common entities decoded,
+// whitespace collapsed. The result is only ever rendered as a React text child (escaped), never as HTML,
+// so even a leftover "<" is shown literally and cannot run anything.
+export const plainText = value => {
+  if (typeof value !== 'string') return '';
+  let text = value.replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, ' ');
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(/<[^>]*>/g, ' '); // repeated, so "<<b>script>" cannot reassemble a tag
+  } while (text !== previous);
+  return text
+    .replace(/&(amp|lt|gt|quot|nbsp|#39);/g, entity => NAMED_ENTITIES[entity])
+    .replace(/\s+/g, ' ')
+    .trim();
+};
 
 export const selectCatalogPrograms = (programs, searchText = '') =>
   dedupeById(programs).filter(program => matchesSearch(program, searchText));

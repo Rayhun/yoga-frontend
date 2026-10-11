@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { FaPlay, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
-import { metaLabel, priceLabel, startOrContinueLabel, trackBadgeLabel } from './catalogModel';
+import { metaLabel, plainText, priceLabel, startOrContinueLabel, trackBadgeLabel } from './catalogModel';
 
 const CREATOR_TYPE_LABELS = {
   qte: 'Coach',
@@ -24,6 +24,7 @@ const ProgramCard = ({ program, onClick, showProgress = false }) => {
   const isAccessEnded = ACCESS_ENDED_STATUSES.includes(program?.enroll_status);
   const enrollBadge = ENROLL_BADGES[program?.enroll_status] || ENROLL_BADGES.InProgress;
   const progress = program?.progress || 0;
+  const description = plainText(program?.short_description);
 
   return (
     <div
@@ -69,10 +70,8 @@ const ProgramCard = ({ program, onClick, showProgress = false }) => {
           {program.title}
         </h4>
 
-        {/* Only present when the endpoint sends it (the catalog card does not today). */}
-        {program.short_description && (
-          <p className="text-sm text-gray-600 line-clamp-3">{program.short_description}</p>
-        )}
+        {/* Plain text only (tags stripped, never injected as HTML); hidden when empty. */}
+        {description && <p className="text-sm text-gray-600 line-clamp-2">{description}</p>}
 
         {program.creator_display_name && (
           <p className="text-sm text-gray-500">By {program.creator_display_name}</p>

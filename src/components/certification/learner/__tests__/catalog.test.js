@@ -21,6 +21,7 @@ const catalogResponse = (programs, extra = {}) => ({
 });
 const enrolledResponse = programs => ({ data: { results: { data: { 'all-programs': programs } } } });
 const render = element => renderToStaticMarkup(element);
+const card = overrides => render(require('react').createElement(ProgramCard, { program: program(1, overrides), onClick() {} }));
 const page = () => render(require('react').createElement(DiscoverPanel));
 
 test.beforeEach(() => harness.reset());
@@ -141,16 +142,35 @@ test('signed in with a track in progress: heading, sub-text, progress bar and Co
   assert.deepEqual(harness.enrolledCalls, [{ status: 'InProgress' }]);
 });
 
-test('under a track pill, My Active Tracks keeps only programs the filtered catalog returned', () => {
+test('under a track pill, My Active Tracks filters enrolled cards by their own track_type', () => {
   harness.url = new URLSearchParams('track_type=clinical');
-  harness.catalog = () => catalogResponse([program(1)]);
+  harness.catalog = () => catalogResponse([]); // the filtered catalog returns none of them: must not matter
   harness.enrolled = () => enrolledResponse([
-    program(1, { title: 'In Clinical', enroll_status: 'InProgress', progress: 10 }),
-    program(2, { title: 'Other Track', enroll_status: 'InProgress', progress: 10 }),
+    program(1, { title: 'Is Clinical', track_type: 'clinical', enroll_status: 'InProgress', progress: 10 }),
+    program(2, { title: 'Is Foundational', track_type: 'foundational', enroll_status: 'InProgress', progress: 10 }),
+    program(3, { title: 'No Track', track_type: null, enroll_status: 'InProgress', progress: 10 }),
   ]);
-  const section = page().split('>My Active Tracks</h2>')[1].split('>Recommended Tracks for You</h2>')[0];
-  assert.match(section, /In Clinical/);
-  assert.doesNotMatch(section, /Other Track/);
+  const section = page().split('>My Active Tracks</h2>')[1].split('>All Tracks</h2>')[0];
+  assert.match(section, /Is Clinical/);
+  assert.doesNotMatch(section, /Is Foundational/);
+  assert.doesNotMatch(section, /No Track/);
+});
+
+test('a no-longer-published program still shows under its pill (it is not in the catalog)', () => {
+  harness.url = new URLSearchParams('track_type=coaching_practice');
+  harness.catalog = () => catalogResponse([]);
+  harness.enrolled = () => enrolledResponse([program(9, { title: 'Retired But Mine', track_type: 'coaching_practice', enroll_status: 'InProgress', progress: 55 })]);
+  assert.match(page(), /Retired But Mine/);
+});
+
+test('All Tracks pill keeps every in-progress enrollment, whatever its track_type', () => {
+  const enrolled = [
+    program(1, { track_type: 'clinical', enroll_status: 'InProgress' }),
+    program(2, { track_type: null, enroll_status: 'InProgress' }),
+    program(3, { track_type: 'foundational', enroll_status: 'Complete' }),
+  ];
+  assert.deepEqual(model.selectActiveTracks(enrolled, { trackType: '' }).map(p => p.id), [1, 2]);
+  assert.deepEqual(model.selectActiveTracks(enrolled, { trackType: 'clinical' }).map(p => p.id), [1]);
 });
 
 // --- card text ---------------------------------------------------------------------------------
@@ -189,10 +209,47 @@ test('track badge per type, with "Professional Track" as the fallback', () => {
   assert.match(badge(undefined), /Professional Track</);
 });
 
-test('card shows the short description when the API sends one and no lesson content either way', () => {
-  const html = render(require('react').createElement(ProgramCard, { program: program(1, { short_description: 'Learn the basics.', modules: [{ title: 'SECRET MODULE' }] }), onClick() {} }));
-  assert.match(html, /Learn the basics\./);
-  assert.doesNotMatch(html, /SECRET MODULE/);
+test('the description is shown, clamped to two lines, between the title and the meta line', () => {
+  const html = card({ short_description: 'Learn the basics.', modules: [{ title: 'SECRET MODULE' }] });
+  assert.match(html, /<p class="[^"]*line-clamp-2[^"]*">Learn the basics\.<\/p>/);
+  assert.ok(html.indexOf('Track 1</h4>') < html.indexOf('Learn the basics.'));
+  assert.ok(html.indexOf('Learn the basics.') < html.indexOf('3 Modules'));
+  assert.doesNotMatch(html, /SECRET MODULE/); // no lesson/module content on a card
+});
+
+test('the description line is hidden when empty, missing or only markup', () => {
+  for (const value of [undefined, null, '', '   ', '<p></p>', '<br/>']) {
+    assert.doesNotMatch(card({ short_description: value }), /<p class="[^"]*line-clamp-2/, JSON.stringify(value)); // the title <h4> also clamps
+  }
+});
+
+test('a description containing tags renders as plain text, never as HTML', () => {
+  const html = card({ short_description: '<p onclick="x()">Hello <b>big</b> world</p><script>alert(1)</script><img src=x onerror=y>' });
+  assert.match(html, />Hello big world</);
+  for (const forbidden of ['<script', '<b>', 'src="x"', 'onclick', 'onerror', 'alert(1)']) assert.ok(!html.includes(forbidden), forbidden);
+  // entities are decoded to characters and then escaped by React, so they cannot become tags
+  const escaped = card({ short_description: 'Tom &amp; Jerry &lt;b&gt;' });
+  assert.match(escaped, /Tom &amp; Jerry &lt;b&gt;/);
+  assert.ok(!escaped.includes('<b>'));
+});
+
+test('plainText: nested/odd markup cannot reassemble a tag, non-strings give an empty string', () => {
+  assert.equal(model.plainText('<<b>script>alert(1)<</b>/script>'), 'script>alert(1) /script>');
+  assert.equal(model.plainText('a <style>p{}</style>b'), 'a b');
+  assert.equal(model.plainText(null), '');
+  assert.equal(model.plainText(42), '');
+});
+
+test('My Active Tracks badge comes from the enrolled card track_type, fallback only when null', () => {
+  harness.enrolled = () => enrolledResponse([
+    program(1, { title: 'Clin', track_type: 'clinical', enroll_status: 'InProgress', progress: 5 }),
+    program(2, { title: 'Untyped', track_type: null, enroll_status: 'InProgress', progress: 5 }),
+  ]);
+  const section = page().split('>My Active Tracks</h2>')[1].split('>All Tracks</h2>')[0];
+  const [clin, untyped] = [section.split('Untyped')[0], section.split('Untyped')[1]];
+  assert.match(clin, /Clinical Track</);
+  assert.doesNotMatch(clin, /Professional Track</);
+  assert.match(untyped, /Professional Track</);
 });
 
 test('header copy', () => {
