@@ -24,13 +24,3 @@ export const getModuleStatus = (module, blockedNotices) => {
     lessonBlockedCount: lessonStatuses.filter(status => status.blocked).length,
   };
 };
-
-// `_key` of the first item that keeps the curriculum from saving (untitled module/lesson, or a quiz
-// lesson with an incomplete question) — the target of the "saving paused → Go to" hint.
-export const findFirstUnsavableKey = values => {
-  const modules = values.modules || [];
-  const untitled = modules.flatMap(module => [module, ...(module.lessons || [])]).find(isUntitled);
-  if (untitled) return untitled._key;
-  const quizLesson = modules.flatMap(module => module.lessons || []).find(lesson => countQuizProblems(lesson) > 0);
-  return quizLesson?._key ?? null;
-};

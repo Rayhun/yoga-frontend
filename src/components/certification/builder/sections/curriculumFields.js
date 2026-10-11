@@ -128,15 +128,6 @@ export const blankLesson = () => ({
   questions: [],
 });
 
-export const blankModule = () => ({
-  _key: newKey('module'),
-  title: '',
-  description: '',
-  image: '',
-  unlock_rule: 'sequential',
-  unlock_date: '',
-  lessons: [],
-});
 
 const toDuration = lesson => {
   const minutes = parseInt(lesson.duration_minutes, 10);
@@ -253,11 +244,6 @@ export const getLessonFieldProblemsByTab = lesson => {
     else if (lesson.quiz_max_attempts !== '' && !isCount(lesson.quiz_max_attempts, { min: 1 })) settings = 'Max attempts must be 1 or more.';
   }
   return { content, settings };
-};
-
-export const getLessonProblem = lesson => {
-  const { content, settings } = getLessonFieldProblemsByTab(lesson);
-  return content || settings;
 };
 
 // "Question 2 — Add the question text." for a quiz's first unfinished question, else null; plus how many

@@ -60,16 +60,20 @@ const Banner = ({ tone, children, onDismiss }) => (
  * Until step 5b a lesson is edited with the existing lesson form inside the pane (LessonPane).
  */
 const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
-  { programId, initialModules, disabled = false, onChanged, onStatusChange, anchorId },
+  { programId, initialModules, disabled = false, onChanged, onStatusChange, anchorId, urlItemKey = null, onItemChange },
   ref
 ) {
   const confirm = useConfirm();
   const curriculum = useCurriculum({ programId, initialModules, onChanged });
   const { modules, seed, notice, failure, blockedNotices, isBusy } = curriculum;
 
-  const [selection, setSelection] = useState(() =>
-    initialModules[0] ? { kind: 'item', key: initialModules[0]._key, fallbackKey: initialModules[0]._key } : HOME
-  );
+  // The item named by the URL (`?lesson=` / `?module=`) opens first; an unknown or stale one is ignored and
+  // the first module opens, as before.
+  const [selection, setSelection] = useState(() => {
+    const fromUrl = urlItemKey && locateByKey(initialModules, urlItemKey) ? urlItemKey : null;
+    if (fromUrl) return { kind: 'item', key: fromUrl, fallbackKey: moduleKeyOf(initialModules, fromUrl) };
+    return initialModules[0] ? { kind: 'item', key: initialModules[0]._key, fallbackKey: initialModules[0]._key } : HOME;
+  });
   const [paneState, setPaneState] = useState(null);
   const [itemStates, setItemStates] = useState(() => new Map());
   const paneRef = useRef(null);
@@ -130,12 +134,13 @@ const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
         }
         setPaneState(null);
         setSelection(next);
+        onItemChange?.(next.kind === 'item' ? next.key : null); // keep the URL in step (saved items only)
         return true;
       } finally {
         switchingRef.current = false;
       }
     },
-    [confirm, activeKey]
+    [confirm, activeKey, onItemChange]
   );
 
   const selectItem = useCallback(
@@ -143,13 +148,28 @@ const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
     [requestSelect, modules]
   );
 
+  // Back/forward or a shared link changed the item in the URL: open it like a click would (the open item is
+  // saved first). An item that no longer exists is ignored.
+  useEffect(() => {
+    if (!urlItemKey || urlItemKey === activeKey || !locateByKey(modules, urlItemKey)) return;
+    requestSelect({ kind: 'item', key: urlItemKey, fallbackKey: moduleKeyOf(modules, urlItemKey) });
+    // only a change of the URL's item should trigger this
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlItemKey]);
+
   const createModule = async ({ title }) => {
     const result = await curriculum.addModule({ title });
-    if (result.ok) setSelection({ kind: 'item', key: result.key, fallbackKey: result.key });
+    if (result.ok) {
+      setSelection({ kind: 'item', key: result.key, fallbackKey: result.key });
+      onItemChange?.(result.key);
+    }
   };
   const createLesson = moduleId => async values => {
     const result = await curriculum.addLesson(moduleId, values);
-    if (result.ok) setSelection({ kind: 'item', key: result.key, fallbackKey: `module-${moduleId}` });
+    if (result.ok) {
+      setSelection({ kind: 'item', key: result.key, fallbackKey: `module-${moduleId}` });
+      onItemChange?.(result.key);
+    }
   };
 
   // One status for the builder's header: a failed action beats a saving one beats the open pane's state.
@@ -199,7 +219,7 @@ const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
     if (view.kind === 'item' && location) {
       const paneProps = { disabled, hasItem: curriculum.hasItem, registerPane, onState: handlePaneState };
       const paneKey = `${activeKey}-${seed}`;
-      const module = modules[location.mi];
+      const openModule = modules[location.mi]; // (not named `module`: Next forbids assigning that name)
       const crumb = location.type === 'module' ? `Module ${location.mi + 1}` : `Module ${location.mi + 1} › Lesson ${location.li + 1}`;
       return (
         <>
@@ -219,11 +239,11 @@ const CurriculumBuilderSection = forwardRef(function CurriculumBuilderSection(
             </div>
           </div>
           {location.type === 'module' ? (
-            <ModuleFold key={paneKey} module={module} saveFields={curriculum.saveModuleFields} {...paneProps} />
+            <ModuleFold key={paneKey} module={openModule} saveFields={curriculum.saveModuleFields} {...paneProps} />
           ) : (
             <LessonPane
               key={paneKey}
-              lesson={module.lessons[location.li]}
+              lesson={openModule.lessons[location.li]}
               saveFields={curriculum.saveLessonFields}
               saveQuiz={curriculum.saveQuiz}
               {...paneProps}

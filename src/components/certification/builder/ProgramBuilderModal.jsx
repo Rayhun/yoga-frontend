@@ -18,7 +18,8 @@ import {
   updateProgramPricing,
 } from '@/services/private/certification/program';
 import ProgramBasicsSection from '@/components/certification/builder/sections/ProgramBasicsSection';
-import { FORMAT_FOLD_INDEX } from '@/components/certification/builder/sections/basicsFolds';
+import useBuilderPosition from '@/components/certification/builder/useBuilderPosition';
+import { BASICS_FOLD_IDS, CONTENT_STEPS, itemFromKey, itemToKey } from '@/components/certification/builder/builderUrlState';
 import DeliveryFormatSection from '@/components/certification/builder/sections/DeliveryFormatSection';
 import CurriculumBuilderSection from '@/components/certification/builder/sections/CurriculumBuilderSection';
 import PricingSection from '@/components/certification/builder/sections/PricingSection';
@@ -153,18 +154,14 @@ const pickCertificateSetup = program => ({
  * ``programId`` is the route param — either an existing program's id, or the literal string
  * 'new'. On 'new', only Basics renders and Step 2 is disabled (nothing else can attach without an
  * id yet); the first successful Basics save creates the draft and replaces the URL with the real
- * id. Resuming an existing program (``routeParam !== 'new'``) defaults straight to Step 2.
+ * id. The step, the Basics part and the selected curriculum item live in the URL (``useBuilderPosition``);
+ * an existing program without a ``?step=`` opens at its first incomplete publish check.
  */
 const ProgramBuilderModal = ({ programId: routeParam }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [liveId, setLiveId] = useState(routeParam === 'new' ? null : routeParam);
-  const [currentStep, setCurrentStep] = useState(routeParam === 'new' ? 1 : 2);
-  const [activeTab, setActiveTab] = useState(TABS[0].id);
   const [sectionStatuses, setSectionStatuses] = useState({});
-  // Which part of the Basics step is showing (see basicsFolds.jsx). Lives here, not in the section,
-  // because the section remounts when the draft is first created.
-  const [basicsFold, setBasicsFold] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   // `curriculumRef.current.reload()` re-reads the curriculum from the server (e.g. after a CSV import).
   const curriculumRef = useRef(null);
@@ -175,6 +172,16 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     enabled: !!liveId,
   });
   const program = programRes?.data;
+
+  // Step / Basics part / selected curriculum item live in the URL (builderUrlState.js), so they survive a
+  // reload, a shared link, back/forward — and the /new → id swap when the draft is created.
+  const { position, goTo, selectItem, adoptCreatedProgram } = useBuilderPosition({ liveId, program });
+  const currentStep = position.step === 'basics' ? 1 : 2;
+  const activeTab = CONTENT_STEPS.includes(position.step) ? position.step : TABS[0].id;
+  const basicsFold = Math.max(0, BASICS_FOLD_IDS.indexOf(position.fold));
+  // Selecting step 2 again goes back to the tab that was open.
+  const lastContentStep = useRef(TABS[0].id);
+  if (CONTENT_STEPS.includes(position.step)) lastContentStep.current = position.step;
 
   const invalidateProgram = useCallback(
     () => queryClient.invalidateQueries([queryKeys.certificationProgramDetail, liveId]),
@@ -191,16 +198,15 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
         const { data: updated } = await updateProgramBasics({ id: created.id, payload: values });
         queryClient.setQueryData([queryKeys.certificationProgramDetail, created.id], { data: updated });
         setLiveId(created.id);
-        // Use the current pathname to preserve whether we're in /portal/teacher/... or /portal/institution/...
-        const basePath = window.location.pathname.replace('/new', '');
-        router.replace(`${basePath}/${created.id}`);
+        // /new → the real id, keeping the step and Basics part (and the portal prefix: teacher or institution).
+        adoptCreatedProgram(created.id);
         return updated;
       }
       const { data } = await updateProgramBasics({ id: liveId, payload: values });
       await invalidateProgram();
       return data;
     },
-    [liveId, router, queryClient, invalidateProgram]
+    [liveId, adoptCreatedProgram, queryClient, invalidateProgram]
   );
 
   const handleDeliverySave = useCallback(
@@ -270,26 +276,28 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
       const { step, tab } = SECTIONS[sectionId];
       // Delivery Format is shown under the Basics step's last part; coming back to Basics from another
       // step starts at its first part (same as selecting the step).
-      if (sectionId === 'delivery') setBasicsFold(FORMAT_FOLD_INDEX);
-      else if (step === 1 && currentStep !== 1) setBasicsFold(0);
-      setCurrentStep(step);
-      if (tab) setActiveTab(tab);
+      if (step === 1) {
+        const fold = sectionId === 'delivery' ? 'format' : currentStep !== 1 ? 'about' : position.fold;
+        goTo({ step: 'basics', fold });
+      } else {
+        goTo({ step: tab });
+      }
       setTimeout(() => {
         const anchor = document.getElementById(sectionAnchorId(sectionId));
         anchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         document.getElementById(`${sectionAnchorId(sectionId)}-title`)?.focus({ preventScroll: true });
       }, 0);
     },
-    [currentStep]
+    [currentStep, goTo, position.fold]
   );
 
-  // Selecting Basics from another step opens its first part.
+  // Selecting Basics from another step opens its first part; selecting step 2 returns to the open tab.
   const handleStepSelect = useCallback(
     step => {
-      if (step === 1 && currentStep !== 1) setBasicsFold(0);
-      setCurrentStep(step);
+      if (step === currentStep) return;
+      goTo(step === 1 ? { step: 'basics', fold: 'about' } : { step: lastContentStep.current });
     },
-    [currentStep]
+    [currentStep, goTo]
   );
 
   const blockers = useMemo(() => (program ? getPublishBlockers(program) : []), [program]);
@@ -361,9 +369,9 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
             anchorId={sectionAnchorId('basics')}
             initialValues={basicsInitialValues}
             onSave={handleBasicsSave}
-            onContinue={() => setCurrentStep(2)}
+            onContinue={() => goTo({ step: 'curriculum' })}
             fold={basicsFold}
-            onFoldChange={setBasicsFold}
+            onFoldChange={index => goTo({ step: 'basics', fold: BASICS_FOLD_IDS[index] })}
             formatSection={
               liveId ? (
                 <DeliveryFormatSection
@@ -386,13 +394,15 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
             aria-labelledby={`${STEP_PANEL_IDS[2]}-tab`}
             className={currentStep === 2 ? 'flex flex-col gap-6' : 'hidden'}
           >
-            <BuilderTabs tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
+            <BuilderTabs tabs={tabs} activeTab={activeTab} onSelect={tab => goTo({ step: tab })} />
             <TabPanel id="curriculum" activeTab={activeTab}>
               <CurriculumBuilderSection
                 ref={curriculumRef}
                 key={`curriculum-${liveId}`}
                 anchorId={sectionAnchorId('curriculum')}
                 programId={liveId}
+                urlItemKey={itemToKey(position.item)}
+                onItemChange={key => selectItem(itemFromKey(key))}
                 initialModules={modulesInitialValues}
                 onChanged={invalidateProgram}
                 onStatusChange={statusReporters.curriculum}
