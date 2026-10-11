@@ -19,6 +19,23 @@ export const UNLOCK_RULE_OPTIONS = [
 
 export const URL_LESSON_TYPES = ['video', 'pdf', 'link'];
 export const TEXT_LESSON_TYPES = ['text', 'assignment'];
+// Files uploaded through our own storage: `content_url` holds the private key the upload returns (never a link
+// the creator typed), and the server's read-only `signed_content_url` is only for previewing it.
+export const MEDIA_LESSON_TYPES = ['audio', 'image'];
+
+// The patch for switching a lesson's type. `content_url` means different things per family (a link, an audio
+// key, an image key) and the server rejects a link as a key, so it is cleared whenever the family changes
+// (video -> audio, audio -> image, image -> pdf ...); between link types (video -> pdf) the link is kept.
+export const lessonTypeChangePatch = (lesson, nextType) => {
+  const patch = { lesson_type: nextType };
+  const stored = lesson.lesson_type;
+  const keepsContent = stored === nextType || (URL_LESSON_TYPES.includes(stored) && URL_LESSON_TYPES.includes(nextType));
+  if (!keepsContent && (MEDIA_LESSON_TYPES.includes(stored) || MEDIA_LESSON_TYPES.includes(nextType))) {
+    patch.content_url = '';
+    patch.signed_content_url = '';
+  }
+  return patch;
+};
 
 // Durations are stored as "12 min" (CertLesson.duration is free text); the builder edits minutes.
 const DURATION_MINUTES_PATTERN = /^\s*(\d+)\s*(m|min|mins|minutes)?\s*$/i;
@@ -80,6 +97,7 @@ export const toLessonFormValues = lesson => {
     title: lesson.title || '',
     lesson_type: lesson.lesson_type || 'video',
     content_url: lesson.content_url || '',
+    signed_content_url: lesson.signed_content_url || '', // read-only preview link; never sent back
     text_content: lesson.text_content || '',
     image: lesson.image || '',
     duration_minutes: minutes,
@@ -98,6 +116,7 @@ export const blankLesson = () => ({
   title: '',
   lesson_type: 'video',
   content_url: '',
+  signed_content_url: '',
   text_content: '',
   image: '',
   duration_minutes: '',
@@ -162,7 +181,10 @@ const toLessonPayload = lesson => ({
   ...withId(lesson),
   title: lesson.title,
   lesson_type: lesson.lesson_type,
-  content_url: URL_LESSON_TYPES.includes(lesson.lesson_type) ? lesson.content_url || null : null,
+  content_url:
+    URL_LESSON_TYPES.includes(lesson.lesson_type) || MEDIA_LESSON_TYPES.includes(lesson.lesson_type)
+      ? lesson.content_url || null
+      : null,
   text_content: TEXT_LESSON_TYPES.includes(lesson.lesson_type) ? richTextOrNull(lesson.text_content) : null,
   image: lesson.image || null,
   duration: toDuration(lesson),

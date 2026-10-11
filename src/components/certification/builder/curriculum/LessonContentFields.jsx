@@ -3,13 +3,19 @@ import React from 'react';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import CertificationRichTextField from '@/components/certification/builder/CertificationRichTextField';
-import { TEXT_LESSON_TYPES, URL_LESSON_TYPES } from '@/components/certification/builder/sections/curriculumFields';
+import LessonMediaField from './LessonMediaField';
+import {
+  MEDIA_LESSON_TYPES,
+  TEXT_LESSON_TYPES,
+  URL_LESSON_TYPES,
+  lessonTypeChangePatch,
+} from '@/components/certification/builder/sections/curriculumFields';
 import { LESSON_TYPE_OPTIONS, TEXT_LABELS, URL_LABELS } from './lessonTypes';
 
 // What the creator typed into a field the new type doesn't use. It stays in the form (switching back
 // restores it) but the lesson no longer saves it.
 const getUnusedNotice = lesson => {
-  if (lesson.content_url?.trim() && !URL_LESSON_TYPES.includes(lesson.lesson_type)) {
+  if (lesson.content_url?.trim() && !URL_LESSON_TYPES.includes(lesson.lesson_type) && !MEDIA_LESSON_TYPES.includes(lesson.lesson_type)) {
     return 'The link you entered isn’t used by this lesson type. It is kept here if you switch back, but it is not saved with the lesson.';
   }
   if (lesson.text_content?.trim() && !TEXT_LESSON_TYPES.includes(lesson.lesson_type)) {
@@ -34,8 +40,9 @@ const LessonContentFields = ({ namePrefix, lesson, disabled, onLessonChange }) =
         options={LESSON_TYPE_OPTIONS}
         disabled={disabled}
         // FormikSelect passes the value; picking the selected option again clears it, which a lesson
-        // type can't be — keep the current type then.
-        onChange={value => onLessonChange({ lesson_type: value || lesson.lesson_type })}
+        // type can't be — keep the current type then. Changing between a link type and audio / image
+        // also clears `content_url`, so a link is never saved as a file key (the server refuses that).
+        onChange={value => onLessonChange(lessonTypeChangePatch(lesson, value || lesson.lesson_type))}
       />
       <FormikField name={`${namePrefix}.title`} label="Lesson Title" placeholder="e.g. Understanding the menopause transition" required disabled={disabled} />
 
@@ -46,6 +53,19 @@ const LessonContentFields = ({ namePrefix, lesson, disabled, onLessonChange }) =
             label={URL_LABELS[lesson.lesson_type]}
             placeholder="https://youtube.com/... or https://vimeo.com/..."
             disabled={disabled}
+          />
+        </div>
+      ) : null}
+      {MEDIA_LESSON_TYPES.includes(lesson.lesson_type) ? (
+        <div className="md:col-span-2">
+          <LessonMediaField
+            key={lesson.lesson_type}
+            lessonType={lesson.lesson_type}
+            title={lesson.title}
+            value={lesson.content_url}
+            previewUrl={lesson.signed_content_url}
+            disabled={disabled}
+            onChange={onLessonChange}
           />
         </div>
       ) : null}

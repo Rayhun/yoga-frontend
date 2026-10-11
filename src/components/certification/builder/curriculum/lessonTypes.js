@@ -1,6 +1,8 @@
-// The six lesson types a creator can pick, and which of a lesson's fields each one uses.
+// The lesson types a creator can pick, and which of a lesson's fields each one uses.
 export const LESSON_TYPE_OPTIONS = [
   { value: 'video', label: '🎥 Video' },
+  { value: 'audio', label: '🎧 Audio' },
+  { value: 'image', label: '🖼️ Image' },
   { value: 'pdf', label: '📄 PDF' },
   { value: 'text', label: '📝 Text' },
   { value: 'quiz', label: '🧩 Quiz' },

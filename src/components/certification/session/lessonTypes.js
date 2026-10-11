@@ -32,4 +32,4 @@ export const getLessonHref = (lessonId, programId) =>
 
 // Types a learner completes with an explicit "Mark as done" (the backend rejects quiz/assignment,
 // and video completes itself once the watch threshold is reached).
-export const MANUALLY_COMPLETABLE_TYPES = ['link', 'pdf', 'text'];
+export const MANUALLY_COMPLETABLE_TYPES = ['link', 'pdf', 'text', 'audio', 'image'];

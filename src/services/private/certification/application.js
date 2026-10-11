@@ -16,11 +16,15 @@ export const getMyQTEApplication = async () => {
   return axios.get('/certification/apply/expert-qte/me/');
 };
 
-export const uploadCertificationFile = async ({ file }) => {
+// `kind` ('audio' | 'image' | ...) is optional: the server then checks the file against that kind alone, with
+// its size limit (image 5 MB, audio 50 MB). The response carries `file_key` (store this) and `file_link`.
+export const uploadCertificationFile = async ({ file, kind, onUploadProgress }) => {
   const formData = new FormData();
   formData.append('file', file);
+  if (kind) formData.append('kind', kind);
 
   return axios.post('/certification/file/upload/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    ...(onUploadProgress ? { onUploadProgress } : {}),
   });
 };

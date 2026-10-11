@@ -13,6 +13,8 @@ import ModuleOutlinePanel from './ModuleOutlinePanel';
 import { CompletedBadge } from './MarkAsDoneButton';
 import CertQuizLesson from './lessons/CertQuizLesson';
 import AssignmentLesson from './lessons/AssignmentLesson';
+import AudioLesson from './lessons/AudioLesson';
+import ImageLesson from './lessons/ImageLesson';
 import LinkLesson from './lessons/LinkLesson';
 import PdfLesson from './lessons/PdfLesson';
 import TextLesson from './lessons/TextLesson';
@@ -20,6 +22,8 @@ import VideoLesson from './lessons/VideoLesson';
 
 const LESSON_BODIES = {
   video: VideoLesson,
+  audio: AudioLesson,
+  image: ImageLesson,
   link: LinkLesson,
   pdf: PdfLesson,
   text: TextLesson,
@@ -90,7 +94,8 @@ const LessonSessionView = ({ lessonId, programId }) => {
     if (!LessonBody) {
       return <div className="w-full h-[200px] flex justify-center items-center text-gray-500">This lesson type isn&apos;t supported yet.</div>;
     }
-    return <LessonBody key={lesson.id} lesson={lesson} programId={programId} />;
+    // `reloadLesson` fetches the lesson again (a fresh signed link for audio / image when the old one expired).
+    return <LessonBody key={lesson.id} lesson={lesson} programId={programId} reloadLesson={() => lessonQuery.refetch()} />;
   };
 
   return (

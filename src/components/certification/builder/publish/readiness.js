@@ -7,6 +7,7 @@ import { isBlankHtml } from '@/components/certification/builder/richText';
 
 const ONE_TIME = 'one_time';
 const URL_LESSON_TYPES = ['video', 'pdf', 'link'];
+const MEDIA_LESSON_TYPES = ['audio', 'image'];
 
 // `target` tells the builder where "Go" should take the creator.
 const check = (id, label, message, target) => ({ id, label, ok: !message, message, target });
@@ -47,6 +48,7 @@ const getLessonGap = lesson => {
   if (lesson.lesson_type === 'assignment' && isBlankHtml(lesson.text_content)) return 'has no instructions';
   if (lesson.lesson_type === 'text' && isBlankHtml(lesson.text_content)) return 'has no text';
   if (URL_LESSON_TYPES.includes(lesson.lesson_type) && !lesson.content_url?.trim()) return 'has no link';
+  if (MEDIA_LESSON_TYPES.includes(lesson.lesson_type) && !lesson.content_url?.trim()) return 'has no file';
   return null;
 };
 
