@@ -1,5 +1,4 @@
 'use client';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -7,39 +6,32 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
 import { FiLock } from 'react-icons/fi';
 import LinearProgress from '@mui/material/LinearProgress';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import { MdViewModule } from 'react-icons/md';
 import { FaTv } from 'react-icons/fa';
 import useHandleApiResponse from '@/hooks/useHandleApiResponse';
+import useSearchParamUtils from '@/hooks/useSearchParamUtils';
 import PageLoader from '@/components/common/loader/PageLoader';
-import Spinner from '@/components/common/loader/Spinner';
-import ContentCard from './ContentCard';
+import BuilderTabs from '@/components/certification/builder/BuilderTabs';
+import { CredentialsPanel, CurriculumPanel, OverviewPanel } from './ProgramTabPanels';
+import { DEFAULT_TAB, DETAIL_TABS, TAB_PARAM, parseTab, tabPanelId } from './detailTabs';
 import { getProgramCatalogDetail, getLearnerProgramDetail, checkoutCertificationProgram } from '@/services/private/certification/catalog';
 import queryKeys from '@/utils/query-keys';
 
-const TABS = {
-  JOURNEY: 'journey',
-  DESCRIPTION: 'description',
-  BENEFITS: 'benefits',
-};
-
-const ITEMS_PER_PAGE = 9;
+const TABLIST_CLASS = 'flex gap-1 overflow-x-auto border-b border-stroke dark:border-strokedark';
+const TABS = DETAIL_TABS.map(tab => ({ ...tab, panelId: tabPanelId(tab.id) }));
 
 const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState(TABS.JOURNEY);
-  const [displayedItemsCount, setDisplayedItemsCount] = useState(ITEMS_PER_PAGE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const loadingRef = useRef(null);
-  const observerRef = useRef(null);
+  const searchParamUtils = useSearchParamUtils();
+  // The selected tab lives in the URL (?tab=credentials), so a reload or a shared link keeps it.
+  const selectedTab = parseTab(searchParamUtils.get(TAB_PARAM));
+  const handleSelectTab = tabId => searchParamUtils.set(TAB_PARAM, tabId === DEFAULT_TAB ? '' : tabId);
 
   const {
     data: catalogResponse,
     isLoading: isCatalogLoading,
     failureReason: catalogError,
-    refetch,
   } = useQuery({
     queryFn: () => getProgramCatalogDetail({ id: programId }),
     queryKey: [queryKeys.certificationProgramCatalogDetail, programId],
@@ -62,6 +54,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
     retry: false,
   });
 
+  // Enrolled learners get the lock-aware module list; everyone else the outline-only catalog detail.
   const program = isEnrolled ? learnerResponse?.data : catalogProgram;
 
   const { mutateAsync: checkout, isPending: isEnrolling } = useMutation({
@@ -89,72 +82,7 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   };
 
   const isProgramCompleted = program?.enrollment_status === 'completed' || program?.enrollment_status === 'Completed';
-
   const programProgress = Math.round(program?.progress_percent || 0);
-
-  const allContent = useMemo(() => {
-    if (!program?.modules) return [];
-    const items = [];
-    program.modules.forEach(module => {
-      items.push({
-        ...module,
-        content_type: 'module',
-        completed: module.completed_count === module.total_count && module.total_count > 0,
-        locked: !isEnrolled || module.is_locked,
-      });
-    });
-    return items;
-  }, [program, isEnrolled]);
-
-  const displayedContent = useMemo(() => {
-    if (selectedTab !== TABS.JOURNEY) return [];
-    return allContent.slice(0, displayedItemsCount);
-  }, [allContent, displayedItemsCount, selectedTab]);
-
-  const hasMoreItems = useMemo(() => {
-    return allContent.length > displayedItemsCount;
-  }, [allContent.length, displayedItemsCount]);
-
-  const loadMoreItems = useCallback(() => {
-    if (hasMoreItems && !isLoadingMore) {
-      setIsLoadingMore(true);
-      setTimeout(() => {
-        setDisplayedItemsCount(prev => Math.min(prev + ITEMS_PER_PAGE, allContent.length));
-        setIsLoadingMore(false);
-      }, 300);
-    }
-  }, [hasMoreItems, isLoadingMore, allContent.length]);
-
-  useEffect(() => {
-    if (selectedTab === TABS.JOURNEY) {
-      setDisplayedItemsCount(ITEMS_PER_PAGE);
-    }
-  }, [selectedTab]);
-
-  useEffect(() => {
-    if (selectedTab !== TABS.JOURNEY || isCatalogLoading || (isEnrolled && isLearnerLoading)) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMoreItems && !isLoadingMore) {
-          loadMoreItems();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadingRef.current) {
-      observer.observe(loadingRef.current);
-    }
-
-    observerRef.current = observer;
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMoreItems, isLoadingMore, selectedTab, loadMoreItems, isCatalogLoading, isEnrolled, isLearnerLoading]);
 
   if (isCatalogLoading || (isEnrolled && isLearnerLoading)) return <PageLoader />;
 
@@ -166,15 +94,16 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
     );
   }
 
-  const handleTabChange = (_, newValue) => {
-    setSelectedTab(newValue);
-  };
-
   const handleCompleteProgram = async () => {
     toast.success('Program completed successfully!');
   };
 
-  const benefits = catalogProgram.outcomes ? catalogProgram.outcomes.split('\n').filter(Boolean) : [];
+  // Overview and Credentials read the catalog detail (public-safe fields); Curriculum reads `program`.
+  const panels = {
+    overview: <OverviewPanel program={catalogProgram} />,
+    curriculum: <CurriculumPanel program={program || catalogProgram} isEnrolled={isEnrolled} programId={programId} />,
+    credentials: <CredentialsPanel program={catalogProgram} />,
+  };
 
   return (
     <div>
@@ -240,48 +169,28 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
       {/* Program Content */}
       <div className="p-4 my-5 bg-white rounded-lg shadow-md text-gray-800 dark:text-gray-200 flex flex-col md:flex-row gap-6 md:gap-12">
         <div className={`w-full ${isEnrolled ? 'md:w-3/4' : 'md:w-full'}`}>
-          {/* Tabs */}
-          <Tabs value={selectedTab === TABS.BENEFITS && benefits.length === 0 ? TABS.JOURNEY : selectedTab} onChange={handleTabChange}>
-            <Tab value={TABS.JOURNEY} label="Curriculum" />
-            <Tab value={TABS.DESCRIPTION} label="About" />
-            {benefits.length > 0 ? <Tab value={TABS.BENEFITS} label="Outcomes" /> : null}
-          </Tabs>
-          <div className="py-5">
-            {/* Journey Tab */}
-            <div hidden={selectedTab !== TABS.JOURNEY}>
-              <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedContent.map(item => (
-                  <ContentCard key={`${item.content_type}-${item.id}`} item={item} isEnrolled={isEnrolled} programId={programId} />
-                ))}
-              </div>
-              {/* Loading indicator for infinite scroll */}
-              {hasMoreItems && (
-                <div ref={loadingRef} className="flex justify-center items-center py-8">
-                  {isLoadingMore && (
-                    <div className="flex flex-col items-center gap-2">
-                      <Spinner size={40} />
-                      <p className="text-gray-600 dark:text-gray-400">Loading more content...</p>
-                    </div>
-                  )}
-                </div>
-              )}
+          <BuilderTabs
+            tabs={TABS}
+            activeTab={selectedTab}
+            onSelect={handleSelectTab}
+            ariaLabel="Program sections"
+            className={TABLIST_CLASS}
+            tabClassName="min-h-[44px] !px-5 md:text-base"
+          />
+          {/* All three panels stay in the DOM (hidden), so the tabs' aria-controls always resolve. */}
+          {TABS.map(tab => (
+            <div
+              key={tab.id}
+              id={tab.panelId}
+              role="tabpanel"
+              aria-labelledby={`${tab.panelId}-tab`}
+              hidden={tab.id !== selectedTab}
+              tabIndex={0}
+              className="py-5 outline-none"
+            >
+              {panels[tab.id]}
             </div>
-
-            {/* Description Tab */}
-            <div hidden={selectedTab !== TABS.DESCRIPTION}>
-              <div className="dark:text-white">{catalogProgram?.full_description || catalogProgram?.short_description || 'No description provided'}</div>
-            </div>
-
-            {/* Benefits Tab */}
-            <div hidden={selectedTab !== TABS.BENEFITS}>
-              <h5 className="text-black-2 font-bold mb-3">What you will learn</h5>
-              <ol className="list-tick list-inside grid grid-cols-2 gap-2 dark:text-white">
-                {benefits.map((benefit, idx) => (
-                  <li key={idx}>{benefit}</li>
-                ))}
-              </ol>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Program Details Sidebar */}
@@ -325,35 +234,13 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
         )}
       </div>
 
-      {/* Certificate Section */}
-      {catalogProgram.certificate_setting && (
-        <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
-          <h3 className="text-lg font-bold dark:text-white mb-3">Certificate Details</h3>
-          <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
-            <p className="font-semibold text-gray-900 dark:text-white">{catalogProgram.certificate_setting.certificate_title}</p>
-            {catalogProgram.certificate_setting.completion_rules && (
-              <p>{catalogProgram.certificate_setting.completion_rules}</p>
-            )}
-            {catalogProgram.certificate_setting.primary_issuer_name && (
-              <p>Issued by {catalogProgram.certificate_setting.primary_issuer_name}</p>
-            )}
-            {catalogProgram.certificate_setting.expiry_period_days && (
-              <p>Valid for {catalogProgram.certificate_setting.expiry_period_days} days after issuance</p>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Policies Section */}
-      {(catalogProgram.refund_policy || catalogProgram.completion_deadline_days || catalogProgram.code_of_conduct || catalogProgram.disclaimer) && (
+      {(catalogProgram.refund_policy || catalogProgram.code_of_conduct || catalogProgram.disclaimer) && (
         <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
           <h3 className="text-lg font-bold dark:text-white mb-3">Policies</h3>
           <div className="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
             {catalogProgram.refund_policy && (
               <p><strong>Refund Policy:</strong> {catalogProgram.refund_policy}</p>
-            )}
-            {catalogProgram.completion_deadline_days && (
-              <p><strong>Completion Deadline:</strong> {catalogProgram.completion_deadline_days} days after enrollment</p>
             )}
             {catalogProgram.code_of_conduct && (
               <p><strong>Code of Conduct:</strong> {catalogProgram.code_of_conduct}</p>

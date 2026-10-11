@@ -1,4 +1,4 @@
-import { FaBookOpen, FaClipboardList, FaFilePdf, FaLink, FaPlayCircle } from 'react-icons/fa';
+import { FaBookOpen, FaClipboardList, FaFilePdf, FaHeadphones, FaImage, FaLink, FaPlayCircle } from 'react-icons/fa';
 import { MdQuiz } from 'react-icons/md';
 
 // Per-type display config for certification lessons (CertLesson.lesson_type) — cards, side panel,
@@ -10,6 +10,10 @@ export const LESSON_TYPES = {
   text: { label: 'Reading', icon: FaBookOpen, tileClassName: 'bg-emerald-50 text-emerald-600' },
   quiz: { label: 'Quiz', icon: MdQuiz, tileClassName: 'bg-purple-50 text-purple-500' },
   assignment: { label: 'Assignment', icon: FaClipboardList, tileClassName: 'bg-amber-50 text-amber-600' },
+  // Not creatable yet (the backend has no such lesson types today); here so the detail-page chips are
+  // ready the day they exist. Nothing iterates this map, entries are only looked up by type.
+  audio: { label: 'Audio', icon: FaHeadphones, tileClassName: 'bg-indigo-50 text-indigo-500' },
+  image: { label: 'Image', icon: FaImage, tileClassName: 'bg-teal-50 text-teal-600' },
 };
 
 const FALLBACK_TYPE = { label: 'Lesson', icon: FaBookOpen, tileClassName: 'bg-gray-100 text-gray-500' };

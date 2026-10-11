@@ -25,7 +25,15 @@ const harness = {
   catalog: () => ({ data: { results: { data: { 'all-programs': [], tags: [], categories: [] } } } }),
   enrolled: () => ({ data: { results: { data: { 'all-programs': [] } } } }),
   pills: null, // props the page passed to TrackFilterPills
+  detail: null, // catalog-detail response body for the program detail page
+  learner: null, // learner-detail response body (enrolled)
+  detailCalls: [],
+  learnerCalls: [],
   reset() {
+    this.detail = null;
+    this.learner = null;
+    this.detailCalls = [];
+    this.learnerCalls = [];
     this.url = new URLSearchParams();
     this.user = { email: 'learner@example.com' };
     this.sets = [];
@@ -54,8 +62,25 @@ const stubs = {
       const pending = opts.queryFn();
       return { data: pending.__result, isFetching: false };
     },
+    useMutation: () => ({ mutateAsync: async () => ({}), isPending: false }),
+    useQueryClient: () => ({ invalidateQueries() {} }),
   },
+  // --- program detail page (details/__tests__) ---
+  'next/link': props => React.createElement('a', { href: props.href, className: props.className }, props.children),
+  'react-toastify': { toast: { success() {}, error() {}, info() {} } },
+  '@mui/material/LinearProgress': { __esModule: true, default: () => React.createElement('div', { role: 'progressbar' }) },
+  '@/components/common/loader/PageLoader': { __esModule: true, default: () => React.createElement('span', null, 'page-loading') },
+  '@/hooks/useHandleApiResponse': { __esModule: true, default: () => {} },
   '@/services/private/certification/catalog': {
+    getProgramCatalogDetail: params => {
+      harness.detailCalls.push(params);
+      return Object.assign(Promise.resolve(), { __result: { data: harness.detail } });
+    },
+    getLearnerProgramDetail: params => {
+      harness.learnerCalls.push(params);
+      return Object.assign(Promise.resolve(), { __result: { data: harness.learner } });
+    },
+    checkoutCertificationProgram: async () => ({}),
     getCertificationCatalog: params => {
       harness.catalogCalls.push(params);
       return Object.assign(Promise.resolve(), { __result: harness.catalog(params) });
@@ -98,6 +123,17 @@ Module._load = function (request, parent, isMain) {
   }
   if (request === './CertificationLibraryFilter' && !(parent?.filename || '').endsWith('DiscoverPanel.jsx')) {
     return originalLoad.apply(this, arguments);
+  }
+  // The detail page's tab bar is the real BuilderTabs, wrapped only to capture the props the page gives it.
+  if (request === '@/components/certification/builder/BuilderTabs' && (parent?.filename || '').endsWith('ProgramDetailsView.jsx')) {
+    const real = originalLoad.call(this, path.join(SRC, 'components/certification/builder/BuilderTabs'), parent, isMain);
+    return {
+      __esModule: true,
+      default: props => {
+        harness.tabsProps = props;
+        return React.createElement(real.default, props);
+      },
+    };
   }
   if (Object.prototype.hasOwnProperty.call(stubs, request)) return stubs[request];
   if (request.startsWith('@/')) return originalLoad.call(this, path.join(SRC, request.slice(2)), parent, isMain);

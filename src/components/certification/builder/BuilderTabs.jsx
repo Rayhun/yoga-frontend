@@ -21,7 +21,7 @@ const DEFAULT_TABLIST_CLASS =
  * `ariaLabel` / `className` (optional) let the same strip tab a lesson's Content / Settings / Questions
  * inside the edit pane, where it must not bleed out to the card's edges.
  */
-const BuilderTabs = ({ tabs, activeTab, onSelect, ariaLabel = 'Program content sections', className = DEFAULT_TABLIST_CLASS }) => {
+const BuilderTabs = ({ tabs, activeTab, onSelect, ariaLabel = 'Program content sections', className = DEFAULT_TABLIST_CLASS, tabClassName = '' }) => {
   const buttonRefs = useRef({});
 
   const handleKeyDown = (event, index) => {
@@ -57,7 +57,7 @@ const BuilderTabs = ({ tabs, activeTab, onSelect, ariaLabel = 'Program content s
             onKeyDown={event => handleKeyDown(event, index)}
             className={`-mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
               isActive ? 'border-primary text-primary' : 'border-transparent text-body hover:text-black dark:hover:text-white'
-            }`}
+            } ${tabClassName}`}
           >
             {tab.label}
             {marker ? (
