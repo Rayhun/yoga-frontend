@@ -15,6 +15,9 @@ export const CERTIFICATION_RICH_TEXT_TOOLBAR = [
 
 export const CERTIFICATION_RICH_TEXT_FORMATS = ['header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'link'];
 
+// One stable object: a new `modules` prop makes react-quill rebuild the editor (and lose the caret).
+export const CERTIFICATION_RICH_TEXT_MODULES = { toolbar: CERTIFICATION_RICH_TEXT_TOOLBAR };
+
 const TAG_PATTERN = /<[a-z][^>]*>/i;
 const MEDIA_TAG_PATTERN = /<(img|iframe|video)\b/i;
 // `&` that doesn't already start an entity — so sanitized text ("A &amp; B") isn't escaped twice.
@@ -35,6 +38,10 @@ export const isBlankHtml = html => {
 export const richTextOrNull = html => (isBlankHtml(html) ? null : html);
 
 const escapeText = text => text.replace(BARE_AMPERSAND_PATTERN, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// What the form stores for an editor value: an empty editor (`<p><br></p>`, whitespace, `&nbsp;`) is '',
+// so "required" checks and dirty-state comparison see "no content" exactly as they did for a textarea.
+export const editorHtmlToValue = html => (isBlankHtml(html) ? '' : html);
 
 // Legacy plain text → one paragraph per line (blank lines kept as Quill's empty paragraph), so
 // line breaks survive being loaded into the editor. Values that already contain markup pass through.

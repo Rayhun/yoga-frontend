@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { richTextOrNull } from '@/components/certification/builder/richText';
 
 // Form <-> API mapping for Curriculum Builder modules/lessons, shared by ProgramBuilderModal
 // (API -> form, toModulesFormValues) and the curriculum panes (form -> API, the to*Payload helpers). Every field
@@ -162,7 +163,7 @@ const toLessonPayload = lesson => ({
   title: lesson.title,
   lesson_type: lesson.lesson_type,
   content_url: URL_LESSON_TYPES.includes(lesson.lesson_type) ? lesson.content_url || null : null,
-  text_content: TEXT_LESSON_TYPES.includes(lesson.lesson_type) ? lesson.text_content || null : null,
+  text_content: TEXT_LESSON_TYPES.includes(lesson.lesson_type) ? richTextOrNull(lesson.text_content) : null,
   image: lesson.image || null,
   duration: toDuration(lesson),
   is_required_for_completion: Boolean(lesson.is_required_for_completion),
@@ -183,7 +184,7 @@ const toUnlockDate = module =>
 // A module's own fields (no id, no lessons).
 export const toModuleFieldsPayload = module => ({
   title: module.title,
-  description: module.description || null,
+  description: richTextOrNull(module.description),
   image: module.image || null,
   unlock_rule: module.unlock_rule || 'sequential',
   unlock_date: toUnlockDate(module),

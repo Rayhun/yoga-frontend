@@ -1,10 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import DOMPurify from 'dompurify';
 import { stripHtmlLinks } from '@/utils/stripHtmlLinks';
-
-// Keep `target` (DOMPurify drops it by default) so existing "open in new tab" links still work.
-const SANITIZE_OPTIONS = { ADD_ATTR: ['target'] };
+import { sanitizeRichHtml } from '@/utils/richTextSafety';
 
 /**
  * Truncates HTML so the first `maxWords` visible words remain (tags ignored for counting).
@@ -75,7 +72,8 @@ const ControllableRichText = ({
   const html = useMemo(() => {
     if (!isMounted) return '';
     const rawHtml = typeof children === 'string' ? children : String(children ?? '');
-    const safeHtml = DOMPurify.sanitize(rawHtml, SANITIZE_OPTIONS);
+    // DOMPurify strips scripts / event handlers / javascript: URLs; links that open a new tab get rel="noopener noreferrer".
+    const safeHtml = sanitizeRichHtml(rawHtml);
     return disableLinks ? stripHtmlLinks(safeHtml) : safeHtml;
   }, [children, disableLinks, isMounted]);
 

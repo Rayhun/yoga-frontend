@@ -1,4 +1,5 @@
 import FormikField from '@/components/common/form/formik/FormikField';
+import CertificationRichTextField from '@/components/certification/builder/CertificationRichTextField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
 import ImageUploadField from '@/components/certification/builder/ImageUploadField';
 import { UNLOCK_RULE_OPTIONS } from './curriculumFields';
@@ -7,11 +8,11 @@ import { UNLOCK_RULE_OPTIONS } from './curriculumFields';
 const CurriculumModuleFields = ({ mi, module, disabled, onModuleChange, getBlockReason }) => (
   <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
     <div className="md:col-span-2">
-      <FormikField
+      <CertificationRichTextField
         name={`modules[${mi}].description`}
         label="Module Description"
         placeholder="What this module covers"
-        rows={2}
+        rows={3}
         disabled={disabled}
       />
     </div>

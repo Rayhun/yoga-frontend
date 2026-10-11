@@ -30,7 +30,11 @@ const FormikRichTextEditor = ({
   rows = 4,
   className = '',
   disableLinks = false,
-  ...props 
+  // Optional converters between the stored value and what the editor shows / emits (default: as-is).
+  // Used by forms that store "empty" as '' (not Quill's `<p><br></p>`) or load legacy plain text.
+  toEditorValue = value => value,
+  fromEditorValue = value => value,
+  ...props
 }) => {
   const [field, meta, helpers] = useField(name);
 
@@ -56,7 +60,7 @@ const FormikRichTextEditor = ({
   }, [disableLinks, field.value, helpers]);
 
   const handleChange = (content) => {
-    helpers.setValue(disableLinks ? stripHtmlLinks(content) : content);
+    helpers.setValue(fromEditorValue(disableLinks ? stripHtmlLinks(content) : content));
   };
 
   const handleBlur = () => {
@@ -75,7 +79,7 @@ const FormikRichTextEditor = ({
       <div className="border border-gray-300 rounded-lg overflow-auto quill-resizable-wrapper" style={{ resize: 'both', minHeight: `${rows * 1.5}rem`, maxWidth: '100%' }}>
         <ReactQuill
           theme="snow"
-          value={field.value || ''}
+          value={toEditorValue(field.value || '')}
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder={placeholder}

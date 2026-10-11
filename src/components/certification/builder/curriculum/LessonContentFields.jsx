@@ -2,6 +2,7 @@
 import React from 'react';
 import FormikField from '@/components/common/form/formik/FormikField';
 import FormikSelect from '@/components/common/form/formik/FormikSelect';
+import CertificationRichTextField from '@/components/certification/builder/CertificationRichTextField';
 import { TEXT_LESSON_TYPES, URL_LESSON_TYPES } from '@/components/certification/builder/sections/curriculumFields';
 import { LESSON_TYPE_OPTIONS, TEXT_LABELS, URL_LABELS } from './lessonTypes';
 
@@ -50,7 +51,7 @@ const LessonContentFields = ({ namePrefix, lesson, disabled, onLessonChange }) =
       ) : null}
       {TEXT_LESSON_TYPES.includes(lesson.lesson_type) ? (
         <div className="md:col-span-2">
-          <FormikField name={`${namePrefix}.text_content`} label={TEXT_LABELS[lesson.lesson_type]} rows={3} disabled={disabled} />
+          <CertificationRichTextField name={`${namePrefix}.text_content`} label={TEXT_LABELS[lesson.lesson_type]} disabled={disabled} />
         </div>
       ) : null}
 

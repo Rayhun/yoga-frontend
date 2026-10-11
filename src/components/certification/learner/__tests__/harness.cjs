@@ -12,6 +12,7 @@ const path = require('path');
 const React = require('react');
 
 global.React = React; // sucrase uses the classic JSX runtime; Next uses the automatic one
+Module._extensions['.css'] = () => {}; // stylesheet imports (e.g. Quill's) are irrelevant to these tests
 
 const SRC = path.resolve(__dirname, '../../../../');
 const harness = {
@@ -66,6 +67,11 @@ const stubs = {
     },
     useMutation: () => ({ mutateAsync: async () => ({}), isPending: false }),
     useQueryClient: () => ({ invalidateQueries() {} }),
+  },
+  // --- rich text editor (builder/__tests__): react-quill is loaded through next/dynamic; capture its props ---
+  'next/dynamic': () => props => {
+    harness.quillProps = props;
+    return React.createElement('div', { 'data-quill': 'editor' });
   },
   // --- admin applications CSV (admin/csv/__tests__) ---
   '@/lib/axios': {
