@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
-import { FiLock } from 'react-icons/fi';
+import { FiLock, FiAward } from 'react-icons/fi';
 import LinearProgress from '@mui/material/LinearProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -91,6 +91,10 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   const isProgramCompleted = program?.enrollment_status === 'completed' || program?.enrollment_status === 'Completed';
 
   const programProgress = Math.round(program?.progress_percent || 0);
+
+  // The certificate only exists once the learner is actually done — the backend 403s until
+  // every required lesson is complete, so don't offer the link before then either.
+  const canViewCertificate = isEnrolled && (programProgress === 100 || isProgramCompleted);
 
   const allContent = useMemo(() => {
     if (!program?.modules) return [];
@@ -222,6 +226,16 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
                   onClick={handleCompleteProgram}
                 >
                   Mark Program as Complete
+                </button>
+              )}
+              {/* Certificate — hidden until progress is actually 100% / completed */}
+              {canViewCertificate && (
+                <button
+                  className="w-full md:w-auto flex items-center justify-center gap-2 border border-primary text-primary p-4 rounded-md shadow hover:bg-primary/10"
+                  onClick={() => router.push(`/portal/customer/certification/${programId}/certificate`)}
+                >
+                  <FiAward size={18} />
+                  View Certificate
                 </button>
               )}
             </>
