@@ -1,8 +1,12 @@
 'use client';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { FaRegFileImage } from 'react-icons/fa6';
 import FormikField from '@/components/common/form/formik/FormikField';
+import FormikDropzone from '@/components/common/form/formik/FormikDropzone';
+import { uploadLMSFile } from '@/services/private/lms';
+import { toastApiError } from '@/utils/helpers';
 import useSectionAutosave from '@/hooks/useSectionAutosave';
 import SectionCard from '@/components/certification/builder/SectionCard';
 import useReportSaveStatus from '@/components/certification/builder/useReportSaveStatus';
@@ -12,6 +16,9 @@ const validationSchema = Yup.object({
   expiry_period_days: Yup.number().min(0, 'Must be 0 or more days').nullable(),
   completion_rules: Yup.string(),
   primary_issuer_name: Yup.string(),
+  certificate_type: Yup.string(),
+  signatory_name: Yup.string(),
+  signatory_title: Yup.string(),
 });
 
 // Same fix as PricingSection: FormikField type="number" leaves an empty field as '', and DRF's
@@ -21,6 +28,12 @@ const toPayload = values => ({
   expiry_period_days: values.expiry_period_days === '' ? null : values.expiry_period_days,
   completion_rules: values.completion_rules,
   primary_issuer_name: values.primary_issuer_name,
+  // Everything below is printed verbatim on the learner's certificate document
+  // (see Certification.certificates.certificate_payload) — no copy is hardcoded client-side.
+  certificate_type: values.certificate_type,
+  signatory_name: values.signatory_name,
+  signatory_title: values.signatory_title,
+  issuer_logo: values.issuer_logo,
 });
 
 /**
@@ -30,6 +43,13 @@ const toPayload = values => ({
  * here rather than leaving the builder unable to publish anything. Still not the full
  * co-branding block (co-issuer name/signature/logo, primary signature image, template picker) —
  * those stay flagged separately, backend already supports them, not built here.
+ *
+ * The four fields added for the dynamic certificate document — Certificate Type (the ribbon /
+ * seal label, e.g. "Course Certificate"), Signatory Name + Title (the printed signature block)
+ * and Issuer Logo (the top-left mark, which replaces the issuer's name in the header when set) —
+ * are collected here because the certificate renders them and nothing else writes them. Issuer
+ * Logo reuses the thumbnail's public-upload pattern (`uploadLMSFile` → `POST /LMS/file/upload/`
+ * → `file_link`): it's a public document image, not a private application document.
  *
  * ``initialValues.primary_issuer_name`` defaults to the creator's own name (Expert.public_name /
  * Institution.legal_organization_name, resolved server-side as `creator_display_name` — see
@@ -45,6 +65,7 @@ const toPayload = values => ({
 const CertificateSetupSection = ({ initialValues, onSave, disabled = false, onStatusChange, anchorId }) => {
   const { notifyBlur, markSaved, retry, status, errorMessage, canRetry } = useSectionAutosave(onSave);
   useReportSaveStatus(onStatusChange, { status, errorMessage, canRetry, retry });
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   useEffect(() => {
     markSaved(toPayload(initialValues));
@@ -52,6 +73,24 @@ const CertificateSetupSection = ({ initialValues, onSave, disabled = false, onSt
   }, [initialValues]);
 
   const handleBlur = useCallback(values => notifyBlur(toPayload(values)), [notifyBlur]);
+
+  const handleLogoDrop = useCallback(
+    async (files, values, setFieldValue) => {
+      const file = files?.[0];
+      if (!file) return;
+      setIsUploadingLogo(true);
+      try {
+        const { data } = await uploadLMSFile({ file });
+        setFieldValue('issuer_logo', data?.file_link);
+        handleBlur({ ...values, issuer_logo: data?.file_link });
+      } catch (error) {
+        toastApiError(error);
+      } finally {
+        setIsUploadingLogo(false);
+      }
+    },
+    [handleBlur]
+  );
 
   return (
     <SectionCard
@@ -63,7 +102,7 @@ const CertificateSetupSection = ({ initialValues, onSave, disabled = false, onSt
       onRetry={retry}
     >
       <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={() => {}}>
-        {({ values }) => (
+        {({ values, setFieldValue }) => (
           <Form className="flex flex-col gap-3" onBlur={() => handleBlur(values)}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormikField name="certificate_title" label="Certificate Title" placeholder="e.g. Menopause Wellness Coach Certification" disabled={disabled} />
@@ -80,6 +119,34 @@ const CertificateSetupSection = ({ initialValues, onSave, disabled = false, onSt
               label="Issuer Name"
               placeholder="e.g. your name or organization, as it should appear on the certificate"
               disabled={disabled}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormikField
+                name="certificate_type"
+                label="Certificate Type"
+                placeholder="e.g. Course Certificate"
+                disabled={disabled}
+              />
+              <FormikField
+                name="signatory_title"
+                label="Signatory Title"
+                placeholder="e.g. Program Director"
+                disabled={disabled}
+              />
+            </div>
+            <FormikField
+              name="signatory_name"
+              label="Signatory Name"
+              placeholder="Name printed under the signature line (defaults to the issuer name)"
+              disabled={disabled}
+            />
+            <FormikDropzone
+              name="logo_file"
+              label={isUploadingLogo ? 'Issuer Logo (uploading…)' : 'Issuer Logo'}
+              fileURLs={values.issuer_logo ? [values.issuer_logo] : []}
+              Icon={FaRegFileImage}
+              disabled={disabled || isUploadingLogo}
+              onDrop={files => handleLogoDrop(files, values, setFieldValue)}
             />
             <FormikField
               name="completion_rules"

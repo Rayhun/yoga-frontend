@@ -131,6 +131,8 @@ const queryKeys = {
   certificationCatalog: 'certificationCatalog',
   certificationMyPrograms: 'certificationMyPrograms',
   certificationEnrolledCertifications: 'certificationEnrolledCertifications',
+  certificationCertificate: 'certificationCertificate',
+  certificationVerify: 'certificationVerify',
   certificationLearnerDetail: 'certificationLearnerDetail',
   certificationLearnerModuleDetail: 'certificationLearnerModuleDetail',
   certificationLearnerLessonDetail: 'certificationLearnerLessonDetail',

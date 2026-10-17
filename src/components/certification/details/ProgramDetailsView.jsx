@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BiCheck } from 'react-icons/bi';
-import { FiLock } from 'react-icons/fi';
+import { FiLock, FiAward } from 'react-icons/fi';
 import LinearProgress from '@mui/material/LinearProgress';
 import { MdViewModule } from 'react-icons/md';
 import { FaTv } from 'react-icons/fa';
@@ -84,6 +84,74 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
   const isProgramCompleted = program?.enrollment_status === 'completed' || program?.enrollment_status === 'Completed';
   const programProgress = Math.round(program?.progress_percent || 0);
 
+  // The certificate only exists once the learner is actually done — the backend 403s until
+  // every required lesson is complete, so don't offer the link before then either.
+  const canViewCertificate = isEnrolled && (programProgress === 100 || isProgramCompleted);
+
+  const allContent = useMemo(() => {
+    if (!program?.modules) return [];
+    const items = [];
+    program.modules.forEach(module => {
+      items.push({
+        ...module,
+        content_type: 'module',
+        completed: module.completed_count === module.total_count && module.total_count > 0,
+        locked: !isEnrolled || module.is_locked,
+      });
+    });
+    return items;
+  }, [program, isEnrolled]);
+
+  const displayedContent = useMemo(() => {
+    if (selectedTab !== TABS.JOURNEY) return [];
+    return allContent.slice(0, displayedItemsCount);
+  }, [allContent, displayedItemsCount, selectedTab]);
+
+  const hasMoreItems = useMemo(() => {
+    return allContent.length > displayedItemsCount;
+  }, [allContent.length, displayedItemsCount]);
+
+  const loadMoreItems = useCallback(() => {
+    if (hasMoreItems && !isLoadingMore) {
+      setIsLoadingMore(true);
+      setTimeout(() => {
+        setDisplayedItemsCount(prev => Math.min(prev + ITEMS_PER_PAGE, allContent.length));
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [hasMoreItems, isLoadingMore, allContent.length]);
+
+  useEffect(() => {
+    if (selectedTab === TABS.JOURNEY) {
+      setDisplayedItemsCount(ITEMS_PER_PAGE);
+    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab !== TABS.JOURNEY || isCatalogLoading || (isEnrolled && isLearnerLoading)) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreItems && !isLoadingMore) {
+          loadMoreItems();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMoreItems, isLoadingMore, selectedTab, loadMoreItems, isCatalogLoading, isEnrolled, isLearnerLoading]);
+
   if (isCatalogLoading || (isEnrolled && isLearnerLoading)) return <PageLoader />;
 
   if (!catalogProgram) {
@@ -151,6 +219,16 @@ const ProgramDetailsView = ({ programId, mode = 'learner' }) => {
                   onClick={handleCompleteProgram}
                 >
                   Mark Program as Complete
+                </button>
+              )}
+              {/* Certificate — hidden until progress is actually 100% / completed */}
+              {canViewCertificate && (
+                <button
+                  className="w-full md:w-auto flex items-center justify-center gap-2 border border-primary text-primary p-4 rounded-md shadow hover:bg-primary/10"
+                  onClick={() => router.push(`/portal/customer/certification/${programId}/certificate`)}
+                >
+                  <FiAward size={18} />
+                  View Certificate
                 </button>
               )}
             </>
