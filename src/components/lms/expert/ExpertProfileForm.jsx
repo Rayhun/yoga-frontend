@@ -440,7 +440,9 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         const isFirstTimeProfileCompletion = !isAdminContext && !selected?.is_profile_complete;
         toast.success(
           isFirstTimeProfileCompletion
-            ? 'Profile completed! Next, create your first guided experience.'
+            ? isQteApplicant
+              ? 'Profile completed!'
+              : 'Profile completed! Next, create your first guided experience.'
             : isEditMode
               ? 'Expert updated successfully'
               : 'Expert created successfully'
@@ -464,6 +466,9 @@ const ExpertProfileForm = ({ selected, isAdminContext = false }) => {
         // Redirect based on context
         if (isAdminContext) {
           router.push('/portal/admin/lms/expert');
+        } else if (isFirstTimeProfileCompletion && isQteApplicant) {
+          // QTE-track users never use Guided Experiences: they continue on their own dashboard
+          router.push('/portal/teacher/dashboard');
         } else if (isFirstTimeProfileCompletion) {
           // First-time profile completion → create guided experience
           router.push('/portal/teacher/group_coaching/add');

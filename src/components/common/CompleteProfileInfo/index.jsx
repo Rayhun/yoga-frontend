@@ -10,10 +10,11 @@ const InfoNote = ({ expertData }) => {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const isChatGroup = Boolean(user?.profile?.is_chat_group);
 
-  // Approved QTEs have no Guided Experiences in their sidebar, so that step is replaced by creating
-  // a Certification Program.
+  // QTE-track users (any status) never use Guided Experiences, so that step never shows for them; an approved
+  // QTE gets "create a Certification Program" in its place.
   const {
     isApprovedQTE,
+    isQteTrack,
     isLoading: isQTEStatusLoading,
     needsFirstProgram: needsFirstCertificationProgram,
   } = useApprovedQTE({ withPrograms: true });
@@ -64,7 +65,7 @@ const InfoNote = ({ expertData }) => {
           onClick: () => router.push(NEW_CERTIFICATION_PROGRAM_HREF),
         });
       }
-    } else if (!isQTEStatusLoading && !expertData?.has_event_or_consult) {
+    } else if (!isQTEStatusLoading && !isQteTrack && !expertData?.has_event_or_consult) {
       items.push({
         id: 'guided-experiences',
         text: 'Add Guided Experiences (workshops, bootcamps, masterclasses, live events)',
@@ -89,6 +90,7 @@ const InfoNote = ({ expertData }) => {
     expertData?.has_event_or_consult,
     isChatGroup,
     isApprovedQTE,
+    isQteTrack,
     isQTEStatusLoading,
     needsFirstCertificationProgram,
   ]);

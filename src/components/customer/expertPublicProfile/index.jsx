@@ -10,6 +10,8 @@ import ExpertProfilePrograms from './programs';
 import UserProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
 import ExpertProfileConsultations from './consultations';
+import ExpertCertificationPrograms from '@/components/certification/learner/ExpertCertificationPrograms';
+import { getPublicProfileTabs, initialPublicProfileTab } from '@/utils/profileTabs';
 import {
   getCustomerCoachDetail,
   toggleFollowCoach,
@@ -24,6 +26,7 @@ const getPracticeTypeLabel = profile =>
 
 const TABS = {
   PROGRAMS: 'programs',
+  CERTIFICATIONS: 'certifications',
   WORKSHOPS: 'workshops',
   GROUP_COACHING: 'group_coaching',
   CONSULT: 'consult',
@@ -83,7 +86,12 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
   );
   const expertName = `${userProfileDetails?.first_name || ''} ${userProfileDetails?.last_name || ''}`.trim();
   
+  // A QTE shows their published certification programs here; their Guided Experiences are never listed.
+  const isQte = userProfileDetails?.creator_type === 'qte';
+  const tabs = getPublicProfileTabs({ creatorType: userProfileDetails?.creator_type });
+
   const [selectedTab, setSelectedTab] = useState(() => {
+    if (isQte) return initialPublicProfileTab({ creatorType: 'qte', activeTab });
     // Set initial tab based on URL parameter
     if (activeTab === 'about') return TABS.ABOUT;
     if (activeTab === 'programs') return TABS.PROGRAMS;
@@ -169,30 +177,39 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
         >
           {/* <Tab value={TABS.PROGRAMS} label="Programs" className="!capitalize" /> */}
           {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
-          <Tab value={TABS.GROUP_COACHING} label="Guided Experiences" className="!capitalize" />
-          {/* <Tab value={TABS.CONSULT} label="Consult" className="!capitalize" /> */}
-          <Tab value={TABS.ABOUT} label="About" className="!capitalize" />
+          {tabs.map(tab => (
+            <Tab key={tab.value} value={tab.value} label={tab.label} className="!capitalize" />
+          ))}
         </Tabs>
         <div className="">
           {/* Tabs Content */}
 
-          {/* PROGRAMS */}
-          <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <ExpertProfilePrograms tabEnabled={selectedTab === TABS.PROGRAMS} />
-          </div>
+          {isQte ? (
+            /* CERTIFICATION PROGRAMS (QTE) — Guided Experiences, programs and consult are never mounted */
+            <div hidden={selectedTab !== TABS.CERTIFICATIONS}>
+              <ExpertCertificationPrograms expertId={expertId} tabEnabled={selectedTab === TABS.CERTIFICATIONS} />
+            </div>
+          ) : (
+            <>
+              {/* PROGRAMS */}
+              <div hidden={selectedTab !== TABS.PROGRAMS}>
+                <ExpertProfilePrograms tabEnabled={selectedTab === TABS.PROGRAMS} />
+              </div>
 
-          {/* WORKSHOPS */}
-          {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
+              {/* WORKSHOPS */}
+              {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
 
-          {/* EVENTS */}
-          <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
-          </div>
+              {/* EVENTS */}
+              <div hidden={selectedTab !== TABS.GROUP_COACHING}>
+                <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
+              </div>
 
-          {/* CONSULT */}
-          <div hidden={selectedTab !== TABS.CONSULT}>
-            <ExpertProfileConsultations tabEnabled={selectedTab === TABS.CONSULT} />
-          </div>
+              {/* CONSULT */}
+              <div hidden={selectedTab !== TABS.CONSULT}>
+                <ExpertProfileConsultations tabEnabled={selectedTab === TABS.CONSULT} />
+              </div>
+            </>
+          )}
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>

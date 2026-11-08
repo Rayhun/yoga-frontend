@@ -34,3 +34,8 @@ export const getPublicProgramDetail = async ({ id }) => {
 export const createGuestCheckoutSession = async ({ type, object_id }) => {
   return axios.post('/subscription/guest-checkout/', { type, object_id });
 };
+
+// A QTE's published certification programs (shown on their public profile instead of Guided Experiences).
+export const getPublicCertificationPrograms = async ({ id }) => {
+  return axios.get(`/certification/experts/${id}/programs/`);
+};

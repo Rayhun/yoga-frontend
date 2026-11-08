@@ -133,19 +133,19 @@ const ApplicationStatusContent = () => {
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
             <div>
               <dt className="text-gray-500">Institution Name</dt>
-              <dd className="font-medium text-gray-800 dark:text-white">{data.name || '—'}</dd>
+              <dd className="font-medium text-gray-800 dark:text-white">{data.legal_organization_name || '—'}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Legal Name</dt>
-              <dd className="font-medium text-gray-800 dark:text-white">{data.legal_name || '—'}</dd>
+              <dt className="text-gray-500">Contact Person</dt>
+              <dd className="font-medium text-gray-800 dark:text-white">{data.contact_person || '—'}</dd>
             </div>
             <div>
               <dt className="text-gray-500">Country</dt>
               <dd className="font-medium text-gray-800 dark:text-white">{data.country || '—'}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Business Email</dt>
-              <dd className="font-medium text-gray-800 dark:text-white">{data.business_email || '—'}</dd>
+              <dt className="text-gray-500">Website</dt>
+              <dd className="font-medium text-gray-800 dark:text-white">{data.website || '—'}</dd>
             </div>
           </dl>
         </div>

@@ -210,21 +210,21 @@ test('draft: no dashboard content (the guard sends it to the wizard)', () => {
   assert.doesNotMatch(html, /QTE Dashboard/);
 });
 
-test('submitted / under_review: unlocked with an "under review" card, tools shown as unavailable', () => {
+test('submitted / under_review: unlocked with an "under review" card and no overview numbers', () => {
   ['submitted', 'under_review'].forEach(status => {
     const html = renderQteDashboard(status);
     assert.match(html, /QTE Dashboard/);
     assert.match(html, /Application under review/);
-    assert.match(html, /Available after your application is approved/);
+    assert.doesNotMatch(html, /Enrolled learners|Needs your attention|Available after your application is approved/);
     assert.doesNotMatch(html, /href="\/portal\/teacher\/certification\/programs"/); // not a live link yet
   });
 });
 
-test('approved: unlocked, the certification tools are live links', () => {
+test('approved: unlocked, the overview replaces the old status card (details are in components/creator/__tests__)', () => {
   const html = renderQteDashboard('approved');
-  assert.match(html, /href="\/portal\/teacher\/certification\/programs"/);
-  assert.match(html, /href="\/portal\/teacher\/certification\/grading"/);
-  assert.doesNotMatch(html, /Available after your application is approved/);
+  assert.match(html, /QTE Dashboard/);
+  assert.match(html, /Enrolled learners/);
+  assert.doesNotMatch(html, /Application approved|Available after your application is approved/);
 });
 
 test('rejected: unlocked, shows the reason and a Re-apply link that reopens the prefilled application step', () => {

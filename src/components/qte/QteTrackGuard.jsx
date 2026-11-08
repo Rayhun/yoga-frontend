@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import PageLoader from '@/components/common/loader/PageLoader';
 import useApprovedQTE from '@/hooks/useApprovedQTE';
-import { resolveTeacherRoute } from '@/utils/qteTrack';
+import useAuthContext from '@/hooks/useAuthContext';
+import { resolveTeacherAreaRoute } from '@/utils/qteTrack';
 
 /**
  * Direct-URL guard for everything under /portal/teacher. A QTE-track user who types an Expert-only URL is
@@ -16,7 +17,8 @@ const QteTrackGuard = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const qte = useApprovedQTE();
-  const decision = resolveTeacherRoute(pathname, qte);
+  const { user } = useAuthContext();
+  const decision = resolveTeacherAreaRoute(pathname, qte, user?.profile?.role);
 
   useEffect(() => {
     if (decision.action === 'redirect') router.replace(decision.to);

@@ -7,16 +7,24 @@ import PublicExpertAbout from './about';
 import PublicExpertGroupCoaching from './groupCoaching';
 import PublicExpertConsultations from './consultations';
 import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
+import ExpertCertificationPrograms from '@/components/certification/learner/ExpertCertificationPrograms';
+import { getPublicProfileTabs, initialPublicProfileTab } from '@/utils/profileTabs';
 
 const TABS = {
   PROGRAMS: 'programs',
+  CERTIFICATIONS: 'certifications',
   GROUP_COACHING: 'group_coaching',
   CONSULT: 'consult',
   ABOUT: 'about',
 };
 
 const PublicExpertProfile = ({ data: expertData }) => {
-  const [selectedTab, setSelectedTab] = useState(TABS.GROUP_COACHING);
+  // A QTE shows their published certification programs here; their Guided Experiences are never listed.
+  const isQte = expertData?.creator_type === 'qte';
+  const tabs = getPublicProfileTabs({ creatorType: expertData?.creator_type });
+  const [selectedTab, setSelectedTab] = useState(
+    initialPublicProfileTab({ creatorType: expertData?.creator_type, plainInitial: TABS.GROUP_COACHING })
+  );
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -77,8 +85,9 @@ const PublicExpertProfile = ({ data: expertData }) => {
             },
           }}
         >
-          <Tab value={TABS.GROUP_COACHING} label="Guided Experiences" />
-          <Tab value={TABS.ABOUT} label="About" />
+          {tabs.map(tab => (
+            <Tab key={tab.value} value={tab.value} label={tab.label} />
+          ))}
         </Tabs>
 
         <div className="p-4 sm:p-6">
@@ -86,20 +95,28 @@ const PublicExpertProfile = ({ data: expertData }) => {
             <PublicExpertAbout data={expertData} />
           </div>
 
-          <div hidden={selectedTab !== TABS.PROGRAMS}>
-            <PublicExpertPrograms expertId={expertData?.id} tabEnabled={selectedTab === TABS.PROGRAMS} />
-          </div>
+          {isQte ? (
+            <div hidden={selectedTab !== TABS.CERTIFICATIONS}>
+              <ExpertCertificationPrograms expertId={expertData?.id} tabEnabled={selectedTab === TABS.CERTIFICATIONS} />
+            </div>
+          ) : (
+            <>
+              <div hidden={selectedTab !== TABS.PROGRAMS}>
+                <PublicExpertPrograms expertId={expertData?.id} tabEnabled={selectedTab === TABS.PROGRAMS} />
+              </div>
 
-          <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <PublicExpertGroupCoaching
-              expertId={expertData?.id}
-              tabEnabled={selectedTab === TABS.GROUP_COACHING}
-            />
-          </div>
+              <div hidden={selectedTab !== TABS.GROUP_COACHING}>
+                <PublicExpertGroupCoaching
+                  expertId={expertData?.id}
+                  tabEnabled={selectedTab === TABS.GROUP_COACHING}
+                />
+              </div>
 
-          <div hidden={selectedTab !== TABS.CONSULT}>
-            <PublicExpertConsultations expertId={expertData?.id} tabEnabled={selectedTab === TABS.CONSULT} />
-          </div>
+              <div hidden={selectedTab !== TABS.CONSULT}>
+                <PublicExpertConsultations expertId={expertData?.id} tabEnabled={selectedTab === TABS.CONSULT} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

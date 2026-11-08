@@ -218,7 +218,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         actionText: 'Complete Profile',
       });
     }
-    if (!has_event_or_consult && navLabel === 'Dashboard') {
+    // QTE-track users never use Guided Experiences, so this requirement never applies to them.
+    if (!has_event_or_consult && !isQteTrack && navLabel === 'Dashboard') {
       missing.push({
         text: 'Add guided experiences',
         icon: FiCalendar,

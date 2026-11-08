@@ -6,6 +6,9 @@ import { FiLink2, FiUsers } from 'react-icons/fi';
 import { HiOutlineAcademicCap } from 'react-icons/hi';
 import { MdOutlinePayments } from 'react-icons/md';
 import useToggle from '@/hooks/useToggle';
+import ActivityItem from '@/components/common/dashboard/ActivityItem';
+import StatCard from '@/components/common/dashboard/StatCard';
+import StatGrid from '@/components/common/dashboard/StatGrid';
 import CircleCompositionSnapshotModal from './CircleCompositionSnapshotModal';
 
 const CommunityGrowthChart = dynamic(() => import('./CommunityGrowthChart'), { ssr: false });
@@ -16,57 +19,6 @@ const STAT_ICONS = {
   referrals: FiLink2,
   workshops: HiOutlineAcademicCap,
 };
-
-const StatCard = ({ stat }) => {
-  const Icon = STAT_ICONS[stat.icon] || FiUsers;
-  const showChange = typeof stat.change_percent === 'number';
-  const isUp = stat.change_direction !== 'down';
-
-  return (
-    <div className="relative rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      {stat.live_label ? (
-        <span className="absolute right-4 top-4 text-xs font-semibold text-[#2E7D32]">
-          {stat.live_label}
-        </span>
-      ) : showChange ? (
-        <span
-          className={`absolute right-4 top-4 inline-flex items-center gap-0.5 text-xs font-semibold ${
-            isUp ? 'text-[#2E7D32]' : 'text-red-500'
-          }`}
-        >
-          <span aria-hidden>{isUp ? '▲' : '▼'}</span>
-          {Math.abs(stat.change_percent)}%
-        </span>
-      ) : null}
-
-      <div
-        className="mb-4 flex h-11 w-11 items-center justify-center rounded-full"
-        style={{ backgroundColor: stat.icon_bg || '#F3F4F6', color: stat.icon_color || '#6B7280' }}
-      >
-        <Icon className="h-5 w-5" />
-      </div>
-
-      <p className="font-serif text-3xl font-semibold tracking-tight text-gray-900">
-        {stat.value_display}
-      </p>
-      <p className="mt-1 text-sm text-gray-500">{stat.label}</p>
-    </div>
-  );
-};
-
-const ActivityItem = ({ item }) => (
-  <div className="flex items-start gap-3 border-b border-gray-100 py-3.5 last:border-0">
-    <span
-      className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
-      style={{ backgroundColor: item.dot_color || '#9CA3AF' }}
-    />
-    <p
-      className="min-w-0 flex-1 text-sm leading-relaxed text-gray-700 [&_strong]:font-semibold [&_strong]:text-gray-900"
-      dangerouslySetInnerHTML={{ __html: item.text || item.plain_text }}
-    />
-    <span className="shrink-0 text-xs text-gray-400">{item.time_ago}</span>
-  </div>
-);
 
 const DashboardBanner = ({ banner, onCtaClick, fallbackCtaLabel = 'View' }) => {
   if (!banner?.title) return null;
@@ -124,11 +76,11 @@ const ExpertHomeDashboard = ({ data }) => {
 
   return (
     <div className="flex w-full flex-col gap-5 md:gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <StatGrid>
         {stats.map(stat => (
-          <StatCard key={stat.id} stat={stat} />
+          <StatCard key={stat.id} stat={stat} Icon={STAT_ICONS[stat.icon] || FiUsers} />
         ))}
-      </div>
+      </StatGrid>
 
       {banners.map(banner => (
         <DashboardBanner

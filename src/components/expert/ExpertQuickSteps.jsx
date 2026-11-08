@@ -15,8 +15,8 @@ const ExpertQuickSteps = () => {
 
   // Approved QTEs don't use Guided Experiences (hidden from their sidebar), so for them the "has an
   // event" requirement counts as met and the events step gives way to creating a Certification Program.
-  const { isApprovedQTE, isLoading: isQTEStatusLoading, needsFirstProgram } = useApprovedQTE({ withPrograms: true });
-  const hasRequiredEvent = isApprovedQTE || hasEventOrConsult;
+  const { isQteTrack, isLoading: isQTEStatusLoading, needsFirstProgram } = useApprovedQTE({ withPrograms: true });
+  const hasRequiredEvent = isQteTrack || hasEventOrConsult; // any QTE-track user: no Guided Experiences step
 
   const handlePayPalSetup = () => {
     router.push('/portal/teacher/payments');

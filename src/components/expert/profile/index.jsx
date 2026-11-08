@@ -1,28 +1,45 @@
 'use client';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import ExpertProfilePrograms from './programs';
 import ExpertProfileAbout from './about';
 import ExpertProfileGroupCoaching from './groupCoaching';
+import ExpertProfileCertifications from './certifications';
 import ExpertConsultations from './consultation';
 import ExpertProfileWithLogo from '@/components/common/ExpertProfileWithLogo';
+import useApprovedQTE from '@/hooks/useApprovedQTE';
+import useAuthContext from '@/hooks/useAuthContext';
+import { getOwnProfileTabs, isCertificationCreator, resolveOwnProfileTab } from '@/utils/profileTabs';
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const TABS = {
-  // PROGRAMS: 'programs',
   WORKSHOPS: 'workshops',
   GROUP_COACHING: 'group_coaching',
+  CERTIFICATIONS: 'certifications',
   CONSULT: 'consult',
   ABOUT: 'about',
 };
 
 const UserProfileDetails = ({ data: userProfileDetails }) => {
-  // const [selectedTab, setSelectedTab] = useState(TABS.PROGRAMS);
   const searchParams = useSearchParams();
-  const selectedTab = searchParams.get("active_tab") || TABS.ABOUT;
   const router = useRouter();
   const pathname = usePathname()
+  const { user } = useAuthContext();
+  const qte = useApprovedQTE();
+
+  // QTE-track Experts (any status) and Institutions never see Guided Experiences: they get a Certification
+  // Programs tab, and a URL asking for the guided tab is redirected to it. Plain Experts: unchanged.
+  const role = user?.profile?.role;
+  const certificationCreator = isCertificationCreator({ isQteTrack: qte.isQteTrack, role });
+  const { tab: selectedTab, redirectTo } = resolveOwnProfileTab({
+    activeTab: searchParams.get("active_tab"),
+    certificationCreator,
+  });
+  const tabs = getOwnProfileTabs({ certificationCreator, profileComplete: userProfileDetails?.is_profile_complete });
+
+  useEffect(() => {
+    if (redirectTo) router.replace(`${pathname}?active_tab=${redirectTo}`);
+  }, [redirectTo, pathname, router]);
 
   const handleTabChange = (_, newValue) => {
     router.replace(`${pathname}?active_tab=${newValue}`)
@@ -84,11 +101,9 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
             },
           }}
         >
-          {/* <Tab value={TABS.PROGRAMS} label="Programs" className='!capitalize' /> */}
-          {/* <Tab disabled value={TABS.WORKSHOPS} label="Workshops" /> */}
-          <Tab value={TABS.GROUP_COACHING} label="Guided Experiences" className='!capitalize' disabled={!userProfileDetails?.is_profile_complete} />
-          {/* <Tab value={TABS.CONSULT} label="Consult" className='!capitalize'  disabled={!userProfileDetails?.is_profile_complete} /> */}
-          <Tab value={TABS.ABOUT} label="About" className='!capitalize' />
+          {tabs.map(tab => (
+            <Tab key={tab.value} value={tab.value} label={tab.label} className='!capitalize' disabled={tab.disabled} />
+          ))}
         </Tabs>
         <div className="">
           {/* Tabs Content */}
@@ -101,15 +116,27 @@ const UserProfileDetails = ({ data: userProfileDetails }) => {
           {/* WORKSHOPS */}
           {/* <div hidden={selectedTab !== TABS.WORKSHOPS}>Worksops</div> */}
 
-          {/* EVENTS */}
-          <div hidden={selectedTab !== TABS.GROUP_COACHING}>
-            <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
-          </div>
+          {certificationCreator ? (
+            /* CERTIFICATION PROGRAMS (QTE / Institution) — Guided Experiences and Consult are never mounted */
+            <div hidden={selectedTab !== TABS.CERTIFICATIONS}>
+              <ExpertProfileCertifications
+                creatorType={role === 'Institution' ? 'institution' : 'qte'}
+                approved={qte.isApprovedQTE}
+              />
+            </div>
+          ) : (
+            <>
+              {/* EVENTS */}
+              <div hidden={selectedTab !== TABS.GROUP_COACHING}>
+                <ExpertProfileGroupCoaching tabEnabled={selectedTab === TABS.GROUP_COACHING} />
+              </div>
 
-          {/* CONSULT  */}
-          <div hidden={selectedTab !== TABS.CONSULT}>
-            <ExpertConsultations tabEnabled={selectedTab === TABS.CONSULT} />
-          </div>
+              {/* CONSULT  */}
+              <div hidden={selectedTab !== TABS.CONSULT}>
+                <ExpertConsultations tabEnabled={selectedTab === TABS.CONSULT} />
+              </div>
+            </>
+          )}
 
           {/* ABOUT */}
           <div hidden={selectedTab !== TABS.ABOUT}>

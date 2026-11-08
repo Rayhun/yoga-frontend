@@ -139,6 +139,8 @@ const queryKeys = {
   certificationLessonQuiz: 'certificationLessonQuiz',
   certificationLessonAssignment: 'certificationLessonAssignment',
   certificationGradingQueue: 'certificationGradingQueue',
+  creatorDashboard: 'creator-dashboard',
+  publicExpertCertificationPrograms: 'publicExpertCertificationPrograms',
   certificationProgramCatalogDetail: 'certificationProgramCatalogDetail',
   customerV2SidebarNavigation: 'customerV2SidebarNavigation',
   customerV2HomePage: 'customerV2HomePage',

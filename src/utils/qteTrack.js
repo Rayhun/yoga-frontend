@@ -99,6 +99,29 @@ export const resolveTeacherRoute = (pathname, state) => {
   return { action: 'allow' };
 };
 
+export const INSTITUTION_DASHBOARD_PATH = '/portal/institution/dashboard';
+const INSTITUTION_ROLE = 'Institution';
+
+// The Guided Experience pages (create, edit, details, copy) under /portal/teacher. They are part of
+// EXPERT_ONLY_PATHS above, so every QTE-track user is already redirected away from them; listed on their
+// own so the rule is visible and testable.
+export const GUIDED_EXPERIENCE_PATHS = ['/portal/teacher/group_coaching'];
+export const isGuidedExperiencePath = pathname => {
+  const path = (pathname || '').split('?')[0].replace(/\/+$/, '');
+  return matchesAny(path, GUIDED_EXPERIENCE_PATHS);
+};
+
+/**
+ * The decision for any page under /portal/teacher, by who is asking. An Institution has no page there (their
+ * portal is /portal/institution), so every URL under /portal/teacher — Guided Experience ones included — sends
+ * them to their own dashboard. Everybody else: resolveTeacherRoute (QTE-track users off Expert-only pages,
+ * plain Experts and the rest allowed).
+ */
+export const resolveTeacherAreaRoute = (pathname, state, role) => {
+  if (role === INSTITUTION_ROLE) return { action: 'redirect', to: INSTITUTION_DASHBOARD_PATH };
+  return resolveTeacherRoute(pathname, state);
+};
+
 /** Where `/portal` (the landing page every role passes through) sends a Teacher on the QTE track. */
 export const getQtePortalTarget = state => {
   if (!state.isQteTrack) return null;
