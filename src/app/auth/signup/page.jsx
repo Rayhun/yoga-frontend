@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaRegCheckCircle } from 'react-icons/fa';
 import SignupForm from '@/components/auth/SignupForm';
+import SignupPanelHeadline from '@/components/auth/SignupPanelHeadline';
 import { QTE_PANEL_COPY, isQteSignup } from '@/components/auth/signupPanelCopy';
 
 export const metadata = {
@@ -44,10 +45,11 @@ const Page = ({ searchParams }) => {
               </Link>
 
               <div className="space-y-6 animate-slideInLeft">
-                <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                  <span className="text-orange-600">{copy.headlineAccent}</span>{' '}
-                  {copy.headlineRest}
-                </h1>
+                <SignupPanelHeadline
+                  accent={copy.headlineAccent}
+                  rest={copy.headlineRest}
+                  stacked={isQteSignup(searchParams)}
+                />
 
                 <p className="text-gray-600 text-lg leading-relaxed max-w-md">
                   {copy.subheadline}

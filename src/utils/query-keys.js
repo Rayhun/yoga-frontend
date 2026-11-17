@@ -127,6 +127,7 @@ const queryKeys = {
   myQTEApplication: 'myQTEApplication',
   myInstitutionApplication: 'myInstitutionApplication',
   certificationApplicationsList: 'certificationApplicationsList',
+  certificationRejectionReasons: 'certificationRejectionReasons',
   certificationProgramDetail: 'certificationProgramDetail',
   certificationCatalog: 'certificationCatalog',
   certificationMyPrograms: 'certificationMyPrograms',

@@ -88,7 +88,8 @@ test('All Tracks shows an empty state, plain when nothing is published, "matchin
   assert.match(page(), /No tracks are available yet/);
   harness.reset();
   harness.url = new URLSearchParams('track_type=clinical');
-  assert.match(page(), /No tracks found matching your criteria/);
+  assert.match(page(), /No programs match your filters\./);
+  assert.match(page(), /Clear filters/);
 });
 
 test('the empty state is shown by the section itself', () => {
@@ -260,10 +261,167 @@ test('header copy', () => {
 
 // --- model details -----------------------------------------------------------------------------
 
-test('buildCatalogParams: no track_type for All, recommended only when asked, tag kept', () => {
-  assert.deepEqual(model.buildCatalogParams({}), { tags: [] });
-  assert.deepEqual(model.buildCatalogParams({ trackType: 'clinical', recommended: true, tag: 'yoga' }), { tags: ['yoga'], track_type: 'clinical', recommended: 'true' });
-  assert.equal(model.parseTrackType('clinical'), 'clinical');
-  assert.equal(model.parseTrackType(''), '');
-  assert.equal(model.parseTrackType(null), '');
+test('buildCatalogParams: no track_type for All, recommended only when asked, and never any tags / categories', () => {
+  assert.deepEqual(model.buildCatalogParams({}), {});
+  assert.deepEqual(model.buildCatalogParams({ trackType: 'clinical', recommended: true, tag: 'yoga', filters: { tags: ['yoga'], categories: ['x'] } }), { track_type: 'clinical', recommended: 'true' });
+});
+
+// --- Price and Level filters (item 3) --------------------------------------------------------------
+
+const CatalogFilterPills = require('../CatalogFilterPills').default;
+const buttonsOf = tree => {
+  const buttons = [];
+  const walk = node => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (node.type === 'button') buttons.push(node);
+    walk(node.props?.children);
+  };
+  walk(tree);
+  return buttons;
+};
+
+test('price and level pills: the options, in order, with Any first', () => {
+  assert.deepEqual(model.PRICE_FILTERS.map(o => [o.value, o.label]), [['', 'Any'], ['free', 'Free'], ['paid', 'Paid']]);
+  assert.deepEqual(
+    model.LEVEL_FILTERS.map(o => [o.value, o.label]),
+    [['', 'Any'], ['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']],
+  );
+});
+
+test('buildCatalogParams: price and level are sent when chosen, left out for Any, and combine with the rest', () => {
+  assert.deepEqual(model.buildCatalogParams({ price: '', level: '' }), {});
+  assert.deepEqual(model.buildCatalogParams({ price: 'free' }), { price: 'free' });
+  assert.deepEqual(
+    model.buildCatalogParams({ trackType: 'clinical', price: 'paid', level: 'advanced', recommended: true }),
+    { track_type: 'clinical', price: 'paid', level: 'advanced', recommended: 'true' },
+  );
+});
+
+test('parsePrice / parseLevel: unknown URL values are treated as Any (the API would answer 400)', () => {
+  assert.equal(model.parsePrice('free'), 'free');
+  assert.equal(model.parsePrice('cheap'), '');
+  assert.equal(model.parsePrice('FREE'), '');
+  assert.equal(model.parsePrice(null), '');
+  assert.equal(model.parseLevel('intermediate'), 'intermediate');
+  assert.equal(model.parseLevel('expert'), '');
+  assert.equal(model.parseLevel(''), '');
+});
+
+test('?price= and ?level= from the URL reach both the All Tracks and Recommended requests, with track_type', () => {
+  harness.url = new URLSearchParams('track_type=clinical&price=paid&level=beginner');
+  page();
+  assert.deepEqual(
+    harness.catalogCalls.map(p => [p.track_type, p.price, p.level, p.recommended]),
+    [['clinical', 'paid', 'beginner', undefined], ['clinical', 'paid', 'beginner', 'true']],
+  );
+  assert.equal(harness.filterGroups.Price.selected, 'paid');
+  assert.equal(harness.filterGroups.Level.selected, 'beginner');
+});
+
+test('with no price / level in the URL nothing is sent and both groups show Any', () => {
+  page();
+  assert.ok(harness.catalogCalls.every(p => !('price' in p) && !('level' in p)));
+  assert.equal(harness.filterGroups.Price.selected, '');
+  assert.equal(harness.filterGroups.Level.selected, '');
+});
+
+test('a bad ?price= / ?level= is ignored rather than sent', () => {
+  harness.url = new URLSearchParams('price=cheap&level=expert');
+  page();
+  assert.ok(harness.catalogCalls.every(p => !('price' in p) && !('level' in p)));
+});
+
+test('choosing a price / level writes ?price= / ?level=, and Any clears the param', () => {
+  page();
+  harness.filterGroups.Price.onSelect('free');
+  harness.filterGroups.Price.onSelect('');
+  harness.filterGroups.Level.onSelect('advanced');
+  harness.filterGroups.Level.onSelect('');
+  assert.deepEqual(harness.sets, [['price', 'free'], ['price', ''], ['level', 'advanced'], ['level', '']]); // "" deletes the key
+  assert.equal(harness.filterGroups.Price.options, model.PRICE_FILTERS);
+  assert.equal(harness.filterGroups.Level.options, model.LEVEL_FILTERS);
+});
+
+test('the pill group renders its label and options like the track pills, Any clears via the empty value', () => {
+  const picked = [];
+  const tree = CatalogFilterPills({ label: 'Price', options: model.PRICE_FILTERS, selected: 'free', onSelect: v => picked.push(v) });
+  const buttons = buttonsOf(tree);
+  assert.deepEqual(buttons.map(b => b.props.children), ['Any', 'Free', 'Paid']);
+  assert.deepEqual(buttons.map(b => b.props['aria-pressed']), [false, true, false]);
+  buttons.forEach(b => b.props.onClick());
+  assert.deepEqual(picked, ['', 'free', 'paid']);
+  assert.equal(tree.props['aria-label'], 'Price');
+  assert.ok(tree.props.className.includes('flex-wrap'));
+  assert.ok(buttons.every(b => b.props.className.includes('min-h-[44px]')));
+  assert.match(render(tree), /Price/);
+});
+
+test('the wellness-plan tag chip row is gone: no FeaturedCategories, and ?tags= is no longer read', () => {
+  harness.catalog = () => catalogResponse([program(1)], { tags: ['Duration', 'Wellness Plan'] });
+  harness.url = new URLSearchParams('tags=Duration');
+  const html = page();
+  assert.doesNotMatch(html, /FEATURED-CATEGORIES-ROW/);
+  assert.ok(harness.catalogCalls.every(p => !('tags' in p) && !('categories' in p)), 'a leftover ?tags= is not sent');
+});
+
+test('track pills and the search box are still on the page', () => {
+  const html = page();
+  assert.match(html, /pills/);
+  assert.match(html, /placeholder="Search Certifications"/);
+});
+
+test('the empty state under a filter says no programs match and offers Clear filters; plain when unfiltered', () => {
+  harness.url = new URLSearchParams('price=free&level=advanced');
+  const filtered = page();
+  assert.match(filtered, /No programs match your filters\./);
+  assert.match(filtered, /Clear filters/);
+
+  harness.reset();
+  const plain = page();
+  assert.match(plain, /No tracks are available yet/);
+  assert.doesNotMatch(plain, /Clear filters/);
+});
+
+test('the funnel button and the filter modal are gone from the page; Track, Price, Level pills and search remain', () => {
+  const fs = require('fs');
+  const source = fs.readFileSync(require.resolve('../DiscoverPanel.jsx'), 'utf8');
+  assert.doesNotMatch(source, /CertificationLibraryFilter|FaFilter|Popup|useToggle|toggleFilterModal|apiTags|categoryOptions/);
+  assert.equal(fs.existsSync(require('path').resolve(__dirname, '../CertificationLibraryFilter.jsx')), false);
+  harness.url = new URLSearchParams();
+  const html = page();
+  assert.doesNotMatch(html, /Certification Filters|Categories|FEATURED-CATEGORIES-ROW/);
+  assert.match(html, /placeholder="Search Certifications"/);
+  assert.match(html, /filter-group:Price/);
+  assert.match(html, /filter-group:Level/);
+  assert.match(html, /pills/); // the track pills
+});
+
+test('?tags= and ?categories= in the URL are ignored: nothing is sent to the API', () => {
+  harness.url = new URLSearchParams('tags=Duration,Yoga&categories=Pilates&track_type=clinical');
+  page();
+  assert.deepEqual(harness.catalogCalls.map(p => Object.keys(p).sort()), [['track_type'], ['recommended', 'track_type']]);
+});
+
+test('clearedFilterParams removes track_type, price and level in one URL update', () => {
+  assert.deepEqual(model.clearedFilterParams(), { track_type: '', price: '', level: '' });
+});
+
+test('the section shows an optional action under the empty message', () => {
+  const React = require('react');
+  const action = React.createElement('button', null, 'Do it');
+  const html = render(React.createElement(CatalogSection, { title: 'T', programs: [], emptyMessage: 'Nothing', emptyAction: action, onOpen() {} }));
+  assert.match(html, /Nothing/);
+  assert.match(html, /Do it/);
+});
+
+test('program card level: capitalised for the three levels, legacy text as stored, nothing when blank', () => {
+  assert.equal(model.levelLabel({ level: 'beginner' }), 'Beginner');
+  assert.equal(model.levelLabel({ level: '  ADVANCED ' }), 'Advanced');
+  assert.equal(model.levelLabel({ level: 'All levels' }), 'All levels');
+  assert.equal(model.levelLabel({ level: null }), '');
+  assert.equal(model.levelLabel({}), '');
+  assert.match(card({ level: 'intermediate' }), /3 Modules • 12 Lessons<\/span><span>• Intermediate/);
+  assert.doesNotMatch(card({ level: null }), /• (Beginner|Intermediate|Advanced)/);
+  assert.match(card({ level: 'All levels' }), /• All levels/);
 });

@@ -1,4 +1,5 @@
 import { isBlankHtml } from '@/components/certification/builder/richText';
+import { lessonContentKind, validateLessonUrl } from '@/components/certification/builder/curriculum/lessonMedia';
 
 // Publish readiness, computed from the saved program detail. `blockers` mirror the backend's
 // `_publish_completeness_errors` (Certification/api/v1/creator_portal/program/api.py) one-for-one —
@@ -6,10 +7,14 @@ import { isBlankHtml } from '@/components/certification/builder/richText';
 // `recommendations` are client-only checks the server deliberately doesn't enforce.
 
 const ONE_TIME = 'one_time';
-const URL_LESSON_TYPES = ['video', 'pdf', 'link'];
-const MEDIA_LESSON_TYPES = ['audio', 'image'];
+const URL_LESSON_TYPES = ['pdf', 'link'];
+const MEDIA_LESSON_TYPES = ['video', 'audio', 'image'];
 
-// `target` tells the builder where "Go" should take the creator.
+// `target` is the builder position ({ step, fold, item } — the shape builderUrlState reads and writes) that
+// fixes the check, so the Publish step's "Fix" links and the resume point use one source of truth:
+// Basics parts live at step 'basics' + a fold id; Content tabs are the steps 'curriculum' | 'pricing' |
+// 'certificate'; a lesson/module to open is `item: { type, id }`.
+const position = (step, { fold = null, item = null } = {}) => ({ step, fold, item });
 const check = (id, label, message, target) => ({ id, label, ok: !message, message, target });
 
 const getCurriculumMessage = modules => {
@@ -32,23 +37,34 @@ export const getPublishBlockers = (program = {}) => {
   const modules = program.modules || [];
   const emptyModule = modules.find(module => !(module.lessons || []).length);
   return [
-    check('basics', 'Basics', program.title ? null : 'Program title is required.', { step: 1 }),
-    check('delivery', 'Delivery format', program.delivery_format ? null : 'Delivery format is required.', { step: 1 }),
-    check('curriculum', 'Curriculum', getCurriculumMessage(modules), {
-      tab: 'curriculum',
-      key: emptyModule ? `module-${emptyModule.id}` : null,
-    }),
-    check('pricing', 'Pricing', getPricingMessage(program), { tab: 'pricing' }),
-    check('certificate_setup', 'Certificate', getCertificateMessage(program.certificate_setting), { tab: 'certificate' }),
+    check('basics', 'Basics', program.title ? null : 'Program title is required.', position('basics', { fold: 'about' })),
+    check('delivery', 'Delivery format', program.delivery_format ? null : 'Delivery format is required.', position('basics', { fold: 'format' })),
+    check(
+      'curriculum',
+      'Curriculum',
+      getCurriculumMessage(modules),
+      position('curriculum', { item: emptyModule ? { type: 'module', id: emptyModule.id } : null })
+    ),
+    check('pricing', 'Pricing', getPricingMessage(program), position('pricing')),
+    check('certificate_setup', 'Certificate', getCertificateMessage(program.certificate_setting), position('certificate')),
   ];
+};
+
+// Video / audio / image: ready with a valid https link or a file uploaded earlier (a legacy lesson); a blank or
+// invalid link is a gap. (The server rejects an invalid link on save, so this mostly catches blank content.)
+const getMediaLessonGap = contentUrl => {
+  const kind = lessonContentKind(contentUrl);
+  if (kind === 'empty') return 'has no link';
+  if (kind === 'link' && validateLessonUrl(contentUrl)) return 'has an invalid link (it must be a full https:// link)';
+  return null;
 };
 
 const getLessonGap = lesson => {
   if (lesson.lesson_type === 'quiz' && !(lesson.questions || []).length) return 'has no questions';
   if (lesson.lesson_type === 'assignment' && isBlankHtml(lesson.text_content)) return 'has no instructions';
   if (lesson.lesson_type === 'text' && isBlankHtml(lesson.text_content)) return 'has no text';
+  if (MEDIA_LESSON_TYPES.includes(lesson.lesson_type)) return getMediaLessonGap(lesson.content_url);
   if (URL_LESSON_TYPES.includes(lesson.lesson_type) && !lesson.content_url?.trim()) return 'has no link';
-  if (MEDIA_LESSON_TYPES.includes(lesson.lesson_type) && !lesson.content_url?.trim()) return 'has no file';
   return null;
 };
 
@@ -61,7 +77,7 @@ export const getPublishRecommendations = (program = {}) =>
         {
           id: `lesson-${lesson.id}`,
           message: `Lesson ${mi + 1}.${li + 1} “${lesson.title}” ${gap}.`,
-          target: { tab: 'curriculum', key: `lesson-${lesson.id}` },
+          target: position('curriculum', { item: { type: 'lesson', id: lesson.id } }),
         },
       ];
     })

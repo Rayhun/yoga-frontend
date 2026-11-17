@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { uploadCertificationFile } from '@/services/private/certification/application';
-import { IDLE, MEDIA_RULES, acceptAttribute, describeAllowed, pickLessonMedia } from './lessonMedia';
+import { IDLE, MEDIA_RULES, acceptAttribute, describeAllowed, isMediaUploadEnabled, pickLessonMedia } from './lessonMedia';
+import LessonUrlField from './LessonUrlField';
 
 const TOUCH_TARGET = 'min-h-[44px]';
 const BUTTON = `${TOUCH_TARGET} rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:border-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-strokedark`;
@@ -10,12 +11,13 @@ const BUTTON = `${TOUCH_TARGET} rounded-md border border-gray-300 px-4 py-2 text
 const fileNameOf = key => (typeof key === 'string' ? key.split('/').pop() : '');
 
 /**
- * Upload control for an audio / image lesson's file. There is deliberately no text input: the file comes
- * only from our own upload (the key it returns is stored as `content_url`), never from a typed or pasted URL.
+ * Upload control for an audio / image lesson's file (kept for when uploads come back; used only while
+ * MEDIA_UPLOAD_ENABLED[lessonType] is true — see LessonMediaField below). There is deliberately no text input
+ * here: the file comes only from our own upload (the key it returns is stored as `content_url`).
  * `onChange(patch)` is the lesson pane's normal change handler, so an upload / removal is autosaved like any edit.
  * Preview: the server's signed link for a saved file, or the local file right after choosing one.
  */
-const LessonMediaField = ({ lessonType, title, value, previewUrl, disabled = false, onChange, uploadFn = uploadCertificationFile }) => {
+const LessonUploadControl = ({ lessonType, title, value, previewUrl, disabled = false, onChange, uploadFn = uploadCertificationFile }) => {
   const rules = MEDIA_RULES[lessonType];
   const inputRef = useRef(null);
   const [state, setState] = useState(IDLE);
@@ -89,5 +91,18 @@ const LessonMediaField = ({ lessonType, title, value, previewUrl, disabled = fal
     </div>
   );
 };
+
+/**
+ * The content control of a video / audio / image lesson. While uploads are switched off for that type
+ * (MEDIA_UPLOAD_ENABLED, the default) it is ONLY a link input with helper text and https validation — and a lesson
+ * that already has an uploaded file shows "Uploaded file in use" with a way to replace it by a link. With the flag
+ * on (and an upload rule for the type) it is the upload control above.
+ */
+const LessonMediaField = ({ namePrefix, ...props }) =>
+  isMediaUploadEnabled(props.lessonType) && MEDIA_RULES[props.lessonType] ? (
+    <LessonUploadControl {...props} />
+  ) : (
+    <LessonUrlField namePrefix={namePrefix} {...props} />
+  );
 
 export default LessonMediaField;

@@ -38,6 +38,60 @@ test('an image lesson renders a responsive image with alt text that opens full s
   assert.match(html, /Mark as done/);
 });
 
+// --- external links (item 2b): the same players, any host --------------------------------------------------------------------
+
+const EXTERNAL_AUDIO = 'https://cdn.example.com/podcast/ep1.mp3';
+const EXTERNAL_IMAGE = 'https://images.example.org/diagram.png?w=800&q=80';
+
+test('an audio link on any host plays in a plain <audio src>, unchanged', () => {
+  const html = render(React.createElement(AudioLesson, { lesson: lesson({ content_url: EXTERNAL_AUDIO }), programId: 5, reloadLesson() {} }));
+  assert.match(html, /<audio controls="" preload="metadata" src="https:\/\/cdn\.example\.com\/podcast\/ep1\.mp3" aria-label="Audio: Breathing basics"/);
+  assert.doesNotMatch(html, /<iframe|<video|<object/);
+});
+
+test('an image link on any host is a plain <img> with the lesson title as alt text (not next/image)', () => {
+  const html = render(React.createElement(ImageLesson, { lesson: lesson({ lesson_type: 'image', title: 'Posture diagram', content_url: EXTERNAL_IMAGE }), programId: 5, reloadLesson() {} }));
+  assert.match(html, /<img[^>]*src="https:\/\/images\.example\.org\/diagram\.png\?w=800&amp;q=80"[^>]*alt="Posture diagram"/);
+  // next/image only serves hosts listed in next.config.js, so an arbitrary external host needs the plain element
+  const source = require('fs').readFileSync(require.resolve('../lessons/ImageLesson.jsx'), 'utf8');
+  assert.doesNotMatch(source, /from 'next\/image'|from "next\/image"/);
+  assert.match(source, /<img\b/);
+});
+
+test('video links: every YouTube form becomes its watch URL; Vimeo, direct files and any other https link pass through', () => {
+  const { normalizeVideoUrl, getYouTubeVideoId } = require('../videoUrl');
+  const watch = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  for (const url of ['https://youtu.be/dQw4w9WgXcQ', 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://www.youtube.com/shorts/dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1']) {
+    assert.equal(normalizeVideoUrl(url), watch, url);
+  }
+  assert.equal(getYouTubeVideoId('https://vimeo.com/76979871'), null);
+  for (const url of ['https://vimeo.com/76979871', 'https://cdn.example.com/clip.mp4', 'https://drive.google.com/file/d/abc/view', 'https://www.dropbox.com/s/abc/clip.mp4?dl=0']) {
+    assert.equal(normalizeVideoUrl(`  ${url}  `), url, url);
+  }
+  assert.equal(normalizeVideoUrl(null), '');
+});
+
+test('the video lesson hands its link to the shared player, which plays YouTube / Vimeo embeds and direct files', () => {
+  const fs = require('fs');
+  const lessonSource = fs.readFileSync(require.resolve('../lessons/VideoLesson.jsx'), 'utf8');
+  assert.match(lessonSource, /normalizeVideoUrl\(lesson\.content_url\)/);
+  assert.match(lessonSource, /<VideoPlayer/);
+  assert.match(lessonSource, /Open video/); // a link that can't be embedded still opens in a new tab
+  const playerSource = fs.readFileSync(require('path').resolve(__dirname, '../../../common/player/VideoPlayer.jsx'), 'utf8');
+  assert.match(playerSource, /react-player/i);
+});
+
+test('a broken external link gets the same one automatic refresh, then the friendly retry state', async () => {
+  const { calls, controller } = withReload();
+  await controller.error();
+  await controller.error();
+  assert.deepEqual(calls, ['reload']);
+  assert.equal(controller.getState().status, MEDIA_STATUS.failed);
+  const html = render(React.createElement(MediaLoadError, { what: 'image', onRetry() {} }));
+  assert.match(html, /This image couldn&#x27;t be loaded right now/);
+  assert.match(html, /Try again/);
+});
+
 test('a completed lesson shows the Completed state instead of the button', () => {
   for (const [Component, type] of [[AudioLesson, 'audio'], [ImageLesson, 'image']]) {
     const html = render(React.createElement(Component, { lesson: lesson({ lesson_type: type, is_completed: true }), programId: 5, reloadLesson() {} }));

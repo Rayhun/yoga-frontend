@@ -3,7 +3,8 @@ import React, { useRef } from 'react';
 import { FiCheck } from 'react-icons/fi';
 
 /**
- * Clickable two-step indicator in the builder card's header. Rendered as a tablist (each step's
+ * Clickable step indicator in the builder card's header (three steps in the Program Builder: Basics · Content ·
+ * Publish; any number of steps works). Rendered as a tablist (each step's
  * panel stays mounted, only hidden — see ProgramBuilderModal), with roving focus: ←/→ move between
  * enabled steps, Home/End jump to the ends, Enter/Space selects.
  *

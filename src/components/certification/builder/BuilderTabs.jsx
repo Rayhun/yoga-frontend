@@ -12,7 +12,7 @@ const DEFAULT_TABLIST_CLASS =
   '-mx-4 flex gap-1 overflow-x-auto border-b border-stroke px-4 dark:border-strokedark sm:-mx-6.5 sm:px-6.5';
 
 /**
- * Step 2's section tabs (Curriculum · Pricing · Certificate · Publish). Only the tab strip lives
+ * Step 2 (Content)'s section tabs (Curriculum · Pricing · Certificate). Only the tab strip lives
  * here — the parent renders every panel and keeps them all mounted (hidden with CSS), so switching
  * tabs never drops unsaved or failed values. ←/→/Home/End move between tabs (roving tabindex).
  *

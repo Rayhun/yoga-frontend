@@ -19,7 +19,7 @@ import {
 } from '@/services/private/certification/program';
 import ProgramBasicsSection from '@/components/certification/builder/sections/ProgramBasicsSection';
 import useBuilderPosition from '@/components/certification/builder/useBuilderPosition';
-import { BASICS_FOLD_IDS, CONTENT_STEPS, itemFromKey, itemToKey } from '@/components/certification/builder/builderUrlState';
+import { BASICS_FOLD_IDS, CONTENT_STEPS, itemFromKey, itemToKey, uiStepOf } from '@/components/certification/builder/builderUrlState';
 import DeliveryFormatSection from '@/components/certification/builder/sections/DeliveryFormatSection';
 import CurriculumBuilderSection from '@/components/certification/builder/sections/CurriculumBuilderSection';
 import PricingSection from '@/components/certification/builder/sections/PricingSection';
@@ -30,16 +30,16 @@ import BuilderStepper from '@/components/certification/builder/BuilderStepper';
 import BuilderTabs from '@/components/certification/builder/BuilderTabs';
 import SaveStatusIndicator from '@/components/certification/builder/SaveStatusIndicator';
 import ProgramPreviewPopup from '@/components/certification/builder/ProgramPreviewPopup';
-import { getPublishBlockers } from '@/components/certification/builder/publish/readiness';
+import { getPublishBlockers, getPublishRecommendations } from '@/components/certification/builder/publish/readiness';
 
-const STEP_PANEL_IDS = { 1: 'builder-step-basics', 2: 'builder-step-content' };
+const STEP_PANEL_IDS = { 1: 'builder-step-basics', 2: 'builder-step-content', 3: 'builder-step-publish' };
 
-// Step 2's tabs; `blockerId` is the readiness check that decides the tab's ✓ / ⚠ marker.
+// Step 2 (Content)'s tabs; `blockerId` is the readiness check that decides the tab's ✓ / ⚠ marker.
+// Publishing is its own step (3) — it is not a tab any more.
 const TABS = [
   { id: 'curriculum', label: 'Curriculum', blockerId: 'curriculum' },
   { id: 'pricing', label: 'Pricing', blockerId: 'pricing' },
   { id: 'certificate', label: 'Certificate', blockerId: 'certificate_setup' },
-  { id: 'publish', label: 'Publish' },
 ];
 const tabPanelId = tabId => `builder-tab-${tabId}`;
 
@@ -57,6 +57,24 @@ const sectionAnchorId = sectionId => `builder-section-${sectionId}`;
 const TabPanel = ({ id, activeTab, children }) => (
   <div id={tabPanelId(id)} role="tabpanel" aria-labelledby={`${tabPanelId(id)}-tab`} className={id === activeTab ? '' : 'hidden'}>
     {children}
+  </div>
+);
+
+// Back / Next between the builder's three steps (the Basics parts have their own pager inside Basics).
+const StepNav = ({ backLabel, onBack, nextLabel, onNext }) => (
+  <div className="flex items-center justify-between gap-3 border-t border-stroke pt-4 dark:border-strokedark">
+    <button
+      type="button"
+      onClick={onBack}
+      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-primary hover:text-primary dark:border-strokedark dark:text-gray-300"
+    >
+      {backLabel}
+    </button>
+    {onNext ? (
+      <button type="button" onClick={onNext} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90">
+        {nextLabel}
+      </button>
+    ) : null}
   </div>
 );
 
@@ -140,16 +158,17 @@ const pickCertificateSetup = program => ({
 });
 
 /**
- * Two-step wizard (KAN-121) inside one LMS-style card (FormLayoutWrapper): a clickable stepper and
+ * Three-step wizard inside one LMS-style card (FormLayoutWrapper): a clickable stepper and
  * the global save status sit in the card header. Step 1 is Basics, shown in five short parts (the
  * Delivery section sits under the last one but is still its own form/autosave), gated behind the last
- * part's "Continue"; Step 2 is
- * tabbed: Curriculum · Pricing · Certificate · Publish. Every section still shares the same
+ * part's "Continue"; Step 2 is Content, tabbed: Curriculum · Pricing · Certificate; Step 3 is Publish — the
+ * readiness checklist (each failing item links back to the Basics part / Content tab / lesson that fixes it)
+ * plus the Draft/Private/Public choice. Every section still shares the same
  * {initialValues, onSave, disabled} → status contract via useSectionAutosave — the stepper and tabs
  * only change navigation, not save mechanics. Each section reports its status up
  * (`onStatusChange`) for the header summary.
  *
- * Both steps and every tab stay MOUNTED; inactive ones are only hidden with CSS. Unmounting would
+ * All three steps and every tab stay MOUNTED; inactive ones are only hidden with CSS. Unmounting would
  * drop a section's Formik values — including values whose save just failed, which the autosave
  * hook only re-sends on unmount while a debounce timer is still pending.
  *
@@ -181,7 +200,7 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
   // Step / Basics part / selected curriculum item live in the URL (builderUrlState.js), so they survive a
   // reload, a shared link, back/forward — and the /new → id swap when the draft is created.
   const { position, goTo, selectItem, adoptCreatedProgram } = useBuilderPosition({ liveId, program });
-  const currentStep = position.step === 'basics' ? 1 : 2;
+  const currentStep = uiStepOf(position.step);
   const activeTab = CONTENT_STEPS.includes(position.step) ? position.step : TABS[0].id;
   const basicsFold = Math.max(0, BASICS_FOLD_IDS.indexOf(position.fold));
   // Selecting step 2 again goes back to the tab that was open.
@@ -296,16 +315,29 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     [currentStep, goTo, position.fold]
   );
 
-  // Selecting Basics from another step opens its first part; selecting step 2 returns to the open tab.
+  // Selecting Basics from another step opens its first part; Content returns to the open tab; Publish is its own step.
   const handleStepSelect = useCallback(
     step => {
       if (step === currentStep) return;
-      goTo(step === 1 ? { step: 'basics', fold: 'about' } : { step: lastContentStep.current });
+      if (step === 1) goTo({ step: 'basics', fold: 'about' });
+      else if (step === 3) goTo({ step: 'publish' });
+      else goTo({ step: lastContentStep.current });
     },
     [currentStep, goTo]
   );
 
+  // The Publish checklist's "Fix" buttons: `target` is a full position from readiness.js (Basics part, Content
+  // tab, or a specific module / lesson), so the creator lands exactly where the gap is fixed.
+  const goToTarget = useCallback(
+    target => {
+      if (!target) return;
+      goTo({ step: target.step, fold: target.fold ?? null, item: target.item ?? null });
+    },
+    [goTo]
+  );
+
   const blockers = useMemo(() => (program ? getPublishBlockers(program) : []), [program]);
+  const recommendations = useMemo(() => (program ? getPublishRecommendations(program) : []), [program]);
   const isBlockerOk = id => blockers.find(check => check.id === id)?.ok;
 
   const saveStatusSections = Object.entries(SECTIONS).map(([id, { label }]) => ({
@@ -332,10 +364,19 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
     { id: 1, label: 'Basics', panelId: STEP_PANEL_IDS[1], done: Boolean(liveId) && isBlockerOk('basics') && isBlockerOk('delivery') },
     {
       id: 2,
-      label: 'Content & Publish',
+      label: 'Content',
       panelId: STEP_PANEL_IDS[2],
       disabled: !liveId,
       disabledReason: 'Give the program a title first',
+      done: TABS.every(tab => isBlockerOk(tab.blockerId)),
+    },
+    {
+      id: 3,
+      label: 'Publish',
+      panelId: STEP_PANEL_IDS[3],
+      disabled: !liveId,
+      disabledReason: 'Give the program a title first',
+      done: Boolean(program?.status) && program.status !== 'draft',
     },
   ];
 
@@ -431,9 +472,31 @@ const ProgramBuilderModal = ({ programId: routeParam }) => {
                 onStatusChange={statusReporters.certificate}
               />
             </TabPanel>
-            <TabPanel id="publish" activeTab={activeTab}>
-              <PublishSection anchorId={sectionAnchorId('publish')} currentStatus={program.status} onPublish={handlePublish} />
-            </TabPanel>
+            <StepNav
+              backLabel="Back to Basics"
+              onBack={() => goTo({ step: 'basics', fold: 'format' })}
+              nextLabel="Continue to Publish"
+              onNext={() => goTo({ step: 'publish' })}
+            />
+          </div>
+        ) : null}
+
+        {liveId ? (
+          <div
+            id={STEP_PANEL_IDS[3]}
+            role="tabpanel"
+            aria-labelledby={`${STEP_PANEL_IDS[3]}-tab`}
+            className={currentStep === 3 ? 'flex flex-col gap-6' : 'hidden'}
+          >
+            <PublishSection
+              anchorId={sectionAnchorId('publish')}
+              currentStatus={program.status}
+              onPublish={handlePublish}
+              blockers={blockers}
+              recommendations={recommendations}
+              onGoTo={goToTarget}
+            />
+            <StepNav backLabel="Back to Content" onBack={() => goTo({ step: lastContentStep.current })} />
           </div>
         ) : null}
       </FormLayoutWrapper>

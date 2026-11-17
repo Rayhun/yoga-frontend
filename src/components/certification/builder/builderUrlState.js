@@ -7,10 +7,29 @@
 // values never throw: they fall back to the resume point (an existing program) or the beginning (a new one).
 import { getPublishBlockers } from '@/components/certification/builder/publish/readiness';
 
-// URL `step` values. The builder's UI steps are 1 = Basics and 2 = Content & Publish; the four tabs of
-// step 2 are addressed directly (`step=pricing`), so one param is enough.
+// URL `step` values vs UI steps. The builder shows THREE UI steps — 1 Basics, 2 Content, 3 Publish — while the
+// URL addresses the screen at a finer grain (`step=pricing`), so one param is enough and the URL format did
+// NOT change when the old two-step "Content & Publish" was split (previously: 1 Basics, 2 Content & Publish):
+//
+//   URL `step`      old UI step (2 steps)          new UI step (3 steps)
+//   basics (+fold)  1 Basics                       1 Basics
+//   curriculum      2 Content & Publish › tab      2 Content   (also `?lesson=<id>` / `?module=<id>`)
+//   pricing         2 Content & Publish › tab      2 Content
+//   certificate     2 Content & Publish › tab      2 Content
+//   publish         2 Content & Publish › tab      3 Publish   (the status / readiness step)
+//
+// So every old link keeps working: content folds and lesson/module deep links open Content, any publish/status
+// link opens Publish. A link with only `lesson`/`module` still means the curriculum.
 export const BUILDER_STEPS = ['basics', 'curriculum', 'pricing', 'certificate', 'publish'];
-export const CONTENT_STEPS = BUILDER_STEPS.slice(1);
+// The tabs inside UI step 2 (Content). `publish` is its own UI step now.
+export const CONTENT_STEPS = ['curriculum', 'pricing', 'certificate'];
+
+/** URL `step` → UI step number (1 Basics, 2 Content, 3 Publish). Unknown values → Basics. */
+export const uiStepOf = step => {
+  if (step === 'publish') return 3;
+  if (CONTENT_STEPS.includes(step)) return 2;
+  return 1;
+};
 // Same ids, same order, as BASICS_FOLDS in sections/basicsFolds.jsx (a test keeps them in step).
 export const BASICS_FOLD_IDS = ['about', 'catalog', 'media', 'schedule', 'format'];
 
@@ -41,28 +60,14 @@ export const parseBuilderUrl = searchParams => {
   return { step, fold, item };
 };
 
-const emptyModuleItem = key => {
-  const match = /^module-(\d+)$/.exec(key || '');
-  return match ? { type: 'module', id: Number(match[1]) } : null;
-};
-
-// readiness check id → where it lives
-const POSITION_OF_CHECK = {
-  basics: () => ({ step: 'basics', fold: 'about', item: null }),
-  delivery: () => ({ step: 'basics', fold: 'format', item: null }),
-  curriculum: check => ({ step: 'curriculum', fold: null, item: emptyModuleItem(check.target?.key) }),
-  pricing: () => ({ step: 'pricing', fold: null, item: null }),
-  certificate_setup: () => ({ step: 'certificate', fold: null, item: null }),
-};
-
 /**
  * Where to open an existing program that has no (valid) step in its URL: the first publish-readiness check
- * that is not OK (the same checks Publish shows), or Publish when everything is ready.
+ * that is not OK (the same checks Publish shows — each carries the position that fixes it as `target`), or
+ * Publish when everything is ready.
  */
 export const getResumePosition = program => {
   const failing = getPublishBlockers(program || {}).find(check => !check.ok);
-  const position = failing ? POSITION_OF_CHECK[failing.id]?.(failing) : null;
-  return position || { step: 'publish', fold: null, item: null };
+  return failing?.target ? { ...failing.target } : { step: 'publish', fold: null, item: null };
 };
 
 /**

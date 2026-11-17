@@ -12,6 +12,11 @@ import {
 } from '@/components/certification/builder/sections/curriculumFields';
 import { LESSON_TYPE_OPTIONS, TEXT_LABELS, URL_LABELS } from './lessonTypes';
 
+// PDF and Link keep their plain URL input. Video, Audio and Image go through LessonMediaField: a link input
+// with https validation while uploads are off (see curriculum/lessonMedia.js MEDIA_UPLOAD_ENABLED).
+const PLAIN_URL_LESSON_TYPES = ['pdf', 'link'];
+const MEDIA_CONTENT_TYPES = ['video', ...MEDIA_LESSON_TYPES];
+
 // What the creator typed into a field the new type doesn't use. It stays in the form (switching back
 // restores it) but the lesson no longer saves it.
 const getUnusedNotice = lesson => {
@@ -40,26 +45,27 @@ const LessonContentFields = ({ namePrefix, lesson, disabled, onLessonChange }) =
         options={LESSON_TYPE_OPTIONS}
         disabled={disabled}
         // FormikSelect passes the value; picking the selected option again clears it, which a lesson
-        // type can't be — keep the current type then. Changing between a link type and audio / image
-        // also clears `content_url`, so a link is never saved as a file key (the server refuses that).
+        // type can't be — keep the current type then. A pasted https link is kept when the type changes; an
+        // uploaded file's key is cleared (it only suits its own type, the server refuses it elsewhere).
         onChange={value => onLessonChange(lessonTypeChangePatch(lesson, value || lesson.lesson_type))}
       />
       <FormikField name={`${namePrefix}.title`} label="Lesson Title" placeholder="e.g. Understanding the menopause transition" required disabled={disabled} />
 
-      {URL_LESSON_TYPES.includes(lesson.lesson_type) ? (
+      {PLAIN_URL_LESSON_TYPES.includes(lesson.lesson_type) ? (
         <div className="md:col-span-2">
           <FormikField
             name={`${namePrefix}.content_url`}
             label={URL_LABELS[lesson.lesson_type]}
-            placeholder="https://youtube.com/... or https://vimeo.com/..."
+            placeholder="https://..."
             disabled={disabled}
           />
         </div>
       ) : null}
-      {MEDIA_LESSON_TYPES.includes(lesson.lesson_type) ? (
+      {MEDIA_CONTENT_TYPES.includes(lesson.lesson_type) ? (
         <div className="md:col-span-2">
           <LessonMediaField
             key={lesson.lesson_type}
+            namePrefix={namePrefix}
             lessonType={lesson.lesson_type}
             title={lesson.title}
             value={lesson.content_url}

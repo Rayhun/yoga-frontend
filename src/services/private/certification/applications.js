@@ -8,6 +8,12 @@ export const approveApplication = async ({ type, id }) => {
   return axios.post(`/certification/admin/applications/${type}/${id}/approve/`);
 };
 
+/** The Disapprove modal's dropdown, from the backend (single source of truth): { categories: [{ key, label }], other_key, details_max_length }. */
+export const getRejectionReasons = async () => {
+  return axios.get('/certification/admin/applications/rejection-reasons/');
+};
+
+/** `payload` = { reason_category, reason_details? } (see rejectReasonModel.buildRejectPayload). */
 export const rejectApplication = async ({ type, id, payload }) => {
   return axios.post(`/certification/admin/applications/${type}/${id}/reject/`, payload);
 };

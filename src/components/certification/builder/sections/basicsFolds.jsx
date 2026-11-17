@@ -39,11 +39,30 @@ const TARGET_AUDIENCE_OPTIONS = [
   { value: 'professional', label: 'Professional' },
 ];
 
-const LEVEL_OPTIONS = [
+// The only levels a new save accepts (the API also takes blank: clear the field to remove the level). A value
+// from before this list existed is still shown as stored, with a hint to pick one of these.
+export const LEVEL_OPTIONS = [
   { value: 'beginner', label: 'Beginner' },
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'advanced', label: 'Advanced' },
 ];
+
+// The hint text for a stored level that is not one of the three (case and spaces ignored); '' when there is
+// nothing to say (blank, or a listed level).
+export const legacyLevelHint = level => {
+  const raw = typeof level === 'string' ? level.trim() : '';
+  if (!raw || LEVEL_OPTIONS.some(option => option.value === raw.toLowerCase())) return '';
+  return `"${raw}" is an older level value. Pick Beginner, Intermediate or Advanced.`;
+};
+
+export const LegacyLevelHint = ({ level }) => {
+  const hint = legacyLevelHint(level);
+  return hint ? (
+    <small role="note" className="text-xs text-amber-600 md:col-span-2">
+      {hint}
+    </small>
+  ) : null;
+};
 
 // Mirrors GroupCoachingFrom.jsx's eventTypeOptions exactly (KAN-121 Workshop-parity field) —
 // this is a plain, un-choiced CharField on the model (same as LMS.Event.event_type), so the
@@ -101,7 +120,10 @@ export const AboutFold = ({ disabled }) => (
 export const CatalogFold = ({ values, setFieldValue, handleBlur, disabled, categoryOptions }) => (
   <FieldGroup title="Catalog" description="Where and how learners find this program.">
     <FormikSelect name="category" label="Category" placeholder="Select category" options={categoryOptions || []} disabled={disabled} />
-    <FormikSelect name="level" label="Level" placeholder="Select level" options={LEVEL_OPTIONS} disabled={disabled} />
+    <div className="flex flex-col gap-1">
+      <FormikSelect name="level" label="Level" placeholder="Select level" options={LEVEL_OPTIONS} disabled={disabled} />
+      <LegacyLevelHint level={values.level} />
+    </div>
     <FormikField name="duration_estimate" label="Duration Estimate" placeholder="e.g. 6–8 hours" disabled={disabled} />
     <FormikField name="language" label="Language" placeholder="e.g. English" disabled={disabled} />
     <ContentCatalogTagsField

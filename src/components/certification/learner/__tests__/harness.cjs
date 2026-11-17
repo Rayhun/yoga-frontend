@@ -19,6 +19,8 @@ const harness = {
   url: new URLSearchParams(),
   user: { email: 'learner@example.com' },
   sets: [], // [key, value] from searchParamUtils.set
+  setAlls: [], // objects passed to searchParamUtils.setAll
+  filterGroups: {}, // props the page passed to each CatalogFilterPills, by label
   removes: [],
   pushes: [],
   catalogCalls: [], // params of every getCertificationCatalog request
@@ -40,6 +42,8 @@ const harness = {
     this.url = new URLSearchParams();
     this.user = { email: 'learner@example.com' };
     this.sets = [];
+    this.setAlls = [];
+    this.filterGroups = {};
     this.removes = [];
     this.pushes = [];
     this.catalogCalls = [];
@@ -123,15 +127,23 @@ const stubs = {
     default: () => ({
       get: key => harness.url.get(key),
       set: (key, value) => harness.sets.push([key, value]),
+      setAll: params => harness.setAlls.push(params),
       remove: key => harness.removes.push(key),
     }),
   },
   '@/hooks/useToggle': { __esModule: true, default: () => ({ isOpen: false, toggle: () => {} }) },
   '@/utils/query-keys': { __esModule: true, default: { certificationCatalog: 'c', certificationEnrolledCertifications: 'e' } },
   '@/components/common/popup': { __esModule: true, default: nothing },
-  '@/components/lms/category/FeaturedCategories': { __esModule: true, default: nothing },
+  // Renders a marker so a test can prove the old tag-chip row is no longer on the page.
+  '@/components/lms/category/FeaturedCategories': { __esModule: true, default: () => React.createElement('div', null, 'FEATURED-CATEGORIES-ROW') },
+  './CatalogFilterPills': {
+    __esModule: true,
+    default: props => {
+      harness.filterGroups[props.label] = props;
+      return React.createElement('div', null, `filter-group:${props.label}`);
+    },
+  },
   '@/components/common/loader/Spinner': { __esModule: true, default: () => React.createElement('span', null, 'loading') },
-  './CertificationLibraryFilter': { __esModule: true, default: nothing },
   './TrackFilterPills': {
     __esModule: true,
     default: props => {
@@ -148,7 +160,7 @@ Module._load = function (request, parent, isMain) {
   if (request === './TrackFilterPills' && !(parent?.filename || '').endsWith('DiscoverPanel.jsx')) {
     return originalLoad.apply(this, arguments);
   }
-  if (request === './CertificationLibraryFilter' && !(parent?.filename || '').endsWith('DiscoverPanel.jsx')) {
+  if (request === './CatalogFilterPills' && !(parent?.filename || '').endsWith('DiscoverPanel.jsx')) {
     return originalLoad.apply(this, arguments);
   }
   // The detail page's tab bar is the real BuilderTabs, wrapped only to capture the props the page gives it.

@@ -9,6 +9,7 @@ const CatalogSection = ({
   programs,
   isLoading = false,
   emptyMessage = '',
+  emptyAction = null, // optional node under the empty message (e.g. a "Clear filters" button)
   hideWhenEmpty = false,
   showProgress = false,
   onOpen,
@@ -32,7 +33,10 @@ const CatalogSection = ({
           ))}
         </div>
       ) : (
-        <div className="w-full min-h-[200px] flex justify-center items-center text-center text-gray-500 px-4">{emptyMessage}</div>
+        <div className="w-full min-h-[200px] flex flex-col justify-center items-center text-center text-gray-500 px-4">
+          <p>{emptyMessage}</p>
+          {emptyAction}
+        </div>
       )}
     </section>
   );

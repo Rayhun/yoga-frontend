@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { richTextOrNull } from '@/components/certification/builder/richText';
+import { isMediaUploadEnabled, lessonContentKind } from '@/components/certification/builder/curriculum/lessonMedia';
 
 // Form <-> API mapping for Curriculum Builder modules/lessons, shared by ProgramBuilderModal
 // (API -> form, toModulesFormValues) and the curriculum panes (form -> API, the to*Payload helpers). Every field
@@ -19,18 +20,26 @@ export const UNLOCK_RULE_OPTIONS = [
 
 export const URL_LESSON_TYPES = ['video', 'pdf', 'link'];
 export const TEXT_LESSON_TYPES = ['text', 'assignment'];
-// Files uploaded through our own storage: `content_url` holds the private key the upload returns (never a link
-// the creator typed), and the server's read-only `signed_content_url` is only for previewing it.
+// Audio / image: `content_url` is a link the creator pasted, or — for a lesson uploaded earlier, or once uploads
+// are switched back on — the private key of a file in our storage; the server's read-only `signed_content_url`
+// is the preview link for either (a signed URL for a key, the link itself otherwise).
 export const MEDIA_LESSON_TYPES = ['audio', 'image'];
 
-// The patch for switching a lesson's type. `content_url` means different things per family (a link, an audio
-// key, an image key) and the server rejects a link as a key, so it is cleared whenever the family changes
-// (video -> audio, audio -> image, image -> pdf ...); between link types (video -> pdf) the link is kept.
+// A lesson type whose content is typed/pasted as a link: video / pdf / link always, audio / image while their
+// upload is switched off (MEDIA_UPLOAD_ENABLED in curriculum/lessonMedia.js).
+export const usesLinkInput = lessonType =>
+  URL_LESSON_TYPES.includes(lessonType) || (MEDIA_LESSON_TYPES.includes(lessonType) && !isMediaUploadEnabled(lessonType));
+
+// The patch for switching a lesson's type. A pasted https link is kept across the link types (video -> audio ->
+// image -> pdf ...), so switching never loses it. What is cleared: an uploaded file's key (it only suits its own
+// type, and the server refuses it anywhere else), and — only while uploads are on — a link moved onto an
+// audio / image lesson, whose value must then be an uploaded key.
 export const lessonTypeChangePatch = (lesson, nextType) => {
   const patch = { lesson_type: nextType };
-  const stored = lesson.lesson_type;
-  const keepsContent = stored === nextType || (URL_LESSON_TYPES.includes(stored) && URL_LESSON_TYPES.includes(nextType));
-  if (!keepsContent && (MEDIA_LESSON_TYPES.includes(stored) || MEDIA_LESSON_TYPES.includes(nextType))) {
+  if (lesson.lesson_type === nextType) return patch;
+  const kind = lessonContentKind(lesson.content_url);
+  const linkBecomesFile = kind === 'link' && MEDIA_LESSON_TYPES.includes(nextType) && isMediaUploadEnabled(nextType);
+  if (kind === 'file' || linkBecomesFile) {
     patch.content_url = '';
     patch.signed_content_url = '';
   }

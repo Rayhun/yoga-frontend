@@ -10,7 +10,7 @@ export const LESSON_TYPE_OPTIONS = [
   { value: 'link', label: '🔗 Link' },
 ];
 
-export const URL_LABELS = { video: 'Video URL', pdf: 'PDF URL', link: 'Link URL' };
+export const URL_LABELS = { video: 'Video URL', audio: 'Audio URL', image: 'Image URL', pdf: 'PDF URL', link: 'Link URL' };
 export const TEXT_LABELS = { text: 'Text Content', assignment: 'Assignment Instructions' };
 
 export const LESSON_TAB_IDS = { content: 'content', settings: 'settings', questions: 'questions' };

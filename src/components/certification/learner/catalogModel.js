@@ -22,15 +22,52 @@ export const parseTrackType = raw => (TRACK_FILTERS.some(filter => filter.value 
 
 export const trackBadgeLabel = trackType => TRACK_BADGE_LABELS[trackType] || DEFAULT_TRACK_BADGE;
 
+// Price and Level pills ("Any" = no param). Their values are what the API's ?price= / ?level= accept;
+// Certification/program_levels.py is the backend's list of levels.
+export const PRICE_PARAM = 'price';
+export const LEVEL_PARAM = 'level';
+
+export const PRICE_FILTERS = [
+  { value: '', label: 'Any' },
+  { value: 'free', label: 'Free' },
+  { value: 'paid', label: 'Paid' },
+];
+
+export const LEVEL_FILTERS = [
+  { value: '', label: 'Any' },
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' },
+];
+
+const parseOption = (options, raw) => (options.some(option => option.value && option.value === raw) ? raw : '');
+
+// A value from the URL that is not one of the pills is treated as "Any" (the API would 400 on it).
+export const parsePrice = raw => parseOption(PRICE_FILTERS, raw);
+export const parseLevel = raw => parseOption(LEVEL_FILTERS, raw);
+
+// The URL keys the Clear filters action removes (the search box is cleared separately).
+export const CLEARABLE_FILTER_PARAMS = [TRACK_TYPE_PARAM, PRICE_PARAM, LEVEL_PARAM];
+export const clearedFilterParams = () => Object.fromEntries(CLEARABLE_FILTER_PARAMS.map(key => [key, '']));
+
 // Query params for GET /certification/programs/catalog/. Empty values are left out, so "All Tracks"
-// sends no track_type at all.
-export const buildCatalogParams = ({ trackType = '', recommended = false, filters = {}, tag = '' } = {}) => {
-  const params = { ...filters };
-  if (tag) params.tags = [tag];
-  if (!params.tags?.length) params.tags = [];
+// sends no track_type at all and "Any" sends no price / level.
+export const buildCatalogParams = ({ trackType = '', price = '', level = '', recommended = false } = {}) => {
+  const params = {}; // no tags / categories: wellness-plan tags are not a catalog filter
   if (trackType) params[TRACK_TYPE_PARAM] = trackType;
+  if (price) params[PRICE_PARAM] = price;
+  if (level) params[LEVEL_PARAM] = level;
   if (recommended) params.recommended = 'true';
   return params;
+};
+
+// Card text for a program's level: the three known levels capitalised whatever their stored case; a legacy
+// value shown as stored (trimmed); nothing when blank.
+export const levelLabel = program => {
+  const raw = typeof program?.level === 'string' ? program.level.trim() : '';
+  if (!raw) return '';
+  const known = LEVEL_FILTERS.find(option => option.value && option.value === raw.toLowerCase());
+  return known ? known.label : raw;
 };
 
 // "1 Module" / "3 Modules"; a missing count reads as 0.

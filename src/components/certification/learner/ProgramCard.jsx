@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaPlay, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
-import { metaLabel, plainText, priceLabel, startOrContinueLabel, trackBadgeLabel } from './catalogModel';
+import { levelLabel, metaLabel, plainText, priceLabel, startOrContinueLabel, trackBadgeLabel } from './catalogModel';
 
 const CREATOR_TYPE_LABELS = {
   qte: 'Coach',
@@ -28,6 +28,7 @@ const ProgramCard = ({ program, onClick, showProgress = false }) => {
   const enrollBadge = ENROLL_BADGES[program?.enroll_status] || ENROLL_BADGES.InProgress;
   const progress = program?.progress || 0;
   const description = plainText(program?.short_description);
+  const level = levelLabel(program);
 
   return (
     <div
@@ -81,9 +82,10 @@ const ProgramCard = ({ program, onClick, showProgress = false }) => {
         )}
 
         {/* Stats: "3 Modules • 1 Lesson" */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex flex-wrap items-center gap-x-2 text-sm text-gray-600">
           <FaBookOpen size={12} className="text-green-500" aria-hidden="true" />
           <span>{metaLabel(program)}</span>
+          {level && <span>• {level}</span>}
         </div>
 
         {/* Price: "USD 500 one-time" / "Free" */}

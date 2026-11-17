@@ -3,18 +3,21 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FaFilter } from 'react-icons/fa';
-import useToggle from '@/hooks/useToggle';
 import useAuthContext from '@/hooks/useAuthContext';
 import useSearchParamUtils from '@/hooks/useSearchParamUtils';
-import Popup from '@/components/common/popup';
-import FeaturedCategories from '@/components/lms/category/FeaturedCategories';
-import CertificationLibraryFilter from './CertificationLibraryFilter';
 import CatalogSection from './CatalogSection';
+import CatalogFilterPills from './CatalogFilterPills';
 import TrackFilterPills from './TrackFilterPills';
 import {
+  LEVEL_FILTERS,
+  LEVEL_PARAM,
+  PRICE_FILTERS,
+  PRICE_PARAM,
   TRACK_TYPE_PARAM,
   buildCatalogParams,
+  clearedFilterParams,
+  parseLevel,
+  parsePrice,
   parseTrackType,
   selectActiveTracks,
   selectCatalogPrograms,
@@ -32,21 +35,18 @@ const DiscoverPanel = () => {
   const isSignedIn = Boolean(user?.email);
   const enrolledProgramId = searchParams.get('enrolled');
 
-  const { isOpen: isFilterModalOpen, toggle: toggleFilterModal } = useToggle();
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState({});
 
-  const selectedTag = searchParamUtils.get('tags') || '';
-  // The pill selection lives in the URL (?track_type=clinical) so it survives a reload and can be shared.
+  // The pill selections live in the URL (?track_type=clinical&price=free&level=beginner) so they survive a
+  // reload, can be shared and combine with each other and with the search box.
   const trackType = parseTrackType(searchParamUtils.get(TRACK_TYPE_PARAM));
+  const price = parsePrice(searchParamUtils.get(PRICE_PARAM));
+  const level = parseLevel(searchParamUtils.get(LEVEL_PARAM));
 
-  const allParams = useMemo(
-    () => buildCatalogParams({ trackType, filters, tag: selectedTag }),
-    [trackType, filters, selectedTag]
-  );
+  const allParams = useMemo(() => buildCatalogParams({ trackType, price, level }), [trackType, price, level]);
   const recommendedParams = useMemo(
-    () => buildCatalogParams({ trackType, filters, tag: selectedTag, recommended: true }),
-    [trackType, filters, selectedTag]
+    () => buildCatalogParams({ trackType, price, level, recommended: true }),
+    [trackType, price, level]
   );
 
   const { isFetching, data: response } = useQuery({
@@ -80,26 +80,24 @@ const DiscoverPanel = () => {
     [isSignedIn, activeResponse, searchText, trackType]
   );
 
-  const apiCategories = response?.data?.results?.data?.categories ?? [];
-  const apiTags = response?.data?.results?.data?.tags ?? [];
-  const tags = useMemo(() => apiTags.map(name => ({ id: name, name })), [apiTags]);
-
-  const handleApplyFilter = values => {
-    setFilters(values);
-    toggleFilterModal(false);
-  };
-
-  const handleSelectFeaturedTag = selected => {
-    if (selectedTag === (selected?.name ?? selected?.id)) {
-      searchParamUtils.remove('tags');
-    } else {
-      searchParamUtils.set('tags', selected?.name ?? selected?.id ?? '');
-    }
-  };
-
   const handleSelectTrackType = value => searchParamUtils.set(TRACK_TYPE_PARAM, value);
+  const handleSelectPrice = value => searchParamUtils.set(PRICE_PARAM, value);
+  const handleSelectLevel = value => searchParamUtils.set(LEVEL_PARAM, value);
+  const handleClearFilters = () => {
+    setSearchText('');
+    searchParamUtils.setAll(clearedFilterParams()); // one URL update: separate set() calls would overwrite each other
+  };
   const openProgram = program => router.push(`/portal/customer/certification/${program.id}`);
-  const isRefined = Boolean(searchText || selectedTag || trackType);
+  const isRefined = Boolean(searchText || trackType || price || level);
+  const clearFiltersButton = (
+    <button
+      type="button"
+      onClick={handleClearFilters}
+      className="mt-3 min-h-[44px] px-4 py-2 rounded-full border border-primary text-sm font-medium text-primary hover:bg-primary hover:text-white transition-colors"
+    >
+      Clear filters
+    </button>
+  );
 
   return (
     <div className="flex flex-col gap-4 md:gap-7">
@@ -111,15 +109,6 @@ const DiscoverPanel = () => {
           </button>
         </div>
       )}
-
-      <Popup heading="Certification Filters" open={isFilterModalOpen} onClose={() => toggleFilterModal()}>
-        <CertificationLibraryFilter
-          filters={filters}
-          onApplyFilter={handleApplyFilter}
-          categoryOptions={apiCategories.map(name => ({ label: name, value: name }))}
-          tagOptions={apiTags.map(name => ({ label: name, value: name }))}
-        />
-      </Popup>
 
       {/* Header */}
       <div className="bg-white text-gray-800 portal-hero rounded-2xl shadow-2xl mb-2 md:mb-4 relative overflow-hidden border border-gray-100">
@@ -156,19 +145,16 @@ const DiscoverPanel = () => {
         {/* Filter pills (whole page) */}
         <TrackFilterPills selected={trackType} onSelect={handleSelectTrackType} />
 
-        <FeaturedCategories
-          categories={tags}
-          selected={selectedTag ? [selectedTag] : []}
-          onSelect={handleSelectFeaturedTag}
-        />
+        <CatalogFilterPills label="Price" options={PRICE_FILTERS} selected={price} onSelect={handleSelectPrice} />
+        <CatalogFilterPills label="Level" options={LEVEL_FILTERS} selected={level} onSelect={handleSelectLevel} />
 
         <div className="portal-search-row">
           <input
+            value={searchText}
             className="portal-search-input rounded-lg border border-stroke bg-transparent py-2 px-4 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             placeholder="Search Certifications"
             onChange={e => setSearchText(e.target.value || '')}
           />
-          <FaFilter className="cursor-pointer dark:text-white" onClick={() => toggleFilterModal()} />
         </div>
 
         {/* Signed-in learners with at least one track in progress */}
@@ -196,7 +182,8 @@ const DiscoverPanel = () => {
           title="All Tracks"
           programs={allPrograms}
           isLoading={isFetching}
-          emptyMessage={isRefined ? 'No tracks found matching your criteria' : 'No tracks are available yet. Please check back soon.'}
+          emptyMessage={isRefined ? 'No programs match your filters.' : 'No tracks are available yet. Please check back soon.'}
+          emptyAction={isRefined ? clearFiltersButton : null}
           onOpen={openProgram}
         />
       </div>

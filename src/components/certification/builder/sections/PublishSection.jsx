@@ -2,6 +2,7 @@
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import SectionCard from '@/components/certification/builder/SectionCard';
+import PublishChecklist from '@/components/certification/builder/publish/PublishChecklist';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -16,7 +17,7 @@ const STATUS_OPTIONS = [
  * messages (e.g. {"delivery": "Delivery format is required."}) — rendered inline here per the
  * acceptance criteria ("shows the specific missing section inline, not a generic error toast").
  */
-const PublishSection = ({ currentStatus, onPublish, disabled = false, anchorId }) => {
+const PublishSection = ({ currentStatus, onPublish, disabled = false, anchorId, blockers = [], recommendations = [], onGoTo }) => {
   const [pendingStatus, setPendingStatus] = useState(null);
   const [sectionErrors, setSectionErrors] = useState(null);
 
@@ -44,6 +45,8 @@ const PublishSection = ({ currentStatus, onPublish, disabled = false, anchorId }
 
   return (
     <SectionCard anchorId={anchorId} title="Publish" subtitle="Draft is only visible to you; Private is reachable by direct link; Public appears in the catalog.">
+      <PublishChecklist blockers={blockers} recommendations={recommendations} onGoTo={onGoTo} />
+
       <div className="flex flex-wrap gap-2">
         {STATUS_OPTIONS.map(option => (
           <button
